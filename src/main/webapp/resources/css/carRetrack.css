@@ -1,0 +1,84 @@
+.container {
+    overflow-x: hidden;
+}
+
+.nav-addr {
+	background-color: rgba(68, 80, 101, 0.8);
+	color: #ffffff;
+	padding-left: 30px;
+}
+.search-zone {
+    width: 100%;
+    min-width: 1500px;
+    height: 56px;
+    background: #eef1f7;
+    font-family: "微软雅黑";
+}
+
+.search-zone>table {
+    position: relative;
+    left: 30px;
+    top: 10px;
+}
+
+.search-zone>table td:nth-of-type(8) {
+    height: 40px;
+    padding: 0 10px;
+    background: #ffffff;
+}
+
+.search-type {
+    height: 36px;
+    color: #5a6779;
+    font-size: 16px;
+    padding-left: 8px;
+    margin-right: 5px;
+}
+
+.search-text {
+    font-size: 16px;
+    padding: 0 8px 0 8px;
+    border: 1px solid #b0b9c6;
+    border-radius: 3px;
+    margin-right: 10px;
+}
+
+input.search-text {
+    width: 160px;
+    height: 34px;
+}
+
+select.search-text {
+    width: 178px;
+    height: 36px;
+}
+
+.search-btn {
+    width: 76px;
+    height: 36px;
+    font-size: 16px;
+    background: #478de4;
+    border: 0;
+    border-radius: 3px;
+    color: white;
+    margin-left: 10px;
+    position: relative;
+    left: 30px;
+}
+
+.search-btn:hover {
+    background: #5ca1f7;
+}
+
+.search-btn:disabled {
+    background: #c4ccd2;
+}
+
+.data-zone {
+    width: 100%;
+    height: auto !important;
+    overflow: visible !important;
+    height: 100% !important;
+    position: fixed;
+    padding: 6px 0;
+}

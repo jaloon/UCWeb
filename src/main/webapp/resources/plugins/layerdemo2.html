@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="jquery-1.8.3.min.js"></script>
+    <script src="layer/layer.js"></script>
+    <script src="../js/base.js"></script>
+</head>
+
+<body>
+    <button>open</button>
+</body>
+<script>
+    $("button").click(() => {
+        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+
+        // layer.confirm('纳尼？', {
+        //         btn: ['按钮一', '按钮二'] //可以无限个按钮
+        //             ,
+        //         cancel: function() {
+        //             //右上角关闭回调
+        //             parent.layer.close(index); //再执行关闭 
+        //             //return false 开启该代码可禁止点击该按钮关闭
+        //         }
+        //     },
+        //     function(index0, layero) {
+        //         //按钮【按钮一】的回调
+        //     },
+        //     function(index0) {
+        //         //按钮【按钮二】的回调
+        //         parent.layer.close(index); //再执行关闭 
+        //     }
+        // )
+        layer.confirm('请求关注车辆数据异常，是否重新请求？', {
+                icon: 3,
+                title: ['数据异常', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                btn: ['是', '否'],
+                cancel: function() {
+                    //右上角关闭回调
+                    parent.layer.close(index);
+                }
+            },
+            function(index0) {
+                //按钮【是】的回调
+                console.log("repeat");
+                layer.close(index0);
+            },
+            function(index0) {
+                //按钮【否】的回调
+                parent.layer.close(index); //再执行关闭 
+            }
+        );
+    })
+</script>
+
+</html>

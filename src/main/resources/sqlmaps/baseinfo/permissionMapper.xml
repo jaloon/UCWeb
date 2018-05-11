@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tipray.dao.PermissionDao" >
+    <resultMap id="BaseResultMap" type="com.tipray.bean.baseinfo.Permission" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="cn_name" property="cname" jdbcType="VARCHAR" />
+        <result column="en_name" property="ename" jdbcType="VARCHAR" />
+        <result column="type" property="permissionType" jdbcType="INTEGER" />
+        <result column="is_enable" property="enable" jdbcType="INTEGER" />
+        <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+        <result column="description" property="description" jdbcType="VARCHAR" />
+        <result column="index_id" property="indexId" jdbcType="INTEGER" />
+        <result column="grid_url" property="gridUrl" jdbcType="VARCHAR" />
+        <result column="is_parent" property="isParent" jdbcType="INTEGER" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        id, cn_name, en_name, type, is_enable, parent_id, description, index_id, grid_url, is_parent
+    </sql>
+
+    <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select * from tbl_permission where is_enable=1 and id = #{id}  
+    </select>
+    <select id="getByEname" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select p.* from tbl_permission p where p.is_enable=1 and p.en_name=#{ename}
+    </select>
+    
+    <select id="findAll" resultMap="BaseResultMap">
+        select * from tbl_permission where is_enable=1
+    </select>
+    <select id="findByIds" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select * from tbl_permission where is_enable=1 and id in (${value})  
+    </select>
+    <select id="findOperatePermissions" resultMap="BaseResultMap" >
+        select * from tbl_permission where is_enable=1 and id > 13  
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Permission" >
+        insert into tbl_permission (id, cn_name, en_name, type, is_enable, parent_id, description, index_id, grid_url, is_parent)
+        values (#{id}, #{cname}, #{ename}, #{permissionType}, #{enable}, #{parentId}, ifnull(#{description},''), #{indexId}, ifnull(#{gridUrl},''), #{isParent})
+    </insert>
+
+    <update id="update" parameterType="com.tipray.bean.baseinfo.Permission" >
+        update tbl_permission
+        <set >
+            <if test="cname != null" >
+                cn_name = #{cname},
+            </if>
+            <if test="ename != null" >
+                en_name = #{ename},
+            </if>
+            <if test="permissionType != null" >
+                type = #{permissionType},
+            </if>
+            <if test="enable != null" >
+                is_enable = #{enable},
+            </if>
+            <if test="parentId != null" >
+                parent_id = #{parentId},
+            </if>
+            <if test="description != null" >
+                description = #{description},
+            </if>
+            <if test="indexId != null" >
+                index_id = #{indexId},
+            </if>
+            <if test="gridUrl != null" >
+                grid_url = #{gridUrl},
+            </if>
+            <if test="isParent != null" >
+                is_parent = #{isParent},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Integer" >
+        delete from tbl_permission where id = #{id}
+    </delete>
+    
+    <select id="findByIdsForLogin" resultType="java.util.Map" parameterType="java.lang.String" >
+        SELECT
+			id,
+			cn_name `name` 
+		FROM
+			tbl_permission 
+		WHERE
+			is_enable = 1 
+			AND id IN ( ${value} ) 
+			AND id NOT IN ( SELECT parent_id FROM tbl_permission )
+    </select>
+    
+    <select id="findEnamesByIds" resultType="java.lang.String" parameterType="java.lang.String" >
+        select en_name from tbl_permission where is_enable=1 and id in (${value})  
+    </select>
+</mapper>

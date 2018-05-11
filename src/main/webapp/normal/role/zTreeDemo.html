@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="../../resources/plugins/ztree/css/metroStyle/metroStyle.css" />
+    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../resources/plugins/ztree/js/jquery.ztree.all.min.js"></script>
+</head>
+
+<body>
+    <input type="button" value="获取节点" onclick="onCheck()">
+    <div>
+        <ul id="treeDemo" class="ztree"></ul>
+    </div>
+</body>
+
+</html>
+<script>
+    $(function() {
+        function findAllPermissions() {
+            var permissions = null;
+            $.ajax({
+                type: "get",
+                async: false, //不异步，先执行完ajax，再干别的
+                url: "../../manage/role/findAllPermissions.do",
+                dataType: "json",
+                success: function(response) {
+                    permissions = response;
+                }
+            });
+            return permissions;
+        }
+
+        var setting = {
+            check: {
+                enable: true
+            },
+            data: {
+                key: {
+                    name: "cname"
+                },
+                simpleData: {
+                    enable: true,
+                    pIdKey: "parentId",
+                }
+            },
+            callback: {
+                // onCheck: onCheck
+            }
+        };
+
+        var zNodes = findAllPermissions();
+
+
+
+        $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+
+    });
+
+    function onCheck(e, treeId, treeNode) {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo"),
+            nodes = treeObj.getCheckedNodes(true),
+            names = "",
+            ids = "";
+        for (var i = 0; i < nodes.length; i++) {
+            names += nodes[i].cname + ",";
+            // alert(nodes[i].id); //获取选中节点的值 
+            ids += nodes[i].id + ",";
+        }
+        names = names.substring(0, names.length - 1);
+        ids = ids.substr(0, ids.length - 1);
+        console.log(names);
+        console.log(ids);
+    }
+</script>

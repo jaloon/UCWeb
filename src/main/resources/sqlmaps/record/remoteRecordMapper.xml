@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.RemoteRecordDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.record.RemoteRecord" >
+        <id column="id" property="id" />
+        <result column="vehicle_number" property="carNumber" />
+        <result column="car_longitude" property="longitude" />
+        <result column="car_latitude" property="latitude" />
+        <result column="speed" property="velocity" />
+        <result column="angle" property="angle" />
+        <result column="user_id" property="user.id" />
+        <result column="user_account" property="user.account" />
+        <result column="user_name" property="user.name" />
+        <result column="type" property="type" />
+        <result column="typeName" property="typeName" />
+        <result column="remote_status" property="status" />
+        <result column="lock_status_info" property="lockStatusInfo" />
+        <result column="happen_time" property="createDate" />
+        <result column="station" property="station" />
+    </resultMap>
+	<sql id="select_colums">
+		r.*,
+		v.vehicle_number vehicle_number,
+		fn_type2name('remoteType',r.type) typeName,
+		fn_type2name('remoteStatus',r.status) remote_status,
+		u.account user_account,
+		u.name user_name,
+		t.longitude car_longitude,
+		t.latitude car_latitude,
+		t.speed speed,
+		t.angle angle,
+		t.lock_status_info lock_status_info
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from (tbl_remote_control r left join 
+				(tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id)
+			on r.vehicle_seal_status_id=c.id),tbl_user u,tbl_vehicle v
+		where c.vehicle_id = v.id and r.user_id = u.id
+	</select>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from (tbl_remote_control r left join 
+				(tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id)
+			on r.vehicle_seal_status_id=c.id),tbl_user u,tbl_vehicle v
+		where c.vehicle_id = v.id and r.user_id = u.id and r.id=#{id}
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.record.RemoteRecord" resultType="java.lang.Long">
+		select count(*) from 
+		tbl_remote_control r left join tbl_vehicle_seal_status c on r.vehicle_seal_status_id=c.id,
+		tbl_vehicle v
+		where c.vehicle_id = v.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			and r.happen_time between #{begin} and #{end}
+		</if> 
+		<if test="type != null and type != -2">
+			and r.type = #{type}
+		</if>
+		<if test="carNumber != null and carNumber != ''">
+			and v.vehicle_number like CONCAT('%',#{carNumber},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from (tbl_remote_control r left join 
+				(tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id)
+			on r.vehicle_seal_status_id=c.id),tbl_user u,tbl_vehicle v
+		where c.vehicle_id = v.id and r.user_id = u.id
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			and r.happen_time between #{entity.begin} and #{entity.end} 
+		</if>
+		<if test="entity.type != null and entity.type != -2">
+			and r.type = #{entity.type}
+		</if>
+		<if test="entity.carNumber != null and entity.carNumber != ''">
+			and v.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
+		</if>
+		order by r.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+</mapper>

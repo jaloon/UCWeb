@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.tipray.dao.ConfigDao">
+	<select id="findAll" resultType="com.tipray.bean.Config">
+		select * from configs
+	</select>
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.Config">
+		insert into configs(code,value,remark) 
+		values(#{code},#{value},#{remark})
+	</insert>
+	<update id="update" parameterType="com.tipray.bean.Config">
+		update configs set value=#{value} where code=#{code}
+	</update>
+	<select id="getById" parameterType="java.lang.Long" resultType="com.tipray.bean.Config">
+		select * from configs where id=#{id}
+	</select>
+</mapper>

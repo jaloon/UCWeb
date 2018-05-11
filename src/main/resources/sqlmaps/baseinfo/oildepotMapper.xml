@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.OilDepotDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.OilDepot" >
+        <id column="id" property="id" />
+        <result column="official_id" property="officialId" />
+        <result column="name" property="name" />
+        <result column="short_name" property="abbr" />
+        <result column="director" property="director" />
+        <result column="phone" property="phone" />
+        <result column="address" property="address" />
+        <result column="company" property="company" />
+        <result column="longitude" property="longitude" />
+        <result column="latitude" property="latitude" />
+        <result column="cover_radius" property="radius" />
+        <result column="cover_lonlatlist_region" property="cover" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		o.*
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_oildepot o
+		where o.is_invalid=0
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.OilDepot">
+		insert into
+		tbl_oildepot(official_id,name,short_name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark)
+		values(#{officialId},#{name},#{abbr},#{director},#{phone},#{address},#{company},#{longitude},#{latitude},#{radius},#{cover},ifnull(#{remark},''))
+	</insert>
+	<insert id="addOilDepots" parameterType="java.util.List">
+		insert into
+		tbl_oildepot(official_id,name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark) values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(
+				#{item.officialId},
+				#{item.name},
+				#{item.abbr},
+				ifnull(#{item.director},''),
+				ifnull(#{item.phone},''),
+				ifnull(#{item.address},''),
+				ifnull(#{item.company},''),
+				ifnull(#{item.longitude},0),
+				ifnull(#{item.latitude},0),
+				ifnull(#{item.radius},0),
+				#{item.cover},
+				ifnull(#{item.remark},'')
+			)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.OilDepot">
+		update tbl_oildepot set
+		name=#{name},
+		short_name=#{abbr},
+		official_id=#{officialId},
+		director=#{director},
+		phone=#{phone},
+		address=#{address},
+		company=#{company},
+		longitude=#{longitude},
+		latitude=#{latitude},
+		cover_radius=#{radius},
+		cover_lonlatlist_region=#{cover},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	<delete id="deleteOilDepotCardsById" parameterType="java.lang.Long">
+		delete from tbl_oildepot_card where oildepot_id=#{id}
+	</delete>
+	<insert id="addOilDepotCardsByIdAndCardIds" parameterType="java.util.List">
+		insert into tbl_oildepot_card(card_id,oildepot_id) values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.cardId},#{item.id})
+		</foreach>
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		update tbl_oildepot set 
+		is_invalid=1 
+		where id=#{id}
+	</delete>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_oildepot o
+		where o.is_invalid=0 and o.id=#{id}
+	</select>
+	<select id="getIdByOfficialId" parameterType="java.lang.String" resultType="java.lang.Long">
+		select id
+		from tbl_oildepot o
+		where o.is_invalid=0 and o.official_id=#{officialId}
+	</select>
+	<select id="getByOfficialId" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_oildepot o
+		where o.is_invalid=0 and o.official_id=#{officialId}
+	</select>
+	<select id="getByName" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_oildepot o
+		where o.is_invalid=0 and o.name=#{oildepotName}
+	</select>
+	
+	<select id="findByName" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_oildepot o
+		where o.is_invalid=0 and o.name like CONCAT('%',#{oildepotName},'%')
+	</select>
+	
+	<select id="findOilDepotsByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_oildepot o, tbl_oildepot_card co
+		where o.is_invalid=0 and o.id= co.oildepot_id and co.card_id = #{cardId}
+	</select>
+	
+	<select id="count" parameterType="com.tipray.bean.baseinfo.OilDepot" resultType="java.lang.Long">
+		select count(*) from tbl_oildepot where is_invalid=0 
+		 <if test="name != null and name != ''">
+			and name like CONCAT('%',#{name},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_oildepot o
+		where o.is_invalid=0 
+		<if test="entity.name != null and entity.name != ''">
+			and o.name like CONCAT('%',#{entity.name},'%')
+		</if>
+		order by o.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<select id="findRecentOilDepotsBySize" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		SELECT * FROM tbl_oildepot ORDER BY id DESC LIMIT #{size}	
+	</select>
+	
+	<select id="findIdAndNameOfAllOilDepots" resultType="java.util.Map">
+		SELECT id, name FROM tbl_oildepot ORDER BY id
+	</select>
+</mapper>

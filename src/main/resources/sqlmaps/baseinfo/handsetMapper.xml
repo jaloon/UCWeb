@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.HandsetDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Handset" >
+        <id column="id" property="id" />
+        <result column="handset_device_id" property="deviceId" />
+        <result column="gasstation_id" property="gasStation.id" />
+        <result column="gasstation_name" property="gasStation.name" />
+        <result column="director" property="director" />
+        <result column="phone" property="phone" />
+        <result column="identity_card" property="identityCard" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		h.*,g.name gasstation_name
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_handset h left join tbl_gasstation g
+		on h.gasstation_id=g.id
+		where h.is_invalid=0
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Handset">
+		insert into
+		tbl_handset(handset_device_id,gasstation_id,director,phone,identity_card,remark)
+		values(#{deviceId},ifnull(#{gasStation.id},0),#{director},#{phone},#{identityCard},ifnull(#{remark},''))
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.Handset">
+		update tbl_handset set
+		handset_device_id=#{deviceId},
+		gasstation_id=ifnull(#{gasStation.id},0),
+		director=#{director},
+		phone=#{phone},
+		identity_card=#{identityCard},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	
+	<update id="resetGasStationOfHandsetByGasStationId" parameterType="java.lang.Long">
+		update tbl_handset set
+		gasstation_id=0
+		where gasstation_id=#{gasStationId}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		update tbl_handset set 
+		is_invalid=1 
+		where id=#{id}
+	</delete>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_handset h left join tbl_gasstation g
+		on h.gasstation_id=g.id
+		where h.is_invalid=0 and h.id=#{id}
+	</select>
+	
+	<select id="getByDeviceId" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_handset h left join tbl_gasstation g
+		on h.gasstation_id=g.id
+		where h.is_invalid=0 and h.handset_device_id=#{deviceId}
+	</select>
+	
+	<select id="getByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_handset h,tbl_gasstation g
+		where h.gasstation_id=g.id and h.is_invalid=0 and h.gasstation_id=#{gasStationId}
+	</select>
+	
+	<select id="findUnaddHandset" resultType="java.lang.Integer">
+		select d.device_id
+		from tbl_device d
+		where d.type=4 and d.is_disallowed=0 and d.is_invalid=0
+		 and d.device_id not in 
+		 (select h.handset_device_id from tbl_handset h where h.is_invalid=0)
+	</select>
+	
+	<select id="findUnusedHandset" resultType="java.lang.Integer">
+		select h.handset_device_id
+		from tbl_handset h
+		where h.is_invalid=0 and h.gasstation_id=0;
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.baseinfo.Handset" resultType="java.lang.Long">
+		select count(*) from tbl_handset where is_invalid=0 
+		<if test="gasStation != null and gasStation.id != null and gasStation.id != -2">
+			and gasstation_id = #{gasStation.id}
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_handset h left join tbl_gasstation g
+		on h.gasstation_id=g.id
+		where h.is_invalid=0
+		<if test="entity.gasStation != null and entity.gasStation.id != null and entity.gasStation.id != -2">
+			and h.gasstation_id = #{entity.gasStation.id}
+		</if>
+		order by h.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+</mapper>

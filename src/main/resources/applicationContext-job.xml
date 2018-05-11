@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/task
+	http://www.springframework.org/schema/task/spring-task.xsd">
+    
+    <!-- 定时器开关 -->
+	<!-- <task:annotation-driven/> -->
+	
+	<!-- <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" />  -->
+	
+	<!-- 启用注解驱动的定时任务 -->
+	<task:annotation-driven scheduler="scheduler"/>
+	<!-- 配置定时任务的线程池（多任务时需要进行配置，若不配置多任务下会有问题。） -->
+	<task:scheduler id="scheduler" pool-size="5"/>
+	
+    <!--<task:scheduled-tasks scheduler="scheduler">-->
+    	<!--&lt;!&ndash; <task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/> &ndash;&gt;-->
+    	<!--&lt;!&ndash; 链路维护心跳任务，每隔2分钟执行一次 &ndash;&gt;-->
+    	<!--<task:scheduled ref="scheduledJob" method="executeHeartbeat" cron="0 */2 * * * ?"/>-->
+    	<!--&lt;!&ndash; <task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" /> &ndash;&gt;-->
+    <!--</task:scheduled-tasks>-->
+    
+</beans>

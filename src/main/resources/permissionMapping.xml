@@ -1,0 +1,41 @@
+<!DOCTYPE databases PUBLIC
+"-//EXOLAB/Castor Mapping DTD Version 1.0//EN"
+"http://castor.exolab.org/mapping.dtd">
+<mapping>
+	
+	<class name="com.tipray.bean.PermissionConfig">
+		<field name="permission" collection="arraylist" type="com.tipray.bean.baseinfo.Permission">
+			<bind-xml name="permission" node="element" />
+		</field>
+	</class>
+	<class name="com.tipray.bean.baseinfo.Permission">
+		<field name="cname" type="java.lang.String">
+			<bind-xml name="cname" node="attribute"/>
+		</field>
+		<field name="ename" type="java.lang.String">
+			<bind-xml name="ename" node="attribute"/>
+		</field>
+		<field name="enable" type="java.lang.Boolean">
+			<bind-xml name="enable" node="attribute"/>
+		</field>
+		<field name="permissionType" type="java.lang.Integer">
+			<bind-xml name="permissionType" node="attribute"/>
+		</field>
+		<field name="moduleName" type="java.lang.String">
+			<bind-xml name="moduleName" node="attribute"/>
+		</field>
+		<field name="description" type="java.lang.String">
+			<bind-xml name="description" node="attribute"/>
+		</field>
+		<field name="gridUrl" type="java.lang.String">
+			<bind-xml name="gridUrl" node="attribute"/>
+		</field>
+		<field name="children" collection="arraylist" type="com.tipray.bean.baseinfo.Permission">
+			<bind-xml name="permission" node="element" />
+		</field>
+		<field name="isParent" type="java.lang.Boolean">
+			<bind-xml name="isParent" node="attribute"/>
+		</field>
+	</class>
+	
+</mapping>

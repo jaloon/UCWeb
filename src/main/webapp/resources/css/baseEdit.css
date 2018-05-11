@@ -1,0 +1,69 @@
+.container {
+    width: 540px;
+    background: #ffffff;
+}
+
+.container>table {
+    width: 480px;
+    position: relative;
+    left: 30px;
+    top: 15px;
+    font-size: 14px;
+    color: #445065;
+}
+
+.container tr {
+    height: 36px;
+}
+
+tr td:first-child {
+    width: 80px;
+}
+
+.editInfo {
+    height: 26px;
+    width: 384px;
+    line-height: 26px;
+    border: 1px solid #d7dbe2;
+    border-radius: 3px;
+    padding: 0 6px 0 6px;
+    color: #57647c;
+}
+
+.oper-zone {
+    position: relative;
+    top: 30px;
+    height: 54px;
+    width: 100%;
+    background: #e6e7e9;
+}
+
+#cancel {
+    width: 100px;
+    height: 30px;
+    border: 1px solid #478de4;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #40454b;
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    right: 124px;
+}
+
+#confirm {
+    width: 100px;
+    height: 30px;
+    background: #478de4;
+    color: #ffffff;
+    border: 0;
+    border-radius: 3px;
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    right: 14px;
+}
+
+input[readonly]{
+	background:#e6e7e9;
+}

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=center-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>车载终端配置</title>
+    <link rel="stylesheet" href="../../../resources/css/base.css ">
+    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
+    <style type="text/css">
+        .file-box {
+            height: 186px;
+            width: 384px;
+            line-height: 21px;
+            border: 1px solid #d7dbe2;
+            border-radius: 3px;
+            padding: 0 6px 0 6px;
+            color: #57647c;
+            overflow: auto;
+        }
+        
+        .hidden-box {
+            width: 500px;
+            background: #ffffff;
+        }
+        
+        .file>table {
+            width: 480px;
+            position: relative;
+            left: 10px;
+            top: 5px;
+            font-size: 14px;
+            color: #445065;
+        }
+        
+        .hidden-oper-zone {
+            position: relative;
+            top: 12px;
+            height: 54px;
+            width: 100%;
+            background: #e6e7e9;
+        }
+        
+        .hidden-cancel {
+            width: 100px;
+            height: 30px;
+            border: 1px solid #478de4;
+            border-radius: 3px;
+            background: #ffffff;
+            color: #40454b;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 124px;
+        }
+        
+        .hidden-confirm {
+            width: 100px;
+            height: 30px;
+            background: #478de4;
+            color: #ffffff;
+            border: 0;
+            border-radius: 3px;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 14px;
+        }
+        
+        .fname {
+            display: inline-block;
+            max-width: 346px;
+            overflow: hidden;
+            color: #551A8B;
+            border-bottom: 1px solid #551A8B
+        }
+        
+        .tree-box {
+            height: 241px;
+            overflow: auto;
+        }
+    </style>
+    <link rel="stylesheet" href="../../../resources/plugins/ztree/css/metroStyle/metroStyle.css">
+    <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/layer/layer.js"></script>
+    <script src="../../../resources/plugins/ztree/js/jquery.ztree.all.min.js"></script>
+    <script src="../../../resources/plugins/verify.js"></script>
+    <script src="../../../resources/js/base.js"></script>
+    <script src="../../../resources/js/car/softUpgrade.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-zone">
+            <div class="base-info">
+                <div class="info-title">
+                    软件升级
+                </div>
+                <table class="base-table">
+                    <tr>
+                        <td>FTP路径</td>
+                        <td>
+                            <input type="text" class="editInfo" id="path" placeholder="格式：ftp://账号:密码@192.3.5.100:21/upgrade/v1.1">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>升级车辆</td>
+                        <td>
+                            <input type="text" class="editInfo" id="cars" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>升级文件</td>
+                        <td>
+                            <div class="file-box">
+                                <ol id="files">
+                                    <li>
+                                        <span id="add" style="font-size: 20px; color: #0154ad">
+                                            <img alt="添加" title="添加" src="../../../resources/images/operate/addNew.png">&nbsp;添加文件
+                                        </span>
+                                    </li>
+                                </ol>
+                            </div>
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+        <div class="oper-zone">
+            <input type="button" id="cancel" value="取消">
+            <input type="button" id="confirm" value="确认">
+        </div>
+    </div>
+    <div class="hidden-box file" style="display:none;">
+        <table>
+            <tr>
+                <td>文件类型:</td>
+                <td>
+                    <input type="text" class="editInfo" id="file_type">
+                </td>
+            </tr>
+            <tr>
+                <td>文件名:</td>
+                <td>
+                    <input type="text" class="editInfo" id="file_name">
+                </td>
+            </tr>
+            <tr>
+                <td>文件大小:</td>
+                <td>
+                    <input type="text" class="editInfo" id="file_size">
+                </td>
+            </tr>
+            <tr>
+                <td>文件CRC32:</td>
+                <td>
+                    <input type="text" class="editInfo" id="file_crc">
+                </td>
+            </tr>
+        </table>
+        <div class="hidden-oper-zone">
+            <input type="button" class="hidden-cancel" id="file_cancel" value="取消">
+            <input type="button" class="hidden-confirm" id="file_confirm" value="确认">
+        </div>
+    </div>
+    <div class="hidden-box cartree" style="display:none;">
+        <div class="tree-box">
+            <ul id="treeDemo" class="ztree"></ul>
+        </div>
+        <div class="hidden-oper-zone">
+            <input type="button" class="hidden-cancel" id="car_cancel" value="取消">
+            <input type="button" class="hidden-confirm" id="car_confirm" value="确认">
+        </div>
+    </div>
+</body>

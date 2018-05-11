@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	description：代表详细描述;
+	permissionType：代表是功能或是菜单权限{1:代表菜单;0：代表功能};
+	ename：代表对应权限的英文名;
+	cname：代表所对应的权限名称;
+	enable：是否启用{1:启用;0:不启用}
+	gridUrl：代表菜单对应显示界面的连接
+	isParent：是否是父节点{1:是;0:否}
+ -->
+<permission-config>
+	<permission cname="系统管理" ename="systemManage" permissionType="1" description=" ">
+		<permission cname="操作员管理" ename="userManage" permissionType="1" description=" ">
+			<permission cname="角色" ename="roleModule" permissionType="1" gridUrl="normal/role/roleList.jsp">
+				<permission cname="编辑角色" ename="editRole" permissionType="0" description=" " />
+				<permission cname="查看角色" ename="viewRole" permissionType="0" description=" " />
+			</permission>
+			<permission cname="操作员" ename="userModule" permissionType="1" gridUrl="normal/user/userList.jsp">
+				<permission cname="编辑操作员" ename="editUser" permissionType="0" description=" " />
+				<permission cname="查看操作员" ename="viewUser" permissionType="0" description=" " />
+			</permission>
+		</permission>
+		<permission cname="操作日志管理" ename="logManage" permissionType="1" description=" ">
+			<permission cname="信息管理日志" ename="infologModule" permissionType="1" gridUrl="normal/log/logList.jsp">
+				<permission cname="查看信息管理日志" ename="viewInfolog" permissionType="0" description=" " />
+			</permission>
+			<permission cname="车辆管理日志" ename="carlogModule" permissionType="1" gridUrl="normal/log/logList.jsp">
+				<permission cname="查看车辆管理日志" ename="viewCarlog" permissionType="0" description=" " />
+			</permission>
+		</permission>
+	</permission>
+	<permission cname="系统操作" ename="systemOperate" permissionType="1" description=" ">
+		<permission cname="信息管理" ename="infoManage" permissionType="1" description="">
+			<permission cname="设备信息管理" ename="deviceModule" permissionType="1" gridUrl="normal/device/deviceList.jsp">
+				<permission cname="同步设备" ename="syncDevice" permissionType="0" description="" />
+				<permission cname="查看设备" ename="viewDevice" permissionType="0" description="" />
+			</permission>
+			<permission cname="油库信息管理" ename="oildepotModule" permissionType="1" gridUrl="normal/oildepot/oildepotList.jsp">
+				<permission cname="编辑油库" ename="editOildepot" permissionType="0" description="" />
+				<permission cname="查看油库" ename="viewOildepot" permissionType="0" description="" />
+			</permission>
+			<permission cname="加油站信息管理" ename="gasstationModule" permissionType="1" gridUrl="normal/gasstation/gasstationList.jsp">
+				<permission cname="编辑加油站" ename="editGasstation" permissionType="0" description="" />
+				<permission cname="查看加油站" ename="viewGasstation" permissionType="0" description="" />
+			</permission>
+			<permission cname="卡信息管理" ename="cardModule" permissionType="1" gridUrl="normal/card/cardList.jsp">
+				<permission cname="编辑卡" ename="editCard" permissionType="0" description="" />
+				<permission cname="查看卡" ename="viewCard" permissionType="0" description="" />
+			</permission>
+			<permission cname="手持机信息管理" ename="handsetModule" permissionType="1" gridUrl="normal/handset/handsetList.jsp">
+				<permission cname="编辑手持机" ename="editHandset" permissionType="0" description="" />
+				<permission cname="查看手持机" ename="viewHandset" permissionType="0" description="" />
+			</permission>
+			<permission cname="配送卡信息管理" ename="transcardModule" permissionType="1" gridUrl="normal/transcard/transcardList.jsp">
+				<permission cname="编辑配送卡" ename="editTranscard" permissionType="0" description="" />
+				<permission cname="查看配送卡" ename="viewTranscard" permissionType="0" description="" />
+			</permission>
+			<permission cname="运输公司信息管理" ename="transcomModule" permissionType="1" gridUrl="normal/transcom/transcomList.jsp">
+				<permission cname="编辑运输公司" ename="editTranscom" permissionType="0" description="" />
+				<permission cname="查看运输公司" ename="viewTranscom" permissionType="0" description="" />
+			</permission>
+			<permission cname="司机信息管理" ename="driverModule" permissionType="1" gridUrl="normal/driver/driverList.jsp">
+				<permission cname="编辑司机" ename="editDriver" permissionType="0" description="" />
+				<permission cname="查看司机" ename="viewDriver" permissionType="0" description="" />
+			</permission>
+		</permission>
+		<permission cname="车辆管理" ename="carManage" permissionType="1" description="">
+			<permission cname="车辆信息管理" ename="carModule" permissionType="1" gridUrl="normal/car/carList.jsp">
+				<permission cname="编辑车辆" ename="editCar" permissionType="0" description="" />
+				<permission cname="查看车辆" ename="viewCar" permissionType="0" description="" />
+			</permission>
+			<permission cname="设备绑定" ename="bindModule" permissionType="1" gridUrl="normal/car/carParam.jsp">
+				<permission cname="车台绑定" ename="bindTerminal" permissionType="0" description="" />
+				<permission cname="仓锁绑定" ename="bindLock" permissionType="0" description="" />
+			</permission>
+			<permission cname="车台配置" ename="configModule" permissionType="1" gridUrl="normal/car/carParam.jsp">
+				<permission cname="GPS配置" ename="gpsConfig" permissionType="0" description="" />
+				<permission cname="功能启用" ename="funcEnable" permissionType="0" description="" />
+				<permission cname="软件升级" ename="softUpgrade" permissionType="0" description="" />
+			</permission>
+			<permission cname="车辆远程控制" ename="remoteModule" permissionType="1" gridUrl="normal/car/carRemote.jsp">
+				<permission cname="进油库" ename="intoOildepot" permissionType="0" description="" />
+				<permission cname="出油库" ename="quitOildepot" permissionType="0" description="" />
+				<permission cname="进加油站" ename="intoGasstation" permissionType="0" description="" />
+				<permission cname="出加油站" ename="quitGasstation" permissionType="0" description="" />
+				<permission cname="状态变更" ename="alterStatus" permissionType="0" description="" />
+				<permission cname="开锁重置" ename="unlockReset" permissionType="0" description="" />
+			</permission>
+			<permission cname="车辆远程换站" ename="changeModule" permissionType="1" gridUrl="normal/car/stationChange.jsp">
+				<permission cname="远程换站" ename="changeStation" permissionType="0" description="" />
+			</permission>
+			<permission cname="车辆监控" ename="monitorModule" permissionType="1" gridUrl="normal/car/carMonitor.jsp">
+				<permission cname="重点监控" ename="focusMonitor" permissionType="0" description="" />
+				<permission cname="实时监控" ename="realtimeMonitor" permissionType="0" description="" />
+			</permission>
+			<permission cname="车辆报警" ename="alarmModule" permissionType="1" gridUrl="normal/car/carAlarm.jsp">
+				<permission cname="报警列表" ename="alarmList" permissionType="0" description="" />
+				<permission cname="消除报警" ename="eliminateAlarm" permissionType="0" description="" />
+			</permission>
+			<permission cname="车辆轨迹回放" ename="retrackModule" permissionType="1" gridUrl="normal/car/carRetrack.jsp">
+				<permission cname="轨迹回放" ename="reTrack" permissionType="0" description="" />
+			</permission>
+		</permission>
+		<permission cname="查询统计" ename="statisticsManage" permissionType="1" description="">
+			<permission cname="报警记录查询" ename="alarmrecordModule" permissionType="1" gridUrl="normal/statistics/alarmrList.jsp">
+				<permission cname="查看报警记录" ename="viewAlarmrecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="远程操作查询" ename="remoterecordModule" permissionType="1" gridUrl="normal/statistics/remoteList.jsp">
+				<permission cname="查看远程操作记录" ename="viewRemoterecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="锁动作记录查询" ename="lockstatusModule" permissionType="1" gridUrl="normal/statistics/lockstatusList.jsp">
+				<permission cname="查看锁动作记录" ename="viewLockstatus" permissionType="0" description="" />
+			</permission>
+			<permission cname="车辆进出记录查询" ename="inandoutrecordModule" permissionType="1" gridUrl="normal/statistics/inandoutList.jsp">
+				<permission cname="查看车辆进出记录" ename="viewInandoutrecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="配送信息查询" ename="transportModule" permissionType="1" gridUrl="normal/statistics/transportList.jsp">
+				<permission cname="查看配送信息" ename="viewTransport" permissionType="0" description="" />
+			</permission>
+			<permission cname="远程换站记录查询" ename="changerecordModule" permissionType="1" gridUrl="normal/statistics/changeList.jsp">
+				<permission cname="查看远程换站记录" ename="viewChangerecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="设备使用记录查询" ename="deviceuseModule" permissionType="1" gridUrl="normal/statistics/deviceuseList.jsp">
+				<permission cname="查看设备使用记录" ename="viewdeviceuse" permissionType="0" description="" />
+			</permission>
+		</permission>
+	</permission>
+</permission-config>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.DeviceDao">
+	<sql id="select_colums">
+		d.id id,
+		d.device_id deviceId,
+		d.type type,
+		fn_type2name("deviceType",d.type) typeName,
+		d.center_id centerId,
+		d.model model,
+		d.produce_time produceTime,
+		date_format(d.produce_time,'%Y-%m-%d %h:%i:%s') produce,
+		d.delivery_time deliveryTime,
+		date_format(d.delivery_time,'%Y-%m-%d %h:%i:%s') delivery,
+		d.remark remark,
+		d.gmt_create createDate,
+		d.gmt_modified modifyDate
+	</sql>
+	<select id="findAll" resultType="com.tipray.bean.baseinfo.Device">
+		select
+		<include refid="select_colums"></include>
+		from tbl_device d
+		where d.is_disallowed=0 and d.is_invalid=0
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Device">
+		insert into
+		tbl_device(device_id,type,center_id,produce_time,delivery_time,model,remark)
+		values(#{deviceId},#{type},#{centerId},#{produceTime},#{deliveryTime},ifnull(#{model},'')},ifnull(#{remark},''))
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.Device">
+		update tbl_device set
+		device_id=#{deviceId},
+		type=#{type},
+		center_id=#{centerId},
+		produce_time=#{produceTime},
+		delivery_time=#{deliveryTime},
+		model=ifnull(#{model},'')},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		update tbl_device set 
+		is_invalid=1 
+		where id=#{id}
+	</delete>
+	
+	<delete id="deleteByDeviceId" parameterType="java.lang.Integer">
+		update tbl_device set 
+		is_invalid=1 
+		where device_id=#{deviceId}
+	</delete>
+
+	<select id="getById" parameterType="java.lang.Long" resultType="com.tipray.bean.baseinfo.Device">
+		select <include refid="select_colums"></include> 
+		from tbl_device d
+		where d.is_disallowed=0 and d.is_invalid=0 and d.id=#{id}
+	</select>
+	
+	<select id="getByDeviceId" parameterType="java.lang.Integer" resultType="com.tipray.bean.baseinfo.Device">
+		select <include refid="select_colums"></include> 
+		from tbl_device d
+		where d.is_disallowed=0 and d.is_invalid=0 and d.device_id=#{deviceId}
+	</select>
+	
+	<select id="findByCenterId" parameterType="java.lang.Integer" resultType="com.tipray.bean.baseinfo.Device">
+		select <include refid="select_colums"></include> 
+		from tbl_device d
+		where c.id=#{centerId} and d.is_disallowed=0 and d.is_invalid=0
+	</select>
+	
+	<select id="findByType" parameterType="java.lang.Integer" resultType="com.tipray.bean.baseinfo.Device">
+		select <include refid="select_colums"></include> 
+		from tbl_device d
+		where d.type=#{deviceType} and d.is_disallowed=0 and d.is_invalid=0
+	</select>
+	
+	<select id="count" parameterType="com.tipray.bean.baseinfo.Device" resultType="java.lang.Long">
+		select count(*) from tbl_device where is_disallowed=0 and is_invalid=0
+		 <if test="type != null and type != -2l">
+			and type = #{type}
+		</if>
+		<if test="centerId != null and centerId != -2l">
+			and center_id = #{centerId}
+		</if>
+	</select>
+	
+	<select id="findByPage" resultType="com.tipray.bean.baseinfo.Device">
+		select <include refid="select_colums"></include> 
+		from tbl_device d
+		where d.is_disallowed=0 and d.is_invalid=0
+		<if test="entity.centerId != null and entity.centerId != -2l">and d.center_id=#{entity.centerId}</if>
+		<if test="entity.type != null and entity.type != -2l">and d.type=#{entity.type}</if>
+		order by d.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<delete id="deleteAll">
+		delete from tbl_device
+	</delete>
+	
+	<insert id="addDevices" parameterType="java.util.List">
+		insert into
+		tbl_device(id,device_id,type,center_id,produce_time,delivery_time,model,remark) values
+		<foreach collection="list" item="device" index="index" separator="," > 
+			(#{device.id},#{device.deviceId},#{device.type},#{device.centerId},#{device.produceTime},#{device.deliveryTime},ifnull(#{device.model},''),ifnull(#{device.remark},''))
+		</foreach>
+	</insert>
+	
+</mapper>

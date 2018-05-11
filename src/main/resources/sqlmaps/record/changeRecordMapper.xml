@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.ChangeRecordDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.record.ChangeRecord" >
+        <id column="id" property="id" />
+        <result column="vehicle_number" property="carNumber" />
+        <result column="user_id" property="user.id" />
+        <result column="user_account" property="user.account" />
+        <result column="user_name" property="user.name" />
+        <result column="invoice_id" property="invoice" />
+        <result column="oildepot_id" property="oilDepot.id" />
+        <result column="oildepot_name" property="oilDepot.name" />
+        <result column="store_id" property="storeId" />
+        <result column="gasstation_id" property="gasStation.id" />
+        <result column="gasstation_name" property="gasStation.name" />
+        <result column="change_station_id" property="changedStation.id" />
+        <result column="change_station_name" property="changedStation.name" />
+        <result column="status_name" property="statusName" />
+        <result column="happen_time" property="createDate" />
+        <result column="is_app" property="isApp" />
+    </resultMap>
+	<sql id="select_colums">
+		t.id									id,
+		c.vehicle_number						vehicle_number,
+		t.user_id								user_id,
+		u.account								user_account,
+		u.name									user_name,
+		t1.distribute_id						invoice_id,
+		t1.store_id								store_id,
+		o.id									oildepot_id,
+		o.name									oildepot_name,
+		g1.id									gasstation_id,
+		g1.name									gasstation_name,
+		g2.id									change_station_id,
+		g2.name									change_station_name,
+		t.status								status,
+		fn_type2name('changeStatus', t.status)	status_name,
+		t.happen_time							happen_time,
+		t.is_app								is_app
+	</sql>
+	<sql id="from_tables">
+		(tbl_remote_change_gasstation t LEFT JOIN tbl_user u on t.user_id = u.id),
+		tbl_vehicle c,
+		( tbl_transport t1 INNER JOIN tbl_gasstation g1 ON t1.gasstation_id = g1.id ),
+		( tbl_transport t2 INNER JOIN tbl_gasstation g2 ON t2.gasstation_id = g2.id ),
+		tbl_oildepot o 
+	</sql>
+	<sql id="select_params">
+		t.vehicle_id = c.id 
+		AND t.transport_id = t1.id 
+		AND t1.oildepot_id = o.id
+		AND t.changed_transport_id = t2.id
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		SELECT
+			<include refid="select_colums"></include> 
+		FROM
+			<include refid="from_tables"></include> 
+		WHERE
+			<include refid="select_params"></include> 
+	</select>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		SELECT
+			<include refid="select_colums"></include> 
+		FROM
+			<include refid="from_tables"></include> 
+		WHERE
+			<include refid="select_params"></include>
+			AND t.id=#{id}
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.record.ChangeRecord" resultType="java.lang.Long">
+		select count(*) from tbl_remote_change_gasstation t,tbl_vehicle c
+		where t.vehicle_id=c.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			and t.happen_time between #{begin} and #{end}
+		</if> 
+		<if test="status != null and status != -2">
+			and t.status = #{status}
+		</if>
+		<if test="carNumber != null and carNumber != ''">
+			and c.vehicle_number like CONCAT('%',#{carNumber},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		SELECT
+			<include refid="select_colums"></include> 
+		FROM
+			<include refid="from_tables"></include> 
+		WHERE
+			<include refid="select_params"></include>
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			and t.happen_time between #{entity.begin} and #{entity.end} 
+		</if>
+		<if test="entity.status != null and entity.status != -2">
+			and t.status = #{entity.status}
+		</if>
+		<if test="entity.carNumber != null and entity.carNumber != ''">
+			and c.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
+		</if>
+		order by t.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<insert id="addByChangeInfo" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.ChangeInfo">
+		insert into
+		tbl_remote_change_gasstation(user_id,vehicle_id,transport_id,changed_transport_id,is_app,is_lnglat_valid,longitude,latitude)
+		values(#{userId},#{carId},#{transportId},#{changedTransportId},ifnull(#{isApp},0),ifnull(#{isLocationValid},0),ifnull(#{longitude},0),ifnull(#{latitude},0))
+	</insert>
+	
+	<insert id="addByChangedDistribution" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
+		insert into
+		tbl_remote_change_gasstation(user_id,vehicle_id,transport_id,changed_transport_id)
+		values(#{userId},#{carId}, #{transportId},#{changedTransportId})
+	</insert>
+	
+	<select id="getChangeIdByTransportIdAndChangedTransportId" resultType="java.lang.Long">
+		select id from tbl_remote_change_gasstation where transport_id=#{transportId} and changed_transport_id=#{changedTransportId}
+	</select>
+	
+	<update id="updateChangeStatus">
+		update tbl_remote_change_gasstation
+		set status=#{changeStatus}
+		where id=#{changeId}
+	</update>
+	
+</mapper>

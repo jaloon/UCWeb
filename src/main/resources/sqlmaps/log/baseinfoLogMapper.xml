@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.InfoManageLogDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.log.InfoManageLog" >
+        <id column="id" property="id" />
+        <result column="user_id" property="user.id" />
+        <result column="user_account" property="user.account" />
+        <result column="user_name" property="user.name" />
+        <result column="type" property="type" />
+        <result column="description" property="description" />
+        <result column="log_time" property="createDate" />
+    </resultMap>
+	<sql id="select_colums">
+		<!-- ol.*,fn_type2name("logType",ol.type) typeName,u.account user_account,u.name user_name -->
+		ol.*,hex(ol.type) typeName,u.account user_account,u.name user_name
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_base_info_manage_log ol,tbl_user u
+		where ol.user_id=u.id
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.log.InfoManageLog">
+		insert into
+		tbl_base_info_manage_log(user_id,type,description)
+		values(#{user.id},#{type},#{description})
+	</insert>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_base_info_manage_log ol,tbl_user u
+		where ol.user_id=u.id and ol.id=#{id}
+	</select>
+	
+	<select id="findByUser" parameterType="com.tipray.bean.baseinfo.User" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_base_info_manage_log ol,tbl_user u
+		where ol.user_id=u.id
+		<if test="user!=null">
+			<if test="user.id != null">
+				and u.id=#{user.id}
+			</if>
+			<if test="user.account != null and user.account != ''">
+				and u.account like CONCAT('%',#{user.account},'%')
+			</if>
+			<if test="user.name != null and user.name != ''">
+				and u.name like CONCAT('%',#{user.name},'%')
+			</if>
+		</if>
+	</select>
+	
+	<select id="findByType" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_base_info_manage_log ol,tbl_user u
+		where ol.user_id=u.id and ol.type=#{type}
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.log.InfoManageLog" resultType="java.lang.Long">
+		select count(*) from tbl_base_info_manage_log ol,tbl_user u
+		where ol.user_id=u.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			and ol.log_time between #{begin} and #{end}
+		</if> 
+		<if test="type != null and type != -2">
+			and ol.type = #{type}
+		</if>
+		<if test="user!=null">
+			<if test="user.id != null">
+				and u.id=#{user.id}
+			</if>
+			<if test="user.account != null and user.account != ''">
+				and u.account like CONCAT('%',#{user.account},'%')
+			</if>
+			<if test="user.name != null and user.name != ''">
+				and u.name like CONCAT('%',#{user.name},'%')
+			</if>
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_base_info_manage_log ol,tbl_user u
+		where ol.user_id=u.id
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			and ol.log_time between #{entity.begin} and #{entity.end} 
+		</if>
+		<if test="entity.type != null and entity.type != -2">
+			and ol.type = #{entity.type}
+		</if>
+		<if test="entity.user!=null">
+			<if test="entity.user.id != null">
+				and u.id=#{entity.user.id}
+			</if>
+			<if test="entity.user.account != null and entity.user.account != ''">
+				and u.account like CONCAT('%',#{entity.user.account},'%')
+			</if>
+			<if test="entity.user.name != null and entity.user.name != ''">
+				and u.name like CONCAT('%',#{entity.user.name},'%')
+			</if>
+		</if>
+		order by ol.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+</mapper>

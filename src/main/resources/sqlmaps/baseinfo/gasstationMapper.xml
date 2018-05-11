@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.GasStationDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.GasStation" >
+        <id column="id" property="id" />
+        <result column="official_id" property="officialId" />
+        <result column="name" property="name" />
+        <result column="short_name" property="abbr" />
+        <result column="director" property="director" />
+        <result column="phone" property="phone" />
+        <result column="address" property="address" />
+        <result column="company" property="company" />
+        <result column="longitude" property="longitude" />
+        <result column="latitude" property="latitude" />
+        <result column="cover_radius" property="radius" />
+        <result column="cover_lonlatlist_region" property="cover" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		g.*
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_gasstation g
+		where g.is_invalid=0
+	</select>
+	<select id="getGasStationList" resultType="com.tipray.bean.baseinfo.GasStation">
+		select g.id,g.name,g.short_name
+		from tbl_gasstation g
+		where g.is_invalid=0
+	</select>
+	<select id="findUnconfigGasStation" resultType="com.tipray.bean.baseinfo.GasStation">
+		select g.id,g.name,g.short_name
+		from tbl_gasstation g
+		where g.is_invalid=0 and g.id not in
+		(select h.gasstation_id from tbl_handset h where h.gasstation_id != 0)
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.GasStation">
+		insert into
+		tbl_gasstation(official_id,name,short_name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark)
+		values(#{officialId},#{name},#{abbr},#{director},#{phone},#{address},#{company},#{longitude},#{latitude},#{radius},#{cover},ifnull(#{remark},''))
+	</insert>
+	
+	<insert id="addGasStations" parameterType="java.util.List">
+		insert into
+		tbl_gasstation(official_id,name,short_name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark) values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(
+				#{item.officialId},
+				#{item.name},
+				#{item.abbr},
+				ifnull(#{item.director},''),
+				ifnull(#{item.phone},''),
+				ifnull(#{item.address},''),
+				ifnull(#{item.company},''),
+				ifnull(#{item.longitude},0),
+				ifnull(#{item.latitude},0),
+				ifnull(#{item.radius},0),
+				#{item.cover},
+				ifnull(#{item.remark},'')
+			)
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.GasStation">
+		update tbl_gasstation set
+		official_id=#{officialId},
+		name=#{name},
+		short_name=#{abbr},
+		director=#{director},
+		phone=#{phone},
+		address=#{address},
+		company=#{company},
+		longitude=#{longitude},
+		latitude=#{latitude},
+		cover_radius=#{radius},
+		cover_lonlatlist_region=#{cover},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	<delete id="deleteGasStationCardsById" parameterType="java.lang.Long">
+		delete from tbl_gasstation_card where gasstation_id=#{id}
+	</delete>
+	<insert id="addGasStationCardsByIdAndCardIds" parameterType="java.util.List">
+		insert into tbl_gasstation_card(card_id,gasstation_id) values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.cardId},#{item.id})
+		</foreach>
+	</insert>
+	
+	<update id="delete" parameterType="java.lang.Long">
+		update tbl_gasstation set 
+		is_invalid=1 
+		where id=#{id}
+	</update>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_gasstation g
+		where g.is_invalid=0 and g.id=#{id}
+	</select>
+	<select id="getByOfficialId" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_gasstation g
+		where g.is_invalid=0 and g.official_id=#{officialId}
+	</select>
+	<select id="getByName" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_gasstation g
+		where g.is_invalid=0 and g.name=#{gasStationName}
+	</select>
+	
+	<select id="findByName" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_gasstation g
+		where g.is_invalid=0 and g.name like CONCAT('%',#{gasStationName},'%')
+	</select>
+
+	<select id="findGasStationsByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_gasstation g, tbl_gasstation_card cg
+		where g.is_invalid=0 and g.id=cg.gasstation_id and cg.card_id = #{cardId}
+	</select>
+	
+	<select id="getStationForChangeById" parameterType="java.lang.Long" resultType="java.util.Map">
+		SELECT
+			<!-- g.name name, -->
+			g.short_name name,
+			g.longitude longitude,
+			g.latitude latitude,
+			g.cover_radius radius,
+			g.cover_lonlatlist_region cover,
+			h.handset_device_id handset
+		FROM
+			tbl_gasstation g LEFT JOIN tbl_handset h ON g.id = h.gasstation_id
+		WHERE
+			g.id = #{id}
+	</select>
+	
+	<select id="findOrdinaryCardById" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT
+			gc.card_id
+		FROM
+			tbl_gasstation_card gc,
+			tbl_card c
+		WHERE
+			gc.card_id = c.card_id
+			AND c.type = 5
+			AND gc.gasstation_id = #{id}
+	</select>
+	
+
+	<select id="count" parameterType="com.tipray.bean.baseinfo.GasStation" resultType="java.lang.Long">
+		select count(*) from tbl_gasstation where is_invalid=0 
+		 <if test="name != null and name != ''">
+			and name like CONCAT('%',#{name},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_gasstation g
+		where g.is_invalid=0 
+		<if test="entity.name != null and entity.name != ''">
+			and g.name like CONCAT('%',#{entity.name},'%')
+		</if>
+		order by g.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<select id="findRecentGasStationsBySize" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		SELECT * FROM tbl_gasstation ORDER BY id DESC LIMIT #{size}	
+	</select>
+	
+	<select id="findIdAndNameOfAllGasStations" resultType="java.util.Map">
+		SELECT id, name FROM tbl_gasstation ORDER BY id
+	</select>
+	
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.TransCompanyDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.TransCompany" >
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="director" property="director" />
+        <result column="phone" property="phone" />
+        <result column="address" property="address" />
+        <result column="parent_company_id" property="superior.id" />
+        <result column="parent_company_name" property="superior.name" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		t1.*,t2.name parent_company_name
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_trans_company t1
+		left join tbl_trans_company t2
+		on t1.parent_company_id=t2.id
+		where t1.is_invalid=0
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.TransCompany">
+		insert into
+		tbl_trans_company(name,director,phone,address,parent_company_id,remark)
+		values(#{name},#{director},#{phone},#{address},#{superior.id},ifnull(#{remark},''))
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.TransCompany">
+		update tbl_trans_company set
+		name=#{name},
+		director=#{director},
+		phone=#{phone},
+		address=#{address},
+		parent_company_id=#{superior.id},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		update tbl_trans_company set 
+		is_invalid=1 
+		where id=#{id}
+	</delete>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_trans_company t1
+		left join tbl_trans_company t2
+		on t1.parent_company_id=t2.id
+		where t1.is_invalid=0 and t1.id=#{id}
+	</select>
+	
+	<select id="getByName" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_trans_company t1
+		left join tbl_trans_company t2
+		on t1.parent_company_id=t2.id
+		where t1.is_invalid=0 and t1.name=#{name}
+	</select>
+	
+	<select id="findSuperiorCom" resultMap="fullResultMap">
+		select t1.id id,t1.name name 
+		from tbl_trans_company t1
+		where t1.is_invalid=0 
+		and t1.id in
+		(select t2.parent_company_id 
+			from tbl_trans_company t2
+			group by t2.parent_company_id)
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.baseinfo.TransCompany" resultType="java.lang.Long">
+		select count(*) from tbl_trans_company where is_invalid=0 
+		<if test="name != null and name != ''">
+			and name like CONCAT('%',#{name},'%')
+		</if>
+		<if test="superior != null and superior.id != null and superior.id != -2">
+			and parent_company_id = #{superior.id}
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_trans_company t1
+		left join tbl_trans_company t2
+		on t1.parent_company_id=t2.id
+		where t1.is_invalid=0
+		<if test="entity.name != null and entity.name != ''">
+			and t1.name like CONCAT('%',#{entity.name},'%')
+		</if>
+		<if test="entity.superior != null and entity.superior.id != null and entity.superior.id != -2">
+			and t1.parent_company_id = #{entity.superior.id}
+		</if>
+		order by t1.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+</mapper>

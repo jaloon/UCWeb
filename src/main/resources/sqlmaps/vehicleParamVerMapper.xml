@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.VehicleParamVerDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.VehicleParamVer" >
+        <id column="id" property="id" />
+        <result column="param_name" property="param" />
+        <result column="version" property="ver" />
+    </resultMap>
+	<sql id="select_colums">
+		p.*
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from 
+			tbl_vehicle_common_param_version p
+	</select>
+
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.VehicleParamVer">
+		insert into
+		tbl_vehicle_common_param_version(param_name,version)
+		values(#{param},ifnull(#{ver},0))
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.VehicleParamVer">
+		update tbl_vehicle_common_param_version set
+		param_name=#{param},
+		version=#{ver}
+		where id=#{id}
+	</update>
+	<update id="updateVerByParam">
+		update tbl_vehicle_common_param_version set
+		version=#{ver}
+		where param_name=#{param}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from tbl_vehicle_common_param_version where id=#{id}
+	</delete>
+	<delete id="deleteByParam" parameterType="java.lang.String">
+		delete from tbl_vehicle_common_param_version where param_name=#{param}
+	</delete>
+	
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from 
+			tbl_vehicle_common_param_version
+		where id=#{id}
+	</select>
+	
+	<select id="getByParam" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from 
+			tbl_vehicle_common_param_version
+		where param_name=#{param}
+	</select>
+	
+	<select id="getVersionsOfOilDepotAndGasStation" resultType="java.util.Map">
+		SELECT
+			t1.version depot_ver,
+			t2.version station_ver 
+		FROM
+			tbl_vehicle_common_param_version t1,
+			tbl_vehicle_common_param_version t2 
+		WHERE
+			t1.id = 5 
+			AND t2.id = 6;
+	</select>
+</mapper>

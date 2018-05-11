@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tipray.dao.SessionDao" >
+	<resultMap id="BaseResultMap" type="com.tipray.bean.Session" >
+        <id column="id" property="id" />
+        <result column="session_id" property="uuid" />
+        <result column="old_session_id" property="oldUuid"  />
+        <result column="ip" property="ip"  />
+        <result column="is_app" property="isApp"  />
+        <result column="login_time" property="loginDate"  />
+        <result column="operate_time" property="operateDate"  />
+        <result column="user_id" property="user.id"  />
+        <result column="user_role" property="user.role.id"  />
+        <result column="user_name" property="user.name"  />
+        <result column="user_account" property="user.account"  />
+    </resultMap>
+    <sql id="select_colums">
+    	s.session_id session_id,
+    	s.old_session_id old_session_id,
+    	inet_ntoa(s.ip) ip,
+    	s.is_app is_app,
+    	s.login_time login_time,
+    	s.operate_time operate_time,
+    	s.user_id user_id,
+    	u.name user_name,
+    	u.account user_account,
+    	u.role_id user_role
+    </sql>
+    
+    <select id="getByUser" resultMap="BaseResultMap" parameterType="com.tipray.bean.Session" >
+        select <include refid="select_colums"></include>
+		from tbl_session s,tbl_user u,tbl_role r 
+		where s.user_id=u.id and u.role_id=r.id and u.id = #{user.id}
+    </select>
+    
+    <select id="getByUUID" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select <include refid="select_colums"></include>
+        from tbl_session s,tbl_user u,tbl_role r 
+		where s.user_id=u.id and u.role_id=r.id and s.session_id = #{uuid}
+    </select>
+    <select id="getByOldUUID" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select <include refid="select_colums"></include>
+        from tbl_session s,tbl_user u,tbl_role r 
+		where s.user_id=u.id and u.role_id=r.id and s.old_session_id = #{uuid}
+		order by login_time desc limit 1
+    </select>
+    
+    <sql id="select_where_vo">
+		<if test="searchValue != null" >
+			 and (u.account like CONCAT('${searchValue}','%') or u.name like CONCAT('${searchValue}','%'))
+        </if>
+	</sql>
+	<select id="countByVo" resultType="java.lang.Long">
+		select count(*) from tbl_session s,tbl_user u where s.user_id=u.id
+		<include refid="select_where_vo"></include>
+	</select>
+	<select id="findByVo" resultMap="BaseResultMap">
+		select <include refid="select_colums"></include>
+		from tbl_session s,tbl_user u,tbl_role r 
+		where s.user_id=u.id and u.role_id=r.id
+		<include refid="select_where_vo"></include>
+	</select>
+	
+    <insert id="add" parameterType="com.tipray.bean.Session" >
+        insert into tbl_session (session_id, user_id, ip, is_app, login_time, operate_time)
+        values (#{uuid}, #{user.id}, inet_aton(#{ip}), ifnull(#{isApp}, 0), #{loginDate}, #{operateDate})
+    </insert>
+
+    <update id="updateOperateDate" parameterType="com.tipray.bean.Session" >
+        update tbl_session set operate_time = #{operateDate} where session_id = #{uuid}
+    </update>
+    <update id="update" parameterType="com.tipray.bean.Session" >
+        update tbl_session set 
+        session_id = #{uuid},
+        old_session_id=#{oldUuid},
+        is_app=ifnull(#{isApp},0),
+        ip=inet_aton(#{ip}),
+        login_time=#{loginDate},
+        operate_time=#{operateDate} 
+        where user_id = #{user.id}
+    </update>
+    
+    <delete id="deleteByUUID" parameterType="java.lang.String" >
+        delete from tbl_session where session_id = #{uuid}
+    </delete>
+    <delete id="deleteByUser" parameterType="java.lang.Long" >
+        delete from tbl_session where user_id = #{userId}
+    </delete>
+    <delete id="deleteByXmppId" parameterType="java.lang.String" >
+        delete from tbl_session where xmppId = #{xmppId}
+    </delete>
+    <delete id="deleteTimeOutSession" parameterType="java.util.Date" >
+    	<![CDATA[delete from tbl_session where operate_time<#{timeoutDate} ]]>
+    </delete>
+
+</mapper>

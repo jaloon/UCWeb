@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.tipray.dao.RoleDao">
+	<resultMap id="baseResultMap" type="com.tipray.bean.baseinfo.Role" >
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="is_super" property="isSuper" />
+        <result column="is_app" property="isApp" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+        <result column="permissions" property="permissionIds"  />
+    </resultMap>
+    
+	<select id="findAll" resultMap="baseResultMap">
+		select * from tbl_role where is_super = 0
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Role">
+		insert into tbl_role(name, is_app, remark, permissions) 
+		values(#{name}, ifnull(#{isApp},0), ifnull(#{remark},''), #{permissionIds})
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.Role">
+		update tbl_role set 
+		name=#{name},
+		is_app=ifnull(#{isApp},0), 
+		remark=ifnull(#{remark},''),
+		permissions=#{permissionIds}
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from tbl_role where id=#{id}
+	</delete>
+	
+	<select id="getById" parameterType="java.lang.Long" resultMap="baseResultMap">
+		select * from tbl_role where id=#{id}
+	</select>
+	
+	<select id="count" parameterType="com.tipray.bean.baseinfo.Role" resultType="java.lang.Long">
+		select count(*) from tbl_role where is_super = 0
+		<if test="name != null and name != ''" >
+			and name like CONCAT('%',#{name},'%')
+		</if>
+	</select>
+	
+	<sql id="select_where_vo">
+		<if test="entity.name != null and entity.name != ''" >
+			and name like CONCAT('%',#{entity.name},'%')
+		</if>
+	</sql>
+	<select id="findByPage" resultMap="baseResultMap">
+		select * from tbl_role where is_super = 0
+		<include refid="select_where_vo"></include>
+	</select>
+	
+	<select id="getByName" parameterType="java.lang.String" resultMap="baseResultMap">
+		select * from tbl_role where name=#{name}
+	</select>
+	<select id="getByIdAndPermission" resultMap="baseResultMap">
+		select * from tbl_role where id=#{id} and LOCATE(CONCAT(',',(select p.id from tbl_permission p where p.en_name=#{ename}),','),CONCAT(',',permissions,','))>0
+	</select>
+	<select id="findByIds" parameterType="java.lang.String" resultMap="baseResultMap">
+		select * from tbl_role where id in (${value})
+	</select>
+	
+	
+</mapper>

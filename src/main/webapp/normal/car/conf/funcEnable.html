@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=center-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>车载终端配置</title>
+    <link rel="stylesheet" href="../../../resources/css/base.css ">
+    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
+    <style>
+        .check-table {
+            width: 480px;
+            font-size: 14px;
+            color: #445065;
+            text-align: center;
+        }
+        
+        .check-table tr {
+            height: 30px;
+        }
+        
+        .check-table tr td:first-child {
+            width: 40px;
+        }
+        
+        .check-table tr td:nth-child(2) {
+            text-align: left;
+            padding-left: 40px;
+        }
+    </style>
+    <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/layer/layer.js"></script>
+    <script src="../../../resources/plugins/verify.js"></script>
+    <script src="../../../resources/js/base.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-zone">
+            <div class="base-info">
+                <div class="info-title">
+                    功能启用
+                </div>
+                <table class="base-table">
+                    <tr>
+                        <td>车牌号</td>
+                        <td>
+                            <input type="text" class="editInfo" id="carno">
+                        </td>
+                    </tr>
+                </table>
+                <table class="check-table">
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="1"></td>
+                        <td>加油站内施解封是否启动GPS校验</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="2"></td>
+                        <td>油库出入库是否启动GPS校验</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="4"></td>
+                        <td>加油站开锁是否启动GPS校验</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="8"></td>
+                        <td>油库开锁是否启动GPS校验</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="16"></td>
+                        <td>是否检测站点信息合法</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="32"></td>
+                        <td>是否可在不同解封中多次开锁</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="func" name="func" value="64"></td>
+                        <td>是否只允许一次开锁</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="oper-zone">
+            <input type="button" id="cancel" value="取消">
+            <input type="button" id="confirm" value="确认">
+        </div>
+    </div>
+</body>
+
+<script>
+    $(function() {
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $("#cancel").click(function() {
+            parent.layer.close(index);
+        });
+
+        $("#confirm").click(function() {
+            var carno = $("#carno").val();
+            if (!isCarNo(carno)) {
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
+                    icon: 2
+                }, function(index2) {
+                    layer.close(index2);
+                    $("#carno").select();
+                });
+                return;
+            }
+            var func = 0;
+            var funcObjs = $(".func:checked");
+            funcObjs.each(function() {
+                func |= $(this).val();
+            });
+            var loadIndex = layer.load();
+            $.post("../../../manage/remote/asyn_terminal_enable_request",
+                encodeURI("car_number=" + carno + "&func_enable=" + func + "&token=" + generateUUID()),
+                function(data) {
+                    layer.close(loadIndex);
+                    if (data.id > 0) {
+                        layer.msg(data.msg, {
+                            icon: 2,
+                            time: 500
+                        });
+                    } else {
+                        layer.msg('请求发送成功！', {
+                            icon: 1,
+                            time: 500
+                        }, function() {
+                            parent.layer.close(index);
+                        });
+                    }
+                },
+                "json"
+            );
+
+
+        });
+    });
+</script>

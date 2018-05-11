@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.VehicleManageLogDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.log.VehicleManageLog" >
+        <id column="id" property="id" />
+        <result column="user_id" property="user.id" />
+        <result column="user_account" property="user.account" />
+        <result column="user_name" property="user.name" />
+        <result column="type" property="type" />
+        <result column="description" property="description" />
+        <result column="result" property="result" />
+        <result column="is_app" property="isApp" />
+        <result column="log_time" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		vl.*,
+		u.account user_account,
+		u.name user_name
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_vehicle_manage_log vl,tbl_user u
+		where vl.user_id=u.id
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.log.VehicleManageLog">
+		INSERT INTO tbl_vehicle_manage_log ( user_id, type, description, result, is_app, udp_id, token )
+		VALUES
+			(#{user.id}, #{type}, #{description}, #{result}, IFNULL(#{isApp}, 0), #{udpBizId}, fn_uuid_to_bin(#{token}))
+	</insert>
+
+	<update id="update"  parameterType="com.tipray.bean.log.VehicleManageLog">
+		<!-- JSON_OBJECT([key, val[, key, val] ...])  -->
+		UPDATE tbl_vehicle_manage_log 
+		<set>
+			<if test="type != null">
+				`type`			= #{type},
+			</if>
+			<if test="result != null and result != ''">
+				`result`		= #{result},
+			</if>
+			<if test="responseMsg != null">
+				`response_msg`	= JSON_OBJECT (
+												'id',		#{responseMsg.id},
+												'result',	#{responseMsg.result},
+												'tag',		#{responseMsg.tag},
+												'code',		#{responseMsg.code},
+												'msg',		#{responseMsg.msg}
+												),
+			</if>
+		</set>
+		WHERE
+			id = #{id}
+	</update>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_vehicle_manage_log vl,tbl_user u
+		where vl.user_id=u.id and vl.id=#{id}
+	</select>
+	
+	<select id="findByUser" parameterType="com.tipray.bean.baseinfo.User" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_vehicle_manage_log vl,tbl_user u
+		where vl.user_id=u.id
+		<if test="user!=null">
+			<if test="user.id != null">
+				and u.id=#{user.id}
+			</if>
+			<if test="user.account != null and user.account != ''">
+				and u.account like CONCAT('%',#{user.account},'%')
+			</if>
+			<if test="user.name != null and user.name != ''">
+				and u.name like CONCAT('%',#{user.name},'%')
+			</if>
+		</if>
+	</select>
+	
+	<select id="findByType" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_vehicle_manage_log vl,tbl_user u
+		where vl.user_id=u.id and vl.type=#{type}
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.log.VehicleManageLog" resultType="java.lang.Long">
+		select count(*) from tbl_vehicle_manage_log vl,tbl_user u
+		where vl.user_id=u.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			and vl.log_time between #{begin} and #{end}
+		</if> 
+		<if test="type != null and type != -2">
+			and vl.type = #{type}
+		</if>
+		<if test="user!=null">
+			<if test="user.id != null">
+				and u.id=#{user.id}
+			</if>
+			<if test="user.account != null and user.account != ''">
+				and u.account like CONCAT('%',#{user.account},'%')
+			</if>
+			<if test="user.name != null and user.name != ''">
+				and u.name like CONCAT('%',#{user.name},'%')
+			</if>
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_vehicle_manage_log vl,tbl_user u
+		where vl.user_id=u.id
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			and vl.log_time between #{entity.begin} and #{entity.end} 
+		</if>
+		<if test="entity.type != null and entity.type != -2">
+			and vl.type = #{entity.type}
+		</if>
+		<if test="entity.user!=null">
+			<if test="entity.user.id != null">
+				and u.id=#{entity.user.id}
+			</if>
+			<if test="entity.user.account != null and entity.user.account != ''">
+				and u.account like CONCAT('%',#{entity.user.account},'%')
+			</if>
+			<if test="entity.user.name != null and entity.user.name != ''">
+				and u.name like CONCAT('%',#{entity.user.name},'%')
+			</if>
+		</if>
+		order by vl.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<select id="findUdpResult" parameterType="java.util.Map" resultType="java.util.LinkedHashMap">
+		SELECT
+			<!-- DATE_FORMAT( request_time, '%Y-%m-%d %H:%I:%S' )							requestTime, -->
+			#{token} token,
+			description,
+			result,
+			response_msg -> '$.id'														`responseMsg.id`,
+			CAST( TRIM( BOTH '\"' FROM ( response_msg -> '$.result' ) ) AS CHAR(10) )	`responseMsg.result`,
+			response_msg -> '$.tag'														`responseMsg.tag`,
+			response_msg -> '$.code'													`responseMsg.code`,
+			CAST( TRIM( BOTH '\"' FROM ( response_msg -> '$.msg' ) ) AS CHAR(255) )		`responseMsg.msg` 
+		FROM
+			tbl_vehicle_manage_log 
+		WHERE
+			user_id = #{userId}
+			AND is_app = #{isApp}
+			AND udp_id = #{udpBizId} 
+			AND token = fn_uuid_to_bin(#{token})
+			<!-- AND request_time >= #{requestTime} -->
+		ORDER BY id DESC LIMIT 1
+	</select>
+	
+</mapper>

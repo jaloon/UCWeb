@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=center-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>设备绑定</title>
+    <link rel="stylesheet" href="../../../resources/css/base.css">
+    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css">
+    <link rel="stylesheet" href="../../../resources/plugins/dropdown/jquery.dropdown.min.css">
+    <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <style type="text/css">
+        select.editInfo {
+            width: 398px;
+            height: 28px;
+        }
+
+        .lock-box {
+            height: 148px;
+            width: 384px;
+            line-height: 21px;
+            border: 1px solid #d7dbe2;
+            border-radius: 3px;
+            padding: 0 6px 0 6px;
+            color: #57647c;
+            overflow: auto;
+        }
+
+        .layable {
+            border-bottom: #1E9FFF solid 1px;
+        }
+
+        .hidden-box {
+            width: 500px;
+            background: #ffffff;
+        }
+
+        .lock>table {
+            width: 480px;
+            position: relative;
+            left: 10px;
+            top: 5px;
+            font-size: 14px;
+            color: #445065;
+        }
+
+        .lock tr td:first-child {
+            width: 120px;
+        }
+
+        .lock .editInfo {
+            width: 368px;
+        }
+
+        .lock select.editInfo {
+            width: 382px;
+        }
+
+        .hidden-oper-zone {
+            position: relative;
+            top: 12px;
+            height: 54px;
+            width: 100%;
+            background: #e6e7e9;
+        }
+
+        .hidden-cancel {
+            width: 100px;
+            height: 30px;
+            border: 1px solid #478de4;
+            border-radius: 3px;
+            background: #ffffff;
+            color: #40454b;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 124px;
+        }
+
+        .hidden-confirm {
+            width: 100px;
+            height: 30px;
+            background: #478de4;
+            color: #ffffff;
+            border: 0;
+            border-radius: 3px;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 14px;
+        }
+
+        .dropdown-main ul {
+            /* 下拉选择插件下拉框高度 */
+            max-height: 100px;
+        }
+    </style>
+    <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/dropdown/jquery.dropdown.min.js"></script>
+    <script src="../../../resources/plugins/layer/layer.js"></script>
+    <script src="../../../resources/plugins/verify.js"></script>
+    <script src="../../../resources/js/base.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-zone">
+            <div class="base-info">
+                <div class="info-title">
+                    锁绑定变更
+                </div>
+                <table class="base-table">
+                    <tr>
+                        <td>车牌号</td>
+                        <td>
+                            <input type="text" class="editInfo" id="carno">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>变更类型</td>
+                        <td>
+                            <select class="editInfo" id="bind_type">
+                                <option value=1>增加</option>
+                                <option value=2>修改</option>
+                                <option value=3>删除</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>待变更的锁</td>
+                        <td>
+                            <div class="lock-box">
+                                <ol id="locks">
+                                    <li>
+                                    <span class="layable" id="add" style="font-size: 16px; color: #0154ad">
+                                        <img alt="添加" title="添加" src="../../../resources/images/operate/addNew.png">&nbsp;添加锁信息
+                                    </span>
+                                    </li>
+                                </ol>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="oper-zone">
+            <input type="button" id="cancel" value="取消">
+            <input type="button" id="confirm" value="确认">
+        </div>
+    </div>
+    <div class="hidden-box lock" style="display:none;">
+        <table>
+            <tr>
+                <td>锁设备ID:</td>
+                <td>
+                    <div id="lock_id">
+                        <!-- PS: select标签需手动设置隐藏 -->
+                        <select style="display:none" placeholder="请选择"></select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>仓号:</td>
+                <td>
+                    <input type="text" class="editInfo" id="store_id">
+                </td>
+            </tr>
+            <tr>
+                <td>仓位:</td>
+                <td>
+                    <select class="editInfo" id="seat">
+                        <option value=1>上仓锁</option>
+                        <option value=2>下仓锁</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>同仓位锁索引:</td>
+                <td>
+                    <input type="text" class="editInfo" id="seat_index">
+                </td>
+            </tr>
+            <tr>
+                <td>是否允许开锁:</td>
+                <td>
+                    <select class="editInfo" id="open_allowed">
+                        <option value="2">是</option>
+                        <option value="1">否</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <div class="hidden-oper-zone">
+            <input type="button" class="hidden-cancel" id="lock_cancel" value="取消">
+            <input type="button" class="hidden-confirm" id="lock_confirm" value="确认">
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    var add = false;
+    var lockLayer;
+
+    function openLockLayer() {
+        var title = "更改";
+        if (add) {
+            title = "添加";
+        }
+        lockLayer = layer.open({
+            type: 1,
+            title: [title + '待重置锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            // area: ['500px', '501px'],
+            area: ['500px', '301px'],
+            content: $('.lock'),
+            end: clearLockDiv()
+        });
+    }
+
+    function clearLockDiv() {
+        $("#store_id").val("");
+        $("#seat").val("1");
+        $("#seat_index").val("");
+        $("#open_allowed").val("2");
+    }
+
+    function addLock() {
+        add = true;
+        openLockLayer();
+    }
+
+    function delLock(obj) {
+        $(obj).closest("li").remove();
+    }
+
+    function alterLock(obj) {
+        add = false;
+        liObj = $(obj).closest("li");
+        openLockLayer();
+        $("#lock_id").val(liObj.children().eq(2).html());
+        $("#store_id").val(liObj.children().eq(3).html());
+        $("#seat").val(liObj.children().eq(4).html());
+        $("#seat_index").val(liObj.children().eq(5).html());
+        $("#open_allowed").val(liObj.children().eq(6).html());
+    }
+
+    $(function () {
+        $.ajax({
+            type: "get",
+            async: false, //不异步，先执行完ajax，再干别的
+            url: "../../../manage/car/findUnusedLocks.do",
+            dataType: "json",
+            success: function(response) {
+                var lock_select = $("#lock_id").children().eq(0);
+                response.forEach(function(lockId) {
+                    lock_select.append("<option value=" + lockId + ">s" + lockId + "</option>");
+                });
+            }
+        });
+
+        $('#lock_id').dropdown();
+
+        function dropdown_val() {
+            var el = $("span.dropdown-selected>i.del");
+            var val = el.attr("data-id");
+            return val;
+        }
+
+        function dropdown_text() {
+            var el = $("span.dropdown-selected");
+            var text = el.text();
+            return text;
+        }
+
+        $("#add").click(addLock);
+
+        $("#lock_cancel").click(function() {
+            layer.close(lockLayer);
+        });
+
+        $("#lock_confirm").click(function() {
+            var lock_id = dropdown_val();
+            var store_id = $("#store_id").val();
+            var seat = $("#seat").val();
+            var seat_index = $("#seat_index").val();
+            var open_allowed = $("#open_allowed").val();
+            if (isNull(lock_id)) {
+                layer.alert('锁设备ID不能为空！', { icon: 2 }, function(index2) {
+                    layer.close(index2);
+                });
+                return;
+            }
+            if (isNull(store_id)) {
+                layer.alert('仓号不能为空！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#store_id").select();
+                });
+                return;
+            }
+            if (!isPositiveInteger(store_id)) {
+                layer.alert('仓号必须是正整数！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#store_id").select();
+                });
+                return;
+            }
+            if (isNull(seat_index)) {
+                layer.alert('同仓位锁索引不能为空！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#seat_index").select();
+                });
+                return;
+            }
+            if (!isPositiveInteger(seat_index)) {
+                layer.alert('同仓位锁索引必须是正整数！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#seat_index").select();
+                });
+                return;
+            }
+            var lockHtml = lock_id + "，" + store_id + "号" + (seat == 1 ? "上仓锁" : "下仓锁") + seat_index + "，" + (open_allowed == 1 ? "不" : "") + "允许开锁";
+            var liHtml = "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delLock(this)\">\n" +
+                "<span class='layable' onclick='alterLock(this)'>锁：" + lockHtml + "</span>" +
+                "<span style=\"display: none;\">" + lock_id + "</span>" +
+                "<span style=\"display: none;\">" + store_id + "</span>" +
+                "<span style=\"display: none;\">" + seat + "</span>" +
+                "<span style=\"display: none;\">" + seat_index + "</span>" +
+                "<span style=\"display: none;\">" + open_allowed + "</span></li>";
+            if (add) {
+                $("#locks li:eq(-1)").before(liHtml);
+                // 用js控制div的滚动条,让它在内容更新时自动滚动到底部
+                $(".lock-box").scrollTop($(".lock-box")[0].scrollHeight);
+            } else {
+                liObj.replaceWith(liHtml);
+            }
+            layer.close(lockLayer);
+        });
+
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $("#cancel").click(function() {
+            parent.layer.close(index);
+        });
+
+        $("#confirm").click(function() {
+            var carno = $("#carno").val();
+            if (!isCarNo(carno)) {
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
+                    icon: 2
+                }, function(index2) {
+                    layer.close(index2);
+                    $("#carno").select();
+                });
+                return;
+            }
+            var bind_type = $("#bind_type").val();
+            var lockNum = $("#locks").children().length - 1;
+            if (lockNum == 0) {
+                layer.alert('至少要重置一把锁！', { icon: 2 }, function(index2) {
+                    layer.close(index2);
+                    $("#add").click();
+                });
+                return;
+            }
+            var locks = [];
+            for (var i = 0; i < lockNum; i++) {
+                var li = $("#locks").children().eq(i);
+                locks.push({
+                    lockId: parseInt(li.children().eq(2).html(), 10),
+                    storeId: parseInt(li.children().eq(3).html(), 10),
+                    seat: parseInt(li.children().eq(4).html(), 10),
+                    seatIndex: parseInt(li.children().eq(5).html(), 10),
+                    allowOpen: parseInt(li.children().eq(6).html(), 10)
+                });
+            }
+            var binding_locks = encodeURIComponent(JSON.stringify(locks));
+            var loadIndex = layer.load();
+            $.post("../../../manage/remote/asyn_lock_bind_request",
+                "car_number=" + carno + "&bind_type=" + bind_type + "&binding_locks=" + binding_locks +
+                "&token=" + generateUUID(),
+                function(data) {
+                    layer.close(loadIndex);
+                    if (data.id > 0) {
+                        layer.msg(data.msg, {
+                            icon: 2,
+                            time: 500
+                        });
+                    } else {
+                        layer.msg('请求发送成功！', {
+                            icon: 1,
+                            time: 500
+                        }, function() {
+                            parent.layer.close(index);
+                        });
+                    }
+                },
+                "json"
+            );
+        });
+
+    });
+
+</script>

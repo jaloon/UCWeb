@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.LockRecordDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.record.LockRecord" >
+        <id column="id" property="id" />
+        <result column="vehicle_number" property="carNumber" />
+        <result column="car_longitude" property="longitude" />
+        <result column="car_latitude" property="latitude" />
+        <result column="speed" property="velocity" />
+        <result column="angle" property="angle" />
+        <result column="lock_index" property="index" />
+        <result column="lock_device_id" property="lockId" />
+        <result column="store_id" property="storeId" />
+		<result column="seat" property="seat" />
+		<result column="seat_name" property="seatName" />
+		<result column="seat_index" property="seatIndex" />
+        <result column="lock_status" property="statusName" />
+        <result column="lock_status_info" property="lockStatusInfo" />
+        <result column="change_time" property="createDate" />
+        <result column="station" property="station" />
+    </resultMap>
+	<sql id="select_colums">
+		l.id											id,
+		v.vehicle_number								vehicle_number,
+		l.store_id										store_id,
+		fn_type2name('lockSeat', l.seat)				seat_name,
+		l.seat_index									seat_index,
+		l.lock_device_id								lock_device_id,
+        tl.lock_index                                   lock_index,
+		fn_type2name('lockStatus', l.`status`)			lock_status,
+		t.longitude										car_longitude,
+		t.latitude										car_latitude,
+		fn_get_station(l.station_type, l.station_id)	station,
+		t.speed											speed,
+		t.angle											angle,
+		t.lock_status_info								lock_status_info
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		SELECT
+		    <include refid="select_colums"></include>
+		FROM
+            (tbl_lock_status l LEFT JOIN tbl_vehicle_track t ON l.vehicle_track_id=t.id),
+            tbl_vehicle v,
+            tbl_lock tl
+        WHERE
+            l.vehicle_id = v.id
+            AND l.vehicle_id = tl.vehicle_id
+            AND l.store_id = tl.store_id
+            AND l.seat = tl.seat
+            AND l.seat_index = tl.seat_index
+	</select>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		SELECT
+		    <include refid="select_colums"></include>
+		FROM
+            (tbl_lock_status l LEFT JOIN tbl_vehicle_track t ON l.vehicle_track_id = t.id),
+            tbl_vehicle v,
+            tbl_lock tl
+        WHERE
+            l.vehicle_id = v.id
+            AND l.vehicle_id = tl.vehicle_id
+            AND l.store_id = tl.store_id
+            AND l.seat = tl.seat
+            AND l.seat_index = tl.seat_index
+            AND l.id = #{id}
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.record.LockRecord" resultType="java.lang.Long">
+		SELECT count(*) FROM
+		    tbl_lock_status l,
+            tbl_vehicle v
+		WHERE l.vehicle_id = v.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			AND l.change_time BETWEEN #{begin} AND #{end}
+		</if>
+		<if test="status != null and status != -2">
+			AND l.status = #{status}
+		</if>
+		<if test="carNumber != null and carNumber != ''">
+			AND v.vehicle_number LIKE CONCAT('%',#{carNumber},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		SELECT
+		  <include refid="select_colums"></include>
+		FROM
+            (tbl_lock_status ls LEFT JOIN tbl_vehicle_track t ON ls.vehicle_track_id=t.id),
+            tbl_vehicle v,
+            tbl_lock tl
+        WHERE
+            l.vehicle_id = v.id
+            AND l.vehicle_id = tl.vehicle_id
+            AND l.store_id = tl.store_id
+            AND l.seat = tl.seat
+            AND l.seat_index = tl.seat_index
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			AND l.change_time BETWEEN #{entity.begin} AND #{entity.end}
+		</if>
+		<if test="entity.status != null and entity.status != -2">
+			AND l.status = #{entity.status}
+		</if>
+		<if test="entity.carNumber != null and entity.carNumber != ''">
+			AND v.vehicle_number LIKE CONCAT('%',#{entity.carNumber},'%')
+		</if>
+		ORDER BY l.id ASC
+		LIMIT #{page.startRow}, #{page.rows}
+	</select>
+</mapper>

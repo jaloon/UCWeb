@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.InOutReaderDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.InOutReader" >
+        <id column="id" property="id" />
+        <result column="device_id" property="devId" />
+        <result column="reader_type" property="type" />
+        <result column="typeName" property="typeName" />
+        <result column="model" property="model" />
+        <result column="oildepot_id" property="oilDepotId" />
+    </resultMap>
+	<sql id="select_colums">
+		od.*,fn_type2name('readerType',od.reader_type) typeName,d.model model
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from 
+			tbl_oildepot_device od,tbl_device d
+		where od.device_id=d.device_id
+	</select>
+
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.InOutReader">
+		insert into
+		tbl_oildepot_device(oildepot_id,device_id,reader_type)
+		values(#{oilDepotId},#{devId},#{type})
+	</insert>
+	<insert id="addReaderList" parameterType="java.util.List">
+		insert into tbl_oildepot_device(oildepot_id,device_id,reader_type) values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.oilDepotId},#{item.devId},#{item.type})
+		</foreach>
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.InOutReader">
+		update tbl_oildepot_device set
+		oildepot_id=#{oilDepotId},
+		device_id=#{devId},
+		reader_type=#{type}
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from tbl_oildepot_device where id=#{id}
+	</delete>
+	<delete id="deleteByOilDepotId" parameterType="java.lang.Long">
+		delete from tbl_oildepot_device where oildepot_id=#{oilDepotId}
+	</delete>
+	
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from 
+			tbl_oildepot_device od,tbl_device d
+		where od.device_id=d.device_id and od.id=#{id}
+	</select>
+	
+	<select id="findByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from 
+			tbl_oildepot_device od,tbl_device d
+		where od.device_id=d.device_id and od.oildepot_id=#{oilDepotId}
+	</select>
+	
+	<select id="getByDevId" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from 
+			tbl_oildepot_device od,tbl_device d
+		where od.device_id=d.device_id and od.device_id=#{devId}
+	</select>
+	
+	<select id="findUnusedReader" resultType="com.tipray.bean.baseinfo.InOutReader">
+		SELECT
+			d.device_id devId,
+			d.model model 
+		FROM
+			tbl_device d 
+		WHERE
+			d.is_disallowed = 0 
+			AND d.is_invalid = 0 
+			AND d.type = 3
+			AND d.device_id NOT IN ( SELECT od.device_id FROM tbl_oildepot_device od )
+	</select>
+	
+</mapper>

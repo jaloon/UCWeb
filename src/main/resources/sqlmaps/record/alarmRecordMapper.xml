@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.AlarmRecordDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.record.AlarmRecord" >
+        <id column="id" property="id" />
+        <result column="vehicle_number" property="carNumber" />
+        <result column="vehicle_id" property="vehicleId" />
+        <result column="terminal_id" property="terminalId" />
+        <result column="longitude" property="longitude" />
+        <result column="latitude" property="latitude" />
+        <result column="speed" property="velocity" />
+        <result column="angle" property="angle" />
+        <result column="device_type" property="deviceType" />
+        <result column="device_id" property="deviceId" />
+        <result column="type" property="type" />
+        <result column="typeName" property="typeName" />
+        <result column="alarm_status" property="status" />
+        <result column="lock_status_info" property="lockStatusInfo" />
+        <result column="alarm_time" property="createDate" />
+        <result column="station" property="station" />
+    </resultMap>
+	<sql id="select_colums">
+		a.id											id,
+		c.vehicle_number								vehicle_number,
+		a.vehicle_id									vehicle_id,
+		c.vehicle_device_id								terminal_id,
+		a.device_type									device_type,
+		a.device_id										device_id,
+		a.type											type,
+		fn_get_alarm_type ( a.device_type, a.type )		typeName,
+		fn_type2name ( 'alarmStatus', a.`status` )		alarm_status,
+		fn_get_station ( a.station_type, a.station_id )	station,
+		t.longitude										longitude,
+		t.latitude										latitude,
+		t.speed											speed,
+		t.angle											angle,
+		t.lock_status_info								lock_status_info,
+		a.alarm_time									alarm_time
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		SELECT
+			<include refid="select_colums"></include>
+		FROM
+			tbl_alarm a
+			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_vehicle c
+		WHERE
+			a.vehicle_id = c.id
+	</select>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		SELECT <include refid="select_colums"></include>
+		FROM
+			tbl_alarm a
+			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_vehicle c
+		WHERE
+			a.vehicle_id = c.id AND a.id=#{id}
+	</select>
+
+    <select id="getAlarmRecordsByIdsAndCar" resultMap="fullResultMap">
+        SELECT id, type FROM tbl_alarm WHERE id IN ( ${ids} ) AND vehicle_id = #{vehicleId};
+    </select>
+
+    <select id="countAlarmDeviceByIds" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT
+            COUNT( * )
+        FROM
+            ( SELECT device_id FROM tbl_alarm WHERE id IN ( ${ids} ) GROUP BY device_id ) t;
+    </select>
+
+	<select id="count" parameterType="com.tipray.bean.record.AlarmRecord" resultType="java.lang.Long">
+		SELECT count(*) FROM tbl_alarm a, tbl_vehicle c
+		WHERE a.vehicle_id=c.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			AND a.alarm_time BETWEEN #{begin} AND #{end}
+		</if> 
+		<if test="deviceType != null and deviceType != -2">
+			AND a.device_type = #{deviceType}
+		</if>
+		<if test="type != null and type != -2">
+			AND a.type = #{type}
+		</if>
+		<if test="carNumber != null and carNumber != ''">
+			AND c.vehicle_number LIKE CONCAT('%',#{carNumber},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		SELECT <include refid="select_colums"></include>
+		FROM
+			tbl_alarm a
+			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_vehicle c
+		WHERE
+            a.vehicle_id = c.id
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			and a.alarm_time between #{entity.begin} and #{entity.end} 
+		</if>
+		<if test="entity.deviceType != null and entity.deviceType != -2">
+			and a.device_type = #{entity.deviceType}
+		</if>
+		<if test="entity.type != null and entity.type != -2">
+			and a.type = #{entity.type}
+		</if>
+		<if test="entity.carNumber != null and entity.carNumber != ''">
+			and c.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
+		</if>
+		order by a.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<insert id="addEliminateAlarm" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO tbl_remote_alarm_eliminate ( user_id, vehicle_id, alarm_id_list, is_app, is_lnglat_valid, longitude, latitude )
+        VALUES
+            (#{userId}, #{vehicleId}, #{alarmIds}, ifnull(#{app}, 0), ifnull(#{isLocationValid}, 0), ifnull(#{lnt}, 0), ifnull(#{lat}, 0))
+	</insert>
+
+    <update id="updateEliminateStatus">
+        UPDATE tbl_remote_alarm_eliminate
+        <set>
+            <if test="eliminateStatus == 2">
+                finish_time = NOW(),
+            </if>
+            `status` = #{eliminateStatus}
+        </set>
+        WHERE
+            id = #{eliminateId};
+    </update>
+
+	<update id="updateEliminateAlarmDone">
+		UPDATE tbl_alarm
+		SET
+			eliminate_trigger_type = 6,
+			eliminate_trigger_id = #{eliminateId},
+			eliminate_time = NOW( ),
+			`status` = 1
+		WHERE
+			id In ( ${alarmIds} );
+	</update>
+
+	<select id="findNotElimited" resultMap="fullResultMap">
+		SELECT <include refid="select_colums"></include>
+		FROM
+			tbl_alarm a
+			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_vehicle c
+		WHERE
+			a.vehicle_id = c.id
+			AND a.eliminate_time = '1970-01-01 08:00:01'
+	</select>
+	
+	<select id="findNotElimitedForApp" resultType="java.util.LinkedHashMap">>
+		SELECT
+			a.id alarm_id,
+			a.vehicle_id,
+			c.vehicle_number,
+			a.device_type,
+			a.device_id,
+			a.type alarm_type,
+			fn_get_alarm_type(a.device_type, a.type) alarm_type_name,
+			a.station_type,
+			a.station_id,
+			fn_get_station ( a.station_type, a.station_id ) station_name,
+			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%I:%S' ) alarm_time,
+			t.is_lnglat_valid,
+			t.longitude,
+			t.latitude 
+		FROM
+			tbl_alarm a,
+			tbl_vehicle c,
+			tbl_vehicle_track t 
+		WHERE
+			a.vehicle_id = c.id 
+			AND a.vehicle_track_id = t.id 
+			AND a.status = 0
+	</select>
+	
+</mapper>

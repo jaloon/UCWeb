@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.VehicleDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Vehicle" >
+        <id column="id" property="id" />
+        <result column="vehicle_number" property="carNumber" />
+        <result column="store_num" property="storeNum" />
+        <result column="sim" property="sim" />
+        <result column="transport_card_id" property="transportCard.transportCardId" />
+        <result column="vehicle_device_id" property="vehicleDevice.deviceId" />
+        <result column="vehicle_device_model" property="vehicleDevice.model" />
+        <result column="trans_company_id" property="transCompany.id" />
+        <result column="trans_company_name" property="transCompany.name" />
+        <result column="belong_type" property="type" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		c.*,
+		d.model vehicle_device_model,
+		t.name trans_company_name,
+		fn_type2name('carType',c.belong_type) typeName
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
+			left join tbl_trans_company t on c.trans_company_id=t.id
+		where c.is_invalid=0
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Vehicle">
+		insert into
+		tbl_vehicle(vehicle_number,store_num,transport_card_id,trans_company_id,belong_type,remark)
+		values(#{carNumber},#{storeNum},#{transportCard.transportCardId},#{transCompany.id},#{type},ifnull(#{remark},''))
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.Vehicle">
+		update tbl_vehicle set
+		vehicle_number=#{carNumber},
+		store_num=#{storeNum},
+		sim=ifnull(#{sim},''),
+		transport_card_id=#{transportCard.transportCardId},
+		trans_company_id=#{transCompany.id},
+		belong_type=#{type},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	
+	<select id="getTransportCardIdById" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT transport_card_id FROM tbl_vehicle WHERE id = #{id};
+	</select>
+	
+	<update id="terminalBind">
+		update tbl_vehicle set
+		vehicle_device_id=#{terminalId}
+		where vehicle_number=#{carNumber}
+	</update>
+	<update id="terminalUnbind">
+		update tbl_vehicle set
+		vehicle_device_id = 0
+		where vehicle_number=#{carNumber}
+	</update>
+	
+	<update id="delete" parameterType="java.lang.Long">
+		update tbl_vehicle set 
+		is_invalid=1 
+		where id=#{id}
+	</update>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
+			left join tbl_trans_company t on c.trans_company_id=t.id
+		where c.is_invalid=0 and c.id=#{id}
+	</select>
+	
+	<select id="getByCarNo" parameterType="java.lang.String" resultMap="fullResultMap">
+		select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
+			left join tbl_trans_company t on c.trans_company_id=t.id
+		where c.is_invalid=0 and c.vehicle_number=#{carNo}
+	</select>
+	
+	<select id="getCarByTerminalId" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
+			left join tbl_trans_company t on c.trans_company_id=t.id
+		where c.is_invalid=0 and c.vehicle_device_id=#{terminalId}
+	</select>
+	
+	<select id="findByTransCompany" parameterType="com.tipray.bean.baseinfo.TransCompany" resultMap="fullResultMap">
+		select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
+			tbl_trans_company t
+		where c.trans_company_id=t.id and c.is_invalid=0 and c.trans_company_id=#{id}
+	</select>
+	
+
+	<select id="count" parameterType="com.tipray.bean.baseinfo.Vehicle" resultType="java.lang.Long">
+		select count(*) from tbl_vehicle where is_invalid=0 
+		<if test="carNumber != null and carNumber != ''">
+			and vehicle_number = #{carNumber}
+		</if>
+		<if test="transCompany != null and transCompany.id != null and transCompany.id !=-2">
+			and trans_company_id = #{transCompany.id}
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
+			left join tbl_trans_company t on c.trans_company_id=t.id
+		where c.is_invalid=0
+		<if test="entity.carNumber != null and entity.carNumber != ''">
+			and c.vehicle_number = #{entity.carNumber}
+		</if>
+		<if test="entity.transCompany != null and entity.transCompany.id != null and entity.transCompany.id !=-2">
+			and c.trans_company_id = #{entity.transCompany.id}
+		</if>
+		order by c.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<select id="findUnusedTerminal" resultType="com.tipray.bean.baseinfo.Device">
+	 	select d.device_id deviceId, d.model model
+		from tbl_device d
+		where d.type=1 and d.is_disallowed=0 and d.is_invalid=0
+		 and d.device_id not in 
+		 (select c.vehicle_device_id from tbl_vehicle c)
+	</select>
+	
+	<select id="findBindedCars" resultMap="fullResultMap">
+	 	select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
+			tbl_trans_company t
+		where c.trans_company_id=t.id and c.is_invalid=0
+			and c.vehicle_device_id > 0
+	</select>
+	
+	<select id="findUnbindedCars" resultMap="fullResultMap">
+	 	select
+			<include refid="select_colums"></include>
+		from 
+			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
+			tbl_trans_company t
+		where c.trans_company_id=t.id and c.is_invalid=0
+			and c.vehicle_device_id=0
+	</select>
+	
+	<select id="selectCars" resultType="com.tipray.bean.DropdownData">
+		SELECT
+			v.id id,
+			v.vehicle_number name,
+			<!-- true disabled,
+			false selected, -->
+			v.trans_company_id groupId,
+			c.name groupName
+		FROM
+			tbl_vehicle v
+			LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
+	</select>
+	
+	<select id="getCarStatus" parameterType="java.lang.String" resultType="com.tipray.bean.VehicleStatus">
+		SELECT
+			v.vehicle_number carNumber,
+			s.is_online `online`,
+			s.`status` `status`,
+			fn_type2name ( 'carStatus', s.`status` ) statusName 
+		FROM
+			tbl_vehicle v
+			LEFT JOIN tbl_vehicle_realtime_status s ON v.id = s.vehicle_id 
+		WHERE
+			v.vehicle_number = #{carNumber}
+	</select>
+	
+	<select id="getDistributionsByCarNumber" parameterType="java.lang.String" resultType="com.tipray.bean.ChangeInfo">
+	 	SELECT
+			c.id carId,
+			c.vehicle_number carNumber,
+			c.store_num storeNum,
+			t.distribute_id invoice,
+			t.store_id storeId,
+			t.oildepot_id oildepotId,
+			t.gasstation_id gasstationId,
+			t.id transportId,
+			t.status transpoertStatus
+		FROM
+			tbl_vehicle c,
+			tbl_transport t 
+		WHERE
+			c.id = t.vehicle_id 
+			AND c.is_invalid = 0 
+			AND t.status = 1 
+			AND c.vehicle_number = #{carNumber}
+	</select>
+	
+	<select id="getDistributionByTransportId" parameterType="java.lang.Long" resultType="com.tipray.bean.ChangeInfo">
+	 	SELECT
+			c.id carId,
+			c.vehicle_number carNumber,
+			c.store_num storeNum,
+			t.distribute_id invoice,
+			t.store_id storeId,
+			t.oildepot_id oildepotId,
+			t.gasstation_id gasstationId,
+			t.id transportId,
+			t.status transportStatus,
+			g.id changedGasstationId 
+		FROM
+			( tbl_vehicle c RIGHT JOIN tbl_transport t ON c.id = t.vehicle_id AND c.is_invalid = 0 )
+			LEFT JOIN tbl_gasstation g ON g.id = #{changedStationId}  
+		WHERE
+			t.id = #{transportId}
+	</select>
+	
+	<select id="findTracks" parameterType="com.tipray.bean.VehicleTrack" resultType="com.tipray.bean.VehicleTrack">
+		SELECT
+			c.id id,
+			c.vehicle_number carNumber,
+			t.longitude longitude,
+			t.latitude latitude,
+			fn_type2name ( 'carStatus', t.vehicle_status ) carStatus,
+			t.speed velocity,
+			t.angle angle,
+			t.lock_status_info lockStatusInfo 
+		FROM
+			tbl_vehicle_track t,
+			tbl_vehicle c 
+		WHERE
+			t.vehicle_id = c.id 
+			AND c.vehicle_number = #{carNumber}
+			AND t.track_time BETWEEN #{begin} AND #{end} 
+	</select>
+	
+	<select id="getTerminalIdById" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT vehicle_device_id FROM tbl_vehicle WHERE id = #{id}
+	</select>
+	
+	<select id="getCarNumberById" parameterType="java.lang.Long" resultType="java.lang.String">
+		SELECT vehicle_number FROM tbl_vehicle WHERE id = #{id}
+	</select>
+	
+	<!-- 存储过程调用 -->
+	<select id="terminalConfig" statementType="CALLABLE" parameterType="com.tipray.bean.VehicleTerminalConfig">
+		<![CDATA[
+            {CALL prd_deal_terminal_track_cfg(
+	            #{scope,			mode=IN,	jdbcType=INTEGER},
+	        	#{carNumber,		mode=IN,	jdbcType=VARCHAR},
+	            #{scanInterval,		mode=IN,	jdbcType=INTEGER},
+	        	#{uploadInterval,	mode=IN,	jdbcType=INTEGER},
+	            #{carState,			mode=OUT,	jdbcType=INTEGER},
+	            #{terminalId,		mode=OUT,	jdbcType=INTEGER},
+	        	#{isUpdate,			mode=OUT,	jdbcType=INTEGER}
+        	)}
+        ]]>
+	</select>
+	
+	<insert id="terminalEnable" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
+		REPLACE INTO tbl_vehicle_param_cfg ( vehicle_device_id, param_cfg_name, param_cfg_value )
+		VALUES
+			( #{deviceId}, 'VehicleWorkOnOff', #{functionEnable} );
+	</insert>
+	
+	<insert id="addRemoteControlRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO 
+			tbl_remote_control(user_id, vehicle_id, type, station_id, vehicle_seal_status_id, is_app, is_lnglat_valid, longitude, latitude)
+		VALUES(
+			#{userId},
+			#{carId}, 
+			#{type}, 
+			IFNULL(#{stationId}, 0),
+		 	IFNULL((SELECT id from tbl_vehicle_seal_status where vehicle_id = #{carId} ORDER BY trigger_time DESC LIMIT 1), 0),
+		  	IFNULL(#{isApp}, 0),
+		  	IFNULL(#{isLocationValid}, 0),
+		  	IFNULL(#{longitude}, 0),
+		  	IFNULL(#{latitude}, 0)
+		  )
+	</insert>
+	<select id="getRemoteControlIdByCarIdAndControlType" resultType="java.lang.Integer">
+		SELECT id FROM tbl_remote_control WHERE vehicle_id = #{carId} AND type = #{type} ORDER BY id DESC LIMIT 1
+	</select>
+	
+	<update id="remoteAlterCarStatus" >
+		UPDATE tbl_vehicle_seal_status SET
+			status = #{status},
+			pre_status = ( SELECT t.status FROM ( SELECT status FROM tbl_vehicle_seal_status WHERE vehicle_id = #{carId} ) t ),
+			status_incident = 7,
+			trigger_type = 6,
+			trigger_id = #{remoteControlId} 
+		WHERE
+			vehicle_id = #{carId};
+	</update>
+	
+	<update id="updateRemoteControlStatus">
+		UPDATE tbl_remote_control SET
+			status = #{remoteControlStatus}
+		WHERE id = #{remoteControlId}
+	</update>
+	
+	<insert id="addLockResetRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO tbl_unlock_reset (
+			vehicle_id,
+			lock_device_id,
+			trigger_type,
+			trigger_id,
+			is_app,
+			is_lnglat_valid,
+			longitude,
+			latitude,
+			reset_time,
+			station_type,
+			station_id,
+			vehicle_track_id,
+			store_id,
+			seat,
+			seat_index
+		)
+		SELECT * FROM (
+			(SELECT
+				#{carId} vehicle_id,
+				#{lockId} lock_device_id,
+				7 trigger_type,
+				#{userId} trigger_id,
+				IFNULL(#{isApp}, 0) is_app,
+				IFNULL(#{isLocationValid}, 0) is_lnglat_valid,
+			  	IFNULL(#{longitude}, 0) longitude,
+			  	IFNULL(#{latitude}, 0) latitude,
+				NOW( ) reset_time,
+				0 station_type,
+				0 station_id,
+				0 vehicle_track_id
+			) v_base
+			JOIN ( SELECT store_id, seat, seat_index FROM tbl_lock WHERE lock_device_id = #{lockId} ) v_lock
+		);
+	</insert>
+	
+	<update id="batchUpdateResetRecord">
+		UPDATE tbl_unlock_reset SET
+			status = #{resetState}
+		WHERE id in (${resetIds})
+	</update>
+	
+	<select id="findTracksByCarNumbers" resultType="java.util.LinkedHashMap">
+		SELECT
+			v.vehicle_number,
+			t.vehicle_id,
+			t.id track_id,
+			t.is_lnglat_valid,
+			t.longitude,
+			t.latitude,
+			t.vehicle_status,
+			t.vehicle_alarm_status,
+			t.angle,
+			t.speed,
+			HEX(t.lock_status_info) lock_status_info,
+			DATE_FORMAT(t.track_time,'%Y-%m-%d %H:%I:%S') track_time
+		FROM
+			tbl_vehicle_track t,
+			tbl_vehicle v 
+		WHERE
+			t.vehicle_id = v.id 
+			AND t.track_time > #{beginTime}
+			AND v.vehicle_number IN ( ${carNumbers} );
+	</select>
+	
+	<select id="findBindedVehicleTree" resultType="java.util.Map">
+		SELECT
+			tv.`vehicle_device_id` `id`,
+			tv.`vehicle_number` `name`,
+			tv.`trans_company_id` `pId` 
+		FROM
+			`tbl_vehicle` tv 
+		WHERE
+			tv.`vehicle_device_id` != 0 
+			AND tv.`is_invalid` = 0 UNION ALL
+		SELECT
+			tc.`id`,
+			tc.`name`,
+			tc.`parent_company_id` `pId` 
+		FROM
+			`tbl_trans_company` tc 
+		WHERE
+			tc.`id` IN ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 ) 
+			AND tc.`is_invalid` = 0
+	</select>
+</mapper>

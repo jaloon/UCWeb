@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.LockDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Lock" >
+        <id column="id" property="id" />
+        <result column="vehicle_id" property="carId" />
+        <result column="lock_index" property="index" />
+        <result column="lock_device_id" property="lockId" />
+        <result column="seat" property="seat" />
+        <result column="seat_name" property="seatName" />
+        <result column="seat_index" property="seatIndex" />
+        <result column="store_id" property="storeId" />
+        <result column="is_allowed_open" property="allowOpen" />
+        <result column="vehicle_number" property="carNumber" />
+    </resultMap>
+	<sql id="select_colums">
+		l.*,fn_type2name('lockType',l.seat) seat_name,c.vehicle_number vehicle_number
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_lock l,tbl_vehicle c
+		where l.vehicle_id=c.id and is_has_bind = 1
+	</select>
+	
+	<select id="getByLockId" parameterType="java.lang.Integer" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_lock l,tbl_vehicle c
+		where l.vehicle_id=c.id
+		and l.lock_device_id=#{lockId} and is_has_bind = 1
+	</select>
+	
+	<select id="findLocksByCarId" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_lock l,tbl_vehicle c
+		where l.vehicle_id=c.id and is_has_bind = 1
+		and c.id=#{carId}
+	</select>
+	
+	<select id="findUnusedLocks" resultType="java.lang.Integer">
+		select d.device_id
+		from tbl_device d
+		where d.type = 2 and
+		 d.is_disallowed=0 and d.is_invalid=0 and d.device_id not in
+		(select l.lock_device_id from tbl_lock l)
+	</select>
+	
+	<insert id="bindLocks" parameterType="java.util.List">
+		insert into
+		tbl_lock(vehicle_id,store_id,seat,seat_index,lock_device_id,is_allowed_open,lock_index) values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(
+				#{item.carId},
+				#{item.storeId},
+				#{item.seat},
+				#{item.seatIndex},
+				#{item.lockId},
+				#{item.allowOpen},
+				ifnull(#{item.index},0)
+			)
+		</foreach>
+	</insert>
+	
+	<select id="findBindingLockDeviceIds" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		select lock_device_id from tbl_lock_binding where vehicle_id = #{carId} and last_valid_time > now()
+	</select>
+	
+	
+	<select id="findLockStatusByLocks" parameterType="java.util.List" resultType="java.util.Map">
+		SELECT * FROM `tbl_lock_status` WHERE
+		<foreach collection="list" item="lock" index="index" separator="or">
+	        (lock_id = #{lock.id} AND change_time = (SELECT MAX(change_time) FROM `tbl_lock_status` WHERE lock_id = #{lock.id}))
+	    </foreach> 
+	</select>
+	
+	<select id="getVehicleIdByLock" parameterType="com.tipray.bean.baseinfo.Lock" resultType="java.lang.Long">
+		SELECT
+			vehicle_id 
+		FROM
+			tbl_lock 
+		WHERE
+			lock_device_id = #{lockId} 
+			AND store_id = #{storeId} 
+			AND seat = #{seat} 
+			AND seat_index = #{seatIndex} 
+			AND is_allowed_open = #{allowOpen}
+	</select>
+	
+	<select id="findVehicleIdByLocks" parameterType="java.util.List" resultMap="fullResultMap">
+		SELECT t1.vehicle_id, t2.lock_device_id FROM
+		(
+		SELECT vehicle_id, lock_device_id FROM `tbl_lock` WHERE 
+		<foreach collection="list" item="lock" index="index" separator="or">
+	        (
+	        lock_device_id = #{lock.lockId} 
+			AND store_id = #{lock.storeId} 
+			AND seat = #{lock.seat} 
+			AND seat_index = #{lock.seatIndex} 
+			AND is_allowed_open = #{lock.allowOpen}
+	        )
+	    </foreach> 
+	    ) t1 
+	    RIGHT JOIN
+	    ( 
+	    SELECT lock_device_id FROM tbl_lock WHERE lock_device_id IN
+	    <foreach collection="list" item="lock" index="index" separator="," open="(" close=")">
+	        #{lock.lockId}
+	    </foreach> 
+	    ) t2
+		ON t1.lock_device_id = t2.lock_device_id
+	</select>
+	
+</mapper>

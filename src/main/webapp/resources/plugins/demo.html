@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="SelectBox.min.js"></script>
+    <script src="iNotify/iNotify.js"></script>
+</head>
+
+
+<body>
+
+    <div id="select1">1546546456</div>
+    <div id="select3">1546546456</div>
+    <input type="button" id="test" value="test"><br>
+</body>
+<script>
+    $(function() {
+        var iN = new iNotify({
+            effect: 'flash',
+            interval: 500,
+            message: "有消息拉！",
+            // audio: {
+            //     file: ['iNotify/msg.mp4', 'iNotify/msg.mp3', 'iNotify/msg.wav']
+            // },
+            notification: {
+                title: "标题内容！",
+                body: '欢迎来到UW3C技术分享~'
+            }
+        });
+        iN.setTitle(true);
+        console.log(iN.isPermission());
+
+        function inotifyTest() {
+            iN.setFavicon(10).setTitle('新标题').notify({
+                title: "新通知",
+                body: "欢迎来到UW3C技术分享~"
+            })
+        }
+
+        $("#test").click(() => {
+            inotifyTest()
+            console.log(iN.isPermission())
+    })
+        //     var humens = [{
+        //         html: '张三',
+        //         value: '12岁',
+        //         type: 3
+        //     }, {
+        //         html: '李四',
+        //         value: '8岁',
+        //         type: 4
+        //     }, {
+        //         html: '王五',
+        //         value: '6岁',
+        //         type: 1
+        //     }];
+        //     // var select = new SelectBox($("#select1"));
+        //     var  select3  =  new  SelectBox($("#select3"),  humens, function(result) {
+        //         console.log(result.name);
+        //     }, {
+        //         dataName: 'html', //option的html
+        //         dataId: 'value', //option的value	
+        //         width: 50, //宽
+        //         height: 26, //高	
+        //     });
+        //     var  select  =  new  SelectBox($("#select1"),   ['', '上仓锁', '下仓锁'], function(result) {
+        //         console.log(1);
+        //     });
+        //     select.changeFnBack(function(result) {
+        //         console.log(2);
+        //         select3.setValue(result.name);
+        //     });
+
+        //     $("#test").click(function() {
+        //         var a = select.getResult();
+        //         var b = a.name;
+        //         var c = select3.getResult().name;
+        //     });
+        //     select.setValue("能看见");
+    })
+</script>
+
+</html>

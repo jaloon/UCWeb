@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script src="layer/layer.js"></script>
+    <script src="verify.js"></script>
+    <script src="SelectBox.min.js"></script>
+    <script src="../js/base.js"></script>
+    <script>
+        $(function() {
+            $("#open").click(function() {
+                layer.open({
+                    type: 2,
+                    title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                    shadeClose: true,
+                    shade: 0.6,
+                    area: ['800px', '560px'],
+                    content: '../plugins/leyerdemo2.html'
+                });
+
+            });
+
+            var str = "   aoihiosdo oidrhfoiho    oijeirhs ";
+            str = str.replace(/^\s+|\s+$/g, '', "");
+            $("div").html("\u5B9A\u4E49\u8F93\u51FA\u7EA7\u522B\u548C\u8F93\u51FA\u5E73\u53F0");
+            $("#delete").click(function() {
+                layer.confirm('删除后不可撤销，是否确认删除？', {
+                    icon: 0,
+                    title: ['删除', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    layer.msg('删除成功！', {
+                        icon: 1
+                    });
+                }, function() {
+                    layer.msg('删除失败！', {
+                        icon: 2
+                    });
+                });
+            });
+            $("#reset").click(function() {
+                layer.confirm('重置后不可撤销，是否确认重置？', {
+                    icon: 0,
+                    title: '重置'
+                }, function() {
+                    layer.msg('重置成功！');
+                }, function() {
+                    layer.msg('重置失败！');
+                });
+            });
+            // $.get("http://www.baidu.com/s?wd=ajax",
+            //     function(data, textStatus) {
+            //         alert("Data: " + data + "\nStatus: " + textStatus);
+            //     },
+            //     "json"
+            // );
+            $("#vphone").click(function() {
+                var phone = $("#phone").val();
+                var flag = isPhone(phone);
+                alert(flag);
+            });
+            $("#rp").click(function() {
+                $("#search_text").replaceWith("<select id=\"search_text\"></select>");
+
+            });
+            $("#search_text").val(new Date().format("yyyy-MM-dd EEE HH:mm:ss"));
+
+        });
+    </script>
+</head>
+
+<body>
+    <input type="button" value="删除" id="delete">
+    <input type="button" value="重置" id="reset">
+    <input type="button" value="layer" id="open">
+    <span><div></div></span>
+    <input type="text" id="phone">
+    <input type="button" value="验证手机号" id="vphone">
+    <!-- <select id="search_text"></select> -->
+    <input type="text" id="search_text">
+    <input type="button" value="替换" id="rp">
+</body>
+
+</html>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.DistributionRecordDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.record.DistributionRecord" >
+        <id column="id" property="id" />
+        <result column="vehicle_number" property="carNumber" />
+        <result column="distribute_id" property="invoice" />
+        <result column="oildepot_id" property="oilDepot.id" />
+        <result column="oildepot_name" property="oilDepot.name" />
+        <result column="store_id" property="storeId" />
+        <result column="gasstation_id" property="gasStation.id" />
+        <result column="gasstation_name" property="gasStation.name" />
+        <result column="status_name" property="statusName" />
+        <result column="issue_time" property="createDate" />
+    </resultMap>
+	<sql id="select_colums">
+		t.*,
+		c.vehicle_number							vehicle_number,
+		o.name										oildepot_name,
+		g.name										gasstation_name,
+		fn_type2name('transportStatus', t.status)	status_name
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_transport t,tbl_vehicle c,tbl_oildepot o,tbl_gasstation g
+		where t.vehicle_id=c.id and t.oildepot_id=o.id and t.gasstation_id=g.id
+	</select>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_transport t,tbl_vehicle c,tbl_oildepot o,tbl_gasstation g
+		where t.vehicle_id=c.id and t.oildepot_id=o.id and t.gasstation_id=g.id
+		and t.id=#{id}
+	</select>
+
+	<select id="count" parameterType="com.tipray.bean.record.DistributionRecord" resultType="java.lang.Long">
+		select count(*) from tbl_transport t,tbl_vehicle c
+		where t.vehicle_id=c.id
+		<if test="begin != null and begin != '' and end != null and end != ''">
+			and t.issue_time between #{begin} and #{end}
+		</if> 
+		<if test="status != null and status != -2">
+			and t.status = #{status}
+		</if>
+		<if test="carNumber != null and carNumber != ''">
+			and c.vehicle_number like CONCAT('%',#{carNumber},'%')
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_transport t,tbl_vehicle c,tbl_oildepot o,tbl_gasstation g
+		where t.vehicle_id=c.id and t.oildepot_id=o.id and t.gasstation_id=g.id
+		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+			and t.issue_time between #{entity.begin} and #{entity.end} 
+		</if>
+		<if test="entity.status != null and entity.status != -2">
+			and t.status = #{entity.status}
+		</if>
+		<if test="entity.carNumber != null and entity.carNumber != ''">
+			and c.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
+		</if>
+		order by t.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<select id="getRecentTransportIdByInvoice" parameterType="java.lang.String" resultType="java.lang.Long">
+		<!-- 方法一：按时间倒序，取第一条数据 -->
+		select id from tbl_transport where distribute_id=#{invoice}
+		ORDER BY issue_time DESC LIMIT 1
+		<!-- 方法二：先查询出最近的时间，再按时间查询 -->
+		<!-- select id from tbl_transport where distribute_id=#{invoice}
+		and issue_time=(SELECT MAX(t.issue_time) FROM (SELECT * FROM tbl_transport) t WHERE t.distribute_id=#{invoice}) -->
+	</select>
+	
+	<select id="getRecentDistributionByInvoice" parameterType="java.lang.String" resultType="java.util.Map">
+		select id, oildepot_id, gasstation_id from tbl_transport where distribute_id=#{invoice}
+		ORDER BY issue_time DESC LIMIT 1
+	</select>
+	
+	<select id="getRecentDistributeStateByCarId" parameterType="java.lang.Long" resultType="java.util.Map">
+		select id, status from tbl_transport where vehicle_id=#{carId}
+		ORDER BY issue_time DESC LIMIT 1
+	</select>
+	
+	<update id="updateStatusToChanged" parameterType="java.lang.Long">
+		UPDATE tbl_transport
+		SET status=3, end_time=now()
+		WHERE id=#{transportId}
+	</update>
+	<update id="updateStatus">
+		UPDATE tbl_transport
+		SET status=#{status}, end_time=now()
+		WHERE id=#{transportId}
+	</update>
+	
+	<update id="updateTriggerInfo">
+		UPDATE tbl_transport
+		SET trigger_type=6, trigger_id=#{changeId}
+		WHERE id=#{transportId}
+	</update>
+	
+	<insert id="addByChangeInfo" useGeneratedKeys="true" keyProperty="changedTransportId" parameterType="com.tipray.bean.ChangeInfo">
+		insert into
+		tbl_transport(distribute_id,vehicle_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
+		values(#{invoice},#{carId},#{storeId},#{oildepotId},#{changedGasstationId},5,6,0)
+	</insert>
+	
+	<insert id="addByDistributionMap" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
+		insert into
+		tbl_transport(distribute_id,vehicle_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
+		values(
+			#{distributNO},
+			#{carId}, 
+			#{binNum},
+			(select o.id from tbl_oildepot o where o.official_id=#{depotNo}),
+			(select g.id from tbl_gasstation g where g.official_id=#{deptId}),
+			1,0,0)
+	</insert>
+	
+	<select id="countByInvoice" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from tbl_transport where distribute_id = #{invoice}
+	</select>
+	
+	<update id="checkDistribute">
+		<![CDATA[
+			UPDATE tbl_transport t1 SET
+		 		t1.status = 4,
+				t1.end_time = NOW()
+			WHERE
+				t1.id in (SELECT t3.id FROM 
+				(SELECT t2.id id FROM tbl_transport t2 WHERE 
+				t2.vehicle_id = #{carId} AND t2.store_id = #{storeId} AND t2.status < 2 
+				AND TIMESTAMPDIFF(MINUTE,t2.issue_time,NOW()) > 30) t3)
+		]]>
+	</update>
+	
+	<sql id="select_distribution">
+		t.id,
+		t.distribute_id,
+		t.vehicle_id,
+		c.vehicle_number,
+		t.store_id,
+		t.oildepot_id,
+		o.`name` oildepot_name,
+		t.gasstation_id,
+		g.`name` gasstation_name,
+		t.`status`,
+		DATE_FORMAT( t.issue_time, '%Y-%m-%d %H:%I:%S' ) issue_time
+	</sql>
+	
+	<select id="findDistributionsByGasStationId" parameterType="java.lang.Long" resultType="java.util.LinkedHashMap">
+		SELECT
+			<include refid="select_distribution"></include> 
+		FROM
+			tbl_transport t,
+			tbl_vehicle c,
+			tbl_oildepot o,
+			tbl_gasstation g 
+		WHERE
+			t.vehicle_id = c.id 
+			AND t.oildepot_id = o.id 
+			AND t.gasstation_id = g.id 
+			AND t.`status` = 1
+			AND t.gasstation_id = #{gasStationId}
+	</select>
+	
+	<select id="findDistributionsByVehicle" parameterType="java.lang.Long" resultType="java.util.LinkedHashMap">
+		SELECT
+			<include refid="select_distribution"></include> 
+		FROM
+			tbl_transport t,
+			tbl_vehicle c,
+			tbl_oildepot o,
+			tbl_gasstation g 
+		WHERE
+			t.vehicle_id = c.id 
+			AND t.oildepot_id = o.id 
+			AND t.gasstation_id = g.id 
+			AND t.`status` = 1
+			AND c.vehicle_number = #{carNumber}
+		<if test="storeId != null and storeId != 0">
+			AND t.store_id = #{storeId}
+		</if>
+	</select>
+	
+</mapper>

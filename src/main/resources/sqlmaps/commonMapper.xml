@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tipray.dao.CommonDao" >
+	<select id="getDBDatadir" resultType="java.lang.String">
+		select @@datadir from dual
+	</select>
+    <select id="countTables" resultType="java.lang.Integer">
+        SELECT count(0) FROM information_schema.TABLES WHERE table_schema = (select database())
+    </select>
+    
+	<select id="countTableByName" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT count(0) FROM information_schema.TABLES WHERE table_schema = (select database()) and TABLE_NAME=#{value}
+    </select>
+    
+    <select id="countTableRow" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT count(0) FROM ${value}
+    </select>
+    
+    <select id="findAllTables" resultType="java.lang.String">
+        SELECT TABLE_NAME FROM information_schema.TABLES WHERE table_schema = (select database())
+    </select>
+    
+    <select id="findTables" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT TABLE_NAME FROM information_schema.TABLES WHERE table_schema = (select database()) and LOCATE(#{value},TABLE_NAME)>0
+    </select>
+    
+	<update id="removeTable" parameterType="java.lang.String">
+	    drop table ${value}
+	</update>
+	
+	<update id="executeUpdate" parameterType="java.lang.String">
+	    ${value}
+	</update>
+	
+	<update id="backupTable" parameterType="java.util.Map">
+	    SELECT * FROM ${table}
+	    <if test="ids!=null and ids!=''">
+	    	where id in (${ids})
+	    </if>
+	    INTO OUTFILE '${outFile}' FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' LINES TERMINATED BY '\n' 
+	</update>
+	<delete id="clearTable" parameterType="java.lang.String">
+		delete from ${value}
+	</delete>
+</mapper>

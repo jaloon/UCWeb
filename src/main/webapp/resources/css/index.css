@@ -1,0 +1,180 @@
+.container {
+    font-family: "微软雅黑";
+    overflow-x: hidden;
+}
+
+.top {
+    width: 100%;
+    min-width: 700px;
+    height: 60px;
+    background-color: #478de4;
+}
+
+.logo-zone {
+    height: 22px;
+    width: 600px;
+    position: relative;
+    left: 20px;
+    top: 19px;
+}
+
+.logo-text {
+    height: 22px;
+    line-height: 22px;
+    color: #ffffff;
+    font-family: "黑体";
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    top: -3px;
+    left: 15px;
+    cursor: default;
+}
+
+.alarm-tip {
+    height: 48px;
+    width: 36px;
+    position: relative;
+    float: right;
+    top: 6px;
+    right: 20px;
+}
+
+.profile-zone {
+    width: 186px;
+    height: 60px;
+    background-color: #3e81d5;
+    color: #ffffff;
+    font-size: 11pt;
+    position: relative;
+    float: right;
+}
+
+.profile-name {
+    height: 20px;
+    line-height: 20px;
+    position: relative;
+    top: 20px;
+    left: 30px;
+    cursor: default;
+}
+
+.profile-name img {
+    width: 8px;
+    height: 6px;
+    position: absolute;
+    top: 50%;
+    margin-top: -3px;
+    right: -15px;
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    position: absolute;
+    top: 50%;
+    margin-top: -20px;
+    right: 20px;
+}
+
+.info-zone {
+    width: 186px;
+    height: 80px;
+    background: #57647c;
+    color: #eef1f7;
+    display: none;
+    position: absolute;
+    bottom: -80px;
+}
+
+.user-info {
+    width: 174px;
+    display: inline-block;
+    height: 26px;
+    line-height: 26px;
+    padding-left: 12px;
+    cursor: pointer;
+}
+
+.user-info:hover {
+    background: #478de4;
+}
+
+.left-nav {
+    width: 200px;
+    height: auto !important;
+    overflow: visible !important;
+    position: fixed;
+    height: 100% !important;
+    background-color: #445065;
+}
+
+.left-nav dt {
+    padding-left: 40px;
+    padding-right: 10px;
+    height: 46px;
+    background-color: #445065;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    color: #f5f5f5;
+    font-size: 16px;
+    position: relative;
+    line-height: 46px;
+    cursor: pointer;
+}
+
+.left-nav dd {
+    height: 30px;
+    vertical-align: middle;
+    background-color: #57647c;
+    padding-left: 40px;
+}
+
+.left-nav dd a {
+    font-size: 14px;
+    color: #f5f5f5;
+    line-height: 30px;
+    text-decoration: none;
+}
+
+.left-nav dt img {
+    position: absolute;
+    right: 10px;
+    top: 18px;
+}
+
+.first_dd {
+    padding-top: 10px;
+}
+
+.left-nav dl:first-child {
+    padding-top: 15px;
+}
+
+.left-nav dl dd:last-child {
+    padding-bottom: 10px;
+}
+
+.main {
+    float: right;
+}
+
+.alarm-box {
+    display: none;
+    width: 260px;
+    background: #ffffff;
+    border: 1px solid #e6e7e9;
+}
+
+#alarm_tips {
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    margin: 5px;
+}
+
+.highlight {
+    background: #CCCCCC;
+    color: #FF6666;
+}

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.tipray.dao.DepartmentDao">
+	<resultMap id="BaseResultMap" type="com.tipray.bean.Department" >
+        <id column="id" property="id" />
+        <result column="name" property="name"  />
+        <result column="code" property="code"  />
+        <result column="remark" property="remark"  />
+        <result column="parentId" property="parent.id"  />
+    </resultMap>
+    <resultMap id="parentResultMap" type="com.tipray.bean.Department" >
+        <id column="id" property="id" />
+        <result column="name" property="name"  />
+        <result column="code" property="code"  />
+        <result column="remark" property="remark"  />
+        <result column="parentId" property="parent.id"  />
+        <result column="parentName" property="parent.name"  />
+        <result column="parentCode" property="parent.code"  />
+    </resultMap>
+    
+    <sql id="select_colums">
+    	d.*,p.name parentName,p.code parentCode
+    </sql>
+	<select id="findAll" resultMap="BaseResultMap">
+		select * from Departments
+	</select>
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.Department">
+		insert into Departments(name,parentId,code,remark) 
+		values(#{name},#{parent.id},#{code},#{remark})
+	</insert>
+	<update id="update" parameterType="com.tipray.bean.Department">
+		update Departments set 
+		name=#{name},
+		parentId=#{parent.id},
+		remark=#{remark} 
+		<if test="code!=null and code!=''">
+			,code=#{code}
+		</if>
+		where id=#{id}
+	</update>
+
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from Departments where id=#{id}
+	</delete>
+	
+	<select id="getById" parameterType="java.lang.Long" resultMap="parentResultMap">
+		select <include refid="select_colums"></include> 
+		from Departments d LEFT JOIN Departments p on d.parentId=p.id where d.id=#{id}
+	</select>
+	<select id="findByParentId" parameterType="java.lang.Long" resultMap="parentResultMap">
+		select <include refid="select_colums"></include> 
+		from Departments d LEFT JOIN Departments p on d.parentId=p.id where d.parentId=#{parentId}
+	</select>
+	<select id="getByNameAndParentId" parameterType="com.tipray.bean.Department" resultMap="parentResultMap">
+		select <include refid="select_colums"></include> 
+		from Departments d LEFT JOIN Departments p on d.parentId=p.id where d.name=#{name} and d.parentId=#{parent.id}
+	</select>
+	<select id="getMaxCode" parameterType="java.lang.Long" resultType="java.lang.String">
+		select code from Departments where parentId=#{parentId} and CAST(REPLACE(code,'.','') AS SIGNED)=
+			(select Max(CAST(REPLACE(code,'.','') AS SIGNED)) from Departments where parentId=#{parentId})
+	</select>
+	
+	<sql id="select_where_vo">
+		<if test="dept.name != null" >
+			and d.name like CONCAT('%',#{dept.name},'%')
+		</if>
+		<if test="dept.code != null" >
+			and d.code like CONCAT(#{dept.code},'%')
+		</if>
+		<if test="dept.parent != null and dept.parent.id != null" >
+			and (d.parentId = #{dept.parent.id} or d.id=#{dept.parent.id})
+		</if>
+	</sql>
+	<select id="findByVo" resultMap="parentResultMap">
+		select  <include refid="select_colums"></include>
+		from Departments d LEFT JOIN Departments p on d.parentId=p.id where 1=1
+		<include refid="select_where_vo"></include>
+	</select>
+	<select id="countByVo" resultType="java.lang.Long">
+		select count(*) from Departments d where 1=1
+		<include refid="select_where_vo"></include>
+	</select>
+	<select id="findByCode" parameterType="java.lang.String" resultType="com.tipray.bean.Department">
+		select * from Departments where code like CONCAT(#{code},'%')
+	</select>
+	<select id="finDepartmentsByCode" parameterType="java.lang.String" resultType="com.tipray.bean.Department">
+		select * from departments d where '${value}' like CONCAT(code,'%')
+	</select>
+	<select id="findDepartmentByIds" parameterType="java.lang.String" resultType="com.tipray.bean.Department">
+		select * from departments d where id in (${value})
+	</select>
+	<select id="countUserByDeptId" parameterType="java.lang.Long" resultType="java.lang.Long">
+		select count(0) from users u,departments d where u.deptId=d.id and d.code like CONCAT((select dd.code from departments dd where dd.id=${value}),'%')
+	</select>
+</mapper>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../../resources/css/base.css ">
+    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
+    <style type="text/css">
+        .lock-box {
+            height: 186px;
+            width: 384px;
+            line-height: 21px;
+            border: 1px solid #d7dbe2;
+            border-radius: 3px;
+            padding: 0 6px 0 6px;
+            color: #57647c;
+            overflow: auto;
+        }
+
+        span {
+            border-bottom: #1E9FFF solid 1px;
+        }
+
+        .hidden-box {
+            width: 500px;
+            background: #ffffff;
+        }
+
+        .lock>table {
+            width: 480px;
+            position: relative;
+            left: 10px;
+            top: 5px;
+            font-size: 14px;
+            color: #445065;
+        }
+
+        .hidden-oper-zone {
+            position: relative;
+            top: 12px;
+            height: 54px;
+            width: 100%;
+            background: #e6e7e9;
+        }
+
+        .hidden-cancel {
+            width: 100px;
+            height: 30px;
+            border: 1px solid #478de4;
+            border-radius: 3px;
+            background: #ffffff;
+            color: #40454b;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 124px;
+        }
+
+        .hidden-confirm {
+            width: 100px;
+            height: 30px;
+            background: #478de4;
+            color: #ffffff;
+            border: 0;
+            border-radius: 3px;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 14px;
+        }
+    </style>
+    <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/layer/layer.js"></script>
+    <script src="../../../resources/plugins/verify.js"></script>
+    <script src="../../../resources/js/base.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <div class="info-zone">
+        <div class="base-info">
+            <div class="info-title">
+                开锁重置
+            </div>
+            <table class="base-table">
+                <tr>
+                    <td>车牌号</td>
+                    <td>
+                        <input type="text" class="editInfo" id="carno">
+                    </td>
+                </tr>
+                <tr>
+                    <td>待重置的锁</td>
+                    <td>
+                        <div class="lock-box">
+                            <ol id="locks">
+                                <li>
+                                    <span id="add" style="font-size: 16px; color: #0154ad">
+                                        <img alt="添加" title="添加" src="../../../resources/images/operate/addNew.png">&nbsp;添加锁设备ID
+                                    </span>
+                                </li>
+                            </ol>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="oper-zone">
+        <input type="button" id="cancel" value="取消">
+        <input type="button" id="confirm" value="确认">
+    </div>
+</div>
+<div class="hidden-box lock" style="display:none;">
+    <table>
+        <tr>
+            <td>锁设备ID:</td>
+            <td>
+                <input type="text" class="editInfo" id="lock_id">
+            </td>
+        </tr>
+    </table>
+    <div class="hidden-oper-zone">
+        <input type="button" class="hidden-cancel" id="lock_cancel" value="取消">
+        <input type="button" class="hidden-confirm" id="lock_confirm" value="确认">
+    </div>
+</div>
+</body>
+<script>
+    var add = false;
+    var lockLayer;
+
+    function openLockLayer() {
+        var title = "更改";
+        if (add) {
+            title = "添加";
+        }
+        lockLayer = layer.open({
+            type: 1,
+            title: [title + '待重置锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            area: ['500px', '149px'],
+            content: $('.lock'),
+            end: clearLockDiv()
+        });
+    }
+
+    function clearLockDiv() {
+        $("#lock_id").val("");
+    }
+
+    function addLock() {
+        add = true;
+        openLockLayer();
+    }
+
+    function delLock(obj) {
+        $(obj).closest("li").remove();
+    }
+
+    function alterLock(obj) {
+        add = false;
+        liObj = $(obj).closest("li");
+        openLockLayer();
+        $("#lock_id").val(liObj.children().eq(2).html());
+    }
+
+    $(function() {
+        $("#add").click(addLock);
+
+        $("#lock_cancel").click(function() {
+            layer.close(lockLayer);
+        });
+
+        $("#lock_confirm").click(function () {
+            var lock_id = $("#lock_id").val();
+            if (isNull(lock_id)) {
+                layer.alert("锁设备ID不能为空！", { icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#lock_id").select();
+                });
+                return;
+            }
+            if (!isInteger(lock_id)) {
+                layer.alert("锁设备ID必须为整数数字！", { icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#lock_id").select();
+                });
+                return;
+            }
+
+            var liHtml = "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delLock(this)\">\n" +
+                    "<span onclick=\"alterLock(this)\">锁：</span>" +
+                    "<span onclick=\"alterLock(this)\">" + lock_id + "</span></li>";
+            if (add) {
+                $("#locks li:eq(-1)").before(liHtml);
+                // 用js控制div的滚动条,让它在内容更新时自动滚动到底部
+                $(".lock-box").scrollTop($(".lock-box")[0].scrollHeight);
+            } else {
+                liObj.replaceWith(liHtml);
+            }
+            layer.close(lockLayer);
+        });
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $("#cancel").click(function() {
+            parent.layer.close(index);
+        });
+
+        $("#confirm").click(function() {
+            var carno = $("#carno").val();
+            if (!isCarNo(carno)) {
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
+                    icon: 2
+                }, function(index2) {
+                    layer.close(index2);
+                    $("#carno").select();
+                });
+                return;
+            }
+            var lockNum = $("#locks").children().length - 1;
+            if (lockNum == 0) {
+                layer.alert('至少要重置一把锁！', { icon: 2 }, function(index2) {
+                    layer.close(index2);
+                    $("#add").click();
+                });
+                return;
+            }
+            var lockIds = "";
+            for (var i = 0; i < lockNum; i++) {
+                var li = $("#locks").children().eq(i);
+                lockIds += li.children().eq(2).html();
+                lockIds += ',';
+            }
+            lockIds = lockIds.substr(0, lockIds.length - 1);
+            var loadIndex = layer.load();
+            $.post("../../../manage/remote/asyn_lock_reset_request",
+                "car_number=" + encodeURIComponent(carno) + "&lock_ids=" + lockIds + "&token=" + generateUUID(),
+                function(data) {
+                    layer.close(loadIndex);
+                    if (data.id > 0) {
+                        layer.msg(data.msg, {
+                            icon: 2,
+                            time: 500
+                        });
+                    } else {
+                        layer.msg('请求发送成功！', {
+                            icon: 1,
+                            time: 500
+                        }, function() {
+                            parent.layer.close(index);
+                        });
+                    }
+                },
+                "json"
+            );
+        });
+
+    });
+</script>
+
+</html>

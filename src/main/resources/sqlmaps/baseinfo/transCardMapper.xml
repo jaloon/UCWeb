@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.TransportCardDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.TransportCard" >
+        <id column="id" property="id" />
+        <result column="transport_card_id" property="transportCardId" />
+        <!-- <result column="driver_id" property="driver.id" /> -->
+        <result column="vehicle_number" property="carNumber" />
+        <result column="remark" property="remark" />
+        <result column="gmt_create" property="createDate" />
+        <result column="gmt_modified" property="modifyDate" />
+    </resultMap>
+	<sql id="select_colums">
+		t.*,c.vehicle_number vehicle_number
+	</sql>
+	
+	<select id="findAll" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_transport_card t left join tbl_vehicle c
+		on t.transport_card_id=c.transport_card_id
+		where t.is_invalid=0
+	</select>
+	
+	<select id="findUnusedTranscards" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_transport_card t left join tbl_vehicle c
+		on t.transport_card_id=c.transport_card_id
+		where t.is_invalid=0 and t.transport_card_id not in
+		(select c.transport_card_id from tbl_vehicle c)
+	</select>
+	
+	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.TransportCard">
+		insert into
+		tbl_transport_card(transport_card_id,remark)
+		values(#{transportCardId},ifnull(#{remark},''))
+	</insert>
+	
+	<update id="update" parameterType="com.tipray.bean.baseinfo.TransportCard">
+		update tbl_transport_card set
+		transport_card_id=#{transportCardId},
+		remark=ifnull(#{remark},'')
+		where id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="java.lang.Long">
+		update tbl_transport_card set 
+		is_invalid=1 
+		where id=#{id}
+	</delete>
+	
+	<delete id="deleteVehicleCardId" parameterType="java.lang.Long">
+		update tbl_vehicle set 
+		transport_card_id = 0
+		where transport_card_id = #{transportCardId}
+	</delete>
+
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_transport_card t left join tbl_vehicle c
+		on t.transport_card_id=c.transport_card_id
+		where t.is_invalid=0 and t.id=#{id}
+	</select>
+	
+	<select id="count" parameterType="com.tipray.bean.baseinfo.TransportCard" resultType="java.lang.Long">
+		select count(*) from tbl_transport_card where is_invalid=0 
+		<if test="transportCardId != null and transportCardId != -2">
+			and transport_card_id = #{transportCardId}
+		</if>
+	</select>
+	
+	<select id="findByPage" resultMap="fullResultMap">
+		select <include refid="select_colums"></include> 
+		from tbl_transport_card t left join tbl_vehicle c
+		on t.transport_card_id=c.transport_card_id
+		where t.is_invalid=0
+		<if test="entity.transportCardId != null and entity.transportCardId != -2">
+			and t.transport_card_id = #{entity.transportCardId}
+		</if>
+		order by t.id asc  
+		limit #{page.startRow}, #{page.rows}
+	</select>
+	
+	<select id="getTransportCardIdById" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT transport_card_id FROMtbl_transport_card WHERE id = #{id};
+	</select>
+	
+	<select id="getTerminalIdById" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT
+			v.vehicle_device_id 
+		FROM
+			tbl_transport_card c,
+			tbl_vehicle v 
+		WHERE
+			c.transport_card_id = v.transport_card_id 
+			AND v.is_invalid = 0 
+			AND c.id = #{id};
+	</select>
+</mapper>

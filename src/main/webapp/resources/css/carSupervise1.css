@@ -1,0 +1,312 @@
+.container {
+    overflow-x: hidden;
+}
+
+.search-zone {
+    width: 100%;
+    min-width: 1170px;
+    height: 56px;
+    background: #eef1f7;
+    font-family: "微软雅黑";
+    font-size: 16px;
+}
+
+.search-type {
+    width: 100px;
+    height: 36px;
+    color: #5a6779;
+    padding-left: 8px;
+    position: relative;
+    left: 30px;
+    top: 10px;
+}
+
+input.search-text {
+    width: 248px;
+    height: 34px;
+    padding: 0 8px 0 8px;
+    border: 1px solid #b0b9c6;
+    border-radius: 3px;
+    position: relative;
+    left: 40px;
+    top: 8px;
+}
+
+select.search-text {
+    width: 266px;
+    height: 36px;
+    padding: 0 8px 0 8px;
+    border: 1px solid #b0b9c6;
+    border-radius: 3px;
+    position: relative;
+    left: 40px;
+    top: 8px;
+}
+
+.search-btn {
+    width: 76px;
+    height: 36px;
+    background: #478de4;
+    border: 0;
+    border-radius: 3px;
+    color: white;
+    position: relative;
+    left: 60px;
+    top: 10px;
+}
+
+
+/********************下拉菜单begin********************/
+
+#nav {
+    /*置父容器高度，宽度，背景颜色，容器位置*/
+    /* background: #eee; */
+    width: 750px;
+    height: 55px;
+    /* position: absolute;
+    top: 1px;
+    right: 21px; */
+    position: relative;
+    float: right;
+    margin-right: 21px;
+    z-index: 110;
+}
+
+#nav ul {
+    /*去掉点点*/
+    list-style: none;
+}
+
+#nav ul li {
+    width: 100px;
+    /*每一个li左浮动形成横排，高度占满父容器形成文字垂直居中，文字水平居左*/
+    float: left;
+    text-align: left;
+    line-height: 55px;
+    color: #478de4;
+    padding: 0 25px;
+    display: block;
+    position: relative;
+    /*给子ul定位用的*/
+}
+
+#nav ul li:hover {
+    color: #fff;
+    background-color: #478de4;
+}
+
+#nav ul li ul {
+    background-color: #ffffff;
+    border: 1px solid #bec5d4;
+    border-top: none;
+    position: absolute;
+    /*相对于父li的位置进行定位*/
+    left: 0;
+    display: none;
+    /*隐藏下拉菜单*/
+}
+
+#nav ul li ul li {
+    width: 98px;
+    color: #445065;
+    line-height: 36px;
+    float: none;
+}
+
+#nav ul li ul li:first-child {
+    margin-top: 2px;
+}
+
+#nav ul li ul li:last-child {
+    margin-bottom: 2px;
+}
+
+#nav ul li ul li:hover {
+    border-left-color: #478de4;
+    border-right-color: #478de4;
+}
+
+#nav ul li:hover ul {
+    display: block;
+}
+
+
+/********************下拉菜单end********************/
+
+.config {
+    width: 250px;
+    background: #ffffff;
+    padding: 10px;
+    display: none;
+}
+
+.config>table {
+    width: 250px;
+    font-size: 14px;
+    color: #445065;
+}
+
+.config tr {
+    height: 36px;
+}
+
+.config tr td:first-child {
+    width: 120px;
+}
+
+.editInfo {
+    height: 26px;
+    width: 130px;
+    line-height: 26px;
+    border: 1px solid #d7dbe2;
+    border-radius: 3px;
+    padding: 0 6px 0 6px;
+    color: #57647c;
+}
+
+#re_track {
+    width: 100px;
+    height: 30px;
+    background: #478de4;
+    color: #ffffff;
+    border: 0;
+    border-radius: 3px;
+}
+
+.data-zone {
+    width: 100%;
+    height: auto !important;
+    overflow: visible !important;
+    height: 100% !important;
+    position: fixed;
+    padding: 10px 0px 8px 0px;
+    /* background: lightgreen; */
+}
+
+.map {
+    /* background: lightgreen; */
+}
+
+.table {
+    position: relative;
+}
+
+#car_list {
+    /* background: url(../../resources/images/operate/hide.png); */
+    background: rgba(68, 80, 101, 0.8) url(../images/operate/toggle.png) no-repeat center;
+    /* background: red; */
+    height: 16px;
+    width: 100%;
+    /* width: 90px; */
+    /* border: #738199 solid 1px;
+    border-bottom: none; */
+    position: absolute;
+    /* left: 50%;
+    margin-left: -45px; */
+    top: -16px;
+    z-index: auto;
+}
+
+.table-head {
+    width: 100%;
+    height: 36px;
+    color: #445065;
+    font-weight: 500;
+    /* background: #009688; */
+    background: #e6e7e9;
+    margin-top: 10px;
+}
+
+.table-body {
+    width: 100%;
+    height: 300px;
+    color: #5a6779;
+    font-size: 13px;
+    /* background: #ffffff; */
+    overflow: auto;
+}
+
+.data-zone th,
+td {
+    text-align: center;
+    vertical-align: middle;
+    height: 30px;
+}
+
+.data-zone td {
+    border-bottom: 1px solid #e6e7e9;
+}
+
+
+/********************表格列begin********************/
+
+.car-num {
+    width: 160px;
+}
+
+.car-company {
+    width: 200px;
+}
+
+.car-type {
+    width: 120px;
+}
+
+.car-coordinate {
+    width: 200px;
+}
+
+.car-velocity {
+    width: 120px;
+}
+
+.car-aspect {
+    width: 120px;
+}
+
+.car-status {
+    width: 160px;
+}
+
+.car-lock {
+    width: 120px;
+}
+
+.car-alarm {
+    width: 200px;
+}
+
+
+/********************表格列end********************/
+
+.page {
+    width: 100%;
+    height: 36px;
+    color: #445065;
+    background: #e6e7e9;
+}
+
+.page span {
+    height: 20px;
+    position: relative;
+    top: 8px;
+    left: 16px;
+}
+
+#page_id {
+    /* width: 30px; */
+    height: 20px;
+    text-align: center;
+    border: 1px solid #d2d2d2;
+    position: relative;
+    top: 7px;
+    left: 16px;
+}
+
+#page_size {
+    height: 22px;
+    border: 1px solid #d2d2d2;
+    position: relative;
+    top: 7px;
+    left: 16px;
+}

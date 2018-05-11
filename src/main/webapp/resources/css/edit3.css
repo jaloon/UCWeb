@@ -1,0 +1,130 @@
+.car-supervise {
+    width: 260px;
+    background: #ffffff;
+    border: 1px solid #e6e7e9;
+    position: fixed;
+    right: 30px;
+    top: 100px;
+}
+
+.info-zone {
+    width: 240px;
+    padding: 3px 17px 5px 18px;
+    overflow: auto;
+}
+
+.base-info {
+    width: 240px;
+}
+
+.sub-info {
+    width: 240px;
+    margin-top: 15px;
+}
+
+.info-title {
+    width: 245px;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 10px;
+    background: #e6e7e9;
+    position: relative;
+    left: -15px;
+}
+
+.base-table {
+    width: 240px;
+    font-size: 14px;
+    color: #445065;
+}
+
+.sub-table {
+    width: 240px;
+    font-size: 14px;
+    color: #445065;
+    text-align: center;
+}
+
+.manage-table {
+    width: 240px;
+    font-size: 14px;
+    color: #445065;
+    text-align: center;
+    margin-top: 15px;
+}
+
+tr {
+    height: 36px;
+}
+
+.base-table tr td:first-child {
+    width: 80px;
+}
+
+.sub-table tr td:first-child {
+    width: 65px;
+}
+
+.manage-table tr td:first-child {
+    width: 120px;
+}
+
+.sub-table td {
+    border-bottom: 1px solid #e6e7e9;
+}
+
+.manage-table td {
+    height: 36px;
+}
+
+.editInfo {
+    height: 26px;
+    width: 160px;
+    line-height: 26px;
+    border: 1px solid #d7dbe2;
+    border-radius: 3px;
+    padding: 0 6px 0 6px;
+    color: #57647c;
+}
+
+.btn {
+    width: 100px;
+    height: 30px;
+    background: #478de4;
+    color: #ffffff;
+    border: 0;
+    border-radius: 3px;
+}
+
+.oper-zone {
+    width: 540px;
+    height: 54px;
+    background: #e6e7e9;
+    position: fixed;
+}
+
+#cancel {
+    width: 100px;
+    height: 30px;
+    border: 1px solid #478de4;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #40454b;
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    right: 124px;
+}
+
+#confirm {
+    width: 100px;
+    height: 30px;
+    background: #478de4;
+    color: #ffffff;
+    border: 0;
+    border-radius: 3px;
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    right: 14px;
+}
