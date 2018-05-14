@@ -1,6 +1,15 @@
 package com.tipray.net;
 
+import com.tipray.cache.AsynUdpCommCache;
+import com.tipray.constant.CenterConfigConst;
+import com.tipray.mq.MyQueue;
+import com.tipray.pool.ThreadPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -10,14 +19,6 @@ import java.nio.channels.Selector;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.tipray.cache.AsynUdpCommCache;
-import com.tipray.constant.CenterConfigConst;
-import com.tipray.mq.MyQueue;
-import com.tipray.pool.ThreadPool;
 
 /**
  * 非阻塞UDP服务端
@@ -115,7 +116,18 @@ public class NioUdpServer {
 							receiveBuffer.clear();// 固定写法
 							// 接受来自客户端通道的数据
 							InetSocketAddress address = (InetSocketAddress) clientChannel.receive(receiveBuffer);
-							
+
+							short i = receiveBuffer.getShort(0);
+                            HttpServletResponse response = AsynUdpCommCache.getAndRemoveResponseCache((int)i);
+                            if (response != null) {
+                                PrintWriter out = response.getWriter();
+                                out.write("recieve: " + i);
+                                out.flush();
+                                out.close();
+                                System.out.println("recieve: " + i);
+                                continue;
+                            }
+
 							// 1.判断是否来自预期地址和端口号
 							// InetSocketAddress.getHostName()获取的主机名称是计算机名，InetAddress.getHostAddress()获取的才是IP地址
 							String host = address.getAddress().getHostAddress();
@@ -147,7 +159,8 @@ public class NioUdpServer {
 						}
 					}
 				} catch (Exception e) {
-					logger.error("接收客户端数据异常：{}", e.getMessage());
+					logger.error("UDP接收数据异常：{}", e.getMessage());
+					logger.debug("UDP接收数据异常堆栈信息：", e);
 				}
 			}
 		});
@@ -215,7 +228,7 @@ public class NioUdpServer {
 			return true;
 		} catch (Exception e) {
 			logger.error("向客户端{}发送数据异常：{}", target, e.toString());
-			e.printStackTrace();
+			logger.debug("UDP发送数据异常堆栈信息：", e);
 			return false;
 		}
 	}

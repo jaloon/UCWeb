@@ -1,11 +1,11 @@
 package com.tipray.net.constant;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * UDP业务ID
@@ -101,6 +101,11 @@ public class UdpBizId {
 	public static final short LOCK_OPEN_RESET_REQUEST = 0x1405;
 	/** 开锁重置应答（UDP） */
 	public static final short LOCK_OPEN_RESET_RESPONSE = 0x1485;
+
+	/** 道闸开启请求（UDP） */
+	// public static final short BARRIER_OPEN_REQUEST = 0x1501;
+    /** 道闸开启应答（UDP） */
+	// public static final short BARRIER_OPEN_RESPONSE = 0x1581;
 
 	private UdpBizId() {
 	}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>未消除报警信息</title>
+    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../resources/plugins/layer/layer.js"></script>
+    <style>
+        .alarm-box {
+            /* display: none; */
+            /* width: 500px; */
+            background: #ffffff;
+            border: 1px solid #e6e7e9;
+            /* position: fixed;
+            right: 30px;
+            top: 100px; */
+        }
+        
+        .highlight {
+            background: #CCCCCC;
+            color: #FF6666;
+        }
+        
+        #alarm_tips {
+            /* width: 100%; */
+            text-align: center;
+            vertical-align: middle;
+            margin: 5px;
+        }
+        
+        #alarm_tips tr td:first-child {
+            width: 80px;
+        }
+        
+        #alarm_tips tr td:nth-child(2) {
+            width: 360px;
+        }
+        
+        #alarm_tips tr td:last-child {
+            width: 100px;
+        }
+        
+        #parent {
+            width: 550px;
+            height: 10px;
+            border: 2px solid #09F;
+        }
+        
+        #son {
+            width: 0;
+            height: 100%;
+            background-color: #09F;
+            text-align: center;
+            line-height: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .box {
+            display: none;
+        }
+    </style>
+    <script>
+        function eliminateAlarm(id) {
+            console.log(id)
+        }
+
+        function openBox() {
+            layer.open({
+                type: 1,
+                title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                // shadeClose: true,
+                // time: 5000,
+                offset: ['100px', $("body").width() - 300 + 'px'],
+                shade: 0,
+                resize: false,
+                content: $('.alarm-box')
+            });
+        }
+
+        function uploadBox() {
+            layer.open({
+                type: 1,
+                title: ['批量导入加油站', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                // time: 5000,
+                // offset: ['100px', $("body").width() - 300 + 'px'],
+                shade: 0,
+                // resize: false,
+                content: $('.box')
+            });
+        }
+    </script>
+
+</head>
+
+<body>
+    <button onclick="openBox()">sdioj</button>
+    <div class="alarm-box">
+        <table id="alarm_tips" border="0" cellspacing="0" cellpadding="0">
+            <tr id="2">
+                <td>16777228</td>
+                <td>桂A12345：车载终端0014D242，异常开锁报警</td>
+                <td><button onclick="eliminateAlarm('%7B%22id%22%3A2%2C%22terminalId%22%3A16777217%2C%22deviceType%22%3A1%2C%22deviceId%22%3A1364546%2C%22alarmType%22%3A2%7D')">消除报警</button></td>
+            </tr>
+        </table>
+    </div>
+    <button onclick="uploadBox()">文件</button>
+    <div class="box">
+        <input type="file" id="file" name="file" />
+        <input type="button" value="上传" /><br />
+        <div id="parent">
+            <div id="son"></div>
+        </div>
+    </div>
+</body>
+
+</html>

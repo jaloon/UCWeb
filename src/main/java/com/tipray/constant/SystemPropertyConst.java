@@ -28,7 +28,9 @@ public class SystemPropertyConst {
 	public static final String OTP_DLL_PATH = new StringBuffer("dll/").append(JRE_ARCH).append("/libotp").toString();
 	/** dll/rc4 */
 	public static final String RC4_DLL_PATH = new StringBuffer("dll/").append(JRE_ARCH).append("/rc4").toString();
-	
+	/** dll/umf */
+	public static final String UMF_DLL_PATH = new StringBuffer("dll/").append(JRE_ARCH).append("/umf").toString();
+
 	private SystemPropertyConst() {}
 	
 }

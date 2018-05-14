@@ -1,15 +1,16 @@
 package com.tipray.util;
 
+import com.tipray.core.dll.Rc4Dll;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-import com.tipray.core.dll.Rc4Dll;
-
 /**
  * RC4工具类
  * 
- * @author chenlong 2017-12-22
+ * @author chenlong
+ * @version 1.0 2017-12-22
  *
  */
 public class RC4Util {

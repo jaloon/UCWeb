@@ -1,8 +1,13 @@
 package com.tipray.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.tipray.cache.AsynUdpCommCache;
+import com.tipray.core.base.BaseAction;
+import com.tipray.net.NioUdpServer;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.StringUtil;
+import com.tipray.websocket.AlarmWebSocketHandler;
+import com.tipray.websocket.MonitorWebSocketHandler;
+import net.sf.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.tipray.core.base.BaseAction;
-import com.tipray.util.JSONUtil;
-import com.tipray.util.StringUtil;
-import com.tipray.websocket.AlarmWebSocketHandler;
-import com.tipray.websocket.MonitorWebSocketHandler;
-
-import net.sf.json.JSON;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 外部接口
@@ -35,6 +37,8 @@ public class ExternalInterface extends BaseAction {
 	private AlarmWebSocketHandler alarmWebSocketHandler;
 	@Autowired
 	private MonitorWebSocketHandler monitorWebSocketHandler;
+    @Resource
+    private NioUdpServer udpServer;
 
 	/**
 	 * 绑定信息更新
@@ -123,5 +127,11 @@ public class ExternalInterface extends BaseAction {
 			logger.error("处理监控信息异常：\n{}", e.toString());
 		}
 	}
-	
+
+    // @RequestMapping(value = "barrier", method = {RequestMethod.POST, RequestMethod.GET})
+    // @ResponseBody
+	public void barrier(HttpServletResponse response){
+        AsynUdpCommCache.putResponseCache(1,response);
+        udpServer.send("send");
+    }
 }

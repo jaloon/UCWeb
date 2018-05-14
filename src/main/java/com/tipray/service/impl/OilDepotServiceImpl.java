@@ -534,7 +534,13 @@ public class OilDepotServiceImpl implements OilDepotService {
 
 	@Override
 	public Map<String, Object> getIdAndNameOfAllOilDepotsAndGasStations(Long depotVer, Long stationVer) {
+		if (depotVer == null || stationVer == null) {
+		    return null;
+        }
 		Map<String, BigInteger> verMap = vehicleParamVerDao.getVersionsOfOilDepotAndGasStation();
+        if (verMap == null) {
+            throw new IllegalArgumentException("数据库数据异常！");
+        }
 		Long dbDepotVer = verMap.get("depot_ver").longValue();
 		Long dbStationVer = verMap.get("station_ver").longValue();
 		Map<String, Object> map = new HashMap<String, Object>();
