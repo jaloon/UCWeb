@@ -83,8 +83,15 @@ select.search-text {
     overflow: visible !important;
     height: 100% !important;
     position: fixed;
-    padding: 10px 0px 8px 0px;
-    /* background: lightgreen; */
+}
+
+.table-cont {
+    /**make table can scroll**/
+    max-height: 750px;
+    overflow: auto;
+    /** add some style**/
+    margin: 10px;
+    box-shadow: 0 0 1px 3px #e6e7e9;
 }
 
 .table-head {
@@ -127,6 +134,8 @@ td {
     height: 36px;
     color: #445065;
     background: #e6e7e9;
+    position: fixed;
+    bottom: 0;
 }
 
 .page span {

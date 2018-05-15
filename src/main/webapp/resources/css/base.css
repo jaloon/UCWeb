@@ -17,6 +17,10 @@ body {
     margin: 0;
 }
 
+table {
+    border-collapse: collapse;
+}
+
 .container {
     width: 100%;
     height: 100%;

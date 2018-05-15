@@ -237,9 +237,9 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class="table-head">
+            <div class='table-cont' id='table-cont'>
                 <table width="100%">
-                    <thead>
+                    <thead class="table-head">
                         <tr>
                             <th class="gasstation-id">加油站编号</th>
                             <th class="gasstation-name">加油站名称</th>
@@ -253,10 +253,7 @@
                             <th class="gasstation-action">操作</th>
                         </tr>
                     </thead>
-                </table>
-            </div>
-            <div class="table-body">
-                <table width="100%">
+                    <tbody class="table-body"></tbody>
                 </table>
             </div>
             <div class="page">
@@ -266,11 +263,10 @@
                 </select>
                 <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
                 <select id="page_size">
-                    <option value="10">10条/页</option>
-                    <option value="20">20条/页</option>
                     <option value="25">25条/页</option>
-                    <option value="30">30条/页</option>
                     <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="150">150条/页</option>
                 </select>
                 <input type="hidden" id="gsname">
             </div>

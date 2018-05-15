@@ -30,10 +30,7 @@
         .role-app {
             width: 100px;
         }
-        /* .role-permissions {
-            width: 1000px;
-        } */
-        
+
         .role-remark {
             width: 160px;
         }
@@ -140,21 +137,20 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class="table-head">
+            <div class='table-cont' id='table-cont'>
                 <table width="100%">
-                    <thead>
+                    <thead class="table-head">
                         <tr>
                             <th class="role-id">角色ID</th>
                             <th class="role-name">角色名称</th>
                             <th class="role-app">是否APP角色</th>
-                            <!-- <th class="role-permissions">功能权限</th> -->
                             <th class="role-remark">备注</th>
                             <th class="role-action">操作</th>
                         </tr>
                     </thead>
+                    <tbody class="table-body"></tbody>
                 </table>
             </div>
-            <div class="table-body"></div>
             <div class="page">
                 <span>第</span>
                 <select id="page_id">
@@ -162,11 +158,10 @@
                 </select>
                 <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
                 <select id="page_size">
-                    <option value="10">10条/页</option>
-                    <option value="20">20条/页</option>
                     <option value="25">25条/页</option>
-                    <option value="30">30条/页</option>
                     <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="150">150条/页</option>
                 </select>
                 <input type="hidden" id="rname">
             </div>

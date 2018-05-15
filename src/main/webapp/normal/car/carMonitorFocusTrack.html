@@ -41,7 +41,7 @@
         var carNumber = getUrlParam("carNumber");
         var parentSession = getUrlParam("parentSession");
         var user = decodeURIComponent(getUrlParam("user"));
-        var wsUrl = window.location.host + "/UCWeb";
+        var wsUrl = getUrlParam("wsUrl");
         var ws = null;
 
         if ('WebSocket' in window) {

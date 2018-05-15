@@ -25,7 +25,7 @@ public class DropdownData implements Serializable {
     /**
      * 分组名
      */
-    private String groupName;
+    private String groupName = "";
     /**
      * 是否禁选
      */
@@ -64,7 +64,9 @@ public class DropdownData implements Serializable {
     }
 
     public void setGroupName(String groupName) {
-        this.groupName = groupName;
+        if (groupName != null) {
+            this.groupName = groupName;
+        }
     }
 
     public boolean isDisabled() {
@@ -95,4 +97,5 @@ public class DropdownData implements Serializable {
         sb.append('}');
         return sb.toString();
     }
+
 }

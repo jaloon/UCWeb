@@ -9,100 +9,152 @@
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="../../resources/css/base.css">
     <link rel="stylesheet" href="../../resources/css/carSupervise.css">
+    <link rel="stylesheet" href="../../../resources/plugins/jRange/jquery.range.css">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../resources/plugins/laydate/laydate.js"></script>
+    <!--<script src="../../resources/plugins/laydate/laydate.js"></script>-->
     <script src="../../resources/plugins/layer/layer.js"></script>
+    <script src="../../resources/plugins/jRange/jquery.range-min.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
-    <script src="../../resources/plugins/SelectBox.min.js"></script>
     <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/car/carSupervise.js"></script>
     <!--加载百度地图api-->
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt"></script>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=2.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt"></script>
 </head>
 
 <body>
-    <div class="container">
-        <div class="search-zone">
-            <label for="search_text" class="search-type" id="search_type">车牌号码</label>
-            <input type="text" class="search-text" id="search_text">
-            <input type="button" class="search-btn" id="search_btn" value="查询">
-            <div id="nav">
-                <ul>
-                    <li>设备绑定
-                        <ul>
-                            <li id="bind_terminal">车载终端绑定</li>
-                            <li id="bind_lock">锁绑定</li>
-                        </ul>
-                    </li>
-                    <li>车载终端配置
-                        <ul>
-                        	<li id="gps_config">GPS配置</li>
-                            <li id="func_enable">功能启用</li>
-                            <li id="soft_upgrade">软件升级</li>
-                        </ul>
-                    </li>
-                    <li id="realtime_monitor">实时监控</li>
-                    <li>车辆远程控制
-                        <ul>
-                            <li id="into_oildepot">进油库</li>
-                            <li id="quit_oildepot">出油库</li>
-                            <li id="into_gasstation">进加油站</li>
-                            <li id="quit_gasstation">出加油站</li>
-                            <li id="alter_status">远程状态变更</li>
-                        </ul>
-                    </li>
-                    <li id="change_station">车辆远程换站</li>
-                </ul>
-            </div>
+<div class="container">
+    <div class="nav-addr">
+        <img src="../../resources/images/navbar/car.png"> 车辆管理
+        <img src="../../resources/images/navbar/nav_right_12.png"> 车辆监控及远程操作
+    </div>
+    <div class="search-zone">
+        <label for="search_text" class="search-type" id="search_type">车牌号码</label>
+        <input type="text" class="search-text" id="search_text">
+        <input type="button" class="search-btn" id="search_btn" value="查询">
+        <div id="nav">
+            <ul>
+                <li>设备绑定
+                    <ul>
+                        <li id="bind_terminal">车载终端绑定</li>
+                        <li id="bind_lock">锁绑定</li>
+                    </ul>
+                </li>
+                <li>车载终端配置
+                    <ul>
+                        <li id="gps_config">GPS配置</li>
+                        <li id="func_enable">功能启用</li>
+                        <li id="soft_upgrade">软件升级</li>
+                    </ul>
+                </li>
+                <li id="realtime_monitor">实时监控</li>
+                <li>车辆远程控制
+                    <ul>
+                        <li id="into_oildepot">进油库</li>
+                        <li id="quit_oildepot">出油库</li>
+                        <li id="into_gasstation">进加油站</li>
+                        <li id="quit_gasstation">出加油站</li>
+                        <li id="alter_status">远程状态变更</li>
+                    </ul>
+                </li>
+                <li id="change_station">车辆远程换站</li>
+            </ul>
         </div>
+    </div>
 
-        <div class="data-zone">
-            <div class="map" id="bmap"></div>
-            <script type="text/javascript">
-                // 百度地图API功能
-                var map = new BMap.Map("bmap"); // 创建Map实例
-                map.centerAndZoom("厦门", 12); // 初始化地图,设置中心点坐标和地图级别
-                map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
-                map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
-                map.addControl(new BMap.ScaleControl({
-                    anchor: BMAP_ANCHOR_BOTTOM_RIGHT
-                })); // 右下角，添加比例尺
-                map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
-            </script>
+    <div class="data-zone">
+        <div class="map" id="bmap"></div>
+        <script type="text/javascript">
+            // 百度地图API功能
+            var map = new BMap.Map("bmap"); // 创建Map实例
+            map.centerAndZoom("厦门", 12); // 初始化地图,设置中心点坐标和地图级别
+            map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
+            map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
+            map.addControl(new BMap.ScaleControl({
+                anchor: BMAP_ANCHOR_BOTTOM_RIGHT
+            })); // 右下角，添加比例尺
+            map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
+        </script>
 
-            <div class="table">
-                <div id="car_list" title="隐藏车辆列表"></div>
-                <div class="monitor-log" style="width: 420px; float: right;">
-                    <div class="log-title" style="height: 42px; background: #a5a6a6;">车辆监控日志</div>
-                    <div class="log-content"></div>
-                </div>
-                <div class="table-list" style="max-width: 1300px;">
-                    <div class="table-head">
-                        <table width="100%">
-                            <thead>
-                            <tr>
-                                <th class="car-num">车牌号码</th>
-                                <th class="car-company">所属公司</th>
-                                <th class="car-type">车辆类型</th>
-                                <th class="car-coordinate">经纬度</th>
-                                <th class="car-velocity">速度</th>
-                                <th class="car-aspect">方向</th>
-                                <th class="car-status">车辆状态</th>
-                                <th class="car-lock">锁状态</th>
-                                <th class="car-alarm">报警</th>
-                                <th class="car-divide"></th>
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
-                    <div class="table-body">
-                        <table width="100%">
-                        </table>
-                    </div>
-                </div>
+        <div class="table">
+            <div id="car_list" title="隐藏车辆列表"></div>
+            <div id="car_info" style="display: none">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            <div class="table-list" id="table-cont">
+                                <table width="100%">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th class="car-num">车牌号码</th>
+                                            <th class="car-company">所属公司</th>
+                                            <th class="car-type">车辆类型</th>
+                                            <th class="car-coordinate">经纬度</th>
+                                            <th class="car-velocity">速度</th>
+                                            <th class="car-aspect">方向</th>
+                                            <th class="car-status">车辆状态</th>
+                                            <th class="car-lock">锁状态</th>
+                                            <th class="car-alarm">报警</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-body"></tbody>
+                                </table>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="monitor-log">
+                                <div class="log-title" style="height: 42px; background: #a5a6a6;">车辆监控日志</div>
+                                <div class="log-content"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
+</div>
+<div class="hidden-box container">
+    <div class="info-zone">
+        <div class="base-info">
+            <div class="info-title">
+                实时监控
+            </div>
+            <table class="base-table">
+                <tr>
+                    <td>配置范围</td>
+                    <td>
+                        <select class="editInfo" id="scope">
+                            <option value=1>单部车辆</option>
+                            <option value=2>运输公司</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>车牌号</td>
+                    <td>
+                        <input type="text" class="editInfo" id="carcom">
+                    </td>
+                </tr>
+                <tr>
+                    <td>轨迹上报间隔（秒）</td>
+                    <td>
+                        <input type="hidden" id="interval" value="30" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>监控时长（分钟）</td>
+                    <td>
+                        <input type="hidden" id="duration" value="5" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="oper-zone">
+        <input type="button" id="cancel" value="取消">
+        <input type="button" id="confirm" value="确认">
+    </div>
+</div>
 </body>
 
 </html>

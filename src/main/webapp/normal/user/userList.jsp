@@ -182,9 +182,9 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class="table-head">
+            <div class='table-cont' id='table-cont'>
                 <table width="100%">
-                    <thead>
+                    <thead class="table-head">
                         <tr>
                             <th class="user-id">操作员ID</th>
                             <th class="user-account">账号</th>
@@ -197,9 +197,9 @@
                             <th class="user-action">操作</th>
                         </tr>
                     </thead>
+                    <tbody class="table-body"></tbody>
                 </table>
             </div>
-            <div class="table-body"></div>
             <div class="page">
                 <span>第</span>
                 <select id="page_id">
@@ -207,11 +207,10 @@
                 </select>
                 <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
                 <select id="page_size">
-                    <option value="10">10条/页</option>
-                    <option value="20">20条/页</option>
                     <option value="25">25条/页</option>
-                    <option value="30">30条/页</option>
                     <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="150">150条/页</option>
                 </select>
                 <input type="hidden" id="uaccount">
                 <input type="hidden" id="uname">

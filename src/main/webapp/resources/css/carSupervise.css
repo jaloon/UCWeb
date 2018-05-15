@@ -2,6 +2,12 @@
     overflow-x: hidden;
 }
 
+.nav-addr {
+    background-color: rgba(68, 80, 101, 0.8);
+    color: #ffffff;
+    padding-left: 30px;
+}
+
 .search-zone {
     width: 100%;
     min-width: 1170px;
@@ -54,7 +60,6 @@ select.search-text {
     left: 60px;
     top: 10px;
 }
-
 
 /********************下拉菜单begin********************/
 
@@ -130,7 +135,6 @@ select.search-text {
     display: block;
 }
 
-
 /********************下拉菜单end********************/
 
 .config {
@@ -140,7 +144,7 @@ select.search-text {
     display: none;
 }
 
-.config>table {
+.config > table {
     width: 250px;
     font-size: 14px;
     color: #445065;
@@ -207,14 +211,27 @@ select.search-text {
     z-index: auto;
 }
 
+.table-list{
+    /**make table can scroll**/
+    height: 340px;
+    overflow: auto;
+    /** add some style**/
+    max-width: 1300px;
+    box-shadow: 0 0 1px 3px #e6e7e9;
+}
+
+.monitor-log {
+    width: 420px;
+    height: 340px;
+    float: right;
+}
+
 .table-head {
     width: 100%;
     height: 36px;
     color: #445065;
     font-weight: 500;
-    /* background: #009688; */
     background: #e6e7e9;
-    margin-top: 10px;
 }
 
 .table-body {
@@ -222,12 +239,10 @@ select.search-text {
     height: 300px;
     color: #5a6779;
     font-size: 13px;
-    /* background: #ffffff; */
     overflow: auto;
 }
 
-.data-zone th,
-td {
+.data-zone th, td {
     text-align: center;
     vertical-align: middle;
     height: 30px;
@@ -236,7 +251,6 @@ td {
 .data-zone td {
     border-bottom: 1px solid #e6e7e9;
 }
-
 
 /********************表格列begin********************/
 
@@ -276,14 +290,6 @@ td {
     width: 200px;
 }
 
-.car-divide {
-    width: 9px;
-    min-width: 9px;
-    max-width: 9px;
-    background: #e6e7e9;
-}
-
-
 /********************表格列end********************/
 
 .page {
@@ -317,3 +323,97 @@ td {
     top: 7px;
     left: 16px;
 }
+
+/***************************hidden-box start************************/
+.hidden-box {
+    width: 540px;
+    background: #ffffff;
+}
+
+.info-zone {
+    width: 480px;
+    padding: 15px 30px;
+    height: 308px;
+    overflow: auto;
+}
+
+.base-info {
+    width: 480px;
+}
+
+.info-title {
+    width: 485px;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 10px;
+    background: #e6e7e9;
+    position: relative;
+    left: -15px;
+}
+
+.base-table {
+    width: 480px;
+    font-size: 14px;
+    color: #445065;
+}
+
+.hidden-box tr {
+    height: 36px;
+}
+
+.hidden-box td {
+    text-align: left;
+}
+
+.base-info tr td:first-child {
+    width: 126px;
+}
+
+.editInfo {
+    height: 26px;
+    width: 334px;
+    line-height: 26px;
+    border: 1px solid #d7dbe2;
+    border-radius: 3px;
+    padding: 0 6px 0 6px;
+    color: #57647c;
+}
+
+select.editInfo {
+    height: 28px;
+    width: 348px;
+}
+
+.oper-zone {
+    width: 540px;
+    height: 54px;
+    background: #e6e7e9;
+    position: fixed;
+}
+
+#cancel {
+    width: 100px;
+    height: 30px;
+    border: 1px solid #478de4;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #40454b;
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    right: 124px;
+}
+
+#confirm {
+    width: 100px;
+    height: 30px;
+    background: #478de4;
+    color: #ffffff;
+    border: 0;
+    border-radius: 3px;
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    right: 14px;
+}
+/***************************hidden-box end**************************/

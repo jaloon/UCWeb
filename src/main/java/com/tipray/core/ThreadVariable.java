@@ -1,14 +1,15 @@
 package com.tipray.core;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.Session;
 import com.tipray.bean.baseinfo.Permission;
 import com.tipray.bean.baseinfo.Role;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.util.CacheUtil;
+import com.tipray.util.PermissionUtil;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 线程变量
@@ -70,4 +71,7 @@ public class ThreadVariable {
 		return appRole != null ? appRole.getPermissions() : null;
 	}
 
+	public static boolean mainAuth() {
+        return PermissionUtil.containPermission(getPermissions(),"carManage");
+    }
 }

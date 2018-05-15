@@ -253,7 +253,7 @@
             success: function(response) {
                 var lock_select = $("#lock_id").children().eq(0);
                 response.forEach(function(lockId) {
-                    lock_select.append("<option value=" + lockId + ">s" + lockId + "</option>");
+                    lock_select.append("<option value=" + lockId + ">" + lockId + "</option>");
                 });
             }
         });

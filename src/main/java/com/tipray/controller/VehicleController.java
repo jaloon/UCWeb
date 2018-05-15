@@ -337,7 +337,8 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "selectCars.do")
     @ResponseBody
     public List<DropdownData> selectCars() {
-        return vehicleService.selectCars();
+        List<DropdownData> list = vehicleService.selectCars();
+        return list;
     }
 
     /**

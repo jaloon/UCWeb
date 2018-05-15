@@ -4,39 +4,62 @@ $(function() {
         $(".map").height($(window).height() - 68);
     }).resize();
 
-    function getCars() {
-        var cars = [{ id: '', name: '' }];
-        $.ajax({
-            type: "get",
-            async: false, //不异步，先执行完ajax，再干别的
-            url: "../../manage/car/getCarList.do",
-            dataType: "json",
-            success: function(response) {
-                for (var i = 0, len = response.length; i < len; i++) {
-                    var res = response[i];
-                    var car = {};
-                    car.id = res.id;
-                    car.name = res.carNumber;
-                    cars.push(car);
-                }
-            }
-        });
-        return cars;
-    }
-    var cars = getCars();
+    // $.ajax({
+    //     type: "get",
+    //     async: false, //不异步，先执行完ajax，再干别的
+    //     url: "../../../manage/car/selectCars.do",
+    //     dataType: "text",
+    //     success: function(response) {
+    //         // var data = JSON.stringify(response);
+    //         $('#text_car').dropdown({data:response});
+    //     }
+    // });
 
-    function editableCarList() {
-        for (var i = 0, len = cars.length; i < len; i++) {
-            var car = cars[i];
-            $("#text_car").append("<option value=" + car.id + ">" + car.name + "</option>");
-        }
-        $('#text_car').editableSelect();
-        $('#text_car').css({
-            // width: '266px',
-            background: 'white'
-        })
-    }
-    editableCarList();
+    // function dropdown_val() {
+    //     var el = $("span.dropdown-selected>i.del");
+    //     var val = el.attr("data-id");
+    //     return val;
+    // }
+    //
+    // function dropdown_text() {
+    //     var el = $("span.dropdown-selected");
+    //     var text = el.text();
+    //     return text;
+    // }
+
+    // function getCars() {
+    //     var cars = [{ id: '', name: '' }];
+    //     $.ajax({
+    //         type: "get",
+    //         async: false, //不异步，先执行完ajax，再干别的
+    //         url: "../../../manage/car/getCarList.do",
+    //         dataType: "json",
+    //         success: function(response) {
+    //             for (var i = 0, len = response.length; i < len; i++) {
+    //                 var res = response[i];
+    //                 var car = {};
+    //                 car.id = res.id;
+    //                 car.name = res.carNumber;
+    //                 cars.push(car);
+    //             }
+    //         }
+    //     });
+    //     return cars;
+    // }
+    // var cars = getCars();
+    //
+    // function editableCarList() {
+    //     for (var i = 0, len = cars.length; i < len; i++) {
+    //         var car = cars[i];
+    //         $("#text_car").append("<option value=" + car.id + ">" + car.name + "</option>");
+    //     }
+    //     $('#text_car').editableSelect();
+    //     $('#text_car').css({
+    //         // width: '266px',
+    //         background: 'white'
+    //     })
+    // }
+    // editableCarList();
 
     $('#text_interval').jRange({
         from: 0,
@@ -78,12 +101,12 @@ $(function() {
     function initCarIcon(alarm) {
         if (alarm) {
             carIcon = new BMap.Icon(
-                '../../resources/images/marker/车辆图标-32-红.png',
+                '../../../resources/images/marker/车辆图标-32-红.png',
                 new BMap.Size(32, 15)
             );
         } else {
             carIcon = new BMap.Icon(
-                '../../resources/images/marker/车辆图标-32-黄.png',
+                '../../../resources/images/marker/车辆图标-32-黄.png',
                 new BMap.Size(32, 15)
             );
         }
@@ -143,10 +166,11 @@ $(function() {
 
     function start() {
         carNumber = trimAll($("#text_car").val());
+        // carNumber = dropdown_text();
         begin = $("#text_begin").val();
         end = $("#text_end").val();
         interval = $("#text_interval").val();
-        $.post("../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
+        $.post("../../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
             function(data) {
                 if (isNull(data) || data.length == 0) {
                     layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
