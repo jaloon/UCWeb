@@ -13,10 +13,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * SpringWebSocket报警业务处理
@@ -27,16 +27,15 @@ import java.util.Map;
  * 100 消除报警 <br>
  * 101 消除报警回复 <br>
  * 110 报警(default) <br>
- * 120 延时推送报警 <br>
- * 130 忽略报警 <br>
- * 
+ *
  * @author chenlong
  * @version 1.0 2017-12-22
  *
  */
 public class AlarmWebSocketHandler implements WebSocketHandler {
 	private static final Logger logger = LoggerFactory.getLogger(AlarmWebSocketHandler.class);
-	private static final Map<Long, WebSocketSession> WEB_SOCKET_CLIENTS = new HashMap<Long, WebSocketSession>();
+	private static final List<AlarmRecord> ALARM_RECORDS_CACHE = new CopyOnWriteArrayList<>();
+    private static final Map<Long, WebSocketSession> WEB_SOCKET_CLIENTS = new HashMap<Long, WebSocketSession>();
 	private static final Map<Long, Integer> SESSION_USER_CACHE = new HashMap<Long, Integer>();
 	private static final Map<Integer, Long> USER_ONLINE_TIME_CACHE = new HashMap<Integer, Long>();
 	private static final Map<Long, String> ALARM_CACHE = new HashMap<Long, String>();
@@ -103,47 +102,55 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
 	 * @param session
 	 *            {@link WebSocketSession}
 	 * @param msgMap
-	 *            {@link WebSocketMessage} JSON文本的实际对象
+	 *            {@link Map} JSON文本 WebSocketMessage 的实际对象
 	 */
 	private void dealWebSocketOpen(WebSocketSession session, Map<String, Object> msgMap) {
-		Integer userId = Integer.parseInt((String) msgMap.get("userId"), 10);
+		// Integer userId = Integer.parseInt((String) msgMap.get("userId"), 10);
 		Long sessionId = Long.parseLong(session.getId(), 16);
 		// 添加WebSocketSessionId与用户对应关系缓存
-		SESSION_USER_CACHE.put(sessionId, userId);
-		// 报警业务类型 （100 消除报警，110 报警(default)，120 延时推送报警，130 忽略报警）
+		// SESSION_USER_CACHE.put(sessionId, userId);
+		// 报警业务类型 （100 消除报警，110 报警(default)）
+        if (EmptyObjectUtil.isEmptyList(ALARM_RECORDS_CACHE)) {
+            List<AlarmRecord> alarmRecords = alarmRecordService.findNotElimited();
+            if (EmptyObjectUtil.isEmptyList(alarmRecords)) {
+                return;
+            }
+            ALARM_RECORDS_CACHE.addAll(alarmRecords);
+        }
 		Map<String, Object> alarmCacheMap = new HashMap<String, Object>();
-		if (!EmptyObjectUtil.isEmptyMap(ALARM_CACHE)) {
-			alarmCacheMap.put("biz", ALARM_DELAY);
-			List<String> alarmCacheList = new ArrayList<String>();
-			if (!EmptyObjectUtil.isEmptyMap(USER_ONLINE_TIME_CACHE) && USER_ONLINE_TIME_CACHE.containsKey(userId)) {
-				// 上次退出时间
-				Long lastOutTime = USER_ONLINE_TIME_CACHE.get(userId);
-				ALARM_TIME_CACHE.keySet().parallelStream().forEach(alarmId -> {
-					if (ALARM_TIME_CACHE.get(alarmId).compareTo(lastOutTime) > 0) {
-						alarmCacheList.add(ALARM_CACHE.get(alarmId));
-					}
-				});
-			} else {
-				ALARM_CACHE.values().parallelStream().forEach(alarmCache -> alarmCacheList.add(alarmCache));
-			}
-			// 用户报警提示更新为TRUE
-			ALARM_TIP_CACHE.put(userId, true);
-			// 更新用户在线时间
-			USER_ONLINE_TIME_CACHE.put(userId, System.currentTimeMillis());
-			alarmCacheMap.put("alarmCacheList", alarmCacheList);
-		} else if (!EmptyObjectUtil.isEmptyMap(ALARM_TIP_CACHE) && ALARM_TIP_CACHE.containsKey(userId)
-				&& ALARM_TIP_CACHE.get(userId)) {
-			alarmCacheMap.put("biz", ALARM_IGNORE);
-		} else {
-			return;
-		}
-		List<AlarmRecord> alarmRecords = alarmRecordService.findNotElimited();
-		alarmCacheMap.put("alarmRecords", alarmRecords);
+		// if (!EmptyObjectUtil.isEmptyMap(ALARM_CACHE)) {
+		// 	alarmCacheMap.put("biz", ALARM_DELAY);
+		// 	List<String> alarmCacheList = new ArrayList<String>();
+		// 	if (!EmptyObjectUtil.isEmptyMap(USER_ONLINE_TIME_CACHE) && USER_ONLINE_TIME_CACHE.containsKey(userId)) {
+		// 		// 上次退出时间
+		// 		Long lastOutTime = USER_ONLINE_TIME_CACHE.get(userId);
+		// 		ALARM_TIME_CACHE.keySet().parallelStream().forEach(alarmId -> {
+		// 			if (ALARM_TIME_CACHE.get(alarmId).compareTo(lastOutTime) > 0) {
+		// 				alarmCacheList.add(ALARM_CACHE.get(alarmId));
+		// 			}
+		// 		});
+		// 	} else {
+		// 		ALARM_CACHE.values().parallelStream().forEach(alarmCache -> alarmCacheList.add(alarmCache));
+		// 	}
+		// 	// 用户报警提示更新为TRUE
+		// 	ALARM_TIP_CACHE.put(userId, true);
+		// 	// 更新用户在线时间
+		// 	USER_ONLINE_TIME_CACHE.put(userId, System.currentTimeMillis());
+		// 	alarmCacheMap.put("alarmCacheList", alarmCacheList);
+		// } else if (!EmptyObjectUtil.isEmptyMap(ALARM_TIP_CACHE) && ALARM_TIP_CACHE.containsKey(userId)
+		// 		&& ALARM_TIP_CACHE.get(userId)) {
+		// 	alarmCacheMap.put("biz", ALARM_IGNORE);
+		// } else {
+		// 	return;
+		// }
+		alarmCacheMap.put("biz", 111);
+		alarmCacheMap.put("cacheAlarm", ALARM_RECORDS_CACHE);
 		try {
 			String alarmCacheMsg = JSONUtil.stringify(alarmCacheMap);
 			session.sendMessage(new TextMessage(alarmCacheMsg));
 		} catch (Exception e) {
-			logger.error("sendAlarmCacheMsg to {} error！\n{}", sessionId, e.getMessage());
+			logger.error("send cache alarm msg to {} error: {}", sessionId, e.toString());
+			logger.debug("send cache alarm msg error stack: ", e);
 		}
 
 	}
@@ -192,12 +199,12 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
 	private void dealConnectionClose(Long sessionId) {
 		// 移除WebSocket客户端缓存
 		WEB_SOCKET_CLIENTS.remove(sessionId);
-		if (SESSION_USER_CACHE.containsKey(sessionId)) {
-			// 更新用户在线时间
-			USER_ONLINE_TIME_CACHE.put(SESSION_USER_CACHE.get(sessionId), System.currentTimeMillis());
-			// 移除WebSocketSessionId与用户对应关系缓存
-			SESSION_USER_CACHE.remove(sessionId);
-		}
+		// if (SESSION_USER_CACHE.containsKey(sessionId)) {
+		// 	// 更新用户在线时间
+		// 	USER_ONLINE_TIME_CACHE.put(SESSION_USER_CACHE.get(sessionId), System.currentTimeMillis());
+		// 	// 移除WebSocketSessionId与用户对应关系缓存
+		// 	SESSION_USER_CACHE.remove(sessionId);
+		// }
 	}
 
 	/**

@@ -74,6 +74,9 @@ $(function() {
                 case "realtime":
                     realtimeId = receiveObj.sessionId;
                     break;
+                case "log":
+                    reFreshLog(receiveObj);
+                    break;
                 default:
                     break;
             }
@@ -85,6 +88,23 @@ $(function() {
     ws.onclose = function(event) {
         if (window.console) console.log("websocket closed： " + event);
     };
+
+    function reFreshLog(log) {
+        var timestamp = "<span class='log-time'>[" + new Date().format("yyyy-MM-dd HH:mm:ss") + "]</span>";
+        var task = isNull(log.task) ? "" : "[" + log.task + "]";
+        var result = "<span " + (log.fail > 0 ? "class='log-fail'>" : "class='log-done'>") + log.result + "</span>";
+        var logHtml = "<div class='log-content'>" + timestamp + task + "&nbsp;&nbsp;" + result;
+        $(".log-box").prepend(logHtml);
+    }
+
+    // for (var i = 0; i < 10; i++) {
+    //     var log = {
+    //         fail: Math.round(Math.random()),
+    //         task: "锁绑定变更下发：黄卓明通过网页对车辆桂A12345增加锁绑定。",
+    //         result: "成功或失败！"
+    //     }
+    //     reFreshLog(log)
+    // }
 
     function initCarIcon(alarm) {
         var carIcon;
@@ -157,15 +177,15 @@ $(function() {
                 shadeClose: true,
                 shade: 0.6,
                 area: ['800px', '560px'],
-                content: '../../normal/car/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
+                content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
                 '&carId=' + id + '&carNumber=' + track.carNumber + '&parentSession=' + sessionId + '&user=' + encodeURIComponent(JSON.stringify(user)),
                 end: function() {
                     var order = {
                         biz: 'focus',
                         bizType: 'cancel',
-                        // car: id,
                         session: focusId,
-                        user: JSON.stringify(user)
+                        user: JSON.stringify(user),
+                        token: generateUUID()
                     };
                     ws.send(JSON.stringify(order));
                 }
@@ -287,8 +307,10 @@ $(function() {
     $("#scope").change(function() {
         var scope = $("#scope").val();
         if (scope == 1) {
+            $("#select_name").html("车牌号");
             $("#carcom").replaceWith("<input type=\"text\" class=\"editInfo\" id=\"carcom\">");
         } else {
+            $("#select_name").html("运输公司名称");
             $("#carcom").replaceWith(comHtml);
         }
     });
@@ -358,7 +380,7 @@ $(function() {
             shadeClose: true,
             shade: 0.6,
             area: ['800px', '560px'],
-            content: '../../normal/car/carMonitorRealtime.html?wsUrl=' + wsUrl + '&car=' + encodeURI(carNumber) +
+            content: '../../normal/car/monitor/carMonitorRealtime.html?wsUrl=' + wsUrl + '&car=' + encodeURI(carNumber) +
             '&comId=' + comId + '&interval=' + interval + '&duration=' + duration +
             '&parentSession=' + sessionId + '&user=' + encodeURIComponent(JSON.stringify(user)),
             end: function() {
@@ -366,7 +388,8 @@ $(function() {
                     biz: 'realtime',
                     bizType: 'cancel',
                     session: realtimeId,
-                    user: JSON.stringify(user)
+                    user: JSON.stringify(user),
+                    token: generateUUID()
                 };
                 ws.send(JSON.stringify(order));
             }

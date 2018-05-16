@@ -1,30 +1,29 @@
 package com.tipray.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import com.tipray.dao.AlarmRecordDao;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import com.tipray.bean.ChangeInfo;
 import com.tipray.bean.VehicleTerminalConfig;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.record.AlarmRecord;
 import com.tipray.core.exception.ServiceException;
+import com.tipray.dao.AlarmRecordDao;
 import com.tipray.dao.DistributionRecordDao;
 import com.tipray.dao.LockDao;
 import com.tipray.dao.VehicleManageLogDao;
 import com.tipray.service.VehicleService;
 import com.tipray.util.JSONUtil;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 车辆管理测试
@@ -46,6 +45,13 @@ public class CarTest {
 	private LockDao lockDao;
 	@Resource
 	private AlarmRecordDao alarmRecordDao;
+
+	@Test
+    public void alarm(){
+	    List<AlarmRecord> list = alarmRecordDao.getAlarmRecordsByIdsAndCar("1,2,3",1L);
+      int i=  alarmRecordDao.countAlarmDeviceByIds("1,2,3");
+        System.out.println(i);
+    }
 
 	@Test
     public void updateEli(){

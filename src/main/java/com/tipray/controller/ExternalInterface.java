@@ -1,6 +1,8 @@
 package com.tipray.controller;
 
+import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
+import com.tipray.cache.SerialNumberCache;
 import com.tipray.core.base.BaseAction;
 import com.tipray.net.NioUdpServer;
 import com.tipray.util.JSONUtil;
@@ -15,11 +17,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,8 +133,25 @@ public class ExternalInterface extends BaseAction {
 
     // @RequestMapping(value = "barrier", method = {RequestMethod.POST, RequestMethod.GET})
     // @ResponseBody
-	public void barrier(HttpServletResponse response){
-        AsynUdpCommCache.putResponseCache(1,response);
-        udpServer.send("send");
+    // public void barrier(HttpServletRequest request){
+    //     short serial = SerialNumberCache.getNextSerialNumber((short)1501);
+    //     System.out.println("send: " + serial);
+    //     ByteBuffer buffer = ByteBuffer.allocate(2);
+    //     buffer.putShort(serial);
+    //     final AsyncContext asyncContext = request.startAsync();
+    //     AsynUdpCommCache.putAsyncContext((int)serial,asyncContext);
+    //     udpServer.send(buffer);
+    // }
+    @RequestMapping(value = "barrier", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public DeferredResult<ResponseMsg> barrier() {
+        DeferredResult<ResponseMsg> deferredResult = new DeferredResult<>();
+        short serial = SerialNumberCache.getNextSerialNumber((short)1501);
+        System.out.println("send: " + serial);
+        ByteBuffer buffer = ByteBuffer.allocate(2);
+        buffer.putShort(serial);
+        AsynUdpCommCache.DEFERRED_RESULT_MAP.put((int)serial,deferredResult);
+        udpServer.send(buffer);
+        return deferredResult;
     }
 }

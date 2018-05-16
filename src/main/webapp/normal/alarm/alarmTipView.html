@@ -83,13 +83,13 @@
         //信息窗内容
         var content = "<div style='margin:0;line-height:20px;padding:2px;'>" +
             "车牌号：&emsp;" + record.carNumber +
-            "<br> 时间：&emsp;&emsp;" + new Date(record.createDate).format("yyyy-MM-dd HH:mm:ss") +
+            "<br> 时间：&emsp;&emsp;" + record.createDate +
             "<br> 经度：&emsp;&emsp;" + record.longitude +
             "<br> 纬度：&emsp;&emsp;" + record.latitude +
             "<br> 速度：&emsp;&emsp;" + record.velocity +
             "<br> 方向：&emsp;&emsp;" + angle2aspect(record.angle) +
             "<br> 报警类型：" + record.typeName +
-            "<br> 报警状态：" + record.status + "<button onclick='eliminateAlarm()'>消除报警</button>" +
+            "<br> 报警状态：" + record.status + "&emsp;&emsp;<button onclick='eliminateAlarm()'>消除报警</button>" +
             "<br> 锁状态：&emsp;" + record.lockStatus +
             "</div>";
             //创建检索信息窗口对象
@@ -112,15 +112,16 @@
         map.addOverlay(carMarker); //在地图中添加marker
 
         function eliminateAlarm() {
-            $.post("../../manage/car/eliminateAlarm.do", "eAlarm=" + encodeURIComponent(JSON.stringify(eAlarm)),
+            $.post("../../manage/remote/asyn_alarm_eliminate_request",
+                "vehicle_id=" + record.vehicleId + "&alarm_ids=" + record.id + "&token=" + generateUUID(),
                 function(data) {
-                    if ("error" == data.msg) {
-                        layer.msg("消除报警失败！", {
+                    if (data.id > 0) {
+                        layer.msg(data.msg, {
                             icon: 2,
                             time: 500
                         });
                     } else {
-                        layer.msg("消除报警成功！", {
+                        layer.msg("消除报警指令发送成功！", {
                             icon: 1,
                             time: 500
                         }, function() {

@@ -61,14 +61,15 @@
 	</select>
 
     <select id="getAlarmRecordsByIdsAndCar" resultMap="fullResultMap">
-        SELECT id, type FROM tbl_alarm WHERE id IN ( ${ids} ) AND vehicle_id = #{vehicleId};
+        SELECT id, type, fn_type2name('alarmStatus', `status`) alarm_status
+        FROM tbl_alarm WHERE id IN ( ${ids} ) AND vehicle_id = #{vehicleId};
     </select>
 
     <select id="countAlarmDeviceByIds" parameterType="java.lang.String" resultType="java.lang.Integer">
         SELECT
             COUNT( * )
         FROM
-            ( SELECT device_id FROM tbl_alarm WHERE id IN ( ${ids} ) GROUP BY device_id ) t;
+            ( SELECT device_id FROM tbl_alarm WHERE id IN ( ${_parameter} ) GROUP BY device_id ) t;
     </select>
 
 	<select id="count" parameterType="com.tipray.bean.record.AlarmRecord" resultType="java.lang.Long">
@@ -149,7 +150,7 @@
 			tbl_vehicle c
 		WHERE
 			a.vehicle_id = c.id
-			AND a.eliminate_time = '1970-01-01 08:00:01'
+			AND a.status = 0
 	</select>
 	
 	<select id="findNotElimitedForApp" resultType="java.util.LinkedHashMap">>

@@ -52,7 +52,7 @@ $(function() {
                     shadeClose: true,
                     shade: 0.8,
                     area: ['800px', '560px'],
-                    content: 'normal/alarm/alarmTipView.html?' + encodeURI('record=' + record)
+                    content: 'normal/alarm/alarmTipView.html?record=' + record
                 });
             },
             // 可选播放声音
@@ -139,10 +139,10 @@ $(function() {
         removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
         addAlarm(receiveObj, 2);
         record = encodeURIComponent(receive);
+        currentAlarmId = receiveObj.id;
+        alarmIds.push(currentAlarmId);
         if (window.Notification && Notification.permission === "granted") {
             tipCount++;
-            currentAlarmId = receiveObj.id;
-            alarmIds.push(currentAlarmId);
             alarmNotify.setTitle(true).setFavicon(tipCount).notify({
                 title: "报警通知",
                 body: parseAlarm(receiveObj)
@@ -162,7 +162,7 @@ $(function() {
                             shadeClose: true,
                             shade: 0.8,
                             area: ['800px', '560px'],
-                            content: 'normal/alarm/alarmTipView.html?' + encodeURI('record=' + record)
+                            content: 'normal/alarm/alarmTipView.html?record=' + record
                         });
                     }]
                 ]

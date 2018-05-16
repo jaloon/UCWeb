@@ -40,7 +40,7 @@ function grayscale(obj) {
  * @param {*} imgUrl 原始图像路径
  */
 function removeGrayscale(obj, cssfilter, imgUrl) {
-    if (css3filter) {
+    if (cssfilter) {
         obj.css("filter", 'grayscale(0)');
         return;
     }

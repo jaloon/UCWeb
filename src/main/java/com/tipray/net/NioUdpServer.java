@@ -1,15 +1,16 @@
 package com.tipray.net;
 
+import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.constant.CenterConfigConst;
 import com.tipray.mq.MyQueue;
 import com.tipray.pool.ThreadPool;
+import com.tipray.util.ResponseMsgUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -118,15 +119,22 @@ public class NioUdpServer {
 							InetSocketAddress address = (InetSocketAddress) clientChannel.receive(receiveBuffer);
 
 							short i = receiveBuffer.getShort(0);
-                            HttpServletResponse response = AsynUdpCommCache.getAndRemoveResponseCache((int)i);
-                            if (response != null) {
-                                PrintWriter out = response.getWriter();
-                                out.write("recieve: " + i);
-                                out.flush();
-                                out.close();
+                            DeferredResult<ResponseMsg> deferredResult =AsynUdpCommCache.DEFERRED_RESULT_MAP.remove((int)i);
+                            if (deferredResult != null) {
+                                deferredResult.setResult(ResponseMsgUtil.success("recieve: " + i));
                                 System.out.println("recieve: " + i);
                                 continue;
                             }
+                            // AsyncContext asyncContext = AsynUdpCommCache.getAsyncContext((int)i);
+                            // if (asyncContext != null) {
+                            //     PrintWriter out = asyncContext.getResponse().getWriter();
+                            //     out.write("recieve: " + i);
+                            //     out.flush();
+                            //     out.close();
+                            //     asyncContext.complete();
+                            //     System.out.println("recieve: " + i);
+                            //     continue;
+                            // }
 
 							// 1.判断是否来自预期地址和端口号
 							// InetSocketAddress.getHostName()获取的主机名称是计算机名，InetAddress.getHostAddress()获取的才是IP地址

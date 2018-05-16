@@ -3,8 +3,9 @@ package com.tipray.cache;
 import com.tipray.bean.ResponseMsg;
 import com.tipray.net.Heartbeat;
 import com.tipray.websocket.MonitorWebSocketHandler;
+import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.AsyncContext;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -39,9 +40,11 @@ public class AsynUdpCommCache {
      */
     private static final Map<Integer, Map<String, Object>> PARAM_MAP = new ConcurrentHashMap<>();
     /**
-     * HttpServletResponse 缓存
+     * AsyncContext异步请求上下文（异步请求容器）缓存
      */
-    private static final Map<Integer, HttpServletResponse> RESPONSE_MAP = new ConcurrentHashMap<>();
+    private static final Map<Integer, AsyncContext> ASYNC_CONTEXT_MAP = new ConcurrentHashMap<>();
+
+    public static final Map<Integer, DeferredResult<ResponseMsg>> DEFERRED_RESULT_MAP = new ConcurrentHashMap<>();
 
     /**
      * 添加任务日志缓存
@@ -168,34 +171,34 @@ public class AsynUdpCommCache {
     }
 
     /**
-     * 添加HttpServletResponse缓存
+     * 添加AsyncContext缓存
      *
-     * @param cacheId  {@link Integer} 缓存ID
-     * @param response {@link HttpServletResponse}
-     * @return {@link HttpServletResponse}
+     * @param cacheId      {@link Integer} 缓存ID
+     * @param asyncContext {@link AsyncContext} 异步请求上下文
+     * @return {@link AsyncContext} 异步请求上下文
      */
-    public static synchronized HttpServletResponse putResponseCache(Integer cacheId, HttpServletResponse response) {
-        return RESPONSE_MAP.put(cacheId, response);
+    public static synchronized AsyncContext putAsyncContext(Integer cacheId, AsyncContext asyncContext) {
+        return ASYNC_CONTEXT_MAP.put(cacheId, asyncContext);
     }
 
     /**
-     * 获取并移除HttpServletResponse缓存
+     * 获取并移除AsyncContext缓存
      *
      * @param cacheId {@link Integer} 缓存ID
-     * @return {@link HttpServletResponse}
+     * @return {@link AsyncContext} 异步请求上下文
      */
-    public static synchronized HttpServletResponse getAndRemoveResponseCache(Integer cacheId) {
-        return RESPONSE_MAP.remove(cacheId);
+    public static synchronized AsyncContext getAndRemoveAsyncContext(Integer cacheId) {
+        return ASYNC_CONTEXT_MAP.remove(cacheId);
     }
 
     /**
-     * 获取HttpServletResponse缓存
+     * 获取AsyncContext缓存
      *
      * @param cacheId {@link Integer} 缓存ID
-     * @return {@link HttpServletResponse}
+     * @return {@link AsyncContext} 异步请求上下文
      */
-    public static synchronized HttpServletResponse getResponseCache(Integer cacheId) {
-        return RESPONSE_MAP.get(cacheId);
+    public static synchronized AsyncContext getAsyncContext(Integer cacheId) {
+        return ASYNC_CONTEXT_MAP.get(cacheId);
     }
 
     /**

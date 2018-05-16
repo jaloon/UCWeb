@@ -107,9 +107,10 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
         try {
-            if (terminalConfig.getScope() == null) {
+            Integer scope = terminalConfig.getScope();
+            if (scope == null || (scope == 1 && StringUtil.isEmpty(terminalConfig.getCarNumber()))) {
                 result = "失败，配置参数为空！";
                 logger.error("更新车台配置失败：{}", TerminalConfigUpdateErrorEnum.CONFIG_PARAM_NULL);
                 return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.CONFIG_PARAM_NULL);
@@ -136,7 +137,6 @@ public class VehicleManageController {
                     ByteBuffer src = SendPacketBuilder.buildProtocol0x1202(terminalId);
                     boolean isSend = udpServer.send(src);
                     if (!isSend) {
-                        removeCache(cacheId, null);
                         throw new UdpException("UDP发送数据异常！");
                     }
                     addTimeoutTask(src, cacheId);
@@ -156,12 +156,13 @@ public class VehicleManageController {
                     throw new IllegalArgumentException("更新车台配置参数错误！");
             }
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，发送更新车台配置请求异常！";
             logger.error("更新车台配置异常：e={}", e.toString());
             logger.debug("更新车台配置异常堆栈信息");
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -216,7 +217,7 @@ public class VehicleManageController {
                 .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("配置车台功能启用。").toString();
         String result = "";
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("车台功能启用配置失败：{}", TerminalConfigUpdateErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.CARNUMBER_NULL);
@@ -248,10 +249,11 @@ public class VehicleManageController {
         } finally {
             if (result.length() > 0) {
                 type++;
+                monitorWebSocketHandler.broadcastLog(1, description, result);
             } else {
                 result = "成功！";
+                monitorWebSocketHandler.broadcastLog(0, description, result);
             }
-            monitorWebSocketHandler.broadcastRemoteControl(description, result);
             OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, result, token, vehicleManageLogService, logger);
         }
     }
@@ -300,10 +302,11 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
+        Map<String, Object> params = new HashMap<>();
         boolean isOk = false;
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("车载终端绑定失败：{}", DevBindErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(DevBindErrorEnum.CARNUMBER_NULL);
@@ -350,7 +353,6 @@ public class VehicleManageController {
                         "设备已与车辆" + carNumber1 + "绑定！");
             }
 
-            Map<String, Object> params = new HashMap<>();
             params.put("carNumber", carNumber);
             params.put("deviceId", deviceId);
             cacheId = addCache(UdpBizId.CAR_BIND_REQUEST, logId, description, params);
@@ -358,7 +360,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1204(deviceId, carNumber, storeNum.byteValue());
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, params);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -369,6 +370,7 @@ public class VehicleManageController {
             logger.info("车载终端绑定指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, params);
             result = "失败，发送车载终端绑定请求异常！";
             logger.error("车载终端绑定异常：e={}", e.toString());
             logger.debug("车载终端绑定异常堆栈信息：", e);
@@ -423,9 +425,9 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("监听待绑定锁列表失败：{}", DevBindErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(DevBindErrorEnum.CARNUMBER_NULL);
@@ -458,7 +460,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1205(terminalId, listenState.byteValue());
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, null);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -467,12 +468,13 @@ public class VehicleManageController {
             logger.info("监听待绑定锁列表指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，发送监听待绑定锁控制请求异常！";
             logger.error("监听待绑定锁列表异常：e={}", e.toString());
             logger.debug("监听待绑定锁列表异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -515,9 +517,9 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("清除待绑定锁列表失败：{}", DevBindErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(DevBindErrorEnum.CARNUMBER_NULL);
@@ -540,7 +542,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1206(terminalId);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, null);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -549,12 +550,13 @@ public class VehicleManageController {
             logger.info("清除待绑定锁列表指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，发送锁监听待绑定列表清除请求异常！";
             logger.error("清除待绑定锁列表异常：e={}", e.toString());
             logger.debug("清除待绑定锁列表异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -602,9 +604,9 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("锁绑定触发控制失败：{}", DevBindErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(DevBindErrorEnum.CARNUMBER_NULL);
@@ -637,7 +639,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1209(terminalId, triggerState.byteValue());
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, null);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -646,12 +647,13 @@ public class VehicleManageController {
             logger.info("锁绑定触发控制指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，发送锁绑定触发开启关闭控制请求异常！";
             logger.error("锁绑定触发控制异常：e={}", e.toString());
             logger.debug("锁绑定触发控制异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -701,10 +703,10 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
         boolean isOk = false;
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("锁绑定变更下发失败：{}", DevBindErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(DevBindErrorEnum.CARNUMBER_NULL);
@@ -789,7 +791,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1207(terminalId, bindType.byteValue(), locks);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, null);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -800,6 +801,7 @@ public class VehicleManageController {
             logger.info("锁绑定变更下发指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，发送锁绑定变更下发请求异常！";
             logger.error("锁绑定变更下发异常：e={}", e.toString());
             logger.debug("锁绑定变更下发异常堆栈信息：", e);
@@ -853,9 +855,9 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
         try {
-            if (terminalIds == null) {
+            if (StringUtil.isEmpty(terminalIds)) {
                 result = "失败，车牌号为空！";
                 logger.error("车台软件升级失败：{}", TerminalSoftwareUpgradeErrorEnum.TERMINAL_IDS_NULL);
                 return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.TERMINAL_IDS_NULL);
@@ -876,7 +878,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1208(terminalIds, ftpPath, files);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, null);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -885,12 +886,13 @@ public class VehicleManageController {
             logger.info("车台软件升级指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，发送车台软件升级请求异常！";
             logger.error("车台软件升级异常：e={}", e.toString());
             logger.debug("车台软件升级异常堆栈信息", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -936,7 +938,8 @@ public class VehicleManageController {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
+        Map<String, Object> params = new HashMap<>();
         try {
             if (transportId == null) {
                 result = "失败，原配送ID为空！";
@@ -994,7 +997,6 @@ public class VehicleManageController {
             // UDP协议数据体
             ByteBuffer dataBuffer = (ByteBuffer) map.get("dataBuffer");
 
-            Map<String, Object> params = new HashMap<>();
             params.put("changeId", changeId);
             params.put("transportId", transportId);
             params.put("changedTransportId", changedTransportId);
@@ -1003,7 +1005,6 @@ public class VehicleManageController {
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, params);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -1012,12 +1013,13 @@ public class VehicleManageController {
             logger.info("远程换站指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, params);
             result = "失败，发送远程换站请求异常！";
             logger.error("远程换站异常：e={}", e.toString());
             logger.debug("远程换站异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -1055,13 +1057,15 @@ public class VehicleManageController {
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_ALARM | LogTypeConst.TYPE_ALARM_ELIMINATE
                 | LogTypeConst.RESULT_DONE;
         String description = new StringBuffer("远程报警消除：").append(user.getName()).append("通过")
-                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("远程消除报警").append(alarmIds).toString();
+                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("远程消除序号为").append(alarmIds)
+                .append("的报警").toString();
         Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
         if (logId == null || logId == 0L) {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
         }
         String result = "";
-        int cacheId;
+        int cacheId = 0;
+        Map<String, Object> params = new HashMap<>();
         boolean isOk = false;
         try {
             if (vehicleId == null) {
@@ -1069,14 +1073,14 @@ public class VehicleManageController {
                 logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.VEHICLE_ID_NULL);
                 return ResponseMsgUtil.error(RemoteEliminateAlarmErrorEnum.VEHICLE_ID_NULL);
             }
-            if (alarmIds == null) {
+            if (StringUtil.isEmpty(alarmIds)) {
                 result = "失败，报警ID为空！";
                 logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.ALARM_ID_NULL);
                 return ResponseMsgUtil.error(RemoteEliminateAlarmErrorEnum.ALARM_ID_NULL);
             }
             alarmIds = StringUtil.pretreatStrWithComma(alarmIds);
             int devNum = alarmRecordService.countAlarmDeviceByIds(alarmIds);
-            if (devNum > 0) {
+            if (devNum > 1) {
                 result = "失败，消除报警的设备不唯一！";
                 logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.ALARM_DEV_NOT_UNIQUE);
                 return ResponseMsgUtil.error(ErrorTagConst.ELIMINATE_ALARM_ERROR_TAG,
@@ -1149,7 +1153,6 @@ public class VehicleManageController {
             alarmRecordService.addEliminateAlarm(eAlarmMap);
             int alarmEliminateId = ((Long) eAlarmMap.get("id")).intValue();
 
-            Map<String, Object> params = new HashMap<>();
             params.put("alarmIds", alarmIds);
             params.put("alarmEliminateId", alarmEliminateId);
             params.put("alarmIdList", alarmIdList);
@@ -1159,7 +1162,6 @@ public class VehicleManageController {
                     alarmType, user.getName());
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, params);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -1167,12 +1169,13 @@ public class VehicleManageController {
 
             result = "请求发起成功！";
             isOk = true;
-            logger.info("远程换站指令发送成功！");
+            logger.info("远程报警消除指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
-            result = "失败，发送远程换站请求异常！";
-            logger.error("远程换站异常：e={}", e.toString());
-            logger.debug("远程换站异常堆栈信息：", e);
+            removeCache(cacheId, params);
+            result = "失败，发送远程报警消除请求异常！";
+            logger.error("远程报警消除异常：e={}", e.toString());
+            logger.debug("远程报警消除异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
             broadcastAndUpdateLogResult(vehicleManageLog, isOk, type, description, result);
@@ -1227,6 +1230,7 @@ public class VehicleManageController {
         }
         String result = "";
         int cacheId = 0;
+        Map<String, Object> params = new HashMap<>();
         try {
             if (controlType == null) {
                 result = "失败，远程操作类型为空！";
@@ -1257,7 +1261,7 @@ public class VehicleManageController {
                 default:
                     break;
             }
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CARNUMBER_NULL);
@@ -1306,7 +1310,6 @@ public class VehicleManageController {
             Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
             String userName = user.getName();
 
-            Map<String, Object> params = new HashMap<>();
             params.put("remoteControlId", remoteControlId);
             if (controlType < 5) {
                 // 远程车辆进出
@@ -1316,7 +1319,6 @@ public class VehicleManageController {
                         controlType.byteValue(), stationId, userName);
                 boolean isSend = udpServer.send(src);
                 if (!isSend) {
-                    removeCache(cacheId, params);
                     throw new UdpException("UDP发送数据异常！");
                 }
                 addTimeoutTask(src, cacheId);
@@ -1331,7 +1333,6 @@ public class VehicleManageController {
                         stationId, userName);
                 boolean isSend = udpServer.send(src);
                 if (!isSend) {
-                    removeCache(cacheId, params);
                     throw new UdpException("UDP发送数据异常！");
                 }
                 addTimeoutTask(src, cacheId);
@@ -1340,12 +1341,13 @@ public class VehicleManageController {
             logger.info("车辆远程控制指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, params);
             result = "失败，发送车辆远程控制请求异常！";
             logger.error("车辆远程控制异常：e={}", e.toString());
             logger.debug("车辆远程控制异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -1392,8 +1394,9 @@ public class VehicleManageController {
         }
         String result = "";
         int cacheId = 0;
+        Map<String, Object> params = new HashMap<>();
         try {
-            if (carNumber == null) {
+            if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
                 logger.error("远程开锁重置失败：{}", RemoteLockResetErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(RemoteLockResetErrorEnum.CARNUMBER_NULL);
@@ -1443,14 +1446,12 @@ public class VehicleManageController {
             resetIds.deleteCharAt(resetIds.length() - 1);
             int terminalId = vehicle.getVehicleDevice().getDeviceId();
 
-            Map<String, Object> params = new HashMap<>();
             params.put("resetIds", resetIds.toString());
             cacheId = addCache(UdpBizId.LOCK_OPEN_RESET_REQUEST, logId, description, params);
 
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1405(terminalId, lockNum, list, user.getName());
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                removeCache(cacheId, params);
                 throw new UdpException("UDP发送数据异常！");
             }
             addTimeoutTask(src, cacheId);
@@ -1459,12 +1460,13 @@ public class VehicleManageController {
             logger.info("远程开锁重置指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, params);
             result = "失败，发送远程开锁重置请求异常！";
             logger.error("远程开锁重置异常：e={}", e.toString());
             logger.debug("远程开锁重置异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            broadcastAndUpdateFailLog(vehicleManageLog, type, description, result);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -1505,26 +1507,26 @@ public class VehicleManageController {
     }
 
     /**
-     * 广播操作和更新失败日志
+     * 广播操作和更新操作日志
      *
      * @param log         {@link VehicleManageLog}
      * @param type        {@link Integer} 日志类型
      * @param description {@link String} 操作描述
      * @param result      {@link String} 操作结果
      */
-    private void broadcastAndUpdateFailLog(VehicleManageLog log,
-                                           Integer type,
-                                           String description,
-                                           String result) {
+    private void broadcastAndUpdateLog(VehicleManageLog log,
+                                       Integer type,
+                                       String description,
+                                       String result) {
         if (result.length() > 0) {
-            monitorWebSocketHandler.broadcastRemoteControl(description, result);
             type++;
             log.setType(type);
             log.setResult(result);
-            OperateLogUtil.updateVehicleManageLog(log, vehicleManageLogService, logger);
+            monitorWebSocketHandler.broadcastLog(1, description, result);
         } else {
-            monitorWebSocketHandler.broadcastRemoteControl(description, "请求发起成功！");
+            monitorWebSocketHandler.broadcastLog(0, description, "请求发起成功！");
         }
+        OperateLogUtil.updateVehicleManageLog(log, vehicleManageLogService, logger);
     }
 
     /**
@@ -1541,15 +1543,17 @@ public class VehicleManageController {
                                              Integer type,
                                              String description,
                                              String result) {
-        monitorWebSocketHandler.broadcastRemoteControl(description, result);
         if (!isOk) {
             type++;
             log.setType(type);
+            monitorWebSocketHandler.broadcastLog(1, description, result);
+        } else {
+            monitorWebSocketHandler.broadcastLog(0, description, result);
         }
         if (!"请求发起成功！".equals(result)) {
             log.setResult(result);
-            OperateLogUtil.updateVehicleManageLog(log, vehicleManageLogService, logger);
         }
+        OperateLogUtil.updateVehicleManageLog(log, vehicleManageLogService, logger);
     }
 
     /**
@@ -1582,6 +1586,10 @@ public class VehicleManageController {
      * @param params  {@link Map} UDP通讯后待处理的参数
      */
     private void removeCache(int cacheId, Map<String, Object> params) {
+        if (cacheId == 0) {
+            return;
+        }
+        AsynUdpCommCache.removeLogCache(cacheId);
         AsynUdpCommCache.removeTaskCache(cacheId);
         if (params != null) {
             AsynUdpCommCache.removeParamCache(cacheId);
