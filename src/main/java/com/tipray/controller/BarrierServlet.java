@@ -26,7 +26,7 @@ public class BarrierServlet extends HttpServlet {
         ByteBuffer buffer = ByteBuffer.allocate(2);
         buffer.putShort(serial);
         final AsyncContext asyncContext = request.startAsync();
-        AsynUdpCommCache.putAsyncContext((int)serial,asyncContext);
+        AsynUdpCommCache.putAsyncContextCache((int)serial,asyncContext);
         UDP_SERVER.send(buffer);
     }
 }

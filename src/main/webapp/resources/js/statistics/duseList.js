@@ -60,14 +60,20 @@ $(function() {
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var duse = duses[i];
-                    tableData += "<tr ondblclick=\"showBMap(" + duse.id + ")\">" +
+                    var coordFlag = duse.longitude == undefined || duse.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + duse.id + ")\">") +
                         "<td class=\"duse-id\">" + duse.id + "</td>" +
                         "<td class=\"duse-car\">" + duse.carNumber + "</td>" +
-                        "<td class=\"duse-time\">" + new Date(duse.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
-                        "<td class=\"duse-coordinate\"><a href=\"javascript:showBMap(" + duse.id + ")\">(" + duse.longitude + ", " + duse.latitude + ")</a></td>" +
-                        "<td class=\"duse-velocity\">" + duse.velocity + "</td>" +
+                        "<td class=\"duse-time\">" + new Date(duse.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>";
+                    if (coordFlag) {
+                        tableData += "<td class=\"duse-coordinate\">数据库记录异常</td>";
+                    } else {
+                        tableData += "<td class=\"duse-coordinate\"><a href=\"javascript:showBMap(" + duse.id + ")\">("
+                            + duse.longitude + ", " + duse.latitude + ")</a></td>";
+                    }
+                    tableData += "<td class=\"duse-velocity\">" + (duse.velocity == undefined ? "数据库记录异常" : duse.velocity) + "</td>" +
                         "<td class=\"duse-aspect\">" + angle2aspect(duse.angle) + "</td>" +
-                        "<td class=\"duse-dev\">" + getHexId(duse.devId, duse.type) + "</td>" +
+                        "<td class=\"duse-dev\">" + duse.devId + "</td>" +
                         "<td class=\"duse-type\">" + duse.typeName + "</td>" +
                         "<td class=\"duse-alarm\">" + duse.alarm + "</td>" +
                         "<td class=\"duse-lock\">" + duse.lockStatus + "</td>" +

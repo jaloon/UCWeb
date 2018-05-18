@@ -11,11 +11,19 @@
         <result column="description" property="description" />
         <result column="result" property="result" />
         <result column="is_app" property="isApp" />
+        <result column="udp_id" property="udpBizId" />
         <result column="log_time" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
 	<sql id="select_colums">
-		vl.*,
+		vl.user_id,
+		vl.type,
+		vl.description,
+		vl.result,
+		vl.is_app,
+		vl.udp_id,
+		vl.log_time,
+		vl.gmt_modified,
 		u.account user_account,
 		u.name user_name
 	</sql>

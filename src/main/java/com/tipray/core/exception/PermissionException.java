@@ -8,11 +8,11 @@ import com.tipray.constant.reply.PermissionErrorEnum;
 /**
  * 权限异常抛出
  * 
- * @author chends
+ * @author chend
  *
  */
 @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "权限不足！")
-public class PermissionException extends Exception {
+public class PermissionException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public PermissionException() {

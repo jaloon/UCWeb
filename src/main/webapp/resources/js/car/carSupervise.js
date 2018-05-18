@@ -15,7 +15,7 @@ $(function() {
         }
     }).resize();
 
-    var tableCont = document.querySelector('#table-cont')
+    var tableCont = document.querySelector('#table-cont');
     /**
      * scroll handle
      * @param {event} e -- scroll event
@@ -26,7 +26,7 @@ $(function() {
         this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
     }
 
-    tableCont.addEventListener('scroll',scrollHandle);
+    tableCont.addEventListener('scroll', scrollHandle);
 
     var ctx = getUrlParam("ctx");
     var wsUrl = window.location.host + ctx;
@@ -100,7 +100,7 @@ $(function() {
     // for (var i = 0; i < 10; i++) {
     //     var log = {
     //         fail: Math.round(Math.random()),
-    //         task: "锁绑定变更下发：黄卓明通过网页对车辆桂A12345增加锁绑定。",
+    //         task: "锁绑定变更下发：aa通过网页对车辆桂A12345增加锁绑定。",
     //         result: "成功或失败！"
     //     }
     //     reFreshLog(log)
@@ -176,6 +176,7 @@ $(function() {
                 title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
                 shadeClose: true,
                 shade: 0.6,
+                resize: false,
                 area: ['800px', '560px'],
                 content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
                 '&carId=' + id + '&carNumber=' + track.carNumber + '&parentSession=' + sessionId + '&user=' + encodeURIComponent(JSON.stringify(user)),
@@ -236,6 +237,7 @@ $(function() {
             title: ['设备绑定', 'font-size:14px;color:#ffffff;background:#478de4;'],
             shadeClose: true,
             shade: 0.8,
+            resize: false,
             area: ['540px', '435px'],
             content: 'bind/carBind.html'
         });
@@ -248,6 +250,7 @@ $(function() {
             title: ['设备绑定', 'font-size:14px;color:#ffffff;background:#478de4;'],
             shadeClose: true,
             shade: 0.8,
+            resize: false,
             area: ['540px', '435px'],
             content: 'bind/lockBind.html'
         });
@@ -261,6 +264,7 @@ $(function() {
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
             shadeClose: true,
             shade: 0.8,
+            resize: false,
             area: ['540px', '435px'],
             content: 'conf/gpsConfig.html'
         });
@@ -272,6 +276,7 @@ $(function() {
     		title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
     		shadeClose: true,
     		shade: 0.8,
+            resize: false,
     		area: ['540px', '435px'],
     		content: 'conf/funcEnable.html'
     	});
@@ -283,6 +288,7 @@ $(function() {
     		title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
     		shadeClose: true,
     		shade: 0.8,
+            resize: false,
     		area: ['540px', '435px'],
     		content: 'conf/softUpgrade.html'
     	});
@@ -348,6 +354,7 @@ $(function() {
             shadeClose: true,
             shade: 0.8,
             area: ['540px', '435px'],
+            resize: false,
             content: $('.hidden-box')
         });
     });
@@ -379,6 +386,7 @@ $(function() {
             title: ['车辆实时监控', 'font-size:14px;color:#ffffff;background:#478de4;'],
             shadeClose: true,
             shade: 0.6,
+            resize: false,
             area: ['800px', '560px'],
             content: '../../normal/car/monitor/carMonitorRealtime.html?wsUrl=' + wsUrl + '&car=' + encodeURI(carNumber) +
             '&comId=' + comId + '&interval=' + interval + '&duration=' + duration +
@@ -422,6 +430,7 @@ $(function() {
                     title: ['车辆远程控制', 'font-size:14px;color:#ffffff;background:#478de4;'],
                     shadeClose: true,
                     shade: 0.8,
+                    resize: false,
                     area: ['540px', '435px'],
                     content: '../../manage/car/carStatusDispatch.do?' + encodeURI('mode=' + mode + '&carNumber=' + carNumber)
                 });
@@ -445,6 +454,19 @@ $(function() {
         remoteControl(5);
     });
 
+    /** 开锁重置 */
+    $("#unlock_reset").click(function() {
+        layer.open({
+            type: 2,
+            title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            shadeClose: true,
+            shade: 0.8,
+            resize: false,
+            area: ['540px', '435px'],
+            content: 'remote/unlockReset.html'
+        });
+    });
+
     /** 车辆远程换站 */
     $("#change_station").click(function() {
         var carNumber = trimAll($("#search_text").val());
@@ -465,6 +487,7 @@ $(function() {
                         title: ['车辆远程换站', 'font-size:14px;color:#ffffff;background:#478de4;'],
                         shadeClose: true,
                         shade: 0.8,
+                        resize: false,
                         area: ['540px', '435px'],
                         content: '../../manage/car/changeDispatch.do?' + encodeURI('carNumber=' + carNumber)
                     });

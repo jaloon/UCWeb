@@ -15,13 +15,13 @@ $(function() {
         max: new Date().getTime() //new Date().getTime()获取当前时间的时间戳，指定日期最大值为当前时间
     });
 
-    function showList(carNumber, type, begin, end, pageId) {
+    function showList(account, name, type, begin, end, pageId) {
         var rows = $("#page_size").val();
         var startRow = (pageId - 1) * rows;
 
         $.post(
-            "../../manage/statistics/findChangeRecordsForPage.do",
-            encodeURI("carNumber=" + carNumber + "&status=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            "../../manage/log/ajaxFindInfoLogsForPage.do",
+            encodeURI("user.account=" + account + "&user.name=" + name + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
             function(data) {
                 var gridPage = eval(data);
 
@@ -39,27 +39,23 @@ $(function() {
                 $("#page_id").val(gridPage.page);
 
                 $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
-                $("#qcar").val(gridPage.t.carNumber);
-                $("#qtype").val(gridPage.t.type);
-                $("#qbegin").val(gridPage.t.begin);
-                $("#qend").val(gridPage.t.end);
+                $("#olaccount").val(gridPage.t.user.account);
+                $("#olname").val(gridPage.t.user.name);
+                $("#oltype").val(gridPage.t.type);
+                $("#olbegin").val(gridPage.t.begin);
+                $("#olend").val(gridPage.t.end);
                 $(".table-body").html("");
-                var changes = gridPage.dataList;
+                var logs = gridPage.dataList;
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
-                    var change = changes[i];
+                    var log = logs[i];
                     tableData += "<tr>" +
-                        "<td class=\"change-id\">" + change.id + "</td>" +
-                        "<td class=\"change-car\">" + change.carNumber + "</td>" +
-                        "<td class=\"change-time\">" + new Date(change.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
-                        "<td class=\"change-user\">" + change.user.name + "(" + change.user.account + ")" + "</td>" +
-                        "<td class=\"change-invoice\">" + change.invoice + "</td>" +
-                        "<td class=\"change-depot\">" + change.oilDepot.name + "</td>" +
-                        "<td class=\"change-store\">" + change.storeId + "</td>" +
-                        "<td class=\"change-station\">" + change.gasStation.name + "</td>" +
-                        "<td class=\"change-change\">" + change.changedStation.name + "</td>" +
-                        "<td class=\"change-status\">" + change.statusName + "</td>" +
-                        "<td class=\"change-app\">" + (change.isApp > 0 ? "是" : "否") + "</td>" +
+                        "<td class=\"log-id\">" + log.id + "</td>" +
+                        "<td class=\"log-account\">" + log.user.account + "</td>" +
+                        "<td class=\"log-name\">" + log.user.name + "</td>" +
+                        "<td class=\"log-type\">" + toHexId(log.type) + "</td>" +
+                        "<td class=\"log-description\">" + log.description + "</td>" +
+                        "<td class=\"log-time\">" + new Date(log.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";
@@ -70,35 +66,47 @@ $(function() {
         );
     }
 
-    showList("", "", "", "", 1);
+    showList("", "", "", "", "", 1);
 
     $("#search_btn").click(function() {
-        var carNumber = $("#text_car").val();
+        var account = "";
+        var name = "";
+        var type_user = $("#type_user").val();
+        if (type_user == 1) {
+            account = trimAll($("#text_user").val());
+        } else {
+            name = trimAll($("#text_user").val());
+
+        }
         var type = $("#text_type").val();
         var begin = $("#text_begin").val();
         var end = $("#text_end").val();
-        showList(carNumber, type, begin, end, 1);
+        showList(account, name, type, begin, end, 1);
     });
 
     function refreshPage(pageId) {
 
-        var carNumber = $("#qcar").val();
-        if (isNull(carNumber)) {
-            carNumber = "";
+        var account = $("#olaccount").val();
+        if (isNull(account)) {
+            account = "";
         }
-        var type = $("#qtype").val();
+        var name = $("#olname").val();
+        if (isNull(name)) {
+            name = "";
+        }
+        var type = $("#oltype").val();
         if (isNull(type)) {
             type = "";
         }
-        var begin = $("#qbegin").val();
+        var begin = $("#olbegin").val();
         if (isNull(begin)) {
             begin = "";
         }
-        var end = $("#qend").val();
+        var end = $("#olend").val();
         if (isNull(end)) {
             end = "";
         }
-        showList(carNumber, type, begin, end, pageId);
+        showList(account, name, type, begin, end, pageId);
     }
 
     $("#page_id").change(function() {

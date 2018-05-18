@@ -20,7 +20,7 @@ $(function() {
         var startRow = (pageId - 1) * rows;
 
         $.post(
-            "../../manage/log/ajaxFindInfoLogsForPage.do",
+            "../../manage/log/ajaxFindCarLogsForPage.do",
             encodeURI("user.account=" + account + "&user.name=" + name + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
             function(data) {
                 var gridPage = eval(data);
@@ -55,7 +55,10 @@ $(function() {
                         "<td class=\"log-name\">" + log.user.name + "</td>" +
                         "<td class=\"log-type\">" + toHexId(log.type) + "</td>" +
                         "<td class=\"log-description\">" + log.description + "</td>" +
+                        "<td class=\"log-result\">" + log.result + "</td>" +
+                        "<td class=\"log-app\">" + (log.isApp > 0 ? "是" : "否") + "</td>" +
                         "<td class=\"log-time\">" + new Date(log.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
+                        "<td class=\"log-update\">" + (log.udpBizId > 0 ? log.modifyDate : "") + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

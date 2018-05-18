@@ -1,16 +1,7 @@
 package com.tipray.util;
 
 import com.tipray.bean.ResponseMsg;
-import com.tipray.constant.reply.DevBindErrorEnum;
-import com.tipray.constant.reply.ErrorTagConst;
-import com.tipray.constant.reply.FindTracksByCarNumberErrorEnum;
-import com.tipray.constant.reply.PermissionErrorEnum;
-import com.tipray.constant.reply.RemoteChangeErrorEnum;
-import com.tipray.constant.reply.RemoteControlErrorEnum;
-import com.tipray.constant.reply.RemoteEliminateAlarmErrorEnum;
-import com.tipray.constant.reply.RemoteLockResetErrorEnum;
-import com.tipray.constant.reply.TerminalConfigUpdateErrorEnum;
-import com.tipray.constant.reply.TerminalSoftwareUpgradeErrorEnum;
+import com.tipray.constant.reply.*;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
 
 /**
@@ -66,6 +57,17 @@ public class ResponseMsgUtil {
 	public static ResponseMsg error(byte errorTag, int errorCode, Object errorMsg) {
 		return new ResponseMsg(ID_ERROR, ERROR, errorTag, errorCode, errorMsg);
 	}
+
+    /**
+     * 错误回复（道闸接口错误）
+     *
+     * @param barrierError
+     *            {@link BarrierErrorEnum} 道闸接口错误
+     * @return {@link ResponseMsg}
+     */
+    public static ResponseMsg error(BarrierErrorEnum barrierError) {
+	    return error(ErrorTagConst.BARRIER_ERROR_TAG, barrierError.code(), barrierError.msg());
+    }
 
 	/**
 	 * 错误回复（设备绑定错误）

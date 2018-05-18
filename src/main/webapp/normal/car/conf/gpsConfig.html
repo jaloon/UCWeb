@@ -51,6 +51,12 @@
                             <input type="hidden" id="upload_interval" value="30" />
                         </td>
                     </tr>
+                    <tr>
+                        <td>轨迹生成距离间隔（米）</td>
+                        <td>
+                            <input type="hidden" id="generate_distance" value="10" />
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -67,12 +73,13 @@
         $("#cancel").click(function() {
             parent.layer.close(index);
         });
-        $('.base-info tr td:first-child').width(126);
+        $('.base-info tr').height(42);
+        $('.base-info tr td:first-child').width(160);
         $('select.editInfo').css({
             height: 28,
-            width: 348
+            width: 316
         });
-        $('input.editInfo').width(334);
+        $('input.editInfo').width(302);
 
         $('#scan_interval').jRange({
             from: 0,
@@ -80,7 +87,7 @@
             step: 1,
             scale: [0, 60, 120, 180, 255],
             format: '%s',
-            width: 348,
+            width: 316,
             snap: true,
             showLabels: true,
             showScale: true
@@ -92,7 +99,19 @@
             step: 1,
             scale: [0, 60, 120, 180, 255],
             format: '%s',
-            width: 348,
+            width: 316,
+            snap: true,
+            showLabels: true,
+            showScale: true
+        });
+
+        $('#generate_distance').jRange({
+            from: 0,
+            to: 255,
+            step: 1,
+            scale: [0, 60, 120, 180, 255],
+            format: '%s',
+            width: 316,
             snap: true,
             showLabels: true,
             showScale: true
@@ -124,10 +143,11 @@
             }
             var scan_interval = $('#scan_interval').val();
             var upload_interval = $('#upload_interval').val();
+            var generate_distance = $('#generate_distance').val();
             var loadIndex = layer.load();
             $.post("../../../manage/remote/asyn_terminal_config_request",
                 encodeURI("scope=" + scope + "&carNumber=" + carno + "&scanInterval=" + scan_interval +
-                    "&uploadInterval=" + upload_interval),
+                    "&uploadInterval=" + upload_interval + "&=" + generate_distance + "&token=" + generateUUID()),
                 function(data) {
                     layer.close(loadIndex);
                     if (data.id > 0) {

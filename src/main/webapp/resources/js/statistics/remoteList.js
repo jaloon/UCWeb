@@ -1,3 +1,16 @@
+function showBMap(id) {
+    layer.open({
+        type: 2,
+        title: ['远程操作查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        shadeClose: true,
+        shade: 0.6,
+        area: ['800px', '560px'],
+        content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=remote&id=' + id)
+    });
+    // 阻止事件冒泡到DOM树上
+    // event.stopPropagation();
+}
+
 $(function() {
     laydate.render({
         elem: '#text_begin',
@@ -48,14 +61,21 @@ $(function() {
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var remote = remotes[i];
-                    tableData += "<tr>" +
+                    var coordFlag = remote.longitude == undefined || remote.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + remote.id + ")\">") +
                         "<td class=\"remote-id\">" + remote.id + "</td>" +
                         "<td class=\"remote-car\">" + remote.carNumber + "</td>" +
-                        "<td class=\"remote-time\">" + new Date(remote.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
-                        "<td class=\"remote-coordinate\">(" + remote.longitude + ", " + remote.latitude + ")</td>" +
-                        "<td class=\"remote-type\">" + remote.typeName + "</td>" +
+                        "<td class=\"remote-time\">" + new Date(remote.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>";
+                    if (coordFlag) {
+                        tableData += "<td class=\"remote-coordinate\">数据库记录异常</td>";
+                    } else {
+                        tableData += "<td class=\"remote-coordinate\"><a href=\"javascript:showBMap(" + remote.id + ")\">("
+                            + remote.longitude + ", " + remote.latitude + ")</a></td>";
+                    }
+                    tableData += "<td class=\"remote-type\">" + remote.typeName + "</td>" +
                         "<td class=\"remote-user\">" + remote.user.name + "(" + remote.user.account + ")" + "</td>" +
                         "<td class=\"remote-result\">" + remote.status + "</td>" +
+                        "<td class=\"remote-app\">" + (remote.isApp > 0 ? "是" : "否") + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

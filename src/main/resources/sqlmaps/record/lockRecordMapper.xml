@@ -34,7 +34,8 @@
 		fn_get_station(l.station_type, l.station_id)	station,
 		t.speed											speed,
 		t.angle											angle,
-		t.lock_status_info								lock_status_info
+		t.lock_status_info								lock_status_info,
+		l.change_time									change_time
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
@@ -88,7 +89,7 @@
 		SELECT
 		  <include refid="select_colums"></include>
 		FROM
-            (tbl_lock_status ls LEFT JOIN tbl_vehicle_track t ON ls.vehicle_track_id=t.id),
+            (tbl_lock_status l LEFT JOIN tbl_vehicle_track t ON l.vehicle_track_id=t.id),
             tbl_vehicle v,
             tbl_lock tl
         WHERE

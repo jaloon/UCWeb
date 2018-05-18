@@ -17,10 +17,12 @@ public class VehicleTerminalConfig implements Serializable {
 	private String carNumber;
 	/** 车载终端ID */
 	private Integer terminalId;
-	/** 轨迹采集间隔 */
+	/** 轨迹采集间隔（秒） */
 	private Integer scanInterval;
-	/** 默认轨迹上报间隔 */
+	/** 默认轨迹上报间隔（秒） */
 	private Integer uploadInterval;
+	/** 轨迹生成距离间隔（米） */
+	private Integer generateDistance;
 	/** 车辆状况：0 车不存在，1 正常，2 未绑定车台，3 配置范围越界 */
 	private Integer carState;
 	/** 车台配置是否有更新：0 否，1 是 */
@@ -66,6 +68,14 @@ public class VehicleTerminalConfig implements Serializable {
 		this.uploadInterval = uploadInterval;
 	}
 
+	public Integer getGenerateDistance() {
+		return generateDistance;
+	}
+
+	public void setGenerateDistance(Integer generateDistance) {
+		this.generateDistance = generateDistance;
+	}
+
 	public Integer getCarState() {
 		return carState;
 	}
@@ -99,6 +109,9 @@ public class VehicleTerminalConfig implements Serializable {
         }
         if (uploadInterval != null) {
 		sb.append(", uploadInterval=").append(uploadInterval);
+        }
+        if (generateDistance != null) {
+		sb.append(", generateDistance=").append(generateDistance);
         }
         if (carState != null) {
 		sb.append(", carState=").append(carState);

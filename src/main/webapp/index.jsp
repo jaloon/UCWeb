@@ -105,9 +105,10 @@
                     <pop:Permission ename="carModule">
                         <dd class="first_dd"><a name="normal/car/carList.jsp">车辆信息管理</a></dd>
                     </pop:Permission>
-                    <dd><a name="normal/car/carSupervise.html?ctx=${pageContext.request.contextPath}">车辆监控及远程操作</a>
+                    <dd>
+                        <a name="normal/car/carSupervise.html?ctx=${pageContext.request.contextPath}">车辆监控及远程操作</a>
                     </dd>
-                    <dd><a name="normal/car/carMonitor.html?ctx=${pageContext.request.contextPath}">车辆实时监控</a></dd>
+                        <%--<dd><a name="normal/car/carMonitor.html?ctx=${pageContext.request.contextPath}">车辆实时监控</a></dd>--%>
                     <pop:Permission ename="retrackModule">
                         <dd><a name="normal/car/track/carRetrack.html">车辆轨迹回放</a></dd>
                     </pop:Permission>
@@ -177,9 +178,19 @@
     </div>
 </div>
 <div class="alarm-box">
-    <table id="alarm_tips">
-        <tbody></tbody>
-    </table>
+    <div class='table-cont' id='alarm_tips'>
+        <table width="100%">
+            <thead class="table-head">
+                <tr>
+                    <th class="alarm-id">报警序号</th>
+                    <th class="alarm-dev">报警设备</th>
+                    <th class="alarm-type">报警类型</th>
+                    <th class="alarm-eli">操作</th>
+                </tr>
+            </thead>
+            <tbody class="table-body"></tbody>
+        </table>
+    </div>
 </div>
 </body>
 

@@ -7,6 +7,20 @@
  */
 
 /**
+ * 休眠
+ * @param {number} numberMillis 毫秒数
+ */
+function sleep(numberMillis) {
+    var now = new Date();
+    var exitTime = now.getTime() + numberMillis;
+    while (true) {
+        now = new Date();
+        if (now.getTime() > exitTime)
+            return;
+    }
+}
+
+/**
  * 空对象判断
  * @param {*} obj
  */
@@ -186,6 +200,9 @@ function angle2aspect(angle) {
     }
     if (angle > 270 && angle < 360) {
         return "南偏东" + (angle - 270) + "度";
+    }
+    if (isNull(angle)) {
+        return "数据异常"
     }
     return "角度超出范围";
 }

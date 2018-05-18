@@ -4,7 +4,7 @@ $(function() {
         $("#table-cont").height($(window).height() - 134);
     }).resize();
 
-    var tableCont = document.querySelector('#table-cont')
+    var tableCont = document.querySelector('#table-cont');
     /**
      * scroll handle
      * @param {event} e -- scroll event
@@ -15,6 +15,6 @@ $(function() {
         this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
     }
 
-    tableCont.addEventListener('scroll',scrollHandle)
+    tableCont.addEventListener('scroll', scrollHandle);
 
 });

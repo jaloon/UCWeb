@@ -119,13 +119,13 @@ public class NioUdpServer {
 							InetSocketAddress address = (InetSocketAddress) clientChannel.receive(receiveBuffer);
 
 							short i = receiveBuffer.getShort(0);
-                            DeferredResult<ResponseMsg> deferredResult =AsynUdpCommCache.DEFERRED_RESULT_MAP.remove((int)i);
+                            DeferredResult<ResponseMsg> deferredResult =AsynUdpCommCache.getAndRemoveDeferredResultCache((int)i);
                             if (deferredResult != null) {
                                 deferredResult.setResult(ResponseMsgUtil.success("recieve: " + i));
                                 System.out.println("recieve: " + i);
                                 continue;
                             }
-                            // AsyncContext asyncContext = AsynUdpCommCache.getAsyncContext((int)i);
+                            // AsyncContext asyncContext = AsynUdpCommCache.getAsyncContextCache((int)i);
                             // if (asyncContext != null) {
                             //     PrintWriter out = asyncContext.getResponse().getWriter();
                             //     out.write("recieve: " + i);

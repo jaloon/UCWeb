@@ -18,6 +18,7 @@
         <result column="lock_status_info" property="lockStatusInfo" />
         <result column="happen_time" property="createDate" />
         <result column="station" property="station" />
+		<result column="is_app" property="isApp" />
     </resultMap>
 	<sql id="select_colums">
 		r.*,

@@ -39,7 +39,7 @@
         map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
         var carIcon = new BMap.Icon(
         	<c:choose>
-	            <c:when test="${(mode=='alarm' && record.status == '未消除报警') || (mode!='alarm' && fn:contains(record.alarm, '报警'))}">
+	            <c:when test="${(mode=='alarm' && record.status == '未消除报警') || (mode!='alarm' && mode!='remote' && fn:contains(record.alarm, '报警'))}">
 	            	'../../resources/images/marker/车辆图标-64-红.png', //图像地址
 	            </c:when>
 	            <c:otherwise>
@@ -84,8 +84,16 @@
             "<br> 时间：&emsp;&emsp;" + new Date("${record.createDate}").format("yyyy-MM-dd HH:mm:ss") +
             "<br> 经度：&emsp;&emsp;${record.longitude}" +
             "<br> 纬度：&emsp;&emsp;${record.latitude}" +
+            <c:if test="${mode!='remote'}">
             "<br> 速度：&emsp;&emsp;${record.velocity}" +
             "<br> 方向：&emsp;&emsp;" + angle2aspect(${record.angle}) +
+            </c:if>
+            <c:if test="${mode=='remote'}">
+            "<br> 操作类型：${record.typeName}" +
+            "<br> 操作结果：${record.status}" +
+            "<br> 操作员：&emsp;${record.user.name}" +
+            "</div>";
+            </c:if>
             <c:if test="${mode=='alarm'}">
             "<br> 报警类型：${record.typeName}" +
             "<br> 报警状态：${record.status}" +
@@ -93,12 +101,12 @@
             "</div>";
             </c:if>
             <c:if test="${mode=='lock'}">
-            "<br> 锁ID：&emsp;&emsp;" + toHexId(${record.lockId}) +
-            "<br> 锁类型：&emsp;${record.type}" +
-            "<br> 仓号：&emsp;&emsp;${record.storeId}" +
-            "<br> 锁序号：&emsp;${record.index}" +
-            "<br> 锁动作：&emsp;${record.statusName}" +
-            "<br> 报警类型：${record.alarm}" +
+            "<br> 锁设备ID：&emsp;${record.lockId}" +
+            "<br> 仓号：&emsp;&emsp;&emsp;${record.storeId}" +
+            "<br> 仓位：&emsp;&emsp;&emsp;${record.seatName}" +
+            "<br> 同仓位锁序号：${record.seatIndex}" +
+            "<br> 锁动作：&emsp;&emsp;${record.statusName}" +
+            "<br> 报警类型：&emsp;${record.alarm}" +
             "</div>";
             </c:if>
             <c:if test="${mode=='inout'}">
@@ -108,7 +116,7 @@
             "</div>";
             </c:if>
             <c:if test="${mode=='use'}">
-            "<br> 设备ID：&emsp;" + toHexId(${record.devId}) +
+            "<br> 设备ID：&emsp;${record.devId}" +
             "<br> 设备类型：${record.typeName}" +
             "<br> 报警类型：${record.alarm}" +
             "<br> 锁状态：&emsp;${record.lockStatus}" +

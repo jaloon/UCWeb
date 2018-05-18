@@ -162,16 +162,60 @@
 
 .alarm-box {
     display: none;
-    width: 260px;
+    width: 580px;
     background: #ffffff;
     border: 1px solid #e6e7e9;
 }
 
-#alarm_tips {
+.table-cont {
+    max-height: 660px;
+    overflow: auto;
+    margin: 10px;
+    box-shadow: 0 0 1px 3px #e6e7e9;
+}
+
+.table-head {
     width: 100%;
+    height: 36px;
+    color: #445065;
+    font-weight: 500;
+    background: #e6e7e9;
+}
+
+.table-body {
+    width: 100%;
+    color: #5a6779;
+    font-size: 13px;
+    overflow: auto;
+}
+
+.table-cont th {
     text-align: center;
     vertical-align: middle;
-    margin: 5px;
+    height: 35px;
+}
+
+.table-cont td {
+    text-align: center;
+    vertical-align: middle;
+    height: 30px;
+    border-bottom: 1px solid #e6e7e9;
+}
+
+.alarm-id {
+    width: 100px;
+}
+
+.alarm-dev {
+    width: 180px;
+}
+
+.alarm-type {
+    width: 181px;
+}
+
+.alarm-eli {
+    width: 99px;
 }
 
 .highlight {

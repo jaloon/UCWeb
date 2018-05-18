@@ -276,14 +276,17 @@ select.search-text {
     width: 160px;
 }
 
-.car-lock {
+/*.car-lock {
     width: 120px;
-}
+}*/
 
 .car-alarm {
     width: 200px;
 }
 
+.car-online {
+    width: 120px;
+}
 /********************表格列end********************/
 
 /******************操作日志栏start*********************/

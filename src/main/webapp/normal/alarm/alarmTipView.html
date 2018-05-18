@@ -84,13 +84,14 @@
         var content = "<div style='margin:0;line-height:20px;padding:2px;'>" +
             "车牌号：&emsp;" + record.carNumber +
             "<br> 时间：&emsp;&emsp;" + record.createDate +
-            "<br> 经度：&emsp;&emsp;" + record.longitude +
-            "<br> 纬度：&emsp;&emsp;" + record.latitude +
-            "<br> 速度：&emsp;&emsp;" + record.velocity +
+            "<br> 经度：&emsp;&emsp;" + (record.longitude == undefined ? "数据异常" : record.longitude) +
+            "<br> 纬度：&emsp;&emsp;" + (record.velocity == undefined ? "数据异常" : record.velocity) +
+            "<br> 速度：&emsp;&emsp;" + (record.velocity == undefined ? "数据异常" : record.velocity) +
             "<br> 方向：&emsp;&emsp;" + angle2aspect(record.angle) +
+            "<br> 报警设备：" + (record.deviceType == 1 ? "车载终端（" : "锁（")  + record.deviceId + "）" +
             "<br> 报警类型：" + record.typeName +
             "<br> 报警状态：" + record.status + "&emsp;&emsp;<button onclick='eliminateAlarm()'>消除报警</button>" +
-            "<br> 锁状态：&emsp;" + record.lockStatus +
+            "<br> 锁状态：&emsp;" + (record.lockStatus == undefined ? "数据异常" : record.lockStatus) +
             "</div>";
             //创建检索信息窗口对象
         var searchInfoWindow = new BMapLib.SearchInfoWindow(map, content, {

@@ -265,6 +265,7 @@
 	        	#{carNumber,		mode=IN,	jdbcType=VARCHAR},
 	            #{scanInterval,		mode=IN,	jdbcType=INTEGER},
 	        	#{uploadInterval,	mode=IN,	jdbcType=INTEGER},
+	        	#{generateDistance,	mode=IN,	jdbcType=INTEGER},
 	            #{carState,			mode=OUT,	jdbcType=INTEGER},
 	            #{terminalId,		mode=OUT,	jdbcType=INTEGER},
 	        	#{isUpdate,			mode=OUT,	jdbcType=INTEGER}

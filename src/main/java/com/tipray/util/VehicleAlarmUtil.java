@@ -1,9 +1,9 @@
 package com.tipray.util;
 
+import com.tipray.constant.AlarmBitMarkConst;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.tipray.constant.AlarmBitMarkConst;
 
 /**
  * 车辆报警工具类
@@ -73,7 +73,9 @@ public class VehicleAlarmUtil {
                 }
 				alarm.setCharAt(alarm.length() - 1, '；');
 			}
-			alarm.setCharAt(alarm.length() - 1, '。');
+			if (alarm.length() > 0) {
+                alarm.setCharAt(alarm.length() - 1, '。');
+            }
 			return alarm.toString();
 		}
 		return "数据库记录异常。";
@@ -142,7 +144,9 @@ public class VehicleAlarmUtil {
         if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
             alarm.append("无、");
         }
-		alarm.deleteCharAt(alarm.length() - 1);
+        if (alarm.length() > 0) {
+            alarm.deleteCharAt(alarm.length() - 1);
+        }
 		return alarm.toString();
 	}
 

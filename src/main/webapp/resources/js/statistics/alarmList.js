@@ -77,18 +77,24 @@ $(function() {
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var alarm = alarms[i];
-                    tableData += "<tr ondblclick=\"showBMap(" + alarm.id + ")\">" +
+                    var coordFlag = alarm.longitude == undefined || alarm.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + alarm.id + ")\">") +
                         "<td class=\"alarm-id\">" + alarm.id + "</td>" +
                         "<td class=\"alarm-car\">" + alarm.carNumber + "</td>" +
                         "<td class=\"alarm-time\">" + new Date(alarm.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
-                        "<td class=\"alarm-coordinate\"><a href=\"javascript:showBMap(" + alarm.id + ")\">(" + alarm.longitude + ", " + alarm.latitude + ")</a></td>" +
-                        "<td class=\"alarm-station\">" + alarm.station + "</td>" +
-                        "<td class=\"alarm-velocity\">" + alarm.velocity + "</td>" +
+                        "<td class=\"alarm-station\">" + alarm.station + "</td>";
+                    if (coordFlag) {
+                        tableData += "<td class=\"alarm-coordinate\">数据库记录异常</td>";
+                    } else {
+                        tableData += "<td class=\"alarm-coordinate\"><a href=\"javascript:showBMap(" + alarm.id + ")\">("
+                            + alarm.longitude + ", " + alarm.latitude + ")</a></td>";
+                    }
+                    tableData += "<td class=\"alarm-velocity\">" + (alarm.velocity == undefined ? "数据库记录异常" : alarm.velocity) + "</td>" +
                         "<td class=\"alarm-aspect\">" + angle2aspect(alarm.angle) + "</td>" +
-                        "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端" : "锁") + "</td>" +
+                        "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
                         "<td class=\"alarm-type\">" + alarm.typeName + "</td>" +
-                        "<td class=\"alarm-status\">" + alarm.status + "</td>" +
-                        "<td class=\"alarm-lock\">" + alarm.lockStatus + "</td>" +
+                        "<td class=\"alarm-status\">" + (alarm.status == undefined ? "数据库记录异常" : alarm.status) + "</td>" +
+                        "<td class=\"alarm-lock\">" + (alarm.lockStatus == undefined ? "数据库记录异常" : alarm.lockStatus) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

@@ -1,59 +1,73 @@
 var ws = null;
 
-function eliminateAlarm(alarmId, eAlarm) {
-    $.post("manage/car/eliminateAlarm.do", "eAlarm=" + eAlarm,
+function eliminateAlarm(vehicleId, alarmIds) {
+    $.post("../../manage/remote/asyn_alarm_eliminate_request",
+        "vehicle_id=" + vehicleId + "&alarm_ids=" + alarmIds + "&token=" + generateUUID(),
         function(data) {
-            if ("error" == data.msg) {
-                layer.msg("消除报警失败！", { icon: 2, time: 500 }, function() {
-                    $("#" + alarmId).removeClass("highlight");
+            if (data.id > 0) {
+                layer.msg(data.msg, {
+                    icon: 2,
+                    time: 500
                 });
             } else {
-                layer.msg("消除报警成功！", { icon: 1, time: 500 }, function() {
-                    alarmCount--;
-                    if (alarmCount <= 0) {
-                        grayscale(tipIcoObj);
-                    }
-                    $("#" + alarmId).remove();
+                layer.msg("消除报警指令发送成功！", {
+                    icon: 1,
+                    time: 500
+                }, function() {
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);
                 });
             }
         },
         "json"
     );
+    // 阻止事件冒泡到DOM树上
+    event.stopPropagation();
 }
+
+function showAlarm(record) {
+    layer.open({
+        type: 2,
+        title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        shadeClose: true,
+        shade: 0.8,
+        resize: false,
+        area: ['800px', '560px'],
+        content: 'normal/alarm/alarmTipView.html?record=' + record
+    });
+}
+
 $(function() {
+    var tableCont = document.querySelector('#alarm_tips');
+    /**
+     * scroll handle
+     * @param {event} e scroll event
+     */
+    function scrollHandle (e){
+        // console.log(this)
+        var scrollTop = this.scrollTop;
+        this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
+    }
+
+    tableCont.addEventListener('scroll', scrollHandle);
+
     var tipIcoObj = $(".alarm-tip");
     var tipIcoUrl = tipIcoObj.attr("src");
     var css3filter = grayscale(tipIcoObj);
     var ctx = $("#ctx").val();
     var wsUrl = window.location.host + ctx;
-    var alarmCount = 0;
-    var tipCount = 0;
-    var alarmIds = [];
-    var currentAlarmId;
-    var record;
-    var alarmNotify;
+    var alarmCount = 0; // 报警数
+    var alarmIds = []; // 报警ID缓存
+    var currentAlarmId; // 当前报警ID
+    var record; // 报警记录
+    var alarmNotify; // 报警通知对象（浏览器通知）
     if (window.Notification) {
         alarmNotify = new iNotify({
-            message: '有新报警信息！', // 标题
+            message: '有报警信息待处理', // 标题
             effect: 'flash', // flash | scroll 闪烁还是滚动
             onclick: function(n) { // 点击通知弹窗事件
                 n.close();
-                tipCount--;
-                alarmIds.removeByValue(currentAlarmId);
-                if (tipCount <= 0) {
-                    alarmNotify.faviconClear();
-                    alarmNotify.setTitle();
-                } else {
-                    alarmNotify.setFavicon(tipCount);
-                }
-                layer.open({
-                    type: 2,
-                    title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                    shadeClose: true,
-                    shade: 0.8,
-                    area: ['800px', '560px'],
-                    content: 'normal/alarm/alarmTipView.html?record=' + record
-                });
+                showAlarm(record);
             },
             // 可选播放声音
             audio: {
@@ -93,8 +107,8 @@ $(function() {
     ws.onopen = function(event) {
         if (window.console) console.log("websocket connected");
         ws.send(JSON.stringify({
-            biz: 1,
-            userId: $("#id").val()
+            biz: 1
+            // userId: $("#id").val()
         }));
     };
     ws.onmessage = function(event) {
@@ -109,11 +123,8 @@ $(function() {
             case 110: //报警
                 receiveAlarm(receive, receiveObj);
                 break;
-            case 120: //延时推送报警
-                receiveDelay(receiveObj);
-                break;
-            case 130: //忽略报警
-                receiveIgnore(receiveObj);
+            case 111: //缓存报警
+                cacheAlarm(receiveObj);
                 break;
             default:
                 break;
@@ -127,23 +138,30 @@ $(function() {
     };
 
     function receiveEliminat(receiveObj) {
-        alarmCount--;
-        if (alarmCount <= 0) {
-            grayscale(tipIcoObj);
+        var alarmId = receiveObj.id;
+        if (alarmIds.isContain(alarmId)) {
+            alarmIds.removeByValue(alarmId);
+            $("#alarm_id_" + alarmId).remove();
+            alarmCount--;
+            if (alarmCount <= 0) {
+                grayscale(tipIcoObj);
+                if (window.Notification && Notification.permission === "granted") {
+                    alarmNotify.faviconClear();
+                }
+            } else {
+                if (window.Notification && Notification.permission === "granted") {
+                    alarmNotify.setTitle(true).setFavicon(alarmCount);
+                }
+            }
         }
-        removeAlarm(receiveObj.clearAlarmId, 1);
     }
 
     function receiveAlarm(receive, receiveObj) {
-        alarmCount++;
         removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
-        addAlarm(receiveObj, 2);
         record = encodeURIComponent(receive);
-        currentAlarmId = receiveObj.id;
-        alarmIds.push(currentAlarmId);
+        addAlarm(receiveObj, record);
         if (window.Notification && Notification.permission === "granted") {
-            tipCount++;
-            alarmNotify.setTitle(true).setFavicon(tipCount).notify({
+            alarmNotify.setTitle(true).setFavicon(alarmCount).notify({
                 title: "报警通知",
                 body: parseAlarm(receiveObj)
             }).player();
@@ -156,103 +174,85 @@ $(function() {
                 buttons: [
                     ['<button>查看报警信息</button>', function(instance, toast) {
                         instance.hide({ transitionOut: 'fadeOutUp' }, toast);
-                        layer.open({
-                            type: 2,
-                            title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                            shadeClose: true,
-                            shade: 0.8,
-                            area: ['800px', '560px'],
-                            content: 'normal/alarm/alarmTipView.html?record=' + record
-                        });
+                        showAlarm(record);
                     }]
                 ]
             });
         }
     }
 
-    function receiveDelay(receiveObj) {
-        receiveIgnore(receiveObj);
-        var alarmCacheList = receiveObj.alarmCacheList;
-        var len = alarmCacheList.length;
-        if (len > 0) {
-            iziToast.info({
-                title: '报警通知',
-                message: len + '条新报警信息',
-                timeout: 5000,
-                position: 'bottomRight',
-            });
+    function cacheAlarm(receiveObj) {
+        var list = receiveObj.cacheAlarm;
+        var len = list.length;
+        if (len < 1) {
+            return;
         }
+        removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
+        for (var i = 0; i < len; i++) {
+            var alarm = list[i];
+            addAlarm(alarm);
+        }
+        if (window.Notification && Notification.permission === "granted") {
+            alarmNotify.setTitle(true).setFavicon(alarmCount);
+        }
+        iziToast.info({
+            title: '报警通知',
+            message: '您有' + alarmCount + '条报警信息待处理！' ,
+            timeout: 5000,
+            position: 'bottomRight',
+            buttons: [
+                ['<button>查看报警信息列表</button>', function(instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOutUp' }, toast);
+                    showAlarmBox()
+                }]
+            ]
+        });
     }
 
-    function receiveIgnore(receiveObj) {
-        var alarmRecords = receiveObj.alarmRecords;
-        alarmCount += alarmRecords.length;
-        if (alarmCount > 0) {
-            removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
-            alarmRecords.forEach(function(alarm) {
-                addAlarm(alarm, 1);
-            });
-        }
-    }
-
-    function addAlarm(alarm, type) {
-        //type 1 正常显示，2 高亮显示
-        var eAlarm = encodeURIComponent(JSON.stringify({
-            id: alarm.id,
-            terminalId: alarm.terminalId,
-            deviceType: alarm.deviceType,
-            deviceId: alarm.deviceId,
-            alarmType: (2 << (alarm.type - 1)),
-            forward: 0 //不转发
-        }));
-        //table#alarm_tips的最后一行
-        var trHtml = "<tr id='" + alarm.id + "'>" +
-            "<td>" + alarm.id + "</td>" +
-            "<td>" + parseAlarm(alarm) + "</td>" +
-            "<td><button onclick=\"eliminateAlarm(" + alarm.id + ", '" + eAlarm + "')\">消除报警</button></td>" +
-            "</tr>";
-        $("#alarm_tips tbody").append(trHtml);
-        if (type == 2) {
-            $("#alarm_tips tr:last").addClass("highlight");
-        }
-    }
-
-    function removeAlarm(alarmId, type) {
-        //type 1 直接移除，2 取消高亮
-        var tr = $("#" + alarmId);
-        switch (type) {
-            case 1:
-                tr.remove();
-                break;
-            case 2:
-                tr.removeClass("highlight");
-                break;
-            default:
-                break;
+    function addAlarm(alarm, record) {
+        var alarmId = alarm.id;
+        if (alarmCount == 0 || !alarmIds.isContain(alarmId)) {
+            alarmIds.push(alarmId);
+            alarmCount++;
+            if (record === undefined || record === null || record === "") {
+                record = encodeURIComponent(JSON.stringify(alarm));
+            }
+            var trHtml = "<tr id='alarm_id_" + alarmId + "' onclick=\"showAlarm('" + record + "')\">" +
+                "<td class='alarm-id'>" + alarmId + "</td>" +
+                "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
+                "<td class='alarm-type'>" + alarm.typeName + "</td>" +
+                "<td class='alarm-eli' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警' title='消除报警'/></td>" +
+                "</tr>"
+            $("#alarm_tips tbody").append(trHtml);
         }
     }
 
     function parseAlarm(receiveObj) {
         var alarm = receiveObj.carNumber + "：";
         var dev = receiveObj.deviceType === 1 ? "车载终端" : "锁";
-        var devId = toHexId(receiveObj.deviceId);
+        var devId = "（" + receiveObj.deviceId + "）";
         alarm += dev + devId + "，" + receiveObj.typeName;
         return alarm;
+    }
+
+    function showAlarmBox() {
+        layer.open({
+            type: 1,
+            title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            shadeClose: true,
+            shade: 0.8,
+            area: '582px',
+            // area: ['540px', '435px'],
+            resize: false,
+            content: $('.alarm-box')
+        });
     }
 
     $(".alarm-tip").click(function() {
         if (alarmCount <= 0) {
             return;
         }
-        layer.open({
-            type: 1,
-            title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            // time: 5000,
-            // offset: ['100px', $("body").width() - 300 + 'px'],
-            shade: 0,
-            // resize: false,
-            content: $('.alarm-box')
-        });
+        showAlarmBox();
     });
 
     $(".profile-zone").mouseover(function() {
@@ -278,6 +278,7 @@ $(function() {
             title: [title, 'font-size:14px;color:#ffffff;background:#478de4;'],
             shadeClose: true,
             shade: 0.8,
+            resize: false,
             area: ['540px', h],
             content: 'manage/user/dispatch.do?' + encodeURI('mode=' + mode + '&id=' + id)
         });

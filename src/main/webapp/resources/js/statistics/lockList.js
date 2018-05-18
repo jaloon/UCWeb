@@ -60,19 +60,25 @@ $(function() {
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var lock = locks[i];
-                    tableData += "<tr ondblclick=\"showBMap(" + lock.id + ")\">" +
+                    var coordFlag = lock.longitude == undefined || lock.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + lock.id + ")\">") +
                         "<td class=\"lock-id\">" + lock.id + "</td>" +
                         "<td class=\"lock-car\">" + lock.carNumber + "</td>" +
-                        "<td class=\"lock-time\">" + new Date(lock.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
-                        "<td class=\"lock-coordinate\"><a href=\"javascript:showBMap(" + lock.id + ")\">(" + lock.longitude + ", " + lock.latitude + ")</a></td>" +
-                        "<td class=\"lock-velocity\">" + lock.velocity + "</td>" +
+                        "<td class=\"lock-time\">" + new Date(lock.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>";
+                    if (coordFlag) {
+                        tableData += "<td class=\"lock-coordinate\">数据库记录异常</td>";
+                    } else {
+                        tableData += "<td class=\"lock-coordinate\"><a href=\"javascript:showBMap(" + lock.id + ")\">("
+                            + lock.longitude + ", " + lock.latitude + ")</a></td>";
+                    }
+                    tableData += "<td class=\"lock-velocity\">" + (lock.velocity == undefined ? "数据库记录异常" : lock.velocity) + "</td>" +
                         "<td class=\"lock-aspect\">" + angle2aspect(lock.angle) + "</td>" +
-                        "<td class=\"lock-lock\">" + toHexId(lock.lockId) + "</td>" +
-                        "<td class=\"lock-type\">" + lock.type + "</td>" +
+                        "<td class=\"lock-dev\">" + lock.lockId + "</td>" +
                         "<td class=\"lock-store\">" + lock.storeId + "</td>" +
-                        "<td class=\"lock-index\">" + lock.index + "</td>" +
+                        "<td class=\"lock-seat\">" + lock.seatName + "</td>" +
+                        "<td class=\"lock-index\">" + lock.seatIndex + "</td>" +
                         "<td class=\"lock-status\">" + lock.statusName + "</td>" +
-                        "<td class=\"lock-alarm\">" + lock.alarm + "</td>" +
+                        "<td class=\"lock-alarm\">" + (lock.alarm == undefined ? "数据库记录异常" : lock.alarm) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

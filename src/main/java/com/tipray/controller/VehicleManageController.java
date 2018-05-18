@@ -64,15 +64,16 @@ public class VehicleManageController {
     /**
      * 更新车台轨迹配置
      *
-     * @param token           {@link String} UUID令牌
-     * @param scope           {@link Integer} 配置范围：0 所有车辆，1 单部车辆
-     * @param carNumber       {@link String} 车牌号
-     * @param scanInterval    {@link Integer} 轨迹采集间隔（秒）
-     * @param uploadInterval  {@link Integer} 默认轨迹上报间隔（秒）
-     * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
-     * @param isLocationValid {@link Integer} 手机定位是否有效
+     * @param token            {@link String} UUID令牌
+     * @param scope            {@link Integer} 配置范围：0 所有车辆，1 单部车辆
+     * @param carNumber        {@link String} 车牌号
+     * @param scanInterval     {@link Integer} 轨迹采集间隔（秒）
+     * @param uploadInterval   {@link Integer} 默认轨迹上报间隔（秒）
+     * @param generateDistance {@link Integer} 轨迹生成距离间隔（米）
+     * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
+     * @param longitude        {@link Integer} 手机定位经度
+     * @param latitude         {@link Integer} 手机定位纬度
+     * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
     @PermissionAnno("paramModule")
@@ -91,9 +92,9 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "更新车台配置：token={}, scope={}, carNumber={}, scanInterval={}, uploadInterval={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                "更新车台配置：token={}, scope={}, carNumber={}, scanInterval={}, uploadInterval={}, generateDistance={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
                 token, terminalConfig.getScope(), terminalConfig.getCarNumber(), terminalConfig.getScanInterval(),
-                terminalConfig.getUploadInterval(), isApp, longitude, latitude, isLocationValid);
+                terminalConfig.getUploadInterval(), terminalConfig.getGenerateDistance(), isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
@@ -110,7 +111,11 @@ public class VehicleManageController {
         int cacheId = 0;
         try {
             Integer scope = terminalConfig.getScope();
-            if (scope == null || (scope == 1 && StringUtil.isEmpty(terminalConfig.getCarNumber()))) {
+            if (scope == null
+                    || (scope == 1 && StringUtil.isEmpty(terminalConfig.getCarNumber()))
+                    || terminalConfig.getScanInterval() == null
+                    || terminalConfig.getUploadInterval() == null
+                    || terminalConfig.getGenerateDistance() == null) {
                 result = "失败，配置参数为空！";
                 logger.error("更新车台配置失败：{}", TerminalConfigUpdateErrorEnum.CONFIG_PARAM_NULL);
                 return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.CONFIG_PARAM_NULL);
@@ -932,7 +937,7 @@ public class VehicleManageController {
                 | LogTypeConst.TYPE_CHANGE_STATION | LogTypeConst.RESULT_DONE;
         String description = new StringBuffer("远程换站：").append(user.getName()).append("通过")
                 .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("对配送记录").append(transportId)
-                .append("远程换站到新加油站").append(changedStationId).toString();
+                .append("远程换站到").append(changedStationId).append("号加油站").toString();
         Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
         if (logId == null || logId == 0L) {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");

@@ -18,12 +18,6 @@
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/plugins/SelectBox.min.js"></script>
     <script src="../../resources/js/base.js"></script>
-    <style>
-        #changeStatus {
-            width: 398px;
-            height: 28px;
-        }
-    </style>
 </head>
 
 <body>
@@ -44,7 +38,7 @@
             </div>
             <div class="sub-info">
                 <div class="info-title">
-                    换站信息
+                    配送信息
                 </div>
                 <table class="sub-table" id="change_info">
                     <tr>
@@ -90,82 +84,37 @@
 </html>
 <script>
     $(function() {
+        $('.sub-info tr td:first-child').width(150);
+        $('.sub-info tr td:nth-child(2)').width(50);
         var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
         $("#cancel").click(function() {
             parent.layer.close(index);
         });
         $("#confirm").click(function() {
             var len = $("#change_info").find("tr").length;
-            var changeInfos = [];
-            for (let i = 1; i < len; i++) {
+            for (var i = 1; i < len; i++) {
                 var tr = $("#change_info").find("tr").eq(i);
-                var	gasstationId = parseInt(tr.children().eq(5).html(),10),
-                	changedGasstationId = parseInt(tr.children().last().find("select").val(),10);
+                var transportId = tr.children().eq(1).html(),
+                    invoice = tr.children().eq(2).html(),
+                    gasstationId = tr.children().eq(5).html(),
+                	changedGasstationId = tr.children().last().find("select").val();
                 if (gasstationId == changedGasstationId) {
+                    layer.msg('配送单：' + invoice + '，未换站！', {icon: 0});
                 	continue;
                 }
-                var change = {
-               		userId: ${userId},
-                   	carId: parseInt(tr.children().first().html(), 10),
-                   	transportId: parseInt(tr.children().eq(1).html(), 10),
-                   	invoice: tr.children().eq(2).html(),
-                   	storeId: parseInt(tr.children().eq(3).html(),10),
-                   	oildepotId: parseInt(tr.children().eq(4).html(),10),
-                   	gasstationId: gasstationId,
-                   	changedGasstationId: changedGasstationId,
-                   	isApp: 0,
-                   	longitude: 0,
-                   	latitude: 0
-                };
-                changeInfos.push(change);
+                $.post("../../manage/remote/asyn_change_station_request",
+                    encodeURI("transport_id=" + transportId + "&changed_station_id=" + changedGasstationId +
+                            "&token=" + generateUUID()),
+                    function(data) {
+                        if (data.id > 0) {
+                            layer.msg('配送单：' + invoice + '，换站请求发送失败！<br>' + data.msg, {icon: 2});
+                        } else {
+                            layer.msg('配送单：' + invoice + '，换站请求发送成功！', {icon: 1});
+                        }
+                    },
+                    "json"
+                );
             }
-            if (changeInfos.length == 0) {
-            	layer.alert('远程换站必须更改加油站！', { icon: 2 }, function(index2) {
-                    layer.close(index2);
-                });
-            	return;
-            }
-            // encodeURIComponent(URIstring)函数可把字符串作为 URI 组件进行编码。
-            // 该方法不会对 ASCII 字母和数字进行编码，也不会对这些 ASCII 标点符号进行编码： - _ . ! ~ * ' ( ) 。
-			// 其他字符（比如 ：;/?:@&=+$,# 这些用于分隔 URI 组件的标点符号），都是由一个或多个十六进制的转义序列替换的。
-            var changeParam = encodeURIComponent(JSON.stringify(changeInfos));
-            $.post("../../manage/car/remoteChange.do",
-            	"changeInfos=" + changeParam + encodeURI("&carNumber=${carNumber}"),
-                function(data) {
-            		switch (data.errorTag) {
-					case 0:
-						layer.msg("远程换站成功！", {
-                            icon: 1,
-                            time: 500
-                        }, function() {
-                            parent.layer.close(index);
-                        });
-						break;
-					case 20:
-						layer.msg(data.errorId + "个远程换站操作失败！", {
-                            icon: 2,
-                            time: 500
-                        }, function() {
-                        	layer.open({
-                       		  type: 1,
-                       		  skin: 'layui-layer-demo', //样式类名
-                       		  closeBtn: 0, //不显示关闭按钮
-                       		  anim: 2,
-                       		  shadeClose: true, //开启遮罩关闭
-                       		  content:data.msg
-                       		});
-                        });
-						break;
-					default:
-						layer.msg("远程换站失败！", {
-                            icon: 2,
-                            time: 500
-                        });
-						break;
-					}
-                },
-                "json"
-            );
         });
     });
 </script>

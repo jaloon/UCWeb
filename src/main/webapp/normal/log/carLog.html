@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>操作日志列表</title>
+    <title>车辆管理日志</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
@@ -43,7 +43,20 @@
             text-align: left;
         }
 
+        .log-result {
+            width: 300px;
+            text-align: left;
+        }
+
+        .log-app {
+            width: 120px;
+        }
+
         .log-time {
+            width: 200px;
+        }
+
+        .log-update {
             width: 200px;
         }
     </style>
@@ -53,7 +66,7 @@
 <div class="container">
     <div class="nav-addr">
         <img src="../../resources/images/navbar/log.png"> 操作日志管理
-        <img src="../../resources/images/navbar/nav_right_12.png"> 操作日志查看
+        <img src="../../resources/images/navbar/nav_right_12.png"> 车辆管理日志
     </div>
     <div class="search-zone">
         <select class="search-type" id="type_user">
@@ -61,7 +74,7 @@
             <option value="2">姓名</option>
         </select>
         <input type="text" class="search-text" id="text_user">
-        <label for="text_type" class="search-type" id="type_type">日志标志</label>
+        <label for="text_type" class="search-type" id="type_type">日志类型</label>
         <input type="text" class="search-text" id="text_type">
         <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
         <input type="text" class="search-text" id="text_begin">
@@ -78,9 +91,12 @@
                     <th class="log-id">序号</th>
                     <th class="log-account">操作员账号</th>
                     <th class="log-name">操作员姓名</th>
-                    <th class="log-type">日志标志</th>
-                    <th class="log-description">操作内容</th>
+                    <th class="log-type">日志类型</th>
+                    <th class="log-description">操作描述</th>
+                    <th class="log-result">操作结果</th>
+                    <th class="log-app">是否APP操作</th>
                     <th class="log-time">操作时间</th>
+                    <th class="log-update">结果更新时间</th>
                 </tr>
                 </thead>
                 <tbody class="table-body"></tbody>

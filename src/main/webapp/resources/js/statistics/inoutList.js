@@ -60,12 +60,18 @@ $(function() {
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var inout = inouts[i];
-                    tableData += "<tr ondblclick=\"showBMap(" + inout.id + ")\">" +
+                    var coordFlag = inout.longitude == undefined || inout.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + inout.id + ")\">") +
                         "<td class=\"inout-id\">" + inout.id + "</td>" +
                         "<td class=\"inout-car\">" + inout.carNumber + "</td>" +
-                        "<td class=\"inout-time\">" + new Date(inout.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
-                        "<td class=\"inout-coordinate\"><a href=\"javascript:showBMap(" + inout.id + ")\">(" + inout.longitude + ", " + inout.latitude + ")</a></td>" +
-                        "<td class=\"inout-velocity\">" + inout.velocity + "</td>" +
+                        "<td class=\"inout-time\">" + new Date(inout.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>";
+                    if (coordFlag) {
+                        tableData += "<td class=\"inout-coordinate\">数据库记录异常</td>";
+                    } else {
+                        tableData += "<td class=\"inout-coordinate\"><a href=\"javascript:showBMap(" + inout.id + ")\">("
+                            + inout.longitude + ", " + inout.latitude + ")</a></td>";
+                    }
+                    tableData += "<td class=\"inout-velocity\">" + (inout.velocity == undefined ? "数据库记录异常" : inout.velocity) + "</td>" +
                         "<td class=\"inout-aspect\">" + angle2aspect(inout.angle) + "</td>" +
                         "<td class=\"inout-type\">" + inout.typeName + "</td>" +
                         "<td class=\"inout-alarm\">" + inout.alarm + "</td>" +

@@ -1,0 +1,205 @@
+<HTML>
+
+<HEAD>
+    <TITLE>Reader Test</TITLE>
+</HEAD>
+
+<BODY id="bodyId">
+
+<center>
+    <h1>Example Reader Used In Web </h1>
+</center>
+
+
+<br><br>
+
+<center>
+
+    <p align="center"><textarea rows="20" id="TxtArea" cols="111"></textarea></p>
+    <script type="text/javascript" src="interface.js"></script>
+
+    <script>
+        var msg = document.getElementById('TxtArea');
+    </script>
+
+    <script>
+        var obj = embed_reader.getOBJ(READER_TYPE._reader_type_contactLess);
+        // obj.onResult(function(rData) {
+        //     switch (rData.FunctionID) {
+        //         case FUNCIDS._fid_initialcom:
+        //             {
+        //                 var opst;
+        //                 var rel = rData.RePara_Int;
+        //                 if (0 == rel) {
+        //                     var hdev = parseInt(rData.RePara_Str);
+        //                     if (hdev != -1) {
+        //                         icdev = hdev;
+        //                         obj.beep(icdev, 10); //do a beep
+        //                         msg.value = msg.value + "Link reader ok\n";
+        //                         isComOpen = true; //Set reader link status
+        //                     } else {
+        //                         msg.value = "Link reader error\n";
+        //                         isComOpen = false; //Set reader link failed status
+        //                     }
+        //                 } else
+        //                     msg.value = "Object load error\n";
+        //             }
+        //             break;
+        //         case FUNCIDS._fid_exit:
+        //             msg.value = msg.value + "reader closed\n"
+        //             break;
+        //         case FUNCIDS._fid_beep:
+        //             break;
+        //         case FUNCIDS._fid_GetDevSN:
+        //             msg.value = msg.value + "DevSN:" + rData.RePara_Str + "\n";
+        //             break;
+        //         case FUNCIDS._fid_findCard:
+        //             {
+        //                 var strcard = rData.RePara_Str;
+        //                 if (strcard != "") {
+        //                     hasCard = true;
+        //                     msg.value = msg.value + "Card ID: " + strcard + "\n";
+        //                     //obj.halt(icdev);
+        //                 } else {
+        //                     msg.value = msg.value + "Found no card \n";
+        //                     hasCard = false; //Set no card status
+        //                 }
+        //             }
+        //             break;
+        //         case FUNCIDS._fid_findCardStr:
+        //             {
+        //                 var strcard = rData.RePara_Str;
+        //                 if (strcard != "") {
+        //                     hasCard = true;
+        //                     msg.value = msg.value + "Card ID str: " + strcard + "\n";
+        //                     //obj.halt(icdev);
+        //                 } else {
+        //                     msg.value = msg.value + "Found no card \n";
+        //                     hasCard = false; //Set no card status
+        //                 }
+        //             }
+        //             break;
+        //         case FUNCIDS._fid_findCardHex:
+        //             {
+        //                 var strcard = rData.RePara_Str;
+        //                 if (strcard != "") {
+        //                     hasCard = true;
+        //                     msg.value = msg.value + "Card ID hex: " + strcard + "\n";
+        //                     //obj.halt(icdev);
+        //                 } else {
+        //                     msg.value = msg.value + "Found no card \n";
+        //                     hasCard = false; //Set no card status
+        //                 }
+        //             }
+        //             break;
+        //
+        //     }
+        //
+        // });
+
+        function AdaptReader() {
+            if (obj == null) {
+                return;
+            }
+            //else alert("ready call adaptreader...");
+            obj.adaptReader(READER_TYPE._reader_type_contactLess);
+        }
+
+        //Link Reader
+        function Connect() {
+            try {
+                if (isComOpen == false) //if reader link failed
+                {
+                    //alert("initialcom");
+                    var code = obj.initialcom(100, 115200);
+                    console.log(code)
+                    obj.onResult(function (rData) {
+                        if (rData.FunctionID == FUNCIDS._fid_initialcom) {
+                            var opst;
+                            var rel = rData.RePara_Int;
+                            if (0 == rel) {
+                                var hdev = parseInt(rData.RePara_Str);
+                                if (hdev != -1) {
+                                    icdev = hdev;
+                                    obj.beep(icdev, 10); //do a beep
+                                    msg.value = msg.value + "Link reader ok\n";
+                                    isComOpen = true; //Set reader link status
+                                } else {
+                                    msg.value = "Link reader error\n";
+                                    isComOpen = false; //Set reader link failed status
+                                }
+                            } else
+                                msg.value = "Object load error\n";
+                        }
+                    });
+                }
+            } catch (e) {
+                alert(e.message);
+            }
+
+            return;
+        }
+
+        function GetDevSN() {
+            obj.GetDevSN(icdev);
+        }
+
+        // Find card
+        function Findcard() {
+            obj.findcard(icdev, 0); //1);     //1: multy card mode
+            obj.onResult(function (rData) {
+                if (rData.FunctionID == FUNCIDS._fid_findCard) {
+                    obj.halt(icdev);
+                    var strcard = rData.RePara_Str;
+                    if (strcard != "") {
+                        obj.beep(icdev, 10);
+                        hasCard = true;
+                        msg.value = msg.value + "Card ID: " + strcard + "\n";
+                        //obj.halt(icdev);
+                    }
+                    Findcard();
+                }
+            });
+        }
+
+        // Find card
+        function FindcardStr() {
+            obj.findcardStr(icdev, 0); //1);     //1: multy card mode
+        }
+
+        // Find card
+        function FindcardHex() {
+            obj.findcardHex(icdev, 0); //1);     //1: multy card mode
+        }
+
+
+        //Disconnect with reader
+        function Disconnect() {
+            iRet = obj.exit(icdev);
+            isComOpen = false; //Set unlink status
+        }
+
+        var hasCard = false;
+        var isComOpen = false;
+        var icdev = -1;
+
+        // AdaptReader();
+        // Connect();
+    </script>
+
+    <br>
+    <form name="formname">
+        <p align="center">&nbsp; <input type="button" value="  Link  " name="btnConnect" onclick="Connect()">&nbsp;
+            <input type="button" value=" ReaderSN " name="btn_GetDevSN" onclick="GetDevSN()">&nbsp;
+            <input type="button" value=" FindCard " name="btn_FindCard" onclick="Findcard()">&nbsp;
+            <input type="button" value=" FindCardStr " name="btn_FindCardStr" onclick="FindcardStr()">&nbsp;
+            <input type="button" value=" FindCardHex " name="btn_FindCardHex" onclick="FindcardHex()">&nbsp;
+            <input type="button" value=" UnLink " name="btn_Disconnect" onclick="Disconnect()"></p>
+        </p>
+    </form>
+
+</center>
+
+</BODY>
+
+</HTML>

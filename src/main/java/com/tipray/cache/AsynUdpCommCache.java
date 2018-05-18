@@ -40,11 +40,13 @@ public class AsynUdpCommCache {
      */
     private static final Map<Integer, Map<String, Object>> PARAM_MAP = new ConcurrentHashMap<>();
     /**
-     * AsyncContext异步请求上下文（异步请求容器）缓存
+     * AsyncContext 异步请求上下文（异步请求容器）缓存
      */
     private static final Map<Integer, AsyncContext> ASYNC_CONTEXT_MAP = new ConcurrentHashMap<>();
-
-    public static final Map<Integer, DeferredResult<ResponseMsg>> DEFERRED_RESULT_MAP = new ConcurrentHashMap<>();
+    /**
+     * DeferredResult 延期结果缓存
+     */
+    private static final Map<Integer, DeferredResult<ResponseMsg>> DEFERRED_RESULT_MAP = new ConcurrentHashMap<>();
 
     /**
      * 添加任务日志缓存
@@ -177,7 +179,7 @@ public class AsynUdpCommCache {
      * @param asyncContext {@link AsyncContext} 异步请求上下文
      * @return {@link AsyncContext} 异步请求上下文
      */
-    public static synchronized AsyncContext putAsyncContext(Integer cacheId, AsyncContext asyncContext) {
+    public static synchronized AsyncContext putAsyncContextCache(Integer cacheId, AsyncContext asyncContext) {
         return ASYNC_CONTEXT_MAP.put(cacheId, asyncContext);
     }
 
@@ -187,7 +189,7 @@ public class AsynUdpCommCache {
      * @param cacheId {@link Integer} 缓存ID
      * @return {@link AsyncContext} 异步请求上下文
      */
-    public static synchronized AsyncContext getAndRemoveAsyncContext(Integer cacheId) {
+    public static synchronized AsyncContext getAndRemoveAsyncContextCache(Integer cacheId) {
         return ASYNC_CONTEXT_MAP.remove(cacheId);
     }
 
@@ -197,8 +199,40 @@ public class AsynUdpCommCache {
      * @param cacheId {@link Integer} 缓存ID
      * @return {@link AsyncContext} 异步请求上下文
      */
-    public static synchronized AsyncContext getAsyncContext(Integer cacheId) {
+    public static synchronized AsyncContext getAsyncContextCache(Integer cacheId) {
         return ASYNC_CONTEXT_MAP.get(cacheId);
+    }
+
+    /**
+     * 添加DeferredResult缓存
+     *
+     * @param cacheId        {@link Integer} 缓存ID
+     * @param deferredResult {@link DeferredResult} 延期结果
+     * @return {@link DeferredResult} 延期结果
+     */
+    public static synchronized DeferredResult<ResponseMsg> putDeferredResultCache(
+            Integer cacheId, DeferredResult<ResponseMsg> deferredResult) {
+        return DEFERRED_RESULT_MAP.put(cacheId, deferredResult);
+    }
+
+    /**
+     * 获取并移除DeferredResult缓存
+     *
+     * @param cacheId {@link Integer} 缓存ID
+     * @return {@link DeferredResult} 延期结果
+     */
+    public static synchronized DeferredResult<ResponseMsg> getAndRemoveDeferredResultCache(Integer cacheId) {
+        return DEFERRED_RESULT_MAP.remove(cacheId);
+    }
+
+    /**
+     * 获取DeferredResult缓存
+     *
+     * @param cacheId {@link Integer} 缓存ID
+     * @return {@link DeferredResult} 延期结果
+     */
+    public static synchronized DeferredResult<ResponseMsg> getDeferredResultCache(Integer cacheId) {
+        return DEFERRED_RESULT_MAP.get(cacheId);
     }
 
     /**
