@@ -49,7 +49,7 @@ public class DeviceController extends BaseAction {
         logger.info("dispatch device edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         Device device = new Device();
-        if (id > 0) {
+        if (id != null && id > 0) {
             device = deviceService.getDeviceById(id);
         }
         modelMap.put("device", device);

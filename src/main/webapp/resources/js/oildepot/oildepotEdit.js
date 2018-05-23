@@ -15,9 +15,26 @@ $.ajax({
             "<option value=2>出库读卡器</option>" +
             "<option value=3>出入库读卡器</option>" +
             "</select></td><td>" +
+            "<td style='display:none;'></td>" +
+            "<td><select>" +
+            "<option value=0>未指定</option>" +
+            "<option value=1>入库道闸</option>" +
+            "<option value=2>出库道闸</option>" +
+            "<option value=3>出入库道闸</option>" +
+            "</select></td><td>" +
             "<img alt=\"取消\" title=\"取消\" src=\"../../resources/images/operate/cancel.png\" onclick=\"deleteTr(this)\">&emsp;" +
             "<img alt=\"确认\" title=\"确认\" src=\"../../resources/images/operate/confirm.png\" onclick=\"confirmReaderTr(this)\">" +
             "</td></tr>";
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                icon: 0,
+                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+            }, function() {
+                location.reload(true);
+            });
+        }
     }
 });
 
@@ -38,6 +55,12 @@ function confirmReaderTr(obj) {
     var typeName = type.children().first().find("option:selected").text();
     tr.children().eq(1).html(readerType);
     type.html(typeName);
+
+    var barrierObj = tr.children().eq(4);
+    var barrier = barrierObj.children().first().val();
+    var barrierName = barrierObj.children().first().find("option:selected").text();
+    tr.children().eq(3).html(barrier);
+    type.html(barrierName);
     var oper = tr.children().last();
     oper.html("<img alt=\"删除\" title=\"删除\" src=\"../../resources/images/operate/delete.png\" onclick=\"deleteTr(this)\">");
 }
@@ -99,6 +122,16 @@ function getCardId(cardType) {
                 }
             }
             tdHtml += "</select>";
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
         }
     });
     return tdHtml;
@@ -154,26 +187,48 @@ $(function() {
         var radius = $.trim($("#radius").val());
         var region = $.trim($("#region").val());
         var remark = $.trim($("#remark").val());
-        var cardIds = "";
-        $(".cardIds").each(function() {
-            cardIds += $(this).text() + ",";
-        });
-        var readers = [];
-        $(".readerTrs").each(function() {
-            var reader = {
-                oilDepotId: id,
-                devId: parseInt($(this).children().first().html(), 16),
-                type: parseInt($(this).children().eq(1).html(), 10),
-            };
-            readers.push(reader);
-        });
+        var url, param;
 
-        cardIds = cardIds.substring(0, cardIds.length - 1);
-        var url = "../../manage/oildepot/update.do";
-        var param = "id=" + id + "&officialId=" + officialId + "&name=" + name + "&abbr=" + abbr + "&director=" + director +
-            "&phone=" + phone + "&address=" + address + "&company=" + company + "&longitude=" + longitude +
-            "&latitude=" + latitude + "&radius=" + radius + "&coverRegion=" + region + "&remark=" + remark +
-            "&cardIds=" + cardIds + "&readersJson=" + encodeURIComponent(JSON.stringify(readers));
+        if ("edit" == mode) {
+            var cardIds = "";
+            $(".cardIds").each(function() {
+                cardIds += $(this).text() + ",";
+            });
+            var readers = [];
+            var barrierCount = parseInt($("#barrierCount").val(), 10);
+            $(".readerTrs").each(function() {
+                var barrier = parseInt($(this).children().eq(3).html(), 10);
+                if (barrier > 0) {
+                    barrierCount++;
+                }
+                var reader = {
+                    oilDepotId: id,
+                    devId: parseInt($(this).children().first().html(), 10),
+                    type: parseInt($(this).children().eq(1).html(), 10),
+                    barrier: barrier
+                };
+                readers.push(reader);
+            });
+
+            if (barrierCount < 1) {
+                layer.alert('每个油库至少要有一个读卡器用于道闸转发通知！', { icon: 2 });
+                return;
+            }
+
+            if (barrierCount > 2) {
+                layer.alert('每个油库最多只能有两个读卡器分别用于出库道闸和入库道闸转发通知！', { icon: 2 });
+                return;
+            }
+
+            cardIds = cardIds.substring(0, cardIds.length - 1);
+
+            url = "../../manage/oildepot/update.do";
+            param = "id=" + id + "&officialId=" + officialId + "&name=" + name + "&abbr=" + abbr + "&director=" + director +
+                "&phone=" + phone + "&address=" + address + "&company=" + company + "&longitude=" + longitude +
+                "&latitude=" + latitude + "&radius=" + radius + "&coverRegion=" + region + "&remark=" + remark +
+                "&cardIds=" + cardIds + "&readersJson=" + encodeURIComponent(JSON.stringify(readers));
+
+        }
 
         if ("add" == mode) {
             url = "../../manage/oildepot/add.do";
@@ -206,6 +261,16 @@ $(function() {
                                 $("#officialId").select();
                             });
                         }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                                icon: 0,
+                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                            }, function() {
+                                location.reload(true);
+                            });
+                        }
                     }
                 });
                 if (!ajaxFlag) {
@@ -232,6 +297,16 @@ $(function() {
                             layer.alert('油库名称已存在！', { icon: 5 }, function(index2) {
                                 layer.close(index2);
                                 $("#name").select();
+                            });
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                                icon: 0,
+                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                            }, function() {
+                                location.reload(true);
                             });
                         }
                     }
@@ -310,7 +385,16 @@ $(function() {
                 }
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
 
     });
 });

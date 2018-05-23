@@ -60,7 +60,16 @@
                         }
                     },
                     "json"
-                );
+                ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                        layer.confirm('登录失效，是否刷新页面重新登录？', {
+                            icon: 0,
+                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                        }, function() {
+                            location.reload(true);
+                        });
+                    }
+                });
             });
             // 阻止事件冒泡到DOM树上
             event.stopPropagation();
@@ -117,7 +126,16 @@
                 $(".table-body").html(tableData);
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
     }
     </script>
 </head>

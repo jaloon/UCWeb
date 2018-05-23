@@ -64,12 +64,24 @@
 	                    }
 	                },
 	                "json"
-	            );
+	            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                        layer.confirm('登录失效，是否刷新页面重新登录？', {
+                            icon: 0,
+                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                        }, function() {
+                            location.reload(true);
+                        });
+                    }
+                });
 	        });
 	        // 阻止事件冒泡到DOM树上
 	        event.stopPropagation();
 	    }
-	    </pop:Permission>
+	    function findCardByReader() {
+            
+        }
+    </pop:Permission>
 	    function showList(cardType, pageId) {
 	        var rows = $("#page_size").val();
 	        var startRow = (pageId - 1) * rows;
@@ -121,7 +133,16 @@
 	                $(".table-body").html(tableData);
 	            },
 	            "json"
-	        );
+	        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function() {
+                        location.reload(true);
+                    });
+                }
+            });
 	    }
     </script>
 </head>
@@ -134,7 +155,6 @@
 	    </div>
         <div class="search-zone">
             <label for="search_text" class="search-type" id="search_type">卡类型</label>
-            <!-- <input type="text" id="search_text"> -->
             <select class="search-text" id="search_text">
                 <option value=1>应急卡</option>
                 <option value=2>入库卡</option>
@@ -145,6 +165,7 @@
             </select>
             <input type="button" class="search-btn" id="search_btn" value="查询">
             <pop:Permission ename="editCard">
+            <input type="button" id="reader" value="读卡器批量添加" onclick="findCardByReader()">
             <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>
@@ -181,7 +202,11 @@
             </div>
         </div>
     </div>
+    <div class="reader-box">
+
+    </div>
 </body>
+<script src="../../resources/plugins/CardReader/interface.js"></script>
 
 </html>
 </pop:Permission>

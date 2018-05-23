@@ -1,6 +1,7 @@
 package com.tipray.core.filter;
 
 import com.tipray.bean.Session;
+import com.tipray.constant.reply.LoginErrorEnum;
 import com.tipray.core.GridProperties;
 import com.tipray.util.HttpRequestUtil;
 import com.tipray.util.SessionUtil;
@@ -21,7 +22,7 @@ import java.nio.charset.StandardCharsets;
  * @version 1.0 2017-12-22
  */
 public class LoginValidateFilter implements Filter {
-
+    private LoginErrorEnum LoginError;
     private String errorMessage;
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -55,6 +56,17 @@ public class LoginValidateFilter implements Filter {
                 }
                 chain.doFilter(servletRequest, servletResponse);
             } else {
+                //判断是否为ajax请求
+                // String requestType = request.getHeader("X-Requested-With");
+                // boolean isAjaxRequest = requestType != null && ("XMLHttpRequest").equals(requestType);
+                // if (isAjaxRequest) {
+                //     PrintWriter out = response.getWriter();
+                //     out.write(JSONUtil.stringify(ResponseMsgUtil.error(LoginError)));
+                //     out.close();
+                //     response.flushBuffer();
+                //     return;
+                // }
+
                 String path = request.getContextPath();
                 String requestUrl = HttpRequestUtil.getRequestUrl(request);
                 encodeUrl(requestUrl);
@@ -84,12 +96,16 @@ public class LoginValidateFilter implements Filter {
         Session session = SessionUtil.getSession(request);
         // 未登录
         if (session == null) {
-            errorMessage = "";
+            // errorMessage = "";
             Session oldSession = SessionUtil.getOldSession(request);
             // 异地登录
             if (oldSession != null) {
+                LoginError = LoginErrorEnum.OFFSITE_LOGIN;
                 errorMessage = encodeUrl(new StringBuffer("<div style=\"font-size:15px;line-height:20px;\">您的账号在异地登录(")
                         .append(oldSession.getIp()).append(")<br>如非授权，建议修改密码</div>").toString());
+            } else {
+                LoginError = LoginErrorEnum.LOGIN_INVALID;
+                errorMessage = encodeUrl("");
             }
             return false;
         }
@@ -97,6 +113,7 @@ public class LoginValidateFilter implements Filter {
         if (SessionUtil.isLoginTimeout(session)) {
             SessionUtil.removeSession(session);
             request.getSession().invalidate();
+            LoginError = LoginErrorEnum.LOGIN_TIME_OUT;
             errorMessage = encodeUrl("因长时间未操作，系统已自动退出，请重新登录");
             return false;
         }

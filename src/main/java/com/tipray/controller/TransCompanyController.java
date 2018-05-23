@@ -46,7 +46,7 @@ public class TransCompanyController extends BaseAction {
         logger.info("dispatch transCompany edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         TransCompany transCompany = new TransCompany();
-        if (id > 0) {
+        if (id != null && id > 0) {
             transCompany = transCompanyService.getTransCompanyById(id);
         }
         modelMap.put("transcom", transCompany);

@@ -71,7 +71,7 @@ var SmartReader = {
             SocketOpen = false;
         };
         var WSonError = function() {
-            alert("Server not running");
+            alert("Card Reader Server not running");
         };
         reader.createSocket = function() {
             try {

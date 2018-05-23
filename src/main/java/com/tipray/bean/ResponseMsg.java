@@ -24,12 +24,12 @@ public class ResponseMsg implements Serializable {
 
 	public ResponseMsg() {}
 
-	public ResponseMsg(int id, String result, byte errorTag, int errorId, Object msg) {
+	public ResponseMsg(int id, String result, byte tag, int code, Object msg) {
 		super();
 		this.id = id;
 		this.result = result;
-		this.tag = errorTag;
-		this.code = errorId;
+		this.tag = tag;
+		this.code = code;
 		this.msg = msg;
 	}
 

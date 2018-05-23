@@ -1,21 +1,9 @@
 package com.tipray.net;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
-import com.tipray.constant.AlarmBitMarkConst;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.VehicleCompanyRelationCache;
+import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.constant.CenterConfigConst;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.mq.MyQueue;
@@ -23,17 +11,14 @@ import com.tipray.mq.MyQueueElement;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
 import com.tipray.net.constant.UdpReplyErrorTag;
-import com.tipray.util.ArraysUtil;
-import com.tipray.util.BytesConverterByBigEndian;
-import com.tipray.util.BytesConverterByLittleEndian;
-import com.tipray.util.BytesUtil;
-import com.tipray.util.CRCUtil;
-import com.tipray.util.DateUtil;
-import com.tipray.util.EmptyObjectUtil;
-import com.tipray.util.HttpRequestUtil;
-import com.tipray.util.JSONUtil;
-import com.tipray.util.RC4Util;
-import com.tipray.util.ResponseMsgUtil;
+import com.tipray.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * UDP协议
@@ -612,7 +597,8 @@ public class UdpProtocol {
 		logger.error("业务ID：{}，无效！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(bizIdWord), false));
 	}
 
-	/**
+
+    /**
 	 * 处理UDP应答业务
 	 * 
 	 * @param replyBizBuf

@@ -23,6 +23,10 @@
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0
 	</select>
+
+    <select id="findAllDeviceIds" resultType="java.lang.Integer">
+        SELECT device_id FROM `tbl_device`
+    </select>
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Device">
 		insert into
@@ -41,8 +45,37 @@
 		remark=ifnull(#{remark},'')
 		where id=#{id}
 	</update>
-	
-	<delete id="delete" parameterType="java.lang.Long">
+
+    <!-- 通用批量更新方法 -->
+    <update id="updateDevices" parameterType="java.util.List">
+        update tbl_device set
+        type =
+        <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
+            when #{item.device_id} then #{item.type}
+        </foreach>
+        , produce_time =
+        <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
+            when #{item.device_id} then #{item.produceTime}
+        </foreach>
+        , delivery_time =
+        <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
+            when #{item.device_id} then #{item.deliveryTime}
+        </foreach>
+        , model =
+        <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
+            when #{item.device_id} then #{item.model}
+        </foreach>
+        , remark =
+        <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
+            when #{item.device_id} then #{item.remark}
+        </foreach>
+        where device_id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item.device_id, jdbcType=INTEGER}
+        </foreach>
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Long">
 		update tbl_device set 
 		is_invalid=1 
 		where id=#{id}
@@ -53,6 +86,21 @@
 		is_invalid=1 
 		where device_id=#{deviceId}
 	</delete>
+
+	<delete id="deleteByDeviceIds" parameterType="java.lang.String">
+		update tbl_device set
+		is_invalid=1
+		where device_id in #{deviceIds}
+	</delete>
+
+    <update id="deleteByDeviceIdList" parameterType="java.util.List">
+        update tbl_device set
+		is_invalid=1
+        where device_id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item, jdbcType=INTEGER}
+        </foreach>
+    </update>
 
 	<select id="getById" parameterType="java.lang.Long" resultType="com.tipray.bean.baseinfo.Device">
 		select <include refid="select_colums"></include> 

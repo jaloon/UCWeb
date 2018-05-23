@@ -46,7 +46,7 @@ public class HandsetController extends BaseAction {
         logger.info("dispatch handset edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         Handset handset = new Handset();
-        if (id > 0) {
+        if (id != null && id > 0) {
             handset = handsetService.getHandsetById(id);
         }
         modelMap.put("handset", handset);

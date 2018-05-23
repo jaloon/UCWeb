@@ -55,7 +55,7 @@ $(function() {
                         "<td class=\"log-name\">" + log.user.name + "</td>" +
                         "<td class=\"log-type\">" + toHexId(log.type) + "</td>" +
                         "<td class=\"log-description\">" + log.description + "</td>" +
-                        "<td class=\"log-time\">" + new Date(log.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
+                        "<td class=\"log-time\">" + log.createDate + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";
@@ -63,7 +63,16 @@ $(function() {
                 $(".table-body").html(tableData);
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
     }
 
     showList("", "", "", "", "", 1);

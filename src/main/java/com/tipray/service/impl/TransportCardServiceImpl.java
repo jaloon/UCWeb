@@ -1,27 +1,25 @@
 package com.tipray.service.impl;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
-import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.TransportCardDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.TransportCardService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 配送卡管理业务层
@@ -101,6 +99,11 @@ public class TransportCardServiceImpl implements TransportCardService {
 	@Override
 	public List<TransportCard> findUnusedTranscards() {
 		return transportCardDao.findUnusedTranscards();
+	}
+
+	@Override
+	public Map<String, Object> getByTransportCardId(Long transportCardId) {
+		return transportCardId == null ? null : transportCardDao.getByTransportCardId(transportCardId);
 	}
 
 	/**

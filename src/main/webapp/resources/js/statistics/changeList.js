@@ -51,7 +51,7 @@ $(function() {
                     tableData += "<tr>" +
                         "<td class=\"change-id\">" + change.id + "</td>" +
                         "<td class=\"change-car\">" + change.carNumber + "</td>" +
-                        "<td class=\"change-time\">" + new Date(change.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
+                        "<td class=\"change-time\">" + change.createDate + "</td>" +
                         "<td class=\"change-user\">" + change.user.name + "(" + change.user.account + ")" + "</td>" +
                         "<td class=\"change-invoice\">" + change.invoice + "</td>" +
                         "<td class=\"change-depot\">" + change.oilDepot.name + "</td>" +
@@ -67,7 +67,16 @@ $(function() {
                 $(".table-body").html(tableData);
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
     }
 
     showList("", "", "", "", 1);

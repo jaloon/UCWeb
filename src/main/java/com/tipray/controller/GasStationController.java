@@ -56,7 +56,7 @@ public class GasStationController extends BaseAction {
         GasStation gasStation = new GasStation();
         List<Card> cards = new ArrayList<Card>();
         Handset handset = new Handset();
-        if (id > 0) {
+        if (id != null && id > 0) {
             gasStation = gasStationService.getGasStationById(id);
             cards = cardService.findByGasStationId(id);
             handset = handsetService.getByGasStationId(id);

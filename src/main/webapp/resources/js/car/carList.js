@@ -47,7 +47,16 @@ $(function() {
                         $("#search_text").append("<option value=" + company.id + ">" + company.name + "</option>");
                     }
                 }
-            );
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function() {
+                        location.reload(true);
+                    });
+                }
+            });
         }
     });
 

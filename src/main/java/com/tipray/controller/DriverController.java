@@ -47,7 +47,7 @@ public class DriverController extends BaseAction {
 		logger.info("dispatch driver edit page, mode={}, id={}", mode, id);
 		modelMap.put("mode", mode);
 		Driver driver = new Driver();
-		if (id > 0) {
+		if (id != null && id > 0) {
 			driver = driverService.getDriverById(id);
 		}
 		modelMap.put("driver", driver);

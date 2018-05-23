@@ -1,14 +1,19 @@
 package com.tipray.controller;
 
 import com.tipray.bean.ResponseMsg;
+import com.tipray.bean.log.VehicleManageLog;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
+import com.tipray.constant.LogTypeConst;
+import com.tipray.constant.reply.BarrierErrorEnum;
+import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.core.base.BaseAction;
 import com.tipray.core.exception.PermissionException;
 import com.tipray.net.NioUdpServer;
-import com.tipray.util.JSONUtil;
-import com.tipray.util.StringUtil;
-import com.tipray.util.UUIDUtil;
+import com.tipray.service.OilDepotService;
+import com.tipray.service.TransportCardService;
+import com.tipray.service.VehicleManageLogService;
+import com.tipray.util.*;
 import com.tipray.websocket.AlarmWebSocketHandler;
 import com.tipray.websocket.MonitorWebSocketHandler;
 import net.sf.json.JSON;
@@ -18,13 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,19 +43,13 @@ public class ExternalInterface extends BaseAction {
     @Autowired
     private MonitorWebSocketHandler monitorWebSocketHandler;
     @Resource
+    private OilDepotService oilDepotService;
+    @Resource
+    private TransportCardService transportCardService;
+    @Resource
     private NioUdpServer udpServer;
-
-    /**
-     * 绑定信息更新
-     *
-     * @param lockWaitBind 锁待绑定列表更新
-     */
-    @RequestMapping("bind")
-    @ResponseBody
-    public void bind(Long lockWaitBind) {
-        // 待定(暂时砍掉)
-        return;
-    }
+    @Resource
+    private VehicleManageLogService vehicleManageLogService;
 
     /**
      * 报警
@@ -85,40 +81,35 @@ public class ExternalInterface extends BaseAction {
     /**
      * 车辆监控
      *
-     * @param track           {@link JSON} 单条轨迹信息
-     * @param trackList       {@link JSON} 轨迹列表信息
      * @param vehicleIsOnline {@link JSON} 在线/离线 vehicleIsOnline={"vehicle_id": 1, "is_online":1}
      * @param vehicleCfg      {@link JSON} 车辆配置信息 vehicleCfg={"vehicle_id": 1}
      */
     @RequestMapping(value = "monitor", method = RequestMethod.POST)
     @ResponseBody
-    public void monitor(String track, String trackList, String vehicleIsOnline, String vehicleCfg) {
-        logger.debug("车辆监控业务：track = {}，trackList = {}, vehicleIsOnline = {}, vehicleCfg = {}",
-                track, trackList, vehicleIsOnline, vehicleCfg);
-        WebSocketSession session = null;
-        Map<String, Object> map = new HashMap<String, Object>();
+    public void monitor(String vehicleIsOnline, String vehicleCfg) {
+        logger.debug("车辆监控业务：vehicleIsOnline = {}, vehicleCfg = {}", vehicleIsOnline, vehicleCfg);
         try {
-            if (StringUtil.isNotEmpty(track)) {
-                map.put("biz", "track");
-                map.put("track", track);
-            } else if (StringUtil.isNotEmpty(trackList)) {
-                map.put("biz", "tracklist");
-                map.put("tracklist", trackList);
-            } else if (StringUtil.isNotEmpty(vehicleIsOnline)) {
+            if (StringUtil.isNotEmpty(vehicleIsOnline)) {
                 Map<String, Object> onlineMap = JSONUtil.parseToMap(vehicleIsOnline);
-                int online = (int) onlineMap.get("is_online");
-                if (online == 0) {
-                    map.put("biz", "offline");
-                    map.put("vehicle_id", onlineMap.get("vehicle_id"));
+                Integer online = (Integer) onlineMap.get("is_online");
+                Integer vehicleId = (Integer) onlineMap.get("vehicle_id");
+                if (online == null || vehicleId == null) {
+                    return;
                 }
-            } else if (StringUtil.isNotEmpty(vehicleCfg)) {
-                // 待处理
+                if (online == 0) {
+                    monitorWebSocketHandler.dealOfflineUpload(vehicleId.longValue());
+                }
                 return;
             }
-            String msg = JSONUtil.stringify(map);
-            monitorWebSocketHandler.handleMessage(session, new TextMessage(msg));
-            // 必须return，否则monitorWebSocketHandler会一直重复发送消息
-            return;
+            if (StringUtil.isNotEmpty(vehicleCfg)) {
+                Map<String, Object> cfgMap = JSONUtil.parseToMap(vehicleCfg);
+                Integer vehicleId = (Integer) cfgMap.get("vehicle_id");
+                if (vehicleId == null) {
+                    return;
+                }
+                monitorWebSocketHandler.dealVehicleCfgUpload(vehicleId.longValue());
+                return;
+            }
         } catch (Exception e) {
             logger.error("处理监控信息异常：\n{}", e.toString());
         }
@@ -137,6 +128,7 @@ public class ExternalInterface extends BaseAction {
     // }
 
     /**
+     * 远程进出道闸
      * @param token   {@link String} UUID令牌
      * @param depotId {@link String} 油库编号
      * @param cardId  {@link Long} 配送卡ID
@@ -151,11 +143,91 @@ public class ExternalInterface extends BaseAction {
                                                @RequestParam("sign") Integer sign,
                                                HttpSession session) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             throw new PermissionException();
         } else {
             session.setAttribute("token", token);
         }
+        logger.info("远程进出道闸：token={}, depot_id={}, card_id={}, sign={}", token, depotId, cardId, sign);
         DeferredResult<ResponseMsg> deferredResult = new DeferredResult<>();
+        VehicleManageLog vehicleManageLog = new VehicleManageLog();
+        Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL | LogTypeConst.TYPE_BARRIER_OPEN
+                | LogTypeConst.RESULT_DONE;
+        if (sign == 1) {
+            type |= LogTypeConst.TYPE_BARRIER_IN;
+        } else if (sign == 2) {
+            type |= LogTypeConst.TYPE_BARRIER_OUT;
+        }
+        String description = new StringBuffer("远程进出道闸：").append("道闸")
+                .toString();
+        Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+        if (logId == null || logId == 0L) {
+            deferredResult.setResult(ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！"));
+            return deferredResult;
+        }
+        String result = "";
+        int cacheId = 0;
+        try {
+            if (depotId.isEmpty()) {
+                result = "失败，油库编号无效！";
+                logger.error("远程进出道闸失败：{}", BarrierErrorEnum.OILDEPOT_INVALID);
+                deferredResult.setResult(ResponseMsgUtil.error(BarrierErrorEnum.OILDEPOT_INVALID));
+                return deferredResult;
+            }
+            if (sign < 1 || sign > 2){
+                result = "失败，进出闸标志无效！";
+                logger.error("远程进出道闸失败：进出闸标志[{}]无效！", sign);
+                deferredResult.setResult(ResponseMsgUtil.error(BarrierErrorEnum.SIGN_INVALID));
+                return deferredResult;
+            }
+
+            Long oilId = oilDepotService.getIdByOfficialId(depotId);
+            if (oilId == null) {
+                result = "失败，油库编号无效！";
+                logger.error("远程进出道闸失败：{}", BarrierErrorEnum.OILDEPOT_INVALID);
+                deferredResult.setResult(ResponseMsgUtil.error(BarrierErrorEnum.OILDEPOT_INVALID));
+                return deferredResult;
+            }
+
+            Map<String, Object> transportCard = transportCardService.getByTransportCardId(cardId);
+            if (transportCard == null) {
+                result = "失败，配送卡ID无效！";
+                logger.error("远程进出道闸失败：配送卡ID[{}]无效！", cardId);
+                deferredResult.setResult(ResponseMsgUtil.error(BarrierErrorEnum.CARD_INVALID));
+                return deferredResult;
+            }
+
+            Integer terminalId = (Integer) transportCard.get("terminalId");
+            if (terminalId == null) {
+                result = "失败，配送卡未与车辆绑定！";
+                logger.error("远程进出道闸失败：{}", BarrierErrorEnum.CARD_UNBIND);
+                deferredResult.setResult(ResponseMsgUtil.error(BarrierErrorEnum.CARD_UNBIND));
+                return deferredResult;
+            }
+
+            if (terminalId == 0) {
+                result = "失败，与配送卡绑定的车辆未绑定车载终端！";
+                logger.error("远程进出道闸失败：{}", BarrierErrorEnum.TERMINAL_UNBIND);
+                deferredResult.setResult(ResponseMsgUtil.error(BarrierErrorEnum.TERMINAL_UNBIND));
+                return deferredResult;
+            }
+
+            int remoteId = 0;
+
+
+
+
+        } catch (Exception e) {
+            // removeCache(cacheId, null);
+            result = "失败，发送更新车台配置请求异常！";
+            logger.error("更新车台配置异常：e={}", e.toString());
+            logger.debug("更新车台配置异常堆栈信息");
+
+            ResponseMsgUtil.excetion(ErrorTagConst.BARRIER_ERROR_TAG, BarrierErrorEnum.EXCEPTON.code(), e.getMessage());
+        } finally {
+            // broadcastAndUpdateLog(vehicleManageLog, type, description, result);
+        }
+
         short serial = SerialNumberCache.getNextSerialNumber((short) 1501);
         System.out.println("send: " + serial);
         ByteBuffer buffer = ByteBuffer.allocate(2);

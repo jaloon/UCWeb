@@ -164,30 +164,72 @@ $(function() {
         }
     };
 
+    // function start() {
+    //     carNumber = trimAll($("#text_car").val());
+    //     // carNumber = dropdown_text();
+    //     begin = $("#text_begin").val();
+    //     end = $("#text_end").val();
+    //     interval = $("#text_interval").val();
+    //     $.post("../../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
+    //         function(data) {
+    //             if (isNull(data) || data.length == 0) {
+    //                 layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
+    //             } else {
+    //                 stop();
+    //                 btn_start.attr('disabled', true);
+    //                 btn_stop.attr('disabled', false);
+    //                 btn_pause.attr('disabled', false);
+    //                 btn_go_on.attr('disabled', true);
+    //                 tracks = data;
+    //                 play();
+    //             }
+    //         },
+    //         "json"
+    //     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+    //             if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+    //                 layer.confirm('登录失效，是否刷新页面重新登录？', {
+    //                     icon: 0,
+    //                     title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+    //                 }, function() {
+    //                     location.reload(true);
+    //                 });
+    //             }
+    //         });
+    // }
+
+
+    var times = [];
+    var t100 = 0;
     function start() {
         carNumber = trimAll($("#text_car").val());
-        // carNumber = dropdown_text();
         begin = $("#text_begin").val();
         end = $("#text_end").val();
-        interval = $("#text_interval").val();
-        $.post("../../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
-            function(data) {
-                if (isNull(data) || data.length == 0) {
-                    layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
-                } else {
-                    stop();
-                    btn_start.attr('disabled', true);
-                    btn_stop.attr('disabled', false);
-                    btn_pause.attr('disabled', false);
-                    btn_go_on.attr('disabled', true);
-                    tracks = data;
-                    play();
+        for (var i = 0; i < 100; i++) {
+            var t1 = new Date().getTime();
+            $.ajax({
+                type: "get",
+                async: false, //不异步，先执行完ajax，再干别的
+                url: "../../../manage/car/retrack.do",
+                data: encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
+                dataType: "json",
+                success: function(response) {
+                    if (isNull(response) || response.length == 0) {
+                        layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
+                    } else {
+                        var t2 = new Date().getTime() - t1;
+                        t100 += t2;
+                        times.push(t2);
+                    }
                 }
-            },
-            "json"
-        );
-
+            });
+        }
+        console.log(JSON.stringify(times))
+        console.log(t100/100);
+        times= [];
+        t100 = 0;
     }
+
+
 
     function stop() {
         btn_start.attr('disabled', false);

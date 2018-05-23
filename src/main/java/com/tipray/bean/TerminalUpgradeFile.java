@@ -30,7 +30,7 @@ public class TerminalUpgradeFile implements Serializable {
 	/** 文件大小 */
 	private Integer size;
 	/** 文件CRC32（4字节16进制字符串） */
-	private String crc;
+	private String crc32;
 
 	public Integer getType() {
 		return type;
@@ -56,12 +56,12 @@ public class TerminalUpgradeFile implements Serializable {
 		this.size = size;
 	}
 
-	public String getCrc() {
-		return crc;
+	public String getCrc32() {
+		return crc32;
 	}
 
-	public void setCrc(String crc) {
-		this.crc = crc;
+	public void setCrc32(String crc32) {
+		this.crc32 = crc32;
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class TerminalUpgradeFile implements Serializable {
 		sb.append("type=").append(type);
 		sb.append(", name='").append(name).append('\'');
 		sb.append(", size=").append(size);
-		sb.append(", crc='").append(crc).append('\'');
+		sb.append(", crc32='").append(crc32).append('\'');
 		sb.append('}');
 		return sb.toString();
 	}

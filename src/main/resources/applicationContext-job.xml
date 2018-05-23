@@ -17,11 +17,11 @@
 	<!-- 配置定时任务的线程池（多任务时需要进行配置，若不配置多任务下会有问题。） -->
 	<task:scheduler id="scheduler" pool-size="5"/>
 	
-    <!--<task:scheduled-tasks scheduler="scheduler">-->
-    	<!--&lt;!&ndash; <task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/> &ndash;&gt;-->
-    	<!--&lt;!&ndash; 链路维护心跳任务，每隔2分钟执行一次 &ndash;&gt;-->
-    	<!--<task:scheduled ref="scheduledJob" method="executeHeartbeat" cron="0 */2 * * * ?"/>-->
-    	<!--&lt;!&ndash; <task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" /> &ndash;&gt;-->
-    <!--</task:scheduled-tasks>-->
+    <!--<task:scheduled-tasks scheduler="scheduler">
+    	&lt;!&ndash; <task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/> &ndash;&gt;
+    	&lt;!&ndash; 链路维护心跳任务，每隔2分钟执行一次 &ndash;&gt;
+    	<task:scheduled ref="scheduledJob" method="executeHeartbeat" cron="0 */2 * * * ?"/>
+    	&lt;!&ndash; <task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" /> &ndash;&gt;
+    </task:scheduled-tasks>-->
     
 </beans>

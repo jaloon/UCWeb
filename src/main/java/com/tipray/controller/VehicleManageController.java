@@ -87,6 +87,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -164,7 +165,7 @@ public class VehicleManageController {
             removeCache(cacheId, null);
             result = "失败，发送更新车台配置请求异常！";
             logger.error("更新车台配置异常：e={}", e.toString());
-            logger.debug("更新车台配置异常堆栈信息");
+            logger.debug("更新车台配置异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
@@ -205,6 +206,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -288,6 +290,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -410,6 +413,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -504,6 +508,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -590,6 +595,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -688,6 +694,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -842,6 +849,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -924,6 +932,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -1051,6 +1060,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -1214,6 +1224,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);
@@ -1379,6 +1390,7 @@ public class VehicleManageController {
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
         if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
             return null;
         } else {
             session.setAttribute("token", token);

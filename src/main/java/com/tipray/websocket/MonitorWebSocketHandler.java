@@ -1,13 +1,12 @@
 package com.tipray.websocket;
 
+import com.tipray.bean.VehicleRealtimeStatus;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.log.VehicleManageLog;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
-import com.tipray.cache.VehicleCompanyRelationCache;
-import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.constant.LogTypeConst;
 import com.tipray.core.ThreadVariable;
 import com.tipray.net.NioUdpServer;
@@ -17,14 +16,11 @@ import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
@@ -165,15 +161,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             case REALTIME_MONITOR:
                 dealRealtimeMonitor(session, msgMap);
                 break;
-            case CAR_TRACK_REPORT:
-                dealCarTrackReport(msgMap);
-                break;
-            case CAR_TRACK_LIST:
-                dealCarTrackList(msgMap);
-                break;
-            case CAR_OFF_LINE:
-                dealCarOffLine(msgMap);
-                break;
             default:
                 break;
         }
@@ -200,27 +187,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     @Override
     public boolean supportsPartialMessages() {
         return false;
-    }
-
-    /**
-     * 发送消息到客户端
-     *
-     * @param session {@link WebSocketSession} 客户端
-     * @param msg     {@link String} 消息文本
-     */
-    private void sendMsg(WebSocketSession session, String msg) {
-        if (StringUtil.isEmpty(msg)) {
-            return;
-        }
-        if (!session.isOpen()) {
-            logger.warn("monitor connection {} is not still open", Long.parseLong(session.getId(), 16));
-            return;
-        }
-        try {
-            session.sendMessage(new TextMessage(msg));
-        } catch (IOException e) {
-            logger.error("发送消息{}异常！\n{}", msg, e.getMessage());
-        }
     }
 
     /**
@@ -294,7 +260,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     return;
                 }
                 // 车辆ID
-                Long carId = ((Integer) msgMap.get("carcarId")).longValue();
+                Long carId = ((Integer) msgMap.get("carId")).longValue();
                 // 车牌号
                 String carNumber = (String) msgMap.get("carNumber");
                 // token
@@ -325,12 +291,13 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         return;
                     }
                     addUdpTimeoutTask(src, cacheId, false);
+                    vehicleManageLog.setUdpBizId(UdpBizId.FOCUS_MONITOR_REQUEST);
                     UDP_CACHE.put(cacheId, sessionId);
-                    WebSocketUtil.sendTextMsg(session, CAR_TRACKS.get(carId));
                     // 当前时间戳（重点监控发起时间）
                     Long timestamp = System.currentTimeMillis();
                     FOCUS_CLIENTS.put(sessionId, timestamp);
                     FOCUS_CARS.put(sessionId, carId);
+                    WebSocketUtil.sendTextMsg(session, CAR_TRACKS.get(carId));
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，重点监控异常！";
@@ -349,8 +316,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 if (!isSend) {
                     removeUdpCache(repeatCacheId, null);
                     logger.error("UDP发送数据异常！");
-                    FOCUS_CLIENTS.remove(sessionId);
-                    FOCUS_CARS.remove(sessionId);
+                    // FOCUS_CLIENTS.remove(sessionId);
+                    // FOCUS_CARS.remove(sessionId);
                     WebSocketUtil.sendTextMsg(session, "conn_broken");
                 }
                 addUdpTimeoutTask(src, repeatCacheId, true);
@@ -383,6 +350,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         // token
         String token = (String) msgMap.get("token");
         Long carId = FOCUS_CARS.get(sessionId);
+        FOCUS_CLIENTS.remove(sessionId);
+        FOCUS_CARS.remove(sessionId);
         if (carId != null && carId != 0) {
             // 车载终端设备ID
             Integer terminalId = vehicleService.getTerminalIdById(carId);
@@ -409,6 +378,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         return;
                     }
                     addUdpTimeoutTask(src, cacheId, false);
+                    vehicleManageLog.setUdpBizId(UdpBizId.FOCUS_MONITOR_CANCEL_REQUEST);
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，重点监控取消异常！";
@@ -486,7 +456,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         // 车载终端设备ID
                         Integer terminalId = car.getVehicleDevice().getDeviceId();
                         ByteBuffer src = SendPacketBuilder.buildProtocol0x1301(terminalId, sessionId, interval, duration);
-                        udpServer.send(src);
                         boolean isSend = udpServer.send(src);
                         if (!isSend) {
                             removeUdpCache(cacheId, description);
@@ -496,6 +465,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                             return;
                         }
                         addUdpTimeoutTask(src, cacheId, false);
+                        vehicleManageLog.setUdpBizId(UdpBizId.REALTIME_MONITOR_REQUEST);
+                        UDP_CACHE.put(cacheId, sessionId);
                         succuessAtLeastOne = true;
                         carIds.add(car.getId());
                         REALTIME_CARS_CACHE.put(cacheId, car.getId());
@@ -538,6 +509,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             case BIZ_CANCEL:
                 Long cancelSessionId = ((Integer) msgMap.get("session")).longValue();
                 List<Long> ids = REALTIME_CARS.get(cancelSessionId);
+                REALTIME_CARS.remove(cancelSessionId);
                 if (!EmptyObjectUtil.isEmptyList(ids)) {
                     ids.parallelStream().forEach(carId -> dealRealtimeCancel(user, carId, cancelSessionId, token));
                 }
@@ -582,6 +554,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         return;
                     }
                     addUdpTimeoutTask(src, cacheId, false);
+                    vehicleManageLog.setUdpBizId(UdpBizId.REALTIME_MONITOR_CANCEL_REQUEST);
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，实时监控取消异常！";
@@ -631,122 +604,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         WebSocketUtil.sendTextMsg(parentSession, strBuf.toString());
     }
 
-    /**
-     * 处理车辆轨迹上报业务
-     *
-     * @param msgMap {@link WebSocketMessage} JSON文本的实际对象
-     */
-    private void dealCarTrackReport(Map<String, Object> msgMap) {
-        JSONObject jsonObj = (JSONObject) msgMap.get("track");
-        Map<String, Object> trackMap = JSONUtil.parseJSONObject(jsonObj);
-        // 车辆ID
-        Long id = ((Integer) msgMap.get("vehicle_id")).longValue();
-        // 车牌号
-        String carNumber = (String) trackMap.get("vehicle_number");
-        // 运输公司
-        String carCom = VehicleCompanyRelationCache.getComOfCar(id);
-        // 经度
-        float longitude = (float) trackMap.get("longitude");
-        // 纬度
-        float latitude = (float) trackMap.get("latitude");
-        // 速度
-        int velocity = (int) trackMap.get("speed");
-        // 角度
-        int angle = (int) trackMap.get("angle");
-        // 车辆状态
-        String status = getCarStatus((int) trackMap.get("vehicle_status"));
-        // 报警情况
-        boolean alarm = isAlarm((int) trackMap.get("vehicle_alarm_status"), (String) trackMap.get("lock_status_info"));
-        StringBuffer strBuf = new StringBuffer();
-        strBuf.append('{');
-        strBuf.append("\"biz\":\"track\",");
-        strBuf.append("\"id\":").append(id.toString()).append(',');
-        strBuf.append("\"carNumber\":\"").append(carNumber).append('\"').append(',');
-        strBuf.append("\"carCom\":\"").append(carCom).append('\"').append(',');
-        strBuf.append("\"longitude\":").append(longitude).append(',');
-        strBuf.append("\"latitude\":").append(latitude).append(',');
-        strBuf.append("\"velocity\":").append(velocity).append(',');
-        strBuf.append("\"angle\":").append(angle).append(',');
-        strBuf.append("\"status\":\"").append(status).append('\"').append(',');
-        strBuf.append("\"alarm\":").append(alarm).append(',');
-        strBuf.append("\"online\":1"); // online：0.离线；1.在线
-        strBuf.append('}');
-        broadcastCarTrackAndOffline(id, strBuf.toString());
-    }
-
-    /**
-     * 处理车辆离线业务
-     *
-     * @param msgMap {@link WebSocketMessage} JSON文本的实际对象
-     */
-    private void dealCarOffLine(Map<String, Object> msgMap) {
-        Long id = ((Integer) msgMap.get("vehicle_id")).longValue();
-        StringBuffer strBuf = new StringBuffer();
-        strBuf.append('{');
-        strBuf.append("\"biz\":\"track\",");
-        strBuf.append("\"id\":").append(id.toString()).append(',');
-        strBuf.append("\"online\":0"); // online：0.离线；1.在线
-        strBuf.append('}');
-        broadcastCarTrackAndOffline(id, strBuf.toString());
-    }
-
-    /**
-     * 处理轨迹列表上报业务
-     *
-     * @param msgMap {@link WebSocketMessage} JSON文本的实际对象
-     */
-    private void dealCarTrackList(Map<String, Object> msgMap) {
-        JSONObject jsonObj = (JSONObject) msgMap.get("tracklist");
-        Map<String, Object> map = JSONUtil.parseJSONObject(jsonObj);
-        // 车辆ID
-        Long id = ((Integer) msgMap.get("vehicle_id")).longValue();
-        // 车牌号
-        String carNumber = (String) map.get("vehicle_number");
-        // 运输公司
-        String carCom = VehicleCompanyRelationCache.getComOfCar(id);
-        // 轨迹列表JSONArray
-        JSONArray jsonArray = (JSONArray) map.get("tracklist");
-        // 轨迹列表
-        List<Map<String, Object>> list = JSONUtil.parseJSONArray(jsonArray);
-        for (int i = 0, len = list.size(); i < len; i++) {
-            Map<String, Object> trackMap = list.get(i);
-            // 经度
-            float longitude = (float) trackMap.get("longitude");
-            // 纬度
-            float latitude = (float) trackMap.get("latitude");
-            // 速度
-            int velocity = (int) trackMap.get("speed");
-            // 角度
-            int angle = (int) trackMap.get("angle");
-            // 车辆状态
-            String status = getCarStatus((int) trackMap.get("vehicle_status"));
-            // 报警情况
-            boolean alarm = isAlarm((int) trackMap.get("vehicle_alarm_status"),
-                    (String) trackMap.get("lock_status_info"));
-            StringBuffer strBuf = new StringBuffer();
-            strBuf.append('{');
-            strBuf.append("\"biz\":\"track\",");
-            strBuf.append("\"id\":").append(id.toString()).append(',');
-            strBuf.append("\"carNumber\":\"").append(carNumber).append('\"').append(',');
-            strBuf.append("\"carCom\":\"").append(carCom).append('\"').append(',');
-            strBuf.append("\"longitude\":").append(longitude).append(',');
-            strBuf.append("\"latitude\":").append(latitude).append(',');
-            strBuf.append("\"velocity\":").append(velocity).append(',');
-            strBuf.append("\"angle\":").append(angle).append(',');
-            strBuf.append("\"status\":\"").append(status).append('\"').append(',');
-            strBuf.append("\"alarm\":").append(alarm).append(',');
-            strBuf.append("\"online\":1"); // online：0.离线；1.在线
-            strBuf.append('}');
-            String track = strBuf.toString();
-            sendToFocusPage(id, track);
-            // 轨迹缓存只保留最后一条轨迹
-            if (i == len - 1) {
-                CAR_TRACKS.put(id, track);
-                sendToGeneralPage(track);
-            }
-        }
-
-    }
 
     /**
      * 广播车辆轨迹和离线信息
@@ -825,7 +682,10 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param clientCache 监控WebSocket客户端缓存
      * @param carCahe     监控车辆缓存
      */
-    private void dealTimeOut(boolean timeout, Long sessionId, String track, Map<Long, ?> clientCache,
+    private void dealTimeOut(boolean timeout,
+                             Long sessionId,
+                             String track,
+                             Map<Long, ?> clientCache,
                              Map<Long, ?> carCahe) {
         WebSocketSession session = WEB_SOCKET_CLIENTS.get(sessionId);
         if (session.isOpen()) {
@@ -838,47 +698,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             clientCache.remove(sessionId);
             carCahe.remove(sessionId);
         }
-    }
-
-    /**
-     * 车辆状态
-     *
-     * @param status 状态值（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急）
-     * @return 车辆状态名称
-     */
-    private String getCarStatus(int status) {
-        switch (status) {
-            case 0:
-                return "未知";
-            case 1:
-                return "在油库";
-            case 2:
-                return "在途中";
-            case 3:
-                return "在加油站";
-            case 4:
-                return "返程中";
-            case 5:
-                return "应急";
-            default:
-                break;
-        }
-        return "未知";
-    }
-
-    /**
-     * 是否报警
-     *
-     * @param carAlarmStatus    车辆报警状态
-     * @param lockStatusInfoHex 锁状态16进制字符串
-     * @return
-     */
-    private boolean isAlarm(int carAlarmStatus, String lockStatusInfoHex) {
-        if ((carAlarmStatus & AlarmBitMarkConst.VALID_TERMINAL_ALARM_BITS) > 0) {
-            return true;
-        }
-        byte[] lockStatusInfo = BytesUtil.hexStringToBytes(lockStatusInfoHex);
-        return VehicleAlarmUtil.isLockAlarm(lockStatusInfo);
     }
 
     /**
@@ -943,6 +762,54 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     }
 
     /**
+     * 处理http车辆离线上报
+     *
+     * @param vehicleId {@link Long} 车辆ID
+     */
+    public void dealOfflineUpload(Long vehicleId) {
+        if (vehicleId == null) {
+            return;
+        }
+        StringBuffer strBuf = new StringBuffer();
+        strBuf.append('{');
+        strBuf.append("\"biz\":\"track\",");
+        strBuf.append("\"id\":").append(vehicleId.toString()).append(',');
+        strBuf.append("\"online\":0"); // online：0.离线；1.在线
+        strBuf.append('}');
+        broadcastCarTrackAndOffline(vehicleId, strBuf.toString());
+    }
+
+    /**
+     * 处理http车辆配置上报
+     *
+     * @param vehicleId {@link Long} 车辆ID
+     */
+    public void dealVehicleCfgUpload(Long vehicleId) {
+        if (vehicleId == null) {
+            return;
+        }
+        VehicleRealtimeStatus realtimeStatus = vehicleService.getVehicleRealtimeStatus(vehicleId);
+        if (realtimeStatus == null) {
+            return;
+        }
+        String carNumber = realtimeStatus.getCarNumber();
+        if (StringUtil.isEmpty(carNumber)) {
+            return;
+        }
+        Integer paramStatus = realtimeStatus.getParamStatus();
+        if (paramStatus == null) {
+            return;
+        }
+        StringBuffer strBuf = new StringBuffer(carNumber);
+        if (paramStatus == 0) {
+            strBuf.append("还未有绑定状态信息！");
+        } else if (((paramStatus >> 7) & 1) > 0) {
+            strBuf.append("中心锁绑定信息异常！");
+        }
+        broadcastLog(1, "", strBuf.toString());
+    }
+
+    /**
      * 处理UDP轨迹上报
      *
      * @param carId     {@link Long} 车辆ID
@@ -977,8 +844,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * 广播远程操作请求
      *
      * @param isFail {@link Integer} 是否失败（1 失败，0 成功）
-     * @param task    {@link String} 请求任务描述
-     * @param result  {@link String} 请求发起结果
+     * @param task   {@link String} 请求任务描述
+     * @param result {@link String} 请求发起结果
      */
     public void broadcastLog(Integer isFail, String task, String result) {
         StringBuffer msgBuf = new StringBuffer();
@@ -1001,7 +868,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param result     {@link String} UDP任务结果
      */
     public void dealUdpReply(short replyBizId, int cacheId, String task, boolean resultFlag, String result) {
-        broadcastLog(resultFlag == true ? 0 : 1, task, result);
+        broadcastLog(resultFlag ? 0 : 1, task, result);
 
         switch (replyBizId) {
             case UdpBizId.REALTIME_MONITOR_RESPONSE:
@@ -1010,19 +877,20 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     if (sessionId != null) {
                         UDP_CACHE.remove(cacheId);
                         WebSocketSession session = WEB_SOCKET_CLIENTS.get(sessionId);
-                        List<Long> carIds = REALTIME_CARS.get(sessionId);
+                        // List<Long> carIds = REALTIME_CARS.get(sessionId);
                         Long carId = REALTIME_CARS_CACHE.get(cacheId);
                         REALTIME_CARS_CACHE.remove(cacheId);
-                        carIds.remove(carId);
-                        if (carIds.isEmpty()) {
-                            REALTIME_CARS.remove(sessionId);
-                        } else {
-                            REALTIME_CARS.put(sessionId, carIds);
-                        }
+                        // carIds.remove(carId);
+                        // if (carIds.isEmpty()) {
+                        //     REALTIME_CARS.remove(sessionId);
+                        // } else {
+                        //     REALTIME_CARS.put(sessionId, carIds);
+                        // }
+                        String carNumber = SpringBeanUtil.getBean(VehicleService.class).getCarNumberById(carId);
                         StringBuffer errorBuf = new StringBuffer();
                         errorBuf.append('{');
                         errorBuf.append("\"biz\":\"error\",");
-                        errorBuf.append("\"carNos\":\"").append(vehicleService.getCarNumberById(carId)).append('\"');
+                        errorBuf.append("\"carNos\":\"").append(carNumber).append('\"');
                         errorBuf.append('}');
                         WebSocketUtil.sendTextMsg(session, errorBuf.toString());
                     }
@@ -1037,17 +905,17 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     if (isRepeat) {
                         REPEAT_CACHE.remove(cacheId);
                         if (!resultFlag) {
-                            FOCUS_CLIENTS.remove(sessionId);
-                            FOCUS_CARS.remove(sessionId);
-                            WebSocketUtil.sendTextMsg(session, "broken");
+                            // FOCUS_CLIENTS.remove(sessionId);
+                            // FOCUS_CARS.remove(sessionId);
+                            WebSocketUtil.sendTextMsg(session, "conn_broken");
                         }
                     } else {
                         if (resultFlag) {
                             WebSocketUtil.sendTextMsg(session, "success");
                         } else {
-                            FOCUS_CLIENTS.remove(sessionId);
-                            FOCUS_CARS.remove(sessionId);
-                            WebSocketUtil.sendTextMsg(session, "error");
+                            // FOCUS_CLIENTS.remove(sessionId);
+                            // FOCUS_CARS.remove(sessionId);
+                            WebSocketUtil.sendTextMsg(session, "conn_error");
                         }
                     }
                 }

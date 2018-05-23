@@ -56,7 +56,7 @@ public class VehicleController extends BaseAction {
         logger.info("dispatch car edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         Map<String, Object> map = new HashMap<>(16);
-        if (id > 0) {
+        if (id != null && id > 0) {
             map = vehicleService.getCarById(id);
         }
         modelMap.put("car", map.get("car"));

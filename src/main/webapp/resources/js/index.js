@@ -314,7 +314,12 @@ $(function() {
                     	// 一个可读的字符串，表示连接被关闭的原因。这个字符串必须是不长于123字节的UTF-8 文本（不是字符）
                     	location.replace("login.jsp");
                     }
-        		}
+        		},
+                error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+        		    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                        location.replace(XMLHttpRequest.responseText);
+                    }
+                }
         	});
         });
     });
@@ -363,7 +368,8 @@ $(function() {
             "font-weight": 900,
             color: "#478de4"
         });
-        window.showContent.location.href = $(this).find('a').attr("name"); //showContent当前页的iframe名字,js控制iframe中页面跳转
+        forwardUrl = $(this).find('a').attr("name") + "?token=" + generateUUID();
+        window.showContent.location.href = forwardUrl; //showContent当前页的iframe名字,js控制iframe中页面跳转
     });
 
     $(window).resize(function() {

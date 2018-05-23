@@ -6,12 +6,17 @@
         <id column="id" property="id" />
         <result column="device_id" property="devId" />
         <result column="reader_type" property="type" />
-        <result column="typeName" property="typeName" />
+        <result column="type_name" property="typeName" />
+        <result column="is_barrier_gate_type" property="barrier" />
+        <result column="barrier_name" property="barrierName" />
         <result column="model" property="model" />
         <result column="oildepot_id" property="oilDepotId" />
     </resultMap>
 	<sql id="select_colums">
-		od.*,fn_type2name('readerType',od.reader_type) typeName,d.model model
+		od.*,
+		fn_type2name('readerType',od.reader_type) type_name,
+		fn_type2name('barrierType',od.is_barrier_gate_type) barrier_name,
+		d.model model
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
@@ -23,9 +28,9 @@
 	</select>
 
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.InOutReader">
-		insert into
-		tbl_oildepot_device(oildepot_id,device_id,reader_type)
-		values(#{oilDepotId},#{devId},#{type})
+		INSERT INTO tbl_oildepot_device ( oildepot_id, device_id, reader_type, is_barrier_gate_type);
+		VALUES
+			(#{oilDepotId}, #{devId}, ifnull(#{type}, 0), ifnull(#{barrier}, 0))
 	</insert>
 	<insert id="addReaderList" parameterType="java.util.List">
 		insert into tbl_oildepot_device(oildepot_id,device_id,reader_type) values

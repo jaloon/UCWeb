@@ -102,26 +102,29 @@
 			</permission>
 		</permission>
 		<permission cname="查询统计" ename="statisticsManage" permissionType="1" description="">
-			<permission cname="报警记录查询" ename="alarmrecordModule" permissionType="1" gridUrl="normal/statistics/alarmrList.jsp">
-				<permission cname="查看报警记录" ename="viewAlarmrecord" permissionType="0" description="" />
+			<permission cname="报警记录查询" ename="alarmRecordModule" permissionType="1" gridUrl="normal/statistics/alarmrList.jsp">
+				<permission cname="查看报警记录" ename="viewAlarmRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="远程操作查询" ename="remoterecordModule" permissionType="1" gridUrl="normal/statistics/remoteList.jsp">
-				<permission cname="查看远程操作记录" ename="viewRemoterecord" permissionType="0" description="" />
+			<permission cname="远程操作查询" ename="remoteRecordModule" permissionType="1" gridUrl="normal/statistics/remoteList.jsp">
+				<permission cname="查看远程操作记录" ename="viewRemoteRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="锁动作记录查询" ename="lockstatusModule" permissionType="1" gridUrl="normal/statistics/lockstatusList.jsp">
-				<permission cname="查看锁动作记录" ename="viewLockstatus" permissionType="0" description="" />
+			<permission cname="锁动作记录查询" ename="lockStatusModule" permissionType="1" gridUrl="normal/statistics/lockstatusList.jsp">
+				<permission cname="查看锁动作记录" ename="viewLockStatus" permissionType="0" description="" />
 			</permission>
-			<permission cname="车辆进出记录查询" ename="inandoutrecordModule" permissionType="1" gridUrl="normal/statistics/inandoutList.jsp">
-				<permission cname="查看车辆进出记录" ename="viewInandoutrecord" permissionType="0" description="" />
+			<permission cname="车辆进出记录查询" ename="inAndOutRecordModule" permissionType="1" gridUrl="normal/statistics/inandoutList.jsp">
+				<permission cname="查看车辆进出记录" ename="viewInAndOutRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="配送信息查询" ename="transportModule" permissionType="1" gridUrl="normal/statistics/transportList.jsp">
-				<permission cname="查看配送信息" ename="viewTransport" permissionType="0" description="" />
+			<permission cname="配送信息查询" ename="transportRecordModule" permissionType="1" gridUrl="normal/statistics/transportList.jsp">
+				<permission cname="查看配送信息" ename="viewTransportRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="远程换站记录查询" ename="changerecordModule" permissionType="1" gridUrl="normal/statistics/changeList.jsp">
-				<permission cname="查看远程换站记录" ename="viewChangerecord" permissionType="0" description="" />
+			<permission cname="远程换站记录查询" ename="changeRecordModule" permissionType="1" gridUrl="normal/statistics/changeList.jsp">
+				<permission cname="查看远程换站记录" ename="viewChangeRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="设备使用记录查询" ename="deviceuseModule" permissionType="1" gridUrl="normal/statistics/deviceuseList.jsp">
-				<permission cname="查看设备使用记录" ename="viewdeviceuse" permissionType="0" description="" />
+			<permission cname="卡及设备使用记录查询" ename="cardAnddevUseRecordModule" permissionType="1" gridUrl="normal/statistics/deviceuseList.jsp">
+				<permission cname="查看设备使用记录" ename="viewCardAnddevUseRecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="施解封状态查询" ename="sealStatus" permissionType="0" description="">
+				<permission cname="查看施解封状态" ename="viewSealStatus" permissionType="0" description="" />
 			</permission>
 		</permission>
 	</permission>

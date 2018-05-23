@@ -146,4 +146,8 @@
 	<select id="findIdAndNameOfAllOilDepots" resultType="java.util.Map">
 		SELECT id, name FROM tbl_oildepot ORDER BY id
 	</select>
+
+	<select id="barrierCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM tbl_oildepot_device WHERE oildepot_id = #{oilDepotId} AND is_barrier_gate_type > 0;
+    </select>
 </mapper>

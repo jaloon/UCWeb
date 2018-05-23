@@ -1,45 +1,27 @@
 package com.tipray.service.impl;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
+import com.tipray.bean.*;
+import com.tipray.bean.baseinfo.*;
+import com.tipray.cache.AsynUdpCommCache;
+import com.tipray.cache.SerialNumberCache;
+import com.tipray.dao.*;
+import com.tipray.net.NioUdpServer;
+import com.tipray.net.SendPacketBuilder;
+import com.tipray.net.TimeOutTask;
+import com.tipray.net.constant.UdpBizId;
+import com.tipray.service.VehicleService;
+import com.tipray.util.DateUtil;
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.StringUtil;
 import com.tipray.util.VehicleAlarmUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tipray.bean.ChangeInfo;
-import com.tipray.bean.DropdownData;
-import com.tipray.bean.GridPage;
-import com.tipray.bean.Page;
-import com.tipray.bean.VehicleStatus;
-import com.tipray.bean.VehicleTerminalConfig;
-import com.tipray.bean.VehicleTrack;
-import com.tipray.bean.baseinfo.Device;
-import com.tipray.bean.baseinfo.Driver;
-import com.tipray.bean.baseinfo.Lock;
-import com.tipray.bean.baseinfo.TransCompany;
-import com.tipray.bean.baseinfo.Vehicle;
-import com.tipray.cache.AsynUdpCommCache;
-import com.tipray.cache.SerialNumberCache;
-import com.tipray.dao.DeviceDao;
-import com.tipray.dao.DistributionRecordDao;
-import com.tipray.dao.DriverDao;
-import com.tipray.dao.LockDao;
-import com.tipray.dao.VehicleDao;
-import com.tipray.net.NioUdpServer;
-import com.tipray.net.SendPacketBuilder;
-import com.tipray.net.TimeOutTask;
-import com.tipray.net.constant.UdpBizId;
-import com.tipray.service.VehicleService;
-import com.tipray.util.EmptyObjectUtil;
-import com.tipray.util.StringUtil;
+import javax.annotation.Resource;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 /**
  * 车辆管理业务层
@@ -219,8 +201,12 @@ public class VehicleServiceImpl implements VehicleService {
 
 	@Override
 	public List<VehicleTrack> findTracks(VehicleTrack carTrack) {
+	    long start =System.currentTimeMillis();
 		List<VehicleTrack> carTracks = vehicleDao.findTracks(carTrack);
-		carTracks.parallelStream().forEach(track -> setAlarm(track));
+		long end =System.currentTimeMillis();
+        long d = (end - start)/DateUtil.SECOND_DIFF;
+        System.out.println("track cost ==> " + d);
+		// carTracks.parallelStream().forEach(track -> setAlarm(track));
 		return carTracks;
 	}
 
@@ -361,5 +347,10 @@ public class VehicleServiceImpl implements VehicleService {
 	public List<Map<String, Object>> findBindedVehicleTree() {
 		return vehicleDao.findBindedVehicleTree();
 	}
+
+    @Override
+    public VehicleRealtimeStatus getVehicleRealtimeStatus(Long vehicleId) {
+        return vehicleId == null ? null : vehicleDao.getVehicleRealtimeStatus(vehicleId);
+    }
 
 }

@@ -5,7 +5,6 @@
 	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.TransportCard" >
         <id column="id" property="id" />
         <result column="transport_card_id" property="transportCardId" />
-        <!-- <result column="driver_id" property="driver.id" /> -->
         <result column="vehicle_number" property="carNumber" />
         <result column="remark" property="remark" />
         <result column="gmt_create" property="createDate" />
@@ -84,7 +83,7 @@
 	</select>
 	
 	<select id="getTransportCardIdById" parameterType="java.lang.Long" resultType="java.lang.Long">
-		SELECT transport_card_id FROMtbl_transport_card WHERE id = #{id};
+		SELECT transport_card_id FROM tbl_transport_card WHERE id = #{id}
 	</select>
 	
 	<select id="getTerminalIdById" parameterType="java.lang.Long" resultType="java.lang.Integer">
@@ -96,6 +95,23 @@
 		WHERE
 			c.transport_card_id = v.transport_card_id 
 			AND v.is_invalid = 0 
-			AND c.id = #{id};
+			AND c.id = #{id}
 	</select>
+
+    <resultMap id="devMap" type="java.util.Map" >
+        <result column="transport_card_id" property="transportCardId" javaType="java.lang.Long"/>
+        <result column="vehicle_device_id" property="terminalId" javaType="java.lang.Integer" />
+    </resultMap>
+
+    <select id="getByTransportCardId" parameterType="java.lang.Long" resultMap="devMap">
+        SELECT
+            t.transport_card_id,
+            c.vehicle_device_id
+        FROM
+            tbl_transport_card t
+            LEFT JOIN tbl_vehicle c ON t.transport_card_id = c.transport_card_id
+        WHERE
+            t.is_invalid = 0
+            AND t.transport_card_id = #{transportCardId}
+    </select>
 </mapper>

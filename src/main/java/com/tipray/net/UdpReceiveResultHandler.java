@@ -33,8 +33,8 @@ public class UdpReceiveResultHandler {
     private static final ChangeRecordService CHANGE_SERVICE = SpringBeanUtil.getBean(ChangeRecordService.class);
     private static final AlarmRecordService ALARM_SERVICE = SpringBeanUtil.getBean(AlarmRecordService.class);
     private static final VehicleManageLogService LOG_SERVICE = SpringBeanUtil.getBean(VehicleManageLogService.class);
-    private static final AlarmWebSocketHandler ALARM_WEB_SOCKET_HANDLER = new AlarmWebSocketHandler();
-    private static final MonitorWebSocketHandler MONITOR_WEB_SOCKET_HANDLER = new MonitorWebSocketHandler();
+    private static final AlarmWebSocketHandler ALARM_WEB_SOCKET_HANDLER = SpringBeanUtil.getBean(AlarmWebSocketHandler.class);
+    private static final MonitorWebSocketHandler MONITOR_WEB_SOCKET_HANDLER = SpringBeanUtil.getBean(MonitorWebSocketHandler.class);
 
     /**
      * 处理远程操作相关应答
@@ -51,13 +51,13 @@ public class UdpReceiveResultHandler {
             MONITOR_WEB_SOCKET_HANDLER.dealUdpReply(bizId, cacheId, AsynUdpCommCache.getTaskCache(cacheId), isOk, result);
             try {
                 switch (bizId) {
-//				case UdpBizId.CAR_BIND_RESPONSE:
-//					if (isOk) {
-//						String carNumber = (String) params.get("carNumber");
-//						Integer deviceId = (Integer) params.get("deviceId");
-//						VEHICLE_SERVICE.terminalBind(carNumber, deviceId);
-//					}
-//					break;
+                    // case UdpBizId.CAR_BIND_RESPONSE:
+                    //     if (isOk) {
+                    //         String carNumber = (String) params.get("carNumber");
+                    //         Integer deviceId = (Integer) params.get("deviceId");
+                    //         VEHICLE_SERVICE.terminalBind(carNumber, deviceId);
+                    //     }
+                    //     break;
                     case UdpBizId.REMOTE_CHANGE_STATION_RESPONSE:
                         Long changeId = (Long) params.get("changeId");
                         Long transportId = (Long) params.get("transportId");
@@ -106,6 +106,9 @@ public class UdpReceiveResultHandler {
                             VEHICLE_SERVICE.batchUpdateResetRecord(resetIds, 0);
                         }
                         break;
+                    case UdpBizId.BARRIER_OPEN_REQUEST:
+
+                        break;
                     default:
                         return;
                 }
@@ -153,7 +156,11 @@ public class UdpReceiveResultHandler {
                 int workError = errorId & 0xFFFF;
                 StringBuffer strBuf = new StringBuffer("失败，");
                 if (commonError > 0) {
-                    strBuf.append("UDP请求公共错误，");
+                    if (commonError == 15) {
+                        strBuf.append("车载终端离线，");
+                    } else {
+                        strBuf.append("UDP请求公共错误，");
+                    }
                 }
                 if (workError > 0) {
                     strBuf.append("UDP请求业务信息错误，");

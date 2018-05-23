@@ -103,9 +103,9 @@ public class UdpBizId {
 	public static final short LOCK_OPEN_RESET_RESPONSE = 0x1485;
 
 	/** 道闸开启请求（UDP） */
-	// public static final short BARRIER_OPEN_REQUEST = 0x1501;
+	public static final short BARRIER_OPEN_REQUEST = 0x1406;
     /** 道闸开启应答（UDP） */
-	// public static final short BARRIER_OPEN_RESPONSE = 0x1581;
+	public static final short BARRIER_OPEN_RESPONSE = 0x1486;
 
 	private UdpBizId() {
 	}

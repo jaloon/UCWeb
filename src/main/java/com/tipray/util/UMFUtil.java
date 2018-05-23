@@ -188,27 +188,4 @@ public class UMFUtil {
     public static int halt(int icdev) {
         return UMF_DLL.fw_halt(icdev);
     }
-
-    public static void main(String[] args) {
-        int icdev = initUSB();
-        lcd(icdev, 0);
-        int i = 0;
-        boolean flag = true;
-        while (flag) {
-            try {
-                System.out.println("long[" + i++ + "]: " + cardDec(icdev));
-            } catch (Exception e) {
-                System.out.println(e.toString());
-                continue;
-            }
-            if (i == 4) {
-                flag = false;
-                exit(icdev);
-            }
-        }
-    }
-    // System.out.println("long\t" + cardId(icdev, 1));
-    // System.out.println("hex\t" + cardHex(icdev, 1));
-    // System.out.println("dec\t" + cardDec(icdev, 1));
-    // System.out.println(exit(icdev));
 }

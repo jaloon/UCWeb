@@ -1,20 +1,14 @@
 package com.tipray.service;
 
-import java.util.List;
-import java.util.Map;
-
-import com.tipray.bean.ChangeInfo;
-import com.tipray.bean.DropdownData;
-import com.tipray.bean.GridPage;
-import com.tipray.bean.Page;
-import com.tipray.bean.VehicleStatus;
-import com.tipray.bean.VehicleTerminalConfig;
-import com.tipray.bean.VehicleTrack;
+import com.tipray.bean.*;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.core.exception.ServiceException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * VehicleService
@@ -366,4 +360,12 @@ public interface VehicleService {
 	 * @return
 	 */
     List<Map<String, Object>> findBindedVehicleTree();
+
+	/**
+	 * 根据车辆ID获取车辆实时状态
+	 *
+	 * @param vehicleId {@link Long} 车辆ID
+	 * @return {@link VehicleRealtimeStatus} 车辆实时状态
+	 */
+	VehicleRealtimeStatus getVehicleRealtimeStatus(Long vehicleId);
 }

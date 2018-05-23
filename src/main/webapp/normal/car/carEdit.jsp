@@ -48,7 +48,16 @@
                         $("#company").val("${car.transCompany.id}");
                     </c:if>
                 }
-            );
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function() {
+                        location.reload(true);
+                    });
+                }
+            });
             $.getJSON("../../manage/transcard/findUnusedTranscards.do",
                 function(data) {
             		<c:if test="${mode=='edit' && car.transportCard.transportCardId != 0}">
@@ -64,7 +73,16 @@
                         $("#transcard").val("${car.transportCard.transportCardId}");
                     </c:if>
       	         }
-            );
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function() {
+                        location.reload(true);
+                    });
+                }
+            });
         });
     </script>
 </head>

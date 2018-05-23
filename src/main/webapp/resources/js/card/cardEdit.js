@@ -27,7 +27,7 @@ $(function() {
 
         if ("add" == mode) {
             url = "../../manage/card/add.do";
-            param = "&cardId=" + cid + "&type=" + type + "&director=" + director + "&phone=" + phone + "&identityCard=" + identity + "&remark=" + remark;
+            param = "cardId=" + cid + "&type=" + type + "&director=" + director + "&phone=" + phone + "&identityCard=" + identity + "&remark=" + remark;
             success_zh_text = "添加成功！";
             error_zh_text = "添加失败！";
 
@@ -51,6 +51,16 @@ $(function() {
                             layer.alert('卡ID已存在！', { icon: 5 }, function(index2) {
                                 layer.close(index2);
                                 $("#cid").select();
+                            });
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                                icon: 0,
+                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                            }, function() {
+                                location.reload(true);
                             });
                         }
                     }
@@ -88,8 +98,21 @@ $(function() {
 
         $.post(url, encodeURI(param),
             function(data) {
+                // switch (data.id) {
+                //     case 0: // 操作成功
+                //         layer.msg(success_zh_text, {icon: 1, time: 500}, function () {
+                //             parent.layer.close(index);
+                //         });
+                //         break;
+                //     case 1: // 登录异常
+                //
+                //         break;
+                //     default: // 操作失败
+                //         layer.msg(error_zh_text, {icon: 2, time: 500});
+                //         break;
+                // }
                 if ("error" == data.msg) {
-                    layer.msg(error_zh_text, { icon: 2, time: 500 });
+                    layer.msg(error_zh_text, {icon: 2, time: 500});
                 } else {
                     layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
                         parent.layer.close(index);
@@ -97,7 +120,16 @@ $(function() {
                 }
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
 
     });
 });

@@ -81,7 +81,7 @@ $(function() {
                     tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + alarm.id + ")\">") +
                         "<td class=\"alarm-id\">" + alarm.id + "</td>" +
                         "<td class=\"alarm-car\">" + alarm.carNumber + "</td>" +
-                        "<td class=\"alarm-time\">" + new Date(alarm.createDate).format("yyyy-MM-dd HH:mm:ss") + "</td>" +
+                        "<td class=\"alarm-time\">" + alarm.createDate + "</td>" +
                         "<td class=\"alarm-station\">" + alarm.station + "</td>";
                     if (coordFlag) {
                         tableData += "<td class=\"alarm-coordinate\">数据库记录异常</td>";
@@ -102,7 +102,16 @@ $(function() {
                 $(".table-body").html(tableData);
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
     }
 
     showList("", "", "", "", "", 1);

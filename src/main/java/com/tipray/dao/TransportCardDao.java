@@ -1,10 +1,11 @@
 package com.tipray.dao;
 
-import java.util.List;
-
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * TransportCardDao
@@ -45,4 +46,12 @@ public interface TransportCardDao extends BaseDao<TransportCard> {
 	 *            配送卡ID
 	 */
 	void deleteVehicleCardId(Long transportCardId);
+
+    /**
+     * 根据配送卡ID获取配送卡相关信息
+     *
+     * @param transportCardId 配送卡ID
+     * @return 配送卡相关信息
+     */
+    Map<String, Object> getByTransportCardId(Long transportCardId);
 }

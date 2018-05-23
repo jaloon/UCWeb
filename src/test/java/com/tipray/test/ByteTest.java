@@ -1,11 +1,9 @@
 package com.tipray.test;
 
+import com.tipray.bean.VehicleTerminalConfig;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.log.VehicleManageLog;
-import com.tipray.util.VehicleAlarmUtil;
-import com.tipray.util.BytesConverterByBigEndian;
-import com.tipray.util.BytesConverterByLittleEndian;
-import com.tipray.util.MD5Util;
+import com.tipray.util.*;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -25,6 +23,23 @@ import java.util.Random;
  */
 @SuppressWarnings({ "unused" })
 public class ByteTest {
+     @Test
+     public void test0() {
+         VehicleTerminalConfig config = new VehicleTerminalConfig();
+         config.setScope(0);
+         config.setScanInterval(10);
+         config.setUploadInterval(30);
+         config.setGenerateDistance(12);
+         Integer scope = config.getScope();
+         if (scope == null
+                 || (scope == 1 && StringUtil.isEmpty(config.getCarNumber()))
+                 || config.getScanInterval() == null
+                 || config.getUploadInterval() == null
+                 || config.getGenerateDistance() == null) {
+             System.out.println("null");
+         }
+     }
+
 	@Test
 	public void test1() {
 		System.out.println("\u5B9A\u4E49\u8F93\u51FA\u7EA7\u522B\u548C\u8F93\u51FA\u5E73\u53F0");

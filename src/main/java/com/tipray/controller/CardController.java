@@ -46,7 +46,7 @@ public class CardController extends BaseAction {
         logger.info("dispatch card edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         Map<String, Object> map = new HashMap<String, Object>();
-        if (id > 0) {
+        if (id != null && id > 0) {
             map = cardService.getCardById(id);
         }
         modelMap.put("card", map.get("card"));

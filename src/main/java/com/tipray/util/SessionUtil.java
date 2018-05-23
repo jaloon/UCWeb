@@ -1,18 +1,17 @@
 package com.tipray.util;
 
+import com.tipray.bean.Session;
+import com.tipray.bean.baseinfo.User;
+import com.tipray.core.ThreadVariable;
+import com.tipray.service.SessionService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.tipray.bean.Session;
-import com.tipray.bean.baseinfo.User;
-import com.tipray.core.ThreadVariable;
-import com.tipray.service.SessionService;
 
 /**
  * 用户登录信息Session工具类

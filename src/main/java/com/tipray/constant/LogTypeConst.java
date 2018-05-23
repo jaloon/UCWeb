@@ -62,6 +62,8 @@ public class LogTypeConst {
 	public static final int ENTITY_TRACK = 0x00_85_00_00;
 	/** 远程操作 */
 	public static final int ENTITY_REMOTE = 0x00_86_00_00;
+	/** 道闸 */
+	public static final int ENTITY_BARRIER = 0x00_87_00_00;
 
 	// 第3个字节：操作类型
 	/** 添加 */
@@ -135,6 +137,13 @@ public class LogTypeConst {
 	public static final int TYPE_OUT_GAS_STATION = 0x00_00_64_00;
 	/** 车辆状态变更 */
 	public static final int TYPE_CAR_STATUS_ALTER = 0x00_00_65_00;
+
+	/** 道闸开启 */
+	public static final int TYPE_BARRIER_OPEN = 0x00_00_70_00;
+	/** 进道闸 */
+	public static final int TYPE_BARRIER_IN = 0x00_00_71_00;
+	/** 出道闸 */
+	public static final int TYPE_BARRIER_OUT = 0x00_00_72_00;
 
 	// 第4个字节：操作结果
 	/** 成功 */

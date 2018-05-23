@@ -153,7 +153,7 @@
 			AND a.status = 0
 	</select>
 	
-	<select id="findNotElimitedForApp" resultType="java.util.LinkedHashMap">>
+	<select id="findNotElimitedForApp" resultType="java.util.LinkedHashMap">
 		SELECT
 			a.id alarm_id,
 			a.vehicle_id,
@@ -170,12 +170,11 @@
 			t.longitude,
 			t.latitude 
 		FROM
-			tbl_alarm a,
-			tbl_vehicle c,
-			tbl_vehicle_track t 
+			tbl_alarm a
+			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_vehicle c
 		WHERE
-			a.vehicle_id = c.id 
-			AND a.vehicle_track_id = t.id 
+			a.vehicle_id = c.id
 			AND a.status = 0
 	</select>
 	

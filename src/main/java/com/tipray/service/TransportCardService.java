@@ -1,11 +1,12 @@
 package com.tipray.service;
 
-import java.util.List;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.core.exception.ServiceException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * TransportCardService
@@ -89,4 +90,12 @@ public interface TransportCardService {
 	 * @return
 	 */
     List<TransportCard> findUnusedTranscards();
+
+	/**
+	 * 根据配送卡ID获取配送卡相关信息
+	 *
+	 * @param transportCardId 配送卡ID
+	 * @return 配送卡相关信息
+	 */
+    Map<String, Object> getByTransportCardId(Long transportCardId);
 }

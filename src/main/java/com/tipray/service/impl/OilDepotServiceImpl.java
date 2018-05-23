@@ -140,6 +140,7 @@ public class OilDepotServiceImpl implements OilDepotService {
 			// sqlite油库信息是否需要更新
 			boolean isUpdateOfSqliteOilDepot = oilDepot.getLongitude() != oilDepotInDb.getLongitude()
 					|| oilDepot.getLatitude() != oilDepotInDb.getLatitude()
+                    || oilDepot.getRadius() != oilDepotInDb.getRadius()
 					|| !oilDepot.getCoverRegion().equals(oilDepotInDb.getCoverRegion());
 			oilDepotDao.update(oilDepot);
 
@@ -312,8 +313,13 @@ public class OilDepotServiceImpl implements OilDepotService {
 
 	@Override
 	public List<OilDepot> findByName(String oildepotName) {
-		return oilDepotDao.findByName(oildepotName);
+		return StringUtil.isEmpty(oildepotName) ? null : oilDepotDao.findByName(oildepotName);
 	}
+
+    @Override
+    public Long getIdByOfficialId(String officialId) {
+	    return StringUtil.isEmpty(officialId) ? null : oilDepotDao.getIdByOfficialId(officialId);
+    }
 
 	@Override
 	public List<OilDepot> findAllOilDepots() {
@@ -556,5 +562,14 @@ public class OilDepotServiceImpl implements OilDepotService {
 		}
 		return map;
 	}
+
+    @Override
+    public Integer barrierCount(Long oilDepotId) {
+        if (oilDepotId == null) {
+            return 0;
+        }
+        Integer barrierCount = oilDepotDao.barrierCount(oilDepotId);
+        return barrierCount == null ? 0 : barrierCount;
+    }
 
 }

@@ -46,7 +46,7 @@ public class TransportCardController extends BaseAction {
         logger.info("dispatch transportCard edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         TransportCard transportCard = new TransportCard();
-        if (id > 0) {
+        if (id != null && id > 0) {
             transportCard = transportCardService.getTransportCardById(id);
         }
         modelMap.put("transcard", transportCard);

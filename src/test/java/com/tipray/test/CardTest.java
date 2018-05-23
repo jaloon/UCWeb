@@ -1,13 +1,14 @@
 package com.tipray.test;
 
-import javax.annotation.Resource;
-
+import com.tipray.service.CardService;
+import com.tipray.service.TransportCardService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tipray.service.CardService;
+import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * 卡管理测试
@@ -21,6 +22,13 @@ import com.tipray.service.CardService;
 public class CardTest {
 	@Resource
 	private CardService cardService;
+	@Resource
+	private TransportCardService transportCardService;
+
+	@Test
+    public void testT() {
+        Map<String, Object> transportCard = transportCardService.getByTransportCardId(123L);
+    }
 
 	@Test
 	public void findUnusedCards() {

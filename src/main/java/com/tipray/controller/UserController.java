@@ -50,7 +50,7 @@ public class UserController extends BaseAction {
         logger.info("dispatch user edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         User user = new User();
-        if (id > 0) {
+        if (id != null && id > 0) {
             user = userService.getUserById(id);
             user.setPassword(null);
         }

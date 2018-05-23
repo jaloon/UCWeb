@@ -62,6 +62,14 @@ public interface OilDepotService {
 	 */
     List<OilDepot> findByName(String oildepotName);
 
+    /**
+     * 根据油库编号获取油库ID
+     *
+     * @param officialId
+     * @return
+     */
+    Long getIdByOfficialId(String officialId);
+
 	/**
 	 * 查询所有的油库信息列表
 	 * 
@@ -133,4 +141,11 @@ public interface OilDepotService {
 	 * @return
 	 */
     Map<String, Object> getIdAndNameOfAllOilDepotsAndGasStations(Long depotVer, Long stationVer);
+
+    /**
+     * 获取油库用于转发道闸通知的读卡器个数
+     * @param oilDepotId 油库ID
+     * @return
+     */
+    Integer barrierCount(Long oilDepotId);
 }

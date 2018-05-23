@@ -48,7 +48,8 @@
             comId: parseInt(getUrlParam('comId'), 10),
             // comName: decodeURI(getUrlParam('comName')),
             interval: parseInt(getUrlParam('interval'), 10),
-            duration: parseInt(getUrlParam('duration'), 10)
+            duration: parseInt(getUrlParam('duration'), 10),
+            token: generateUUID()
         };
         var orderText = JSON.stringify(order);
 
@@ -112,7 +113,7 @@
                         var tip = receiveObj.carNos + "连接异常！";
                         layer.msg(tip, {
                                 icon: 0,
-                                time: 1000
+                                time: 3000
                             },
                             function() {
                                 parent.layer.close(index);

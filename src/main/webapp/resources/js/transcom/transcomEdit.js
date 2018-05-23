@@ -52,6 +52,16 @@ $(function() {
                                 $("#name").select();
                             });
                         }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                                icon: 0,
+                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                            }, function() {
+                                location.reload(true);
+                            });
+                        }
                     }
                 });
                 if (!ajaxFlag) {
@@ -95,7 +105,16 @@ $(function() {
                 }
             },
             "json"
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function() {
+                    location.reload(true);
+                });
+            }
+        });
 
     });
 });

@@ -1,14 +1,11 @@
 package com.tipray.net;
 
-import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.constant.CenterConfigConst;
 import com.tipray.mq.MyQueue;
 import com.tipray.pool.ThreadPool;
-import com.tipray.util.ResponseMsgUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -118,13 +115,13 @@ public class NioUdpServer {
 							// 接受来自客户端通道的数据
 							InetSocketAddress address = (InetSocketAddress) clientChannel.receive(receiveBuffer);
 
-							short i = receiveBuffer.getShort(0);
-                            DeferredResult<ResponseMsg> deferredResult =AsynUdpCommCache.getAndRemoveDeferredResultCache((int)i);
-                            if (deferredResult != null) {
-                                deferredResult.setResult(ResponseMsgUtil.success("recieve: " + i));
-                                System.out.println("recieve: " + i);
-                                continue;
-                            }
+                            // short i = receiveBuffer.getShort(0);
+                            // DeferredResult<ResponseMsg> deferredResult =AsynUdpCommCache.getAndRemoveDeferredResultCache((int)i);
+                            // if (deferredResult != null) {
+                            //     deferredResult.setResult(ResponseMsgUtil.success("recieve: " + i));
+                            //     System.out.println("recieve: " + i);
+                            //     continue;
+                            // }
                             // AsyncContext asyncContext = AsynUdpCommCache.getAsyncContextCache((int)i);
                             // if (asyncContext != null) {
                             //     PrintWriter out = asyncContext.getResponse().getWriter();

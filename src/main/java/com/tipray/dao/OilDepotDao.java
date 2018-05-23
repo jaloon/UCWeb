@@ -1,11 +1,11 @@
 package com.tipray.dao;
 
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * OilDepotDao
@@ -93,4 +93,11 @@ public interface OilDepotDao extends BaseDao<OilDepot> {
 	 * @return
 	 */
     List<Map<String, Object>> findIdAndNameOfAllOilDepots();
+
+    /**
+     * 获取油库用于转发道闸通知的读卡器个数
+     * @param oilDepotId 油库ID
+     * @return
+     */
+    Integer barrierCount(Long oilDepotId);
 }

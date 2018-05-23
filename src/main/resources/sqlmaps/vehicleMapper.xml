@@ -230,7 +230,7 @@
 			t.id = #{transportId}
 	</select>
 	
-	<select id="findTracks" parameterType="com.tipray.bean.VehicleTrack" resultType="com.tipray.bean.VehicleTrack">
+	<select id="findTracks" parameterType="com.tipray.bean.VehicleTrack" resultType="com.tipray.bean.VehicleTrack" useCache="false">
 		SELECT
 			c.id id,
 			c.vehicle_number carNumber,
@@ -241,7 +241,7 @@
 			t.angle angle,
 			t.lock_status_info lockStatusInfo 
 		FROM
-			tbl_vehicle_track t,
+			tbl_vehicle_track_2018_04 t,
 			tbl_vehicle c 
 		WHERE
 			t.vehicle_id = c.id 
@@ -401,4 +401,21 @@
 			tc.`id` IN ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 ) 
 			AND tc.`is_invalid` = 0
 	</select>
+	
+    <select id="getVehicleRealtimeStatus" parameterType="java.lang.Long" resultType="com.tipray.bean.VehicleRealtimeStatus">
+        SELECT
+            s.vehicle_id vehicleId,
+            v.vehicle_number carNumber,
+            s.is_online `online`,
+            s.`status`,
+            fn_type2name ( 'carStatus', s.`status` ) statusName,
+            s.param_status paramStatus,
+            s.last_online_time lastOnline
+        FROM
+            tbl_vehicle_realtime_status s,
+            tbl_vehicle v
+        WHERE
+            s.vehicle_id = v.id
+            AND s.vehicle_id = #{vehicleId}
+    </select>
 </mapper>

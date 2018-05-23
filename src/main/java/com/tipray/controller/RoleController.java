@@ -54,7 +54,7 @@ public class RoleController extends BaseAction {
         logger.info("dispatch role edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
         Role role = new Role();
-        if (id > 0) {
+        if (id != null && id > 0) {
             role = roleService.getRoleById(id);
         }
         modelMap.put("role", role);

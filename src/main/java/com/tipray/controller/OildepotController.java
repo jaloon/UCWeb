@@ -8,6 +8,7 @@ import com.tipray.bean.baseinfo.InOutReader;
 import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.bean.log.InfoManageLog;
 import com.tipray.constant.LogTypeConst;
+import com.tipray.constant.PageActionMode;
 import com.tipray.core.ThreadVariable;
 import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
@@ -57,14 +58,18 @@ public class OildepotController extends BaseAction {
         OilDepot oilDepot = new OilDepot();
         List<InOutReader> readers = new ArrayList<InOutReader>();
         List<Card> cards = new ArrayList<Card>();
-        if (id > 0) {
+        if (id != null && id > 0) {
             oilDepot = oilDepotService.getOilDepotById(id);
             readers = inOutReaderService.findByOilDepotId(id);
             cards = cardService.findByOilDepotId(id);
+            if (PageActionMode.EDIT.equals(mode)) {
+                modelMap.put("barrierCount", oilDepotService.barrierCount(id));
+            }
         }
         modelMap.put("oilDepot", oilDepot);
         modelMap.put("readers", readers);
         modelMap.put("cards", cards);
+
         return "normal/oildepot/oildepotEdit.jsp";
     }
 

@@ -115,6 +115,7 @@
 	                            <td>序号</td>
 	                            <td>读卡器ID</td>
 	                            <td>读卡器类型</td>
+	                            <td>是否用于道闸转发通知</td>
 	                            <td>读卡器型号</td>
 	                        </tr>
 	                        <c:forEach var="reader" items="${readers}" varStatus="status">
@@ -122,6 +123,7 @@
 	                                <td>${status.index+1}</td>
 	                                <td>${reader.devId}</td>
 	                                <td>${reader.typeName}</td>
+	                                <td>${reader.barrierName}</td>
 	                                <td>${reader.model}</td>
 	                            </tr>
 	                        </c:forEach>
@@ -322,16 +324,19 @@
 	                    </table>
             		</div>
             		<div class="tab-con-list">
+                        <input type="hidden" id="barrierCount" value="${barrierCount}">
 	            		<table class="sub-table" id="reader_info">
 	                        <tr>
-	                            <td width="170px">读卡器ID</td>
-	                            <td width="200px">读卡器类型</td>
-	                            <td width="100px">操作</td>
+	                            <td>读卡器ID</td>
+	                            <td>读卡器类型</td>
+								<td>是否用于道闸转发通知</td>
+	                            <td>操作</td>
 	                        </tr>
 	                        <c:forEach var="reader" items="${readers}" varStatus="status">
 	                            <tr>
 	                                <td class="readerIds">${reader.devId}</td>
 	                                <td>${reader.typeName}</td>
+	                                <td>${reader.barrierName}</td>
 	                                <td><img alt="删除" title="删除" src="../../resources/images/operate/delete.png" onclick="deleteTr(this)"></td>
 	                            </tr>
 	                        </c:forEach>
