@@ -1,12 +1,12 @@
 package com.tipray.dao;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.tipray.bean.baseinfo.Driver;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * DriverDao
@@ -25,6 +25,13 @@ public interface DriverDao extends BaseDao<Driver> {
 	 * @return {@link List} 司机信息
 	 */
     List<Driver> findByCarNo(String carNo);
+
+    /**
+     * 根据车牌号获取司机信息
+     * @param carNo   {@link String} 车牌号
+     * @return {@link Map} [{name, phone}, {name2, phone2}]
+     */
+    List<Map<String, Object>> findByCarNoForApp(String carNo);
 
 	/**
 	 * 获取空闲司机列表

@@ -1,21 +1,18 @@
 package com.tipray.service.impl;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.User;
-import com.tipray.core.exception.ServiceException;
-import com.tipray.dao.RoleDao;
 import com.tipray.dao.UserDao;
 import com.tipray.service.UserService;
 import com.tipray.util.MD5Util;
 import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * 操作员管理业务层
@@ -29,13 +26,10 @@ import com.tipray.util.StringUtil;
 public class UserServiceImpl implements UserService {
 	@Resource
 	private UserDao userDao;
-	@Resource
-	private RoleDao roleDao;
 
 	@Override
-	public User addUser(User user, Long roleId) throws NoSuchAlgorithmException {
+	public User addUser(User user) throws NoSuchAlgorithmException {
 		if (user != null) {
-			user.setRole(roleDao.getById(roleId));
 			String password = MD5Util.md5Encode("123456");
 			String upwd = user.getPassword();
 			if (StringUtil.isNotEmpty(upwd)) {
@@ -48,9 +42,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User updateUser(User user, Long roleId) {
+	public User updateUser(User user) {
 		if (user != null) {
-			user.setRole(roleDao.getById(roleId));
 			userDao.update(user);
 		}
 		return user;

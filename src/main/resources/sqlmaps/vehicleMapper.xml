@@ -176,6 +176,84 @@
 			tbl_vehicle v
 			LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
 	</select>
+
+    <resultMap id="comMap" type="java.util.Map" >
+        <result column="id" property="id" javaType="java.lang.Long" />
+        <result column="name" property="name" javaType="java.lang.String" />
+    </resultMap>
+
+    <select id="findComsWithCar" resultMap="comMap">
+        SELECT
+            v.trans_company_id id,
+            c.`name`
+        FROM
+            tbl_vehicle v
+            LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
+        WHERE
+            v.is_invalid = 0
+        GROUP BY
+            v.trans_company_id;
+    </select>
+
+    <select id="findComsWithBindedCar" resultMap="comMap">
+        SELECT
+            v.trans_company_id id,
+            c.`name`
+        FROM
+            tbl_vehicle v
+            LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
+        WHERE
+            v.is_invalid = 0 AND v.vehicle_device_id != 0
+        GROUP BY
+            v.trans_company_id;
+    </select>
+
+    <select id="findComsWithOnlineCar" resultMap="comMap">
+        SELECT
+            v.trans_company_id id,
+            c.`name`
+        FROM
+            tbl_vehicle_realtime_status s,
+            tbl_vehicle v
+            LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
+        WHERE
+            v.is_invalid = 0
+            AND v.vehicle_device_id != 0
+            AND v.id = s.vehicle_id
+            AND s.is_online = 1
+        GROUP BY
+            v.trans_company_id;
+    </select>
+
+    <resultMap id="carMap" type="java.util.Map" >
+        <result column="id" property="carId" javaType="java.lang.Long" />
+        <result column="vehicle_number" property="carNumber" javaType="java.lang.String" />
+        <result column="trans_company_id" property="comId" javaType="java.lang.Long" />
+    </resultMap>
+
+    <select id="findCarNumbers" resultMap="carMap">
+        SELECT id, vehicle_number, trans_company_id FROM tbl_vehicle WHERE is_invalid = 0
+    </select>
+
+    <select id="findBindedCarNumbers" resultMap="carMap">
+        SELECT id, vehicle_number, trans_company_id FROM tbl_vehicle WHERE is_invalid = 0 AND vehicle_device_id != 0
+    </select>
+
+    <select id="findOnlineCarNumbers" resultMap="carMap">
+        SELECT
+            v.id,
+            v.vehicle_number,
+            v.trans_company_id
+        FROM
+            tbl_vehicle v,
+            tbl_vehicle_realtime_status s
+        WHERE
+            v.is_invalid = 0
+            AND v.vehicle_device_id != 0
+            AND v.id = s.vehicle_id
+            AND s.is_online = 1
+    </select>
+
 	
 	<select id="getCarStatus" parameterType="java.lang.String" resultType="com.tipray.bean.VehicleStatus">
 		SELECT
@@ -383,23 +461,29 @@
 	
 	<select id="findBindedVehicleTree" resultType="java.util.Map">
 		SELECT
-			tv.`vehicle_device_id` `id`,
-			tv.`vehicle_number` `name`,
-			tv.`trans_company_id` `pId` 
-		FROM
-			`tbl_vehicle` tv 
-		WHERE
-			tv.`vehicle_device_id` != 0 
-			AND tv.`is_invalid` = 0 UNION ALL
-		SELECT
-			tc.`id`,
-			tc.`name`,
-			tc.`parent_company_id` `pId` 
-		FROM
-			`tbl_trans_company` tc 
-		WHERE
-			tc.`id` IN ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 ) 
-			AND tc.`is_invalid` = 0
+            tc.`id`,
+            tc.`name`,
+            tc.`parent_company_id` `pId`
+        FROM
+            `tbl_trans_company` tc
+        WHERE
+            tc.`id` IN
+              ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v, `tbl_vehicle_realtime_status` s
+                WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 AND v.`id` = s.`vehicle_id` AND s.`is_online` = 1)
+            AND tc.`is_invalid` = 0 UNION ALL
+        SELECT
+            tv.`vehicle_device_id` `id`,
+            tv.`vehicle_number` `name`,
+            tv.`trans_company_id` `pId`
+        FROM
+            `tbl_vehicle` tv,
+            `tbl_vehicle_realtime_status` ts
+        WHERE
+            tv.`vehicle_device_id` != 0
+            AND tv.`is_invalid` = 0
+            AND tv.`id` = ts.`vehicle_id`
+            AND ts.`is_online` = 1
+            <!-- 只查在线车辆 -->
 	</select>
 	
     <select id="getVehicleRealtimeStatus" parameterType="java.lang.Long" resultType="com.tipray.bean.VehicleRealtimeStatus">
@@ -417,5 +501,41 @@
         WHERE
             s.vehicle_id = v.id
             AND s.vehicle_id = #{vehicleId}
+    </select>
+
+    <resultMap id="carMap" type="java.util.Map">
+        <result column="id" property="id" javaType="java.lang.Long" />
+        <result column="vehicle_number" property="vehicle_number" javaType="java.lang.Long" />
+        <result column="vehicle_device_id" property="vehicle_device_id" javaType="java.lang.Long" />
+        <result column="store_num" property="store_num" javaType="java.lang.Long" />
+        <result column="transport_card_id" property="transport_card_id" javaType="java.lang.Long" />
+    </resultMap>
+    <select id="getByCarNoForApp" parameterType="java.lang.String" resultMap="carMap">
+        SELECT
+            id,
+            vehicle_number,
+            vehicle_device_id,
+            store_num,
+            transport_card_id
+        FROM
+            `tbl_vehicle`
+        WHERE
+            vehicle_number = #{carNo}
+    </select>
+    <select id="findOnlineCarsForApp" resultMap="carMap">
+        SELECT
+            v.id,
+            v.vehicle_number,
+            v.vehicle_device_id,
+            v.store_num,
+            v.transport_card_id
+        FROM
+            tbl_vehicle v,
+            tbl_vehicle_realtime_status s
+        WHERE
+            v.vehicle_device_id != 0
+            AND v.is_invalid = 0
+            AND v.id = s.vehicle_id
+            AND s.is_online = 1
     </select>
 </mapper>

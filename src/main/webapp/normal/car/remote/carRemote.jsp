@@ -92,6 +92,7 @@
 	                                <option value=3>在加油站</option>
 	                                <option value=4>返程中</option>
 	                                <option value=5>应急</option>
+	                                <option value=6>待入库</option>
 	                            </select>
 	                        </td>
 	                    </c:if>

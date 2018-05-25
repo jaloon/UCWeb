@@ -1,6 +1,7 @@
 var add = false;
 var fileLayer;
 var liObj;
+var onlineCarCount = 0;
 
 function openFileLayer() {
     var title = "修改";
@@ -56,62 +57,62 @@ function aUp(obj) {
     });
 }
 
-$(function() {
+$(function () {
     $("#add").click(addFile);
 
-    $("#file_cancel").click(function() {
+    $("#file_cancel").click(function () {
         layer.close(fileLayer);
     });
 
-    $("#file_confirm").click(function() {
+    $("#file_confirm").click(function () {
         var file_type = $("#file_type").val();
         var file_name = $("#file_name").val();
         var file_size = $("#file_size").val();
         var file_crc = $("#file_crc").val();
         if (isNull(file_type)) {
-            layer.alert('文件类型不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('文件类型不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_type").select();
             });
             return;
         }
         if (!isInteger(file_type)) {
-            layer.alert('文件类型必需为数字！', { icon: 2 }, function(index2) {
+            layer.alert('文件类型必需为数字！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_type").select();
             });
             return;
         }
         if (isNull(file_name)) {
-            layer.alert('文件名不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('文件名不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_name").select();
             });
             return;
         }
         if (isNull(file_size)) {
-            layer.alert('文件大小不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('文件大小不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_size").select();
             });
             return;
         }
         if (!isInteger(file_size)) {
-            layer.alert('文件大小必需为数字！', { icon: 2 }, function(index2) {
+            layer.alert('文件大小必需为数字！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_size").select();
             });
             return;
         }
         if (isNull(file_crc)) {
-            layer.alert('文件CRC32不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('文件CRC32不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_crc").select();
             });
             return;
         }
         if (!isHEX(file_crc, 8)) {
-            layer.alert('文件CRC32不是有效的CRC码，请查证！', { icon: 2 }, function(index2) {
+            layer.alert('文件CRC32不是有效的CRC码，请查证！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#file_crc").select();
             });
@@ -132,52 +133,52 @@ $(function() {
         layer.close(fileLayer);
     });
 
-    function findBindedVehicleTree() {
-        var cars = null;
-        $.ajax({
-            type: "get",
-            async: false, //不异步，先执行完ajax，再干别的
-            url: "../../../manage/car/findBindedVehicleTree.do",
-            dataType: "json",
-            success: function(response) {
-                cars = response;
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
-                        location.reload(true);
-                    });
-                }
+    $.getJSON("../../../manage/car/findBindedVehicleTree.do",
+        function (data, textStatus, jqXHR) {
+            onlineCarCount += data.length;
+
+            if (isNull(data) || onlineCarCount == 0) {
+                layer.alert('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+                    layer.close(index2);
+                    parent.layer.close(index);
+                });
+                return;
             }
-        });
-        // cars = JSON.parse("[{\"name\":\"桂B42133\",\"pId\":1,\"id\":16777228},{\"name\":\"桂A12348\",\"pId\":1,\"id\":16777219},{\"name\":\"中石油南宁运输公司\",\"pId\":0,\"id\":1}]");
-        return cars;
-    }
-    var setting = {
-        check: {
-            enable: true
-        },
-        data: {
-            simpleData: {
-                enable: true,
-                idKey: "id",
-                pIdKey: "pId",
-                rootPId: 0
-            }
-        },
-    };
-    var zNodes = findBindedVehicleTree();
-    if (isNull(zNodes)) {
-        $(".tree-box").html("无可用车辆。");
-    } else {
-        $.fn.zTree.init($("#treeDemo"), setting, zNodes); //初始化树
-    }
+            var setting = {
+                check: {
+                    enable: true
+                },
+                data: {
+                    simpleData: {
+                        enable: true,
+                        idKey: "id",
+                        pIdKey: "pId",
+                        rootPId: 0
+                    }
+                },
+            };
+            $.fn.zTree.init($("#treeDemo"), setting, data); //初始化树
+        }
+    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                icon: 0,
+                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+            }, function () {
+                location.reload(true);
+            });
+        }
+    });
     var carLayer;
     var terminalIds;
-    $("#cars").click(function() {
+    $("#cars").click(function () {
+        if (onlineCarCount == 0) {
+            layer.alert('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+                layer.close(index2);
+                parent.layer.close(index);
+            });
+            return;
+        }
         var carnos = $("#cars").val();
         var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
         if (isNull(carnos)) {
@@ -188,7 +189,7 @@ $(function() {
             // 展开所有选中节点
             // var nodes = treeObj.getSelectedNodes(); // 此方法无效
             var nodes = treeObj.getCheckedNodes(true);
-            nodes.forEach(function(el) {
+            nodes.forEach(function (el) {
                 treeObj.expandNode(el, true, false, false, false);
             });
         }
@@ -197,7 +198,7 @@ $(function() {
             title: ['升级车辆', 'font-size:14px;color:#ffffff;background:#478de4;'],
             area: ['500px', '350px'],
             content: $('.cartree'),
-            end: function() {
+            end: function () {
                 // 折叠全部节点
                 var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
                 treeObj.expandAll(false);
@@ -205,17 +206,17 @@ $(function() {
         });
     });
 
-    $("#car_cancel").click(function() {
+    $("#car_cancel").click(function () {
         layer.close(carLayer);
     });
 
-    $("#car_confirm").click(function() {
+    $("#car_confirm").click(function () {
         var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
         // var nodes = treeObj.getSelectedNodes(); // 此方法无效
         var nodes = treeObj.getCheckedNodes(true);
         var carnos = "";
         terminalIds = "";
-        nodes.forEach(function(el) {
+        nodes.forEach(function (el) {
             if (el.id >= 0x01000001) {
                 carnos += el.name + ", ";
                 terminalIds += el.id + ",";
@@ -228,28 +229,28 @@ $(function() {
     });
 
     var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
-    $("#cancel").click(function() {
+    $("#cancel").click(function () {
         parent.layer.close(index);
     });
 
-    $("#confirm").click(function() {
+    $("#confirm").click(function () {
         var path = $("#path").val();
         if (isNull(path)) {
-            layer.alert('FTP路径不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('FTP路径不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#path").select();
             });
             return;
         }
         if (!isFtpPath(path)) {
-            layer.alert('FTP路径格式不正确！', { icon: 2 }, function(index2) {
+            layer.alert('FTP路径格式不正确！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#path").select();
             });
             return;
         }
         if (isNull(terminalIds)) {
-            layer.alert('升级车辆不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('升级车辆不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#cars").click();
             });
@@ -257,7 +258,7 @@ $(function() {
         }
         var fileNum = $("#files").children().length - 1;
         if (fileNum == 0) {
-            layer.alert('升级文件不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('升级文件不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#add").click();
             });
@@ -278,7 +279,7 @@ $(function() {
         $.post("../../../manage/remote/asyn_terminal_upgrade_request",
             "terminal_ids=" + terminalIds + "&ftp_path=" + path + "&upgrade_files=" + upgrade_files +
             "&token=" + generateUUID(),
-            function(data) {
+            function (data) {
                 layer.close(loadIndex);
                 if (data.id > 0) {
                     layer.msg(data.msg, {
@@ -289,7 +290,7 @@ $(function() {
                     layer.msg('请求发送成功！', {
                         icon: 1,
                         time: 500
-                    }, function() {
+                    }, function () {
                         parent.layer.close(index);
                     });
                 }
@@ -300,7 +301,7 @@ $(function() {
                 layer.confirm('登录失效，是否刷新页面重新登录？', {
                     icon: 0,
                     title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
+                }, function () {
                     location.reload(true);
                 });
             }

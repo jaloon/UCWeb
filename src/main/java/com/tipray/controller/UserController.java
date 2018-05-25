@@ -61,14 +61,14 @@ public class UserController extends BaseAction {
     @PermissionAnno("userModule")
     @RequestMapping(value = "add.do")
     @ResponseBody
-    public Message addUser(@ModelAttribute User user, Long roleId) {
-        logger.info("add user, user={}, roleId={}", user, roleId);
+    public Message addUser(@ModelAttribute User user) {
+        logger.info("add user, user={}", user);
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
         StringBuffer description = new StringBuffer("添加操作员：").append(user.getAccount()).append('。');
         try {
-            userService.addUser(user, roleId);
+            userService.addUser(user);
             description.append("成功！");
             return Message.success();
         } catch (Exception e) {
@@ -85,14 +85,14 @@ public class UserController extends BaseAction {
     @PermissionAnno("userModule")
     @RequestMapping(value = "update.do")
     @ResponseBody
-    public Message updateUser(User user, Long roleId) {
-        logger.info("update user, user={}, roleId={}", user, roleId);
+    public Message updateUser(User user) {
+        logger.info("update user, user={}", user);
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
         StringBuffer description = new StringBuffer("修改操作员：").append(user.getAccount()).append('。');
         try {
-            userService.updateUser(user, roleId);
+            userService.updateUser(user);
             description.append("成功！");
             return Message.success();
         } catch (Exception e) {

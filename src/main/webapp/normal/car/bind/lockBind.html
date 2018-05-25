@@ -8,7 +8,7 @@
     <title>设备绑定</title>
     <link rel="stylesheet" href="../../../resources/css/base.css">
     <link rel="stylesheet" href="../../../resources/css/cfgEdit.css">
-    <link rel="stylesheet" href="../../../resources/plugins/dropdown/jquery.dropdown.min.css">
+    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
     <style type="text/css">
         select.editInfo {
@@ -36,7 +36,7 @@
             background: #ffffff;
         }
 
-        .lock>table {
+        .lock > table {
             width: 480px;
             position: relative;
             left: 10px;
@@ -97,105 +97,107 @@
         }
     </style>
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../../resources/plugins/dropdown/jquery.dropdown.min.js"></script>
+    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../../resources/plugins/layer/layer.js"></script>
     <script src="../../../resources/plugins/verify.js"></script>
     <script src="../../../resources/js/base.js"></script>
 </head>
 
 <body>
-    <div class="container">
-        <div class="info-zone">
-            <div class="base-info">
-                <div class="info-title">
-                    锁绑定变更
-                </div>
-                <table class="base-table">
-                    <tr>
-                        <td>车牌号</td>
-                        <td>
-                            <input type="text" class="editInfo" id="carno">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>变更类型</td>
-                        <td>
-                            <select class="editInfo" id="bind_type">
-                                <option value=1>增加</option>
-                                <option value=2>修改</option>
-                                <option value=3>删除</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>待变更的锁</td>
-                        <td>
-                            <div class="lock-box">
-                                <ol id="locks">
-                                    <li>
+<div class="container">
+    <div class="info-zone">
+        <div class="base-info">
+            <div class="info-title">
+                锁绑定变更
+            </div>
+            <table class="base-table">
+                <tr>
+                    <td>车牌号</td>
+                    <td>
+                        <!--<input type="text" class="editInfo" id="carno">-->
+                        <select class="editInfo" id="carno">
+                            <option value="">车牌号</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>变更类型</td>
+                    <td>
+                        <select class="editInfo" id="bind_type">
+                            <option value=1>增加</option>
+                            <option value=2>修改</option>
+                            <option value=3>删除</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>待变更的锁</td>
+                    <td>
+                        <div class="lock-box">
+                            <ol id="locks">
+                                <li>
                                     <span class="layable" id="add" style="font-size: 16px; color: #0154ad">
                                         <img alt="添加" title="添加" src="../../../resources/images/operate/addNew.png">&nbsp;添加锁信息
                                     </span>
-                                    </li>
-                                </ol>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <div class="oper-zone">
-            <input type="button" id="cancel" value="取消">
-            <input type="button" id="confirm" value="确认">
+                                </li>
+                            </ol>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
-    <div class="hidden-box lock" style="display:none;">
-        <table>
-            <tr>
-                <td>锁设备ID:</td>
-                <td>
-                    <div id="lock_id">
-                        <!-- PS: select标签需手动设置隐藏 -->
-                        <select style="display:none" placeholder="请选择"></select>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>仓号:</td>
-                <td>
-                    <input type="text" class="editInfo" id="store_id">
-                </td>
-            </tr>
-            <tr>
-                <td>仓位:</td>
-                <td>
-                    <select class="editInfo" id="seat">
-                        <option value=1>上仓锁</option>
-                        <option value=2>下仓锁</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>同仓位锁索引:</td>
-                <td>
-                    <input type="text" class="editInfo" id="seat_index">
-                </td>
-            </tr>
-            <tr>
-                <td>是否允许开锁:</td>
-                <td>
-                    <select class="editInfo" id="open_allowed">
-                        <option value="2">是</option>
-                        <option value="1">否</option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <div class="hidden-oper-zone">
-            <input type="button" class="hidden-cancel" id="lock_cancel" value="取消">
-            <input type="button" class="hidden-confirm" id="lock_confirm" value="确认">
-        </div>
+    <div class="oper-zone">
+        <input type="button" id="cancel" value="取消">
+        <input type="button" id="confirm" value="确认">
     </div>
+</div>
+<div class="hidden-box lock" style="display:none;">
+    <table>
+        <tr>
+            <td>锁设备ID:</td>
+            <td>
+                <select class="editInfo" id="lock_id">
+                    <option value="">锁设备ID</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>仓号:</td>
+            <td>
+                <input type="text" class="editInfo" id="store_id">
+            </td>
+        </tr>
+        <tr>
+            <td>仓位:</td>
+            <td>
+                <select class="editInfo" id="seat">
+                    <option value=1>上仓锁</option>
+                    <option value=2>下仓锁</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>同仓位锁索引:</td>
+            <td>
+                <input type="text" class="editInfo" id="seat_index">
+            </td>
+        </tr>
+        <tr>
+            <td>是否允许开锁:</td>
+            <td>
+                <select class="editInfo" id="open_allowed">
+                    <option value="2">是</option>
+                    <option value="1">否</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <div class="hidden-oper-zone">
+        <input type="button" class="hidden-cancel" id="lock_cancel" value="取消">
+        <input type="button" class="hidden-confirm" id="lock_confirm" value="确认">
+    </div>
+</div>
 </body>
 </html>
 <script>
@@ -245,58 +247,91 @@
     }
 
     $(function () {
-        $.ajax({
-            type: "get",
-            async: false, //不异步，先执行完ajax，再干别的
-            url: "../../../manage/car/findUnusedLocks.do",
-            dataType: "json",
-            success: function(response) {
-                var lock_select = $("#lock_id").children().eq(0);
-                response.forEach(function(lockId) {
-                    lock_select.append("<option value=" + lockId + ">" + lockId + "</option>");
-                });
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
-                        location.reload(true);
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
+        $.getJSON("../../../manage/car/selectCars.do", "scope=2",
+            function (data, textStatus, jqXHR) {
+                var cars = data.car;
+                var len = cars.length;
+                if (len == 0) {
+                    layer.alert('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+                        layer.close(index2);
+                        parent.layer.close(index);
                     });
+                    return;
                 }
+                var selectObj = $('#carno');
+                selectObj.append(data.com);
+                var groupObj;
+                for (var i = 0; i < len; i++) {
+                    var car = cars[i];
+                    groupObj = $("#com_" + car.comId);
+                    groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+                }
+                selectObj.comboSelect();
+                selectObj.hide();
+                selectObj.closest(".combo-select").css({
+                    width: '396px',
+                    height: '28px',
+                    "margin-bottom": "0px"
+                });
+                selectObj.siblings(".combo-dropdown").css("max-height", "250px");
+                selectObj.siblings(".combo-input").height(2);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
             }
         });
 
-        $('#lock_id').dropdown();
-
-        function dropdown_val() {
-            var el = $("span.dropdown-selected>i.del");
-            var val = el.attr("data-id");
-            return val;
-        }
-
-        function dropdown_text() {
-            var el = $("span.dropdown-selected");
-            var text = el.text();
-            return text;
-        }
+        $.getJSON("../../../manage/car/findUnusedLocks.do",
+            function (data, textStatus, jqXHR) {
+                var lock_select = $("#lock_id");
+                data.forEach(function (lockId) {
+                    lock_select.append("<option value=" + lockId + ">" + lockId + "</option>");
+                });
+                lock_select.comboSelect();
+                lock_select.hide();
+                lock_select.closest(".combo-select").css({
+                    width: '380px',
+                    height: '26px',
+                    "margin-bottom": "0px"
+                });
+                lock_select.siblings(".combo-dropdown").css("max-height", "165px");
+                lock_select.siblings(".combo-input").height(2);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
 
         $("#add").click(addLock);
 
-        $("#lock_cancel").click(function() {
+        $("#lock_cancel").click(function () {
             layer.close(lockLayer);
         });
 
-        $("#lock_confirm").click(function() {
-            var lock_id = dropdown_val();
+        $("#lock_confirm").click(function () {
+            var lock_id = $("#lock_id").val();
             var store_id = $("#store_id").val();
             var seat = $("#seat").val();
             var seat_index = $("#seat_index").val();
             var open_allowed = $("#open_allowed").val();
             if (isNull(lock_id)) {
-                layer.alert('锁设备ID不能为空！', { icon: 2 }, function(index2) {
+                layer.alert('未选择系统已有的锁设备ID！', {icon: 2}, function (index2) {
                     layer.close(index2);
+                    $("#lock_id").focus();
                 });
                 return;
             }
@@ -346,26 +381,23 @@
             layer.close(lockLayer);
         });
 
-        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
-        $("#cancel").click(function() {
+        $("#cancel").click(function () {
             parent.layer.close(index);
         });
 
-        $("#confirm").click(function() {
+        $("#confirm").click(function () {
             var carno = $("#carno").val();
-            if (!isCarNo(carno)) {
-                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
-                    icon: 2
-                }, function(index2) {
+            if (carno == "") {
+                layer.alert('未选择系统已有车辆！', { icon: 2 }, function(index2) {
                     layer.close(index2);
-                    $("#carno").select();
+                    $("#carno").focus();
                 });
                 return;
             }
             var bind_type = $("#bind_type").val();
             var lockNum = $("#locks").children().length - 1;
             if (lockNum == 0) {
-                layer.alert('至少要重置一把锁！', { icon: 2 }, function(index2) {
+                layer.alert('至少要重置一把锁！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#add").click();
                 });
@@ -387,7 +419,7 @@
             $.post("../../../manage/remote/asyn_lock_bind_request",
                 "car_number=" + carno + "&bind_type=" + bind_type + "&binding_locks=" + binding_locks +
                 "&token=" + generateUUID(),
-                function(data) {
+                function (data) {
                     layer.close(loadIndex);
                     if (data.id > 0) {
                         layer.msg(data.msg, {
@@ -398,7 +430,7 @@
                         layer.msg('请求发送成功！', {
                             icon: 1,
                             time: 500
-                        }, function() {
+                        }, function () {
                             parent.layer.close(index);
                         });
                     }
@@ -409,7 +441,7 @@
                     layer.confirm('登录失效，是否刷新页面重新登录？', {
                         icon: 0,
                         title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                    }, function () {
                         location.reload(true);
                     });
                 }

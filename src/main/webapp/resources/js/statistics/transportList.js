@@ -1,4 +1,42 @@
 $(function() {
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+        function (data, textStatus, jqXHR) {
+            var selectObj = $('#text_car');
+            selectObj.append(data.com);
+            var cars = data.car;
+            var groupObj;
+            for (var i = 0, len = cars.length; i < len; i++) {
+                var car = cars[i];
+                groupObj = $("#com_" + car.comId);
+                groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+            }
+            selectObj.comboSelect();
+            $("#hidden_car").show();
+            selectObj.hide();
+            selectObj.closest(".combo-select").css({
+                position: 'absolute',
+                'z-index': 100000,
+                left: '100px',
+                top: '30px',
+                width: '266px',
+                height: '34px',
+                'font-size': '16px',
+                "margin-bottom": "0px"
+            });
+            selectObj.siblings(".combo-input").height(10);
+        }
+    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                icon: 0,
+                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+            }, function() {
+                location.reload(true);
+            });
+        }
+    });
+
+
     laydate.render({
         elem: '#text_begin',
         type: 'datetime',

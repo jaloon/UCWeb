@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="resources/css/index.css"/>
     <link rel="stylesheet" type="text/css" href="resources/plugins/iziToast/iziToast.min.css"/>
     <script src="resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="resources/plugins/ConcurrentThread/Concurrent.Thread.min.js"></script>
     <script src="resources/plugins/iNotify/iNotify.js"></script>
     <script src="resources/plugins/iziToast/iziToast.min.js"></script>
     <script src="resources/plugins/layer/layer.js"></script>
@@ -106,7 +107,7 @@
                         <dd class="first_dd"><a name="normal/car/carList.jsp">车辆信息管理</a></dd>
                     </pop:Permission>
                     <dd>
-                        <a name="normal/car/carSupervise.html?ctx=${pageContext.request.contextPath}">车辆监控及远程操作</a>
+                        <a name="normal/car/carSupervise.html">车辆监控及远程操作</a>
                     </dd>
                         <%--<dd><a name="normal/car/carMonitor.html?ctx=${pageContext.request.contextPath}">车辆实时监控</a></dd>--%>
                     <pop:Permission ename="retrackModule">
@@ -117,25 +118,25 @@
             <pop:Permission ename="statisticsManage">
                 <dl class="statisticsManage">
                     <dt>查询统计</dt>
-                    <pop:Permission ename="alarmrecordModule">
+                    <pop:Permission ename="alarmRecordModule">
                         <dd class="first_dd"><a name="normal/statistics/alarmList.html">报警记录查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="remoterecordModule">
+                    <pop:Permission ename="remoteRecordModule">
                         <dd><a name="normal/statistics/remoteList.html">远程操作查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="lockstatusModule">
+                    <pop:Permission ename="lockStatusModule">
                         <dd><a name="normal/statistics/lockstatusList.html">锁动作记录查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="inandoutrecordModule">
+                    <pop:Permission ename="inAndOutRecordModule">
                         <dd><a name="normal/statistics/inandoutList.html">车辆进出记录查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="transportModule">
+                    <pop:Permission ename="transRecordModule">
                         <dd><a name="normal/statistics/transportList.html">配送信息查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="changerecordModule">
+                    <pop:Permission ename="changeRecordModule">
                         <dd><a name="normal/statistics/changeList.html">远程换站记录查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="deviceuseModule">
+                    <pop:Permission ename="cardUseRecordModule">
                         <dd><a name="normal/statistics/deviceuseList.html">卡及设备使用记录查询</a></dd>
                     </pop:Permission>
                 </dl>

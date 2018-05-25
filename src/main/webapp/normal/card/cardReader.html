@@ -14,7 +14,7 @@
             width: 500px;
         }
 
-        .btn-box{
+        .btn-box {
             width: 100%;
             margin: 15px;
         }
@@ -46,8 +46,92 @@
             overflow: auto;
             border: 1px solid #d7dbe2;
         }
+
         .card-box {
             display: none;
+            width: 540px;
+            background: #ffffff;
+        }
+
+        .info-zone {
+            width: 480px;
+            padding: 15px 30px;
+            overflow: auto;
+        }
+
+        .base-info {
+            width: 480px;
+        }
+
+        .base-table {
+            width: 480px;
+            font-size: 14px;
+            color: #445065;
+            margin-top: 10px;
+        }
+
+        .hidden-box tr {
+            height: 40px;
+        }
+
+        .hidden-box td {
+            text-align: left;
+        }
+
+        .base-info tr td:first-child {
+            width: 80px;
+        }
+
+        .editInfo {
+            height: 26px;
+            width: 384px;
+            line-height: 26px;
+            border: 1px solid #d7dbe2;
+            border-radius: 3px;
+            padding: 0 6px 0 6px;
+            color: #57647c;
+        }
+
+        select.editInfo {
+            height: 28px;
+            width: 398px;
+        }
+
+        .oper-zone {
+            width: 540px;
+            height: 54px;
+            background: #e6e7e9;
+            position: fixed;
+        }
+
+        #cancel {
+            width: 100px;
+            height: 30px;
+            border: 1px solid #478de4;
+            border-radius: 3px;
+            background: #ffffff;
+            color: #40454b;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 124px;
+        }
+
+        #confirm {
+            width: 100px;
+            height: 30px;
+            background: #478de4;
+            color: #ffffff;
+            border: 0;
+            border-radius: 3px;
+            position: absolute;
+            top: 50%;
+            margin-top: -15px;
+            right: 14px;
+        }
+
+        input[readonly]{
+            background:#e6e7e9;
         }
     </style>
 </head>
@@ -64,9 +148,6 @@
 <div class="card-box container">
     <div class="info-zone">
         <div class="base-info">
-            <div class="info-title">
-                添加卡
-            </div>
             <table class="base-table">
                 <tr>
                     <td>卡ID:</td>
@@ -91,7 +172,7 @@
                 <tr>
                     <td>负责人:</td>
                     <td>
-                        <input type="text" class="editInfo" id="director">
+                        <input type="text" class="editInfo" id="director" required>
                     </td>
                 </tr>
                 <tr>
@@ -116,8 +197,8 @@
         </div>
     </div>
     <div class="oper-zone">
-        <input type="button" class="oper-btn" id="cancel" value="取消">
-        <input type="button" class="oper-btn" id="confirm" value="确认">
+        <input type="button" id="cancel" value="取消">
+        <input type="button" id="confirm" value="确认">
     </div>
 </div>
 </body>
@@ -135,6 +216,11 @@
         }
     }
     $(function () {
+        // 必填字段添加星号标识
+        $('input[required]').each(function() {
+            $(this).closest('tr').children().first().prepend('<span style="color:red">* </span>');
+        });
+
         var isComOpen = false;
         var find = true;
         var icdev = -1;
@@ -151,17 +237,17 @@
                         if (hdev != -1) {
                             icdev = hdev;
                             obj.beep(icdev, 10); //do a beep
-                            logger.info("Link reader ok");
+                            logger.info("读卡器连接成功！");
                             isComOpen = true; //Set reader link status
                         } else {
-                            logger.error("Link reader error");
+                            logger.error("读卡器连接失败！");
                             isComOpen = false; //Set reader link failed status
                         }
                     } else
-                        logger.error("Object load error");
+                        logger.error("读卡器驱动加载异常！");
                     break;
                 case FUNCIDS._fid_exit:
-                    logger.info("reader closed");
+                    logger.info("读卡器连接已关闭！");
                     break;
                 case FUNCIDS._fid_findCard:
                     obj.halt(icdev);
@@ -184,7 +270,7 @@
                                 title: ['添加卡', 'font-size:14px;color:#ffffff;background:#478de4;'],
                                 shadeClose: true,
                                 shade: 0.8,
-                                // area: ['540px', '435px'],
+                                area: '540px',
                                 resize: false,
                                 content: $('.card-box'),
                                 end: function () {
@@ -197,7 +283,8 @@
                         findCard();
                     }
                     break;
-
+                default:
+                    break;
             }
 
         });
@@ -214,7 +301,7 @@
 
         $("#start").click(function () {
             find = true;
-            logger.info("start to find card");
+            logger.info("开始寻卡...");
             findCard();
         });
 
@@ -226,7 +313,7 @@
 
         $("#stop").click(function () {
             find = false;
-            logger.info("stop finding card");
+            logger.info("寻卡结束！");
         });
 
         $("#unlink").click(function () {
@@ -253,7 +340,7 @@
             url = "../../manage/card/add.do";
             param = "cardId=" + cid + "&type=" + type + "&director=" + director + "&phone=" + phone + "&identityCard=" + identity + "&remark=" + remark;
             if (isNull(cid)) {
-                layer.alert('卡ID不能为空！', { icon: 0 }, function(index2) {
+                layer.alert('卡ID不能为空！', {icon: 0}, function (index2) {
                     layer.close(index2);
                     $("#cid").select();
                 });
@@ -266,21 +353,21 @@
                     url: "../../manage/card/isExist.do",
                     data: encodeURI("cardId=" + cid),
                     dataType: "json",
-                    success: function(response) {
+                    success: function (response) {
                         if (response == true || response == "true") {
                             ajaxFlag = false;
-                            layer.alert('卡ID已存在！', { icon: 5 }, function(index2) {
+                            layer.alert('卡ID已存在！', {icon: 5}, function (index2) {
                                 layer.close(index2);
                                 $("#cid").select();
                             });
                         }
                     },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
                         if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
                             layer.confirm('登录失效，是否刷新页面重新登录？', {
                                 icon: 0,
                                 title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                            }, function() {
+                            }, function () {
                                 location.reload(true);
                             });
                         }
@@ -290,57 +377,56 @@
                     return;
                 }
             }
-        }
 
-        if (isNull(director)) {
-            layer.alert('负责人不能为空！', { icon: 2 }, function(index2) {
-                layer.close(index2);
-                $("#director").select();
-            });
-            return;
-        }
+            if (isNull(director)) {
+                layer.alert('负责人不能为空！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#director").select();
+                });
+                return;
+            }
 
-        if (!isPhone(phone)) {
-            layer.alert('电话号码不正确！', { icon: 5 }, function(index2) {
-                layer.close(index2);
-                $("#phone").select();
-            });
-            return;
-        }
+            // if (!isPhone(phone)) {
+            //     layer.alert('电话号码不正确！', {icon: 5}, function (index2) {
+            //         layer.close(index2);
+            //         $("#phone").select();
+            //     });
+            //     return;
+            // }
+            //
+            // if (!isIdCard(identity)) {
+            //     layer.alert('身份证号不正确！', {icon: 5}, function (index2) {
+            //         layer.close(index2);
+            //         $("#identity").select();
+            //     });
+            //     return;
+            // }
 
-        if (!isIdCard(identity)) {
-            layer.alert('身份证号不正确！', { icon: 5 }, function(index2) {
-                layer.close(index2);
-                $("#identity").select();
-            });
-            return;
-        }
 
-
-        $.post(url, encodeURI(param),
-            function(data) {
-                if ("error" == data.msg) {
-                    layer.msg("添加失败！", {icon: 2, time: 1000});
-                } else {
-                    layer.msg("添加成功！", { icon: 1, time: 1000 }, function() {
-                        // parent.layer.close(index);
-                        layer.close(cardLayer);
-                        cardIds.push(cid);
+            $.post(url, encodeURI(param),
+                function (data) {
+                    if ("error" == data.msg) {
+                        layer.msg("添加失败！", {icon: 2, time: 1000});
+                    } else {
+                        layer.msg("添加成功！", {icon: 1, time: 1000}, function () {
+                            // parent.layer.close(index);
+                            layer.close(cardLayer);
+                            cardIds.push(cid);
+                        });
+                    }
+                },
+                "json"
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function () {
+                        location.reload(true);
                     });
                 }
-            },
-            "json"
-        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
-                    location.reload(true);
-                });
-            }
+            });
         });
-
-    })
+    });
 </script>
 </html>

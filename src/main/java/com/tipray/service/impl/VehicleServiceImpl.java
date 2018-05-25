@@ -11,7 +11,6 @@ import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.VehicleService;
 import com.tipray.util.DateUtil;
-import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.StringUtil;
 import com.tipray.util.VehicleAlarmUtil;
 import org.slf4j.Logger;
@@ -21,7 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 车辆管理业务层
@@ -151,6 +153,41 @@ public class VehicleServiceImpl implements VehicleService {
 	@Override
 	public List<DropdownData> selectCars() {
 		return vehicleDao.selectCars();
+	}
+
+	@Override
+	public Map<String, Object> selectCars(int scope) {
+        List<Map<String, Object>> coms;
+        List<Map<String, Object>> carNumbers;
+	    switch (scope) {
+            case 0:
+                coms = vehicleDao.findComsWithCar();
+                carNumbers = vehicleDao.findCarNumbers();
+                break;
+            case 1:
+                coms = vehicleDao.findComsWithBindedCar();
+                carNumbers = vehicleDao.findBindedCarNumbers();
+                break;
+            case 2:
+                coms = vehicleDao.findComsWithOnlineCar();
+                carNumbers = vehicleDao.findOnlineCarNumbers();
+                break;
+            default:
+                return null;
+        }
+        StringBuffer comBuf = new StringBuffer();
+        for (Map<String, Object> com : coms) {
+            Long id = (Long) com.get("id");
+            String name = (String) com.get("name");
+            if (id == 0) {
+                name = "未指定运输公司";
+            }
+            comBuf.append("<optgroup id=\"com_").append(id).append("\" label=\"").append(name).append("\"></optgroup>");
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("com", comBuf.toString());
+        map.put("car", carNumbers);
+        return map;
 	}
 
 	@Override
@@ -301,6 +338,9 @@ public class VehicleServiceImpl implements VehicleService {
 
 	@Override
 	public Map<String, Object> getCarAndLockByCarNo(String carNumber) {
+        if (StringUtil.isEmpty(carNumber)) {
+            return null;
+        }
 		Vehicle vehicle = vehicleDao.getByCarNo(carNumber);
 		List<Driver> drivers = new ArrayList<>();
 		List<Lock> locks = new ArrayList<>();
@@ -309,9 +349,9 @@ public class VehicleServiceImpl implements VehicleService {
 			locks = lockDao.findLocksByCarId(vehicle.getId());
 			drivers = driverDao.findByCarNo(vehicle.getCarNumber());
 		}
-		if (!EmptyObjectUtil.isEmptyList(locks)) {
-			lockStatus = lockDao.findLockStatusByLocks(locks);
-		}
+		// if (!EmptyObjectUtil.isEmptyList(locks)) {
+		// 	lockStatus = lockDao.findLockStatusByLocks(locks);
+		// }
 		Map<String, Object> map = new HashMap<>();
 		map.put("vehicle", vehicle);
 		map.put("drivers", drivers);
@@ -351,6 +391,11 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleRealtimeStatus getVehicleRealtimeStatus(Long vehicleId) {
         return vehicleId == null ? null : vehicleDao.getVehicleRealtimeStatus(vehicleId);
+    }
+
+    @Override
+    public List<String> findCarNumbersByTerminalIds(String terminalIds) {
+        return StringUtil.isEmpty(terminalIds) ? null : vehicleDao.findCarNumbersByTerminalIds(terminalIds);
     }
 
 }

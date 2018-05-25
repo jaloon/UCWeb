@@ -11,8 +11,45 @@ function showBMap(id) {
     // event.stopPropagation();
 }
 
-$(function() {
-    $("#text_dev").change(function() {
+$(function () {
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+        function (data, textStatus, jqXHR) {
+            var selectObj = $('#text_car');
+            selectObj.append(data.com);
+            var cars = data.car;
+            var groupObj;
+            for (var i = 0, len = cars.length; i < len; i++) {
+                var car = cars[i];
+                groupObj = $("#com_" + car.comId);
+                groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+            }
+            selectObj.comboSelect();
+            $("#hidden_car").show();
+            selectObj.hide();
+            selectObj.closest(".combo-select").css({
+                position: 'absolute',
+                'z-index': 100000,
+                left: '100px',
+                top: '30px',
+                width: '160px',
+                height: '34px',
+                'font-size': '16px',
+                "margin-bottom": "0px"
+            });
+            selectObj.siblings(".combo-input").height(10);
+        }
+    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                icon: 0,
+                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+            }, function () {
+                location.reload(true);
+            });
+        }
+    });
+
+    $("#text_dev").change(function () {
         $("#text_type").empty();
         $("#text_type").append("<option value=''>所有报警</option>");
         var dev = $("#text_dev").val();
@@ -50,7 +87,7 @@ $(function() {
         $.post(
             "../../manage/statistics/findAlarmRecordsForPage.do",
             encodeURI("carNumber=" + carNumber + "&deviceType=" + dev + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(data) {
+            function (data) {
                 var gridPage = eval(data);
 
                 var maxIndex = $("#page_id option:last").index(); //获取Select最大的索引值
@@ -91,7 +128,7 @@ $(function() {
                     }
                     tableData += "<td class=\"alarm-velocity\">" + (alarm.velocity == undefined ? "数据库记录异常" : alarm.velocity) + "</td>" +
                         "<td class=\"alarm-aspect\">" + angle2aspect(alarm.angle) + "</td>" +
-                        "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
+                        "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端（" : "锁（") + alarm.deviceId + "）</td>" +
                         "<td class=\"alarm-type\">" + alarm.typeName + "</td>" +
                         "<td class=\"alarm-status\">" + (alarm.status == undefined ? "数据库记录异常" : alarm.status) + "</td>" +
                         "<td class=\"alarm-lock\">" + (alarm.lockStatus == undefined ? "数据库记录异常" : alarm.lockStatus) + "</td>" +
@@ -107,7 +144,7 @@ $(function() {
                 layer.confirm('登录失效，是否刷新页面重新登录？', {
                     icon: 0,
                     title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
+                }, function () {
                     location.reload(true);
                 });
             }
@@ -116,7 +153,7 @@ $(function() {
 
     showList("", "", "", "", "", 1);
 
-    $("#search_btn").click(function() {
+    $("#search_btn").click(function () {
         var carNumber = $("#text_car").val();
         var dev = $("#text_dev").val();
         var type = $("#text_type").val();
@@ -133,11 +170,11 @@ $(function() {
         }
         var dev = $("#qdev").val();
         if (isNull(dev) || dev == 0) {
-        	dev = "";
+            dev = "";
         }
         var type = $("#qtype").val();
         if (isNull(type) || type == 0) {
-        	type = "";
+            type = "";
         }
         var begin = $("#qbegin").val();
         if (isNull(begin)) {
@@ -150,7 +187,7 @@ $(function() {
         showList(carNumber, dev, type, begin, end, pageId);
     }
 
-    $("#page_id").change(function() {
+    $("#page_id").change(function () {
         var pageId = $("#page_id").val();
         if (isNull(pageId)) {
             pageId = 1;
@@ -158,7 +195,7 @@ $(function() {
         refreshPage(pageId);
     });
 
-    $("#page_size").change(function() {
+    $("#page_size").change(function () {
         refreshPage(1);
     });
 });

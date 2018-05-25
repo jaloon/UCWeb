@@ -4,62 +4,42 @@ $(function() {
         $(".map").height($(window).height() - 68);
     }).resize();
 
-    // $.ajax({
-    //     type: "get",
-    //     async: false, //不异步，先执行完ajax，再干别的
-    //     url: "../../../manage/car/selectCars.do",
-    //     dataType: "text",
-    //     success: function(response) {
-    //         // var data = JSON.stringify(response);
-    //         $('#text_car').dropdown({data:response});
-    //     }
-    // });
-
-    // function dropdown_val() {
-    //     var el = $("span.dropdown-selected>i.del");
-    //     var val = el.attr("data-id");
-    //     return val;
-    // }
-    //
-    // function dropdown_text() {
-    //     var el = $("span.dropdown-selected");
-    //     var text = el.text();
-    //     return text;
-    // }
-
-    // function getCars() {
-    //     var cars = [{ id: '', name: '' }];
-    //     $.ajax({
-    //         type: "get",
-    //         async: false, //不异步，先执行完ajax，再干别的
-    //         url: "../../../manage/car/getCarList.do",
-    //         dataType: "json",
-    //         success: function(response) {
-    //             for (var i = 0, len = response.length; i < len; i++) {
-    //                 var res = response[i];
-    //                 var car = {};
-    //                 car.id = res.id;
-    //                 car.name = res.carNumber;
-    //                 cars.push(car);
-    //             }
-    //         }
-    //     });
-    //     return cars;
-    // }
-    // var cars = getCars();
-    //
-    // function editableCarList() {
-    //     for (var i = 0, len = cars.length; i < len; i++) {
-    //         var car = cars[i];
-    //         $("#text_car").append("<option value=" + car.id + ">" + car.name + "</option>");
-    //     }
-    //     $('#text_car').editableSelect();
-    //     $('#text_car').css({
-    //         // width: '266px',
-    //         background: 'white'
-    //     })
-    // }
-    // editableCarList();
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+        function (data, textStatus, jqXHR) {
+            var selectObj = $('#text_car');
+            selectObj.append(data.com);
+            var cars = data.car;
+            var groupObj;
+            for (var i = 0, len = cars.length; i < len; i++) {
+                var car = cars[i];
+                groupObj = $("#com_" + car.comId);
+                groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+            }
+            selectObj.comboSelect();
+            $("#hidden_car").show();
+            selectObj.hide();
+            selectObj.closest(".combo-select").css({
+                position: 'absolute',
+                'z-index': 100000,
+                left: '60px',
+                top: '2px',
+                width: '178px',
+                height: '34px',
+                'font-size': '16px',
+                "margin-bottom": "0px"
+            });
+            selectObj.siblings(".combo-input").height(10);
+        }
+    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                icon: 0,
+                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+            }, function() {
+                location.reload(true);
+            });
+        }
+    });
 
     $('#text_interval').jRange({
         from: 0,
@@ -164,70 +144,76 @@ $(function() {
         }
     };
 
-    // function start() {
-    //     carNumber = trimAll($("#text_car").val());
-    //     // carNumber = dropdown_text();
-    //     begin = $("#text_begin").val();
-    //     end = $("#text_end").val();
-    //     interval = $("#text_interval").val();
-    //     $.post("../../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
-    //         function(data) {
-    //             if (isNull(data) || data.length == 0) {
-    //                 layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
-    //             } else {
-    //                 stop();
-    //                 btn_start.attr('disabled', true);
-    //                 btn_stop.attr('disabled', false);
-    //                 btn_pause.attr('disabled', false);
-    //                 btn_go_on.attr('disabled', true);
-    //                 tracks = data;
-    //                 play();
-    //             }
-    //         },
-    //         "json"
-    //     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-    //             if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-    //                 layer.confirm('登录失效，是否刷新页面重新登录？', {
-    //                     icon: 0,
-    //                     title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-    //                 }, function() {
-    //                     location.reload(true);
-    //                 });
-    //             }
-    //         });
-    // }
-
-
-    var times = [];
-    var t100 = 0;
     function start() {
         carNumber = trimAll($("#text_car").val());
+        if (carNumber == "") {
+            layer.alert('未选择系统已有车辆！', { icon: 2 }, function(index2) {
+                layer.close(index2);
+                $("#text_car").focus();
+            });
+            return;
+        }
         begin = $("#text_begin").val();
         end = $("#text_end").val();
-        for (var i = 0; i < 100; i++) {
-            var t1 = new Date().getTime();
-            $.ajax({
-                type: "get",
-                async: false, //不异步，先执行完ajax，再干别的
-                url: "../../../manage/car/retrack.do",
-                data: encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
-                dataType: "json",
-                success: function(response) {
-                    if (isNull(response) || response.length == 0) {
-                        layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
-                    } else {
-                        var t2 = new Date().getTime() - t1;
-                        t100 += t2;
-                        times.push(t2);
-                    }
+        interval = $("#text_interval").val();
+        $.post("../../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
+            function(data) {
+                if (isNull(data) || data.length == 0) {
+                    layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
+                } else {
+                    stop();
+                    btn_start.attr('disabled', true);
+                    btn_stop.attr('disabled', false);
+                    btn_pause.attr('disabled', false);
+                    btn_go_on.attr('disabled', true);
+                    tracks = data;
+                    play();
+                }
+            },
+            "json"
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function() {
+                        location.reload(true);
+                    });
                 }
             });
-        }
-        console.log(JSON.stringify(times))
-        console.log(t100/100);
-        times= [];
-        t100 = 0;
     }
+
+
+    // var times = [];
+    // var t100 = 0;
+    // function start() {
+    //     carNumber = trimAll($("#text_car").val());
+    //     begin = $("#text_begin").val();
+    //     end = $("#text_end").val();
+    //     for (var i = 0; i < 100; i++) {
+    //         var t1 = new Date().getTime();
+    //         $.ajax({
+    //             type: "get",
+    //             async: false, //不异步，先执行完ajax，再干别的
+    //             url: "../../../manage/car/retrack.do",
+    //             data: encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
+    //             dataType: "json",
+    //             success: function(response) {
+    //                 if (isNull(response) || response.length == 0) {
+    //                     layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
+    //                 } else {
+    //                     var t2 = new Date().getTime() - t1;
+    //                     t100 += t2;
+    //                     times.push(t2);
+    //                 }
+    //             }
+    //         });
+    //     }
+    //     console.log(JSON.stringify(times))
+    //     console.log(t100/100);
+    //     times= [];
+    //     t100 = 0;
+    // }
 
 
 

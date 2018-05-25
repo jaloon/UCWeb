@@ -5,7 +5,7 @@ $(function() {
         var title = "添加角色";
         var h = "435px";
         if ("edit" == mode) {
-            if (id < 8) {
+            if (id < 21) {
                 layer.alert('系统内置角色，不可修改！', { icon: 6 });
                 return;
             }

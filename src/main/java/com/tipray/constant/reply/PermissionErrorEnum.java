@@ -9,7 +9,9 @@ package com.tipray.constant.reply;
  */
 public enum PermissionErrorEnum {
 	/** 权限不足 */
-	PERMISSION_DENIED(1, "权限不足！");
+	PERMISSION_DENIED(1, "权限不足！"),
+	/** 无APP登录权限 */
+	APP_NOT_ACCEPTABLE(2, "无APP登录权限！");
 
 	private int code;
 	private String msg;

@@ -728,7 +728,7 @@ public class UdpProtocol {
 		// 通知失败的设备数量
 		byte devNum = data[index];
 		if (data.length != UdpProtocol.MIN_REPLY_DATA_LEN + 1 + 4 * devNum) {
-			logger.error("车台软件更新下发业务：实际设备ID数目[n*4={}]与报文中指定是设备数量[{}]不符！", data.length - 5, devNum);
+			logger.error("车台软件更新下发业务：实际设备ID数目[n*4={}]与报文中指定的设备数量[{}]不符！", data.length - 5, devNum);
 			return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
 		}
 		index += 1;
@@ -880,7 +880,7 @@ public class UdpProtocol {
 			index += lockNum;
 			// 是否报警
 			boolean alarm = isAlarm(terminalAlarm, lockNum, lockAlarms);
-			trackBuf.append("\"alarm\":").append(alarm).append(',');
+			trackBuf.append("\"alarm\":\"").append(alarm ? '是' : '否').append('\"').append(',');
 			trackBuf.append("\"online\":1"); // online：0.离线；1.在线
 			trackBuf.append('}');
 			trackList.add(trackBuf.toString());

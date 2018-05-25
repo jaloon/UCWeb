@@ -1,12 +1,12 @@
 package com.tipray.service;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.core.exception.ServiceException;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * UserService
@@ -23,14 +23,14 @@ public interface UserService {
 	 * @throws ServiceException
 	 * @throws NoSuchAlgorithmException
 	 */
-    User addUser(User user, Long roleId) throws ServiceException, NoSuchAlgorithmException;
+    User addUser(User user) throws ServiceException, NoSuchAlgorithmException;
 
 	/**
 	 * 修改操作员信息
 	 * 
 	 * @param user
 	 */
-    User updateUser(User user, Long roleId) throws ServiceException;
+    User updateUser(User user) throws ServiceException;
 
 	/**
 	 * 修改密码

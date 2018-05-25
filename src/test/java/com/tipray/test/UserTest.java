@@ -1,15 +1,5 @@
 package com.tipray.test;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.Session;
@@ -21,6 +11,14 @@ import com.tipray.core.exception.ServiceException;
 import com.tipray.service.RoleService;
 import com.tipray.service.SessionService;
 import com.tipray.service.UserService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.annotation.Resource;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * 操作员管理测试
@@ -82,7 +80,7 @@ public class UserTest {
 			 * userService.addUser(user,1L); userService.addUser(user1,2L);
 			 * userService.addUser(user2,2L); userService.addUser(user3,2L);
 			 */
-			userService.addUser(user4, 2L);
+			userService.addUser(user4);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		} catch (ServiceException e) {
@@ -100,7 +98,7 @@ public class UserTest {
 		user.setPhone("13912345678");
 		user.setIdentityCard("640402197611251236");
 		try {
-			userService.updateUser(user, 2L);
+			userService.updateUser(user);
 		} catch (ServiceException e) {
 			e.printStackTrace();
 		}

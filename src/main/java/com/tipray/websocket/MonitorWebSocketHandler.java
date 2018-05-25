@@ -197,16 +197,16 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     private void removeMonitorCache(Long sessionId) {
         WEB_SOCKET_CLIENTS.remove(sessionId);
         GENERAL_CLIENTS.remove(sessionId);
-        FOCUS_CLIENTS.remove(sessionId);
-        FOCUS_CARS.remove(sessionId);
-        REALTIME_CLIENTS.remove(sessionId);
-        REALTIME_CARS.remove(sessionId);
-        UDP_CACHE.keySet().parallelStream().forEach(cacheId -> {
-            if (UDP_CACHE.get(cacheId).equals(sessionId)) {
-                UDP_CACHE.remove(cacheId);
-                REALTIME_CARS_CACHE.remove(cacheId);
-            }
-        });
+        // FOCUS_CLIENTS.remove(sessionId);
+        // FOCUS_CARS.remove(sessionId);
+        // REALTIME_CLIENTS.remove(sessionId);
+        // REALTIME_CARS.remove(sessionId);
+        // UDP_CACHE.keySet().parallelStream().forEach(cacheId -> {
+        //     if (UDP_CACHE.get(cacheId).equals(sessionId)) {
+        //         UDP_CACHE.remove(cacheId);
+        //         REALTIME_CARS_CACHE.remove(cacheId);
+        //     }
+        // });
     }
 
     /**
@@ -868,14 +868,15 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param result     {@link String} UDP任务结果
      */
     public void dealUdpReply(short replyBizId, int cacheId, String task, boolean resultFlag, String result) {
-        broadcastLog(resultFlag ? 0 : 1, task, result);
+        if (task != null) {
+            broadcastLog(resultFlag ? 0 : 1, task, result);
+        }
 
         switch (replyBizId) {
             case UdpBizId.REALTIME_MONITOR_RESPONSE:
                 if (!resultFlag) {
-                    Long sessionId = UDP_CACHE.get(cacheId);
+                    Long sessionId = UDP_CACHE.remove(cacheId);
                     if (sessionId != null) {
-                        UDP_CACHE.remove(cacheId);
                         WebSocketSession session = WEB_SOCKET_CLIENTS.get(sessionId);
                         // List<Long> carIds = REALTIME_CARS.get(sessionId);
                         Long carId = REALTIME_CARS_CACHE.get(cacheId);
@@ -897,9 +898,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 }
                 break;
             case UdpBizId.FOCUS_MONITOR_RESPONSE:
-                Long sessionId = UDP_CACHE.get(cacheId);
+                Long sessionId = UDP_CACHE.remove(cacheId);
                 if (sessionId != null) {
-                    UDP_CACHE.remove(cacheId);
                     WebSocketSession session = WEB_SOCKET_CLIENTS.get(sessionId);
                     boolean isRepeat = REPEAT_CACHE.contains(cacheId);
                     if (isRepeat) {

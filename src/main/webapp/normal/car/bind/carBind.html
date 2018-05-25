@@ -6,138 +6,175 @@
     <meta name="viewport" content="width=center-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>设备绑定</title>
-    <link rel="stylesheet" href="../../../resources/css/base.css ">
-    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
-    <link rel="stylesheet" href="../../../resources/plugins/jRange/jquery.range.css">
+    <link rel="stylesheet" href="../../../resources/css/base.css">
+    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css">
+    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../../resources/plugins/layer/layer.js"></script>
-    <script src="../../../resources/plugins/jRange/jquery.range-min.js"></script>
     <script src="../../../resources/plugins/verify.js"></script>
-    <script src="../../../resources/plugins/SelectBox.min.js"></script>
     <script src="../../../resources/js/base.js"></script>
-
-    <body>
-        <div class="container">
-            <div class="info-zone">
-                <div class="base-info">
-                    <div class="info-title">
-                        车载终端绑定
-                    </div>
-                    <table class="base-table">
-                        <tr>
-                            <td>车牌号</td>
-                            <td>
-                                <input type="text" class="editInfo" id="carno">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>车载终端</td>
-                            <td>
-                                <input type="text" class="editInfo" id="terminal" placeholder="车载终端设备ID">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>仓数</td>
-                            <td>
-                                <input type="text" class="editInfo" id="store">
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+    <style type="text/css">
+        select.editInfo {
+            width: 398px;
+            height: 28px;
+        }
+    </style>
+<body>
+<div class="container">
+    <div class="info-zone">
+        <div class="base-info">
+            <div class="info-title">
+                车载终端绑定
             </div>
-            <div class="oper-zone">
-                <input type="button" id="cancel" value="取消">
-                <input type="button" id="confirm" value="确认">
-            </div>
+            <table class="base-table">
+                <tr>
+                    <td>车牌号</td>
+                    <td>
+                        <!--<input type="text" class="editInfo" id="carno">-->
+                        <select class="editInfo" id="carno">
+                            <option value="">车牌号</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>车载终端</td>
+                    <td>
+                        <input type="text" class="editInfo" id="terminal" placeholder="车载终端设备ID">
+                    </td>
+                </tr>
+                <tr>
+                    <td>仓数</td>
+                    <td>
+                        <input type="text" class="editInfo" id="store">
+                    </td>
+                </tr>
+            </table>
         </div>
-    </body>
+    </div>
+    <div class="oper-zone">
+        <input type="button" id="cancel" value="取消">
+        <input type="button" id="confirm" value="确认">
+    </div>
+</div>
+</body>
 
-    <script>
-        $(function() {
-            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
-            $("#cancel").click(function() {
-                parent.layer.close(index);
-            });
-            $("#confirm").click(function() {
-                var carNumber = $("#carno").val();
-                if (!isCarNo(carNumber)) {
-                    layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
-                        icon: 2
-                    }, function(index2) {
-                        layer.close(index2);
-                        $("#carno").select();
-                    });
-                    return;
+<script>
+    $(function () {
+        $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+            function (data, textStatus, jqXHR) {
+                var selectObj = $('#carno');
+                selectObj.append(data.com);
+                var cars = data.car;
+                var groupObj;
+                for (var i = 0, len = cars.length; i < len; i++) {
+                    var car = cars[i];
+                    groupObj = $("#com_" + car.comId);
+                    groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
                 }
-                var terminalId = $("#terminal").val();
-                if (isNull(terminalId)) {
-                    layer.alert('车载终端不能为空！', {
-                        icon: 5
-                    }, function(index2) {
-                        layer.close(index2);
-                        $("#terminal").select();
-                    });
-                    return;
-                }
-                if (!isInteger(terminalId)) {
-                    layer.alert('车载终端设备ID必须为数字！', {
-                        icon: 5
-                    }, function(index2) {
-                        layer.close(index2);
-                        $("#terminal").select();
-                    });
-                    return;
-                }
-                var storeNum = $("#store").val();
-                if (isNull(storeNum)) {
-                    layer.alert('仓数不能为空！', {
-                        icon: 5
-                    }, function(index2) {
-                        layer.close(index2);
-                        $("#store").select();
-                    });
-                    return;
-                }
-                if (!isInteger(storeNum)) {
-                    layer.alert('仓数必须为数字！', {
-                        icon: 5
-                    }, function(index2) {
-                        layer.close(index2);
-                        $("#store").select();
-                    });
-                    return;
-                }
-                var loadIndex = layer.load();
-                $.post("../../../manage/remote/asyn_vehicle_bind_request",
-                    encodeURI("car_number=" + carNumber + "&device_id=" + terminalId + "&store_num=" + storeNum +
-                        "&token=" + generateUUID()),
-                    function(data) {
-                        layer.close(loadIndex);
-                        if (data.id > 0) {
-                            layer.msg(data.msg, {
-                                icon: 2,
-                                time: 500
-                            });
-                        } else {
-                            layer.msg('请求发送成功！', {
-                                icon: 1,
-                                time: 500
-                            }, function() {
-                                parent.layer.close(index);
-                            });
-                        }
-                    },
-                    "json"
-                ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                        layer.confirm('登录失效，是否刷新页面重新登录？', {
-                            icon: 0,
-                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                        }, function() {
-                            location.reload(true);
+                selectObj.comboSelect();
+                selectObj.hide();
+                selectObj.closest(".combo-select").css({
+                    width: '396px',
+                    height: '28px',
+                    "margin-bottom": "0px"
+                });
+                selectObj.siblings(".combo-dropdown").css("max-height", "250px");
+                selectObj.siblings(".combo-input").height(2);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
+
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $("#cancel").click(function () {
+            parent.layer.close(index);
+        });
+        $("#confirm").click(function () {
+            var carNumber = $("#carno").val();
+            if (carNumber == "") {
+                layer.alert('未选择系统已有车辆！', { icon: 2 }, function(index2) {
+                    layer.close(index2);
+                    $("#carno").focus();
+                });
+                return;
+            }
+            var terminalId = $("#terminal").val();
+            if (isNull(terminalId)) {
+                layer.alert('车载终端不能为空！', {
+                    icon: 5
+                }, function (index2) {
+                    layer.close(index2);
+                    $("#terminal").select();
+                });
+                return;
+            }
+            if (!isInteger(terminalId)) {
+                layer.alert('车载终端设备ID必须为数字！', {
+                    icon: 5
+                }, function (index2) {
+                    layer.close(index2);
+                    $("#terminal").select();
+                });
+                return;
+            }
+            var storeNum = $("#store").val();
+            if (isNull(storeNum)) {
+                layer.alert('仓数不能为空！', {
+                    icon: 5
+                }, function (index2) {
+                    layer.close(index2);
+                    $("#store").select();
+                });
+                return;
+            }
+            if (!isInteger(storeNum)) {
+                layer.alert('仓数必须为数字！', {
+                    icon: 5
+                }, function (index2) {
+                    layer.close(index2);
+                    $("#store").select();
+                });
+                return;
+            }
+            var loadIndex = layer.load();
+            $.post("../../../manage/remote/asyn_vehicle_bind_request",
+                encodeURI("car_number=" + carNumber + "&device_id=" + terminalId + "&store_num=" + storeNum +
+                    "&token=" + generateUUID()),
+                function (data) {
+                    layer.close(loadIndex);
+                    if (data.id > 0) {
+                        layer.msg(data.msg, {
+                            icon: 2,
+                            time: 500
+                        });
+                    } else {
+                        layer.msg('请求发送成功！', {
+                            icon: 1,
+                            time: 500
+                        }, function () {
+                            parent.layer.close(index);
                         });
                     }
-                });
+                },
+                "json"
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function () {
+                        location.reload(true);
+                    });
+                }
             });
         });
-    </script>
+    });
+</script>

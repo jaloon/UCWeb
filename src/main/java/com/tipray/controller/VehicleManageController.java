@@ -1204,7 +1204,7 @@ public class VehicleManageController {
      * @param controlType     {@link Integer} 远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5：远程状态变更）
      * @param carNumber       {@link String} 车牌号
      * @param stationId       {@link Integer} 站点ID
-     * @param status          {@link Integer} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急）
+     * @param status          {@link Integer} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入库）
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
      * @param longitude       {@link Integer} 手机定位经度
      * @param latitude        {@link Integer} 手机定位纬度
@@ -1293,7 +1293,7 @@ public class VehicleManageController {
                     logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CAR_STATUS_NULL);
                     return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_NULL);
                 }
-                if (status < 1 || status > 5) {
+                if (status < 1 || status > 6) {
                     result = "失败，车辆状态无效！";
                     logger.error("车辆远程控制失败：车辆状态【{}】无效！", status);
                     return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_INVALID);

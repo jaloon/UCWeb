@@ -35,6 +35,48 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     List<DropdownData> selectCars();
 
     /**
+     * 查找车辆对应运输公司
+     *
+     * @return
+     */
+    List<Map<String, Object>> findComsWithCar();
+
+    /**
+     * 查找绑定车台车辆对应运输公司
+     *
+     * @return
+     */
+    List<Map<String, Object>> findComsWithBindedCar();
+
+    /**
+     * 查找在线车辆对应运输公司
+     *
+     * @return
+     */
+    List<Map<String, Object>> findComsWithOnlineCar();
+
+    /**
+     * 查找车辆车牌号
+     *
+     * @return
+     */
+    List<Map<String, Object>> findCarNumbers();
+
+    /**
+     * 查找绑定车台车辆车牌号
+     *
+     * @return
+     */
+    List<Map<String, Object>> findBindedCarNumbers();
+
+    /**
+     * 查找在线车辆车牌号
+     *
+     * @return
+     */
+    List<Map<String, Object>> findOnlineCarNumbers();
+
+    /**
      * 根据车牌号获取车辆信息
      *
      * @param carNo {@link Vehicle} 车牌号
@@ -131,15 +173,13 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 根据车辆ID获取车载终端ID
      *
-     * @param id {@link Long}
-     *           车辆ID
+     * @param id {@link Long} 车辆ID
      * @return {@link Integer} 车载终端ID
      */
     Integer getTerminalIdById(Long id);
 
     /**
-     * @param id {@link Long}
-     *           车辆ID
+     * @param id {@link Long} 车辆ID
      * @return {@link String}  车牌号
      */
     String getCarNumberById(Long id);
@@ -236,4 +276,28 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      * @return {@link VehicleRealtimeStatus} 车辆实时状态
      */
     VehicleRealtimeStatus getVehicleRealtimeStatus(Long vehicleId);
+
+    /**
+     * 根据车载终端设备ID批量获取车牌号
+     *
+     * @param terminalIds {@link String} 车载终端设备ID，逗号分隔
+     * @return {@link String} 车牌号集合
+     */
+    List<String> findCarNumbersByTerminalIds(String terminalIds);
+
+    /**
+     * 根据车牌号获取车辆信息（车牌号、仓数、设备ID、配送卡）
+     *
+     * @param carNo {@link String} 车牌号
+     * @return {@link Map} {id, vehicle_number, vehicle_device_id, store_num, transport_card_id}
+     */
+    Map<String, Object> getByCarNoForApp(String carNo);
+
+    /**
+     * 获取所有在线车辆信息（车牌号、仓数、设备ID、配送卡）
+     *
+     * @return {@link Map} {id, vehicle_number, vehicle_device_id, store_num, transport_card_id}
+     */
+    List<Map<String, Object>> findOnlineCarsForApp();
+
 }

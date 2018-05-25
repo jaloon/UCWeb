@@ -11,6 +11,7 @@ import com.tipray.constant.PageActionMode;
 import com.tipray.core.ThreadVariable;
 import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
+import com.tipray.core.exception.PermissionException;
 import com.tipray.service.InfoManageLogService;
 import com.tipray.service.PermissionService;
 import com.tipray.service.RoleService;
@@ -55,6 +56,9 @@ public class RoleController extends BaseAction {
         modelMap.put("mode", mode);
         Role role = new Role();
         if (id != null && id > 0) {
+            if (PageActionMode.EDIT.equals(mode) && id < 21) {
+                throw new PermissionException("系统内置角色不允许修改！");
+            }
             role = roleService.getRoleById(id);
         }
         modelMap.put("role", role);
@@ -95,6 +99,12 @@ public class RoleController extends BaseAction {
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
         StringBuffer description = new StringBuffer("修改角色：").append(role.getName()).append('。');
         try {
+            if (role.getId() < 21) {
+                logger.warn("{}是系统内置角色，不允许修改！", role.getName());
+                type++;
+                description.append("失败，系统内置角色不允许修改！");
+                return Message.error("系统内置角色不允许修改！");
+            }
             roleService.updateRole(role);
             description.append("成功！");
             return Message.success();

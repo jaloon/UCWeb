@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="../../../resources/css/base.css ">
     <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
     <link rel="stylesheet" href="../../../resources/plugins/jRange/jquery.range.css">
+    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../../resources/plugins/layer/layer.js"></script>
     <script src="../../../resources/plugins/jRange/jquery.range-min.js"></script>
     <script src="../../../resources/plugins/verify.js"></script>
@@ -17,60 +19,63 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="info-zone">
-            <div class="base-info">
-                <div class="info-title">
-                    GPS配置
-                </div>
-                <table class="base-table">
-                    <tr>
-                        <td>配置范围</td>
-                        <td>
-                            <select class="editInfo" id="config_scope">
-                                    <option value=0>所有车辆</option>
-                                    <option value=1>单部车辆</option>
-                                </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>车牌号</td>
-                        <td>
-                            <input type="text" class="editInfo" id="carno" disabled>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>轨迹采集间隔（秒）</td>
-                        <td>
-                            <input type="hidden" id="scan_interval" value="5" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>轨迹上报间隔（秒）</td>
-                        <td>
-                            <input type="hidden" id="upload_interval" value="30" />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>轨迹生成距离间隔（米）</td>
-                        <td>
-                            <input type="hidden" id="generate_distance" value="10" />
-                        </td>
-                    </tr>
-                </table>
+<div class="container">
+    <div class="info-zone">
+        <div class="base-info">
+            <div class="info-title">
+                GPS配置
             </div>
-        </div>
-        <div class="oper-zone">
-            <input type="button" id="cancel" value="取消">
-            <input type="button" id="confirm" value="确认">
+            <table class="base-table">
+                <tr>
+                    <td>配置范围</td>
+                    <td>
+                        <select class="editInfo" id="config_scope">
+                            <option value=0>所有车辆</option>
+                            <option value=1>单部车辆</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>车牌号</td>
+                    <td>
+                        <input type="text" class="editInfo" id="allcar" disabled>
+                        <select class="editInfo" id="carno" style="display: none;">
+                            <option value="">车牌号</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>轨迹采集间隔（秒）</td>
+                    <td>
+                        <input type="hidden" id="scan_interval" value="5"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>轨迹上报间隔（秒）</td>
+                    <td>
+                        <input type="hidden" id="upload_interval" value="30"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>轨迹生成距离间隔（米）</td>
+                    <td>
+                        <input type="hidden" id="generate_distance" value="10"/>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
+    <div class="oper-zone">
+        <input type="button" id="cancel" value="取消">
+        <input type="button" id="confirm" value="确认">
+    </div>
+</div>
 </body>
 
 <script>
-    $(function() {
+    $(function () {
         var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
-        $("#cancel").click(function() {
+        $("#cancel").click(function () {
             parent.layer.close(index);
         });
         $('.base-info tr').height(42);
@@ -80,6 +85,39 @@
             width: 316
         });
         $('input.editInfo').width(302);
+
+        $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+            function (data, textStatus, jqXHR) {
+                var selectObj = $('#carno');
+                selectObj.append(data.com);
+                var cars = data.car;
+                var groupObj;
+                for (var i = 0, len = cars.length; i < len; i++) {
+                    var car = cars[i];
+                    groupObj = $("#com_" + car.comId);
+                    groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+                }
+                selectObj.comboSelect();
+                // selectObj.hide();
+                selectObj.closest(".combo-select").css({
+                    width: '316px',
+                    height: '28px',
+                    'z-index': 10000,
+                    "margin-bottom": "0px"
+                });
+                selectObj.siblings(".combo-dropdown").css("max-height", "180px");
+                selectObj.siblings(".combo-input").height(2);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
 
         $('#scan_interval').jRange({
             from: 0,
@@ -117,26 +155,26 @@
             showScale: true
         });
 
-        $("#config_scope").change(function() {
+        $("#config_scope").change(function () {
             var scope = $("#config_scope").val();
             if (scope > 0) {
-                $("#carno").attr("disabled", false);
+                $("#allcar").hide();
+                $("#carno").closest(".combo-select").show();
             } else {
-                $("#carno").attr("disabled", true);
+                $("#carno").closest(".combo-select").hide();
+                $("#allcar").show();
             }
         });
 
-        $("#confirm").click(function() {
+        $("#confirm").click(function () {
             var scope = $("#config_scope").val();
             var carno = "";
             if (scope > 0) {
                 carno = $("#carno").val();
-                if (!isCarNo(carno)) {
-                    layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
-                        icon: 2
-                    }, function(index2) {
+                if (carno == "") {
+                    layer.alert('未选择系统已有车辆！', { icon: 0 }, function(index2) {
                         layer.close(index2);
-                        $("#carno").select();
+                        $("#carno").focus();
                     });
                     return;
                 }
@@ -148,7 +186,7 @@
             $.post("../../../manage/remote/asyn_terminal_config_request",
                 encodeURI("scope=" + scope + "&carNumber=" + carno + "&scanInterval=" + scan_interval +
                     "&uploadInterval=" + upload_interval + "&generateDistance=" + generate_distance + "&token=" + generateUUID()),
-                function(data) {
+                function (data) {
                     layer.close(loadIndex);
                     if (data.id > 0) {
                         layer.msg(data.msg, {
@@ -159,7 +197,7 @@
                         layer.msg('请求发送成功！', {
                             icon: 1,
                             time: 500
-                        }, function() {
+                        }, function () {
                             parent.layer.close(index);
                         });
                     }
@@ -170,7 +208,7 @@
                     layer.confirm('登录失效，是否刷新页面重新登录？', {
                         icon: 0,
                         title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                    }, function () {
                         location.reload(true);
                     });
                 }

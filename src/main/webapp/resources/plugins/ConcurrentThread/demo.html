@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 多线程能运行 -->
+    <script src="Concurrent.Thread.min.js"></script>
+    <script type="text/javascript">
+        function f(i) {
+            while (1) {
+                document.body.innerHTML += i++ + "<br>";
+            }
+        }
+        Concurrent.Thread.create(f, 0);
+        Concurrent.Thread.create(f, 100000);
+    </script>
+</head>
+<body>
+
+</body>
+</html>
+
+<!-- 单线程浏览器卡死 -->
+<!--
+<script type="text/javascript">
+    function f(i) {
+        while (1) {
+            document.body.innerHTML += i++ + "<br>";
+        }
+    }
+    f(0);
+    f(100000);
+</script>-->

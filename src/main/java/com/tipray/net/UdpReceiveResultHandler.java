@@ -10,6 +10,7 @@ import com.tipray.service.AlarmRecordService;
 import com.tipray.service.ChangeRecordService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
+import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.OperateLogUtil;
 import com.tipray.util.ResponseMsgUtil;
 import com.tipray.util.SpringBeanUtil;
@@ -46,7 +47,7 @@ public class UdpReceiveResultHandler {
     public static void handleReplyForRemoteControl(short bizId, int cacheId, ResponseMsg msg) {
         synchronized (AsynUdpCommCache.class) {
             Map<String, Object> params = AsynUdpCommCache.getParamCache(cacheId);
-            String result = buildLogResultByResponseMsg(msg);
+            String result = buildLogResultByResponseMsg(bizId, msg);
             boolean isOk = msg.getId() == 0;
             MONITOR_WEB_SOCKET_HANDLER.dealUdpReply(bizId, cacheId, AsynUdpCommCache.getTaskCache(cacheId), isOk, result);
             try {
@@ -140,10 +141,11 @@ public class UdpReceiveResultHandler {
     /**
      * 根据UDP应答结果构建日志显示结果
      *
-     * @param msg {@link ResponseMsg} UDP应答结果
+     * @param bizId {@link Short} 应答业务ID
+     * @param msg   {@link ResponseMsg} UDP应答结果
      * @return {@link String} 日志显示结果
      */
-    private static String buildLogResultByResponseMsg(ResponseMsg msg) {
+    private static String buildLogResultByResponseMsg(short bizId, ResponseMsg msg) {
         byte errorTag = msg.getTag();
         switch (errorTag) {
             case ErrorTagConst.NO_ERROR_TAG:
@@ -151,6 +153,26 @@ public class UdpReceiveResultHandler {
             case ErrorTagConst.UDP_PARSE_ERROR_TAG:
                 return "失败，UDP应答数据解析错误！";
             case ErrorTagConst.UDP_REPLY_ERROR_TAG:
+                if (bizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
+                    String errorMsg = (String) msg.getMsg();
+                    int beginIndex = errorMsg.indexOf("[") + 1;
+                    int endIndex = errorMsg.indexOf("]");
+                    if (beginIndex > 1 && endIndex > beginIndex) {
+                        String terminalIds = errorMsg.substring(beginIndex, endIndex);
+                        List<String> carNumbers = VEHICLE_SERVICE.findCarNumbersByTerminalIds(terminalIds);
+                        if (EmptyObjectUtil.isEmptyList(carNumbers)) {
+                            return "失败，数据库车辆数据异常！";
+                        }
+                        StringBuffer strBuf = new StringBuffer();
+                        for (String carNumber : carNumbers) {
+                            strBuf.append('，').append(carNumber);
+                        }
+                        strBuf.deleteCharAt(0);
+                        strBuf.append("车载终端软件升级通知失败！");
+                        return strBuf.toString();
+                    }
+                    return "失败，UDP应答数据解析错误！";
+                }
                 int errorId = msg.getCode();
                 int commonError = errorId >>> 16;
                 int workError = errorId & 0xFFFF;

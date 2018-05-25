@@ -1,19 +1,15 @@
 package com.tipray.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServlet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tipray.core.GridProperties;
-import com.tipray.init.impl.DatabaseSqlInit;
-import com.tipray.init.impl.PermissionXmlInit;
 import com.tipray.init.impl.PropertyDictInit;
 import com.tipray.init.impl.SqliteInit;
 import com.tipray.util.SpringBeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServlet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 初始化 - 运行器 初始化系统属性，如： 1、数据库的初始化或更新 2、权限树的初始化 2、数据字典的初始化
@@ -63,7 +59,7 @@ public class InitializationsRunner extends HttpServlet {
 	 */
 	private void addDefaultInitializations() {
 //		addInitialization(new DatabaseSqlInit());
-//		addInitialization(new PermissionXmlInit());
+// 		addInitialization(new PermissionXmlInit());
 		addInitialization(new PropertyDictInit());
 		addInitialization(new SqliteInit());
 	}

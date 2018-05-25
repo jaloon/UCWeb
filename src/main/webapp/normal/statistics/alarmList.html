@@ -9,7 +9,9 @@
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
+    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../resources/plugins/laydate/laydate.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/js/base.js"></script>
@@ -83,7 +85,10 @@
         </div>
         <div class="search-zone">
             <label for="text_car" class="search-type" id="type_car">车牌号</label>
-            <input type="text" class="search-text" id="text_car">
+            <input class="search-text" id="hidden_car" style="width: 142px; display: none; opacity: 0;" disabled>
+            <select class="search-text" id="text_car">
+                <option value="">车牌号</option>
+            </select>
             <label for="text_dev" class="search-type" id="type_dev">报警设备</label>
             <select class="search-text" id="text_dev">
                 <option value="">所有设备</option> 

@@ -2,8 +2,8 @@
 <!--
 	description：代表详细描述;
 	permissionType：代表是功能或是菜单权限{1:代表菜单;0：代表功能};
-	ename：代表对应权限的英文名;
-	cname：代表所对应的权限名称;
+	ename：代表对应权限的英文名（数据库限制20个字符）;
+	cname：代表所对应的权限名称（数据库限制20个字符）;
 	enable：是否启用{1:启用;0:不启用}
 	gridUrl：代表菜单对应显示界面的连接
 	isParent：是否是父节点{1:是;0:否}
@@ -114,16 +114,16 @@
 			<permission cname="车辆进出记录查询" ename="inAndOutRecordModule" permissionType="1" gridUrl="normal/statistics/inandoutList.jsp">
 				<permission cname="查看车辆进出记录" ename="viewInAndOutRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="配送信息查询" ename="transportRecordModule" permissionType="1" gridUrl="normal/statistics/transportList.jsp">
-				<permission cname="查看配送信息" ename="viewTransportRecord" permissionType="0" description="" />
+			<permission cname="配送信息查询" ename="transRecordModule" permissionType="1" gridUrl="normal/statistics/transportList.jsp">
+				<permission cname="查看配送信息" ename="viewTransRecord" permissionType="0" description="" />
 			</permission>
 			<permission cname="远程换站记录查询" ename="changeRecordModule" permissionType="1" gridUrl="normal/statistics/changeList.jsp">
 				<permission cname="查看远程换站记录" ename="viewChangeRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="卡及设备使用记录查询" ename="cardAnddevUseRecordModule" permissionType="1" gridUrl="normal/statistics/deviceuseList.jsp">
-				<permission cname="查看设备使用记录" ename="viewCardAnddevUseRecord" permissionType="0" description="" />
+			<permission cname="卡及设备使用记录查询" ename="cardUseRecordModule" permissionType="1" gridUrl="normal/statistics/deviceuseList.jsp">
+				<permission cname="查看卡及设备使用记录" ename="viewCardUseRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="施解封状态查询" ename="sealStatus" permissionType="0" description="">
+			<permission cname="施解封状态查询" ename="sealStatusModule" permissionType="0" description="">
 				<permission cname="查看施解封状态" ename="viewSealStatus" permissionType="0" description="" />
 			</permission>
 		</permission>

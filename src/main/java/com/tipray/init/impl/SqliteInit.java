@@ -1,16 +1,14 @@
 package com.tipray.init.impl;
 
-import java.io.File;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tipray.constant.CenterConfigConst;
 import com.tipray.constant.SqliteFileConst;
 import com.tipray.init.AbstractInitialization;
-import com.tipray.util.FileUtil;
 import com.tipray.util.JDBCUtil;
 import com.tipray.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /**
  * Sqlite数据库初始化
@@ -43,14 +41,17 @@ public class SqliteInit extends AbstractInitialization {
 	 *            sqlite数据库名称
 	 */
 	private void initSqliteDb(String sqliteDbName) {
+		if (StringUtil.isNotEmpty(CenterConfigConst.SQLITE_FILE_PATH)) {
+			String pathname = new StringBuffer(CenterConfigConst.SQLITE_FILE_PATH).append('/')
+					.append(sqliteDbName).append(".db").toString();
+			File file = new File(pathname);
+			if (file.exists()) {
+			    logger.info("sqlite数据库{}已存在！", sqliteDbName);
+			    return;
+            }
+		}
 		JDBCUtil jdbcUtil = new JDBCUtil();
 		try {
-			if (StringUtil.isNotEmpty(CenterConfigConst.SQLITE_FILE_PATH)) {
-				String pathname = new StringBuffer(CenterConfigConst.SQLITE_FILE_PATH).append('/')
-						.append(sqliteDbName).append(".db").toString();
-				File file = new File(pathname);
-				FileUtil.deleteFile(file);
-			}
 			jdbcUtil.createSqliteConnection(sqliteDbName);
 			String sql = null;
 			switch (sqliteDbName) {

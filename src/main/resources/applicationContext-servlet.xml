@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans.xsd 
 		http://www.springframework.org/schema/context 
 		http://www.springframework.org/schema/context/spring-context.xsd 
@@ -14,57 +14,57 @@
 		http://www.springframework.org/schema/mvc 
 		http://www.springframework.org/schema/mvc/spring-mvc.xsd 
 	">
-	
-	<!-- 默认的注解映射的支持 -->
-	<mvc:annotation-driven>
-		<!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->
-		<mvc:message-converters>
-			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
-				<!-- 用于避免响应头过大 --> 
-				<property name="writeAcceptCharset" value="false" />
-				<!-- 解决@ResponseBody注解直接返回字符串出现中文乱码 -->
-				<constructor-arg value="UTF-8" /> 
-			</bean>
-			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-				<property name="objectMapper">
-					<bean class="com.fasterxml.jackson.databind.ObjectMapper">
-						<property name="dateFormat">
-			                <bean class="java.text.SimpleDateFormat">
-			                    <constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss"/>
-			                </bean>
-			            </property>
-			            <property name="serializationInclusion">
-			                <!-- 注入枚举类型,过滤对象，这样JSON中不会输出null -->
-			                <value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>
-			            </property>
-					</bean>
-				</property>
-			</bean>
-			<bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
-		</mvc:message-converters>
-	</mvc:annotation-driven>
-	<!-- 对静态资源文件的访问 -->
-	<mvc:default-servlet-handler />
 
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+    <!-- 默认的注解映射的支持 -->
+    <mvc:annotation-driven>
+        <!-- 启动Spring MVC的注解功能，完成请求和注解POJO的映射 -->
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <!-- 用于避免响应头过大 -->
+                <property name="writeAcceptCharset" value="false"/>
+                <!-- 解决@ResponseBody注解直接返回字符串出现中文乱码 -->
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper">
+                    <bean class="com.fasterxml.jackson.databind.ObjectMapper">
+                        <property name="dateFormat">
+                            <bean class="java.text.SimpleDateFormat">
+                                <constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss"/>
+                            </bean>
+                        </property>
+                        <property name="serializationInclusion">
+                            <!-- 注入枚举类型,过滤对象，这样JSON中不会输出null -->
+                            <value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!-- 对静态资源文件的访问 -->
+    <mvc:default-servlet-handler/>
 
-	<!-- 把标记了@Controller注解的类转换为bean -->
-	<context:component-scan base-package="com.tipray" use-default-filters="false">
-		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
-	</context:component-scan>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
-	<!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->
-	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-		p:prefix="/" p:suffix="" />
-		
-	<!-- 文件上传解析器 -->
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-		<!-- 文件总大小1024*1024*20 -->
-		<property name="maxUploadSize" value="20971520" />
-		<!-- 单个文件大小1024*1024*5 -->
-		<property name="maxUploadSizePerFile" value="5240880" />
-		<!-- 编码方式 -->
-		<property name="defaultEncoding" value="utf-8"/>
-	</bean>
+    <!-- 把标记了@Controller注解的类转换为bean -->
+    <context:component-scan base-package="com.tipray" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+          p:prefix="/" p:suffix=""/>
+
+    <!-- 文件上传解析器 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 文件总大小1024*1024*20 -->
+        <property name="maxUploadSize" value="20971520"/>
+        <!-- 单个文件大小1024*1024*5 -->
+        <property name="maxUploadSizePerFile" value="5240880"/>
+        <!-- 编码方式 -->
+        <property name="defaultEncoding" value="utf-8"/>
+    </bean>
 
 </beans>

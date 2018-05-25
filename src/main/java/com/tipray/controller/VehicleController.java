@@ -326,6 +326,9 @@ public class VehicleController extends BaseAction {
     @ResponseBody
     public Map<String, Object> getCarAndLockByCarNo(String carNumber) {
         logger.info("getCarAndLockByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+        if (StringUtil.isEmpty(carNumber)) {
+            return null;
+        }
         return vehicleService.getCarAndLockByCarNo(carNumber);
     }
 
@@ -334,11 +337,32 @@ public class VehicleController extends BaseAction {
      *
      * @return
      */
-    @RequestMapping(value = "selectCars.do")
+    @RequestMapping(value = "selectDropdownData.do")
     @ResponseBody
-    public List<DropdownData> selectCars() {
+    public List<DropdownData> selectDropdownData() {
         List<DropdownData> list = vehicleService.selectCars();
         return list;
+    }
+
+    /**
+     * 网页车辆选择控件数据获取接口
+     *
+     * @param scope 选取范围（0 全部车辆，1 绑定车台的，2 在线）
+     */
+    @RequestMapping(value = "selectCars.do")
+    @ResponseBody
+    public Map<String, Object> selectCars(Integer scope) {
+        if (scope == null || scope == 0) {
+            // 选取全部车辆
+            return vehicleService.selectCars(0);
+        } else if (scope == 1) {
+            // 只选取绑定了车台的车辆
+            return vehicleService.selectCars(1);
+        } else if (scope == 2){
+            // 只选取在线车辆
+            return vehicleService.selectCars(2);
+        }
+        return null;
     }
 
     /**

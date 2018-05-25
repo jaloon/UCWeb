@@ -141,9 +141,15 @@ $(function() {
         $.post(url, encodeURI(param),
             function(data) {
                 if ("error" == data.msg) {
-                    layer.msg(error_zh_text, { icon: 2, time: 500 });
+                    if ("系统内置角色不允许修改！" == data.e) {
+                        layer.msg(data.e, { icon: 1, time: 1000 }, function() {
+                            parent.layer.close(index);
+                        });
+                    } else {
+                        layer.msg(error_zh_text, { icon: 2, time: 1000 });
+                    }
                 } else {
-                    layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
+                    layer.msg(success_zh_text, { icon: 1, time: 1000 }, function() {
                         parent.layer.close(index);
                     });
                 }

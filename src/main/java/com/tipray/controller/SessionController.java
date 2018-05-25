@@ -58,7 +58,11 @@ public class SessionController extends BaseAction {
             HttpSession httpSession = request.getSession();
             String sessionId = httpSession.getId();
             if (isLogin(sessionId, user)) {
-                return ResponseMsgUtil.success("已登录！");
+                if (isApp == null || isApp == 0) {
+                    return ResponseMsgUtil.success("已登录！");
+                }
+                Role appRole = sessionService.userCheck(user, isApp).getAppRole();
+                return ResponseMsgUtil.success(getAppPermissions(appRole));
             }
             Session session = new Session();
             session.setIsApp(isApp);
@@ -77,14 +81,7 @@ public class SessionController extends BaseAction {
                 msg = ResponseMsgUtil.success();
             } else {
                 Role appRole = session.getUser().getAppRole();
-                String roleName = appRole.getName();
-                String permissionIds = appRole.getPermissionIds();
-                List<Map<String, Object>> permissions = permissionService.findByIdsForLogin(permissionIds);
-                Map<String, Object> map = new HashMap<>();
-                map.put("serverTime", new Date());
-                map.put("role", roleName);
-                map.put("permissions", permissions);
-                msg = ResponseMsgUtil.success(map);
+                msg = ResponseMsgUtil.success(getAppPermissions(appRole));
             }
             logger.info("操作员{}登录成功！", user.getAccount());
             return msg;
@@ -93,7 +90,7 @@ public class SessionController extends BaseAction {
             return ResponseMsgUtil.excetion(e);
         } catch (PermissionException e) {
             logger.error("操作员{}登录异常：账户未配置APP角色！", user.getAccount());
-            return ResponseMsgUtil.error(PermissionErrorEnum.PERMISSION_DENIED);
+            return ResponseMsgUtil.error(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
         }
     }
 
@@ -118,9 +115,9 @@ public class SessionController extends BaseAction {
     /**
      * 是否已登录
      *
-     * @param sessionId
-     * @param user
-     * @return
+     * @param sessionId {@link String}
+     * @param user {@link User}
+     * @return 是否已登录
      */
     private boolean isLogin(String sessionId, User user) {
         Session session = sessionService.getSessionByUUID(sessionId);
@@ -143,4 +140,19 @@ public class SessionController extends BaseAction {
         return false;
     }
 
+    /**
+     * 获取APP角色权限
+     * @param appRole {@link Role} APP角色
+     * @return {@link Map} APP角色权限信息
+     */
+    private Map<String, Object> getAppPermissions(Role appRole) {
+        String roleName = appRole.getName();
+        String permissionIds = appRole.getPermissionIds();
+        List<Map<String, Object>> permissions = permissionService.findByIdsForLogin(permissionIds);
+        Map<String, Object> map = new HashMap<>();
+        map.put("serverTime", new Date());
+        map.put("role", roleName);
+        map.put("permissions", permissions);
+        return map;
+    }
 }

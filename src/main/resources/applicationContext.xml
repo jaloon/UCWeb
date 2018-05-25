@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:tx="http://www.springframework.org/schema/tx"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/tx 
 	http://www.springframework.org/schema/tx/spring-tx.xsd
@@ -13,95 +13,95 @@
     http://www.springframework.org/schema/context 
     http://www.springframework.org/schema/context/spring-context.xsd
     ">
-	<context:component-scan base-package="com.tipray">
-		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
-	</context:component-scan>
+    <context:component-scan base-package="com.tipray">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
 
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 
-	<bean id="springBeanUtil" class="com.tipray.util.SpringBeanUtil" scope="singleton" lazy-init="false" />
-	<bean id="ftpServer" class="com.tipray.ftp.FtpServer" scope="singleton" lazy-init="false" />
-	<bean id="udpServer" class="com.tipray.net.NioUdpServer" scope="singleton" lazy-init="false" />
+    <bean id="springBeanUtil" class="com.tipray.util.SpringBeanUtil" scope="singleton" lazy-init="false"/>
+    <bean id="ftpServer" class="com.tipray.ftp.FtpServer" scope="singleton" lazy-init="false"/>
+    <bean id="udpServer" class="com.tipray.net.NioUdpServer" scope="singleton" lazy-init="false"/>
 
-	<!-- <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> 
-		<property name="location" value="classpath:jdbc.properties" /> </bean> -->
-	<context:property-placeholder location="classpath:jdbc.properties" />
+    <!-- <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:jdbc.properties" /> </bean> -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
 
-	<!-- 阿里 druid 数据库连接池 -->
-	<bean id="tr_dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
-		<!-- 数据库基本信息配置 -->
-		<property name="driverClassName" value="${jdbc.driverClassName}" />
-		<property name="url" value="${jdbc.url}" />
-		<property name="username" value="${jdbc.username}" />
-		<property name="password" value="${jdbc.password}" />
-		<!-- 初始化连接数量 -->
-		<property name="initialSize" value="1" />
-		<!-- 最大连接池数量 -->
-		<property name="maxActive" value="300" />
-		<!-- 最小连接池数量 -->
-		<property name="minIdle" value="5" />
+    <!-- 阿里 druid 数据库连接池 -->
+    <bean id="tr_dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <!-- 数据库基本信息配置 -->
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <!-- 初始化连接数量 -->
+        <property name="initialSize" value="1"/>
+        <!-- 最大连接池数量 -->
+        <property name="maxActive" value="300"/>
+        <!-- 最小连接池数量 -->
+        <property name="minIdle" value="5"/>
 
-		<!-- 配置获取连接等待超时的时间 -->
-		<property name="maxWait" value="60000" />
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
 
-		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
 
-		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
 
-		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
-		<property name="minEvictableIdleTimeMillis" value="300000" />
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
 
-		<property name="validationQuery" value="SELECT 'x'" />
-		<property name="testWhileIdle" value="true" />
-		<property name="testOnBorrow" value="false" />
-		<property name="testOnReturn" value="false" />
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
 
-		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
-		<property name="poolPreparedStatements" value="true" />
-		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20"/>
 
-		<!-- 连接泄漏处理。Druid提供了RemoveAbandanded相关配置，用来关闭长时间不使用的连接（例如忘记关闭连接）。 -->
-		<property name="removeAbandoned" value="true" />
-		<!-- 1800秒，也就是30分钟 -->
-		<property name="removeAbandonedTimeout" value="1800" />
-		<!-- 关闭abanded连接时输出错误日志 -->
-		<property name="logAbandoned" value="true" />
+        <!-- 连接泄漏处理。Druid提供了RemoveAbandanded相关配置，用来关闭长时间不使用的连接（例如忘记关闭连接）。 -->
+        <property name="removeAbandoned" value="true"/>
+        <!-- 1800秒，也就是30分钟 -->
+        <property name="removeAbandonedTimeout" value="1800"/>
+        <!-- 关闭abanded连接时输出错误日志 -->
+        <property name="logAbandoned" value="true"/>
 
-		<!-- 配置监控统计拦截的filters, 监控统计："stat",防SQL注入："wall",组合使用： "stat,wall" -->
-		<property name="filters" value="stat" />
-	</bean>
+        <!-- 配置监控统计拦截的filters, 监控统计："stat",防SQL注入："wall",组合使用： "stat,wall" -->
+        <property name="filters" value="stat"/>
+    </bean>
 
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="tr_dataSource" />
-		<property name="typeAliasesPackage" value="com.tipray.bean" />
-		<!-- 注意点：在classpath后面的*必不可少，缺少型号的话后面的通配符不起作用。**表示可以表示任意多级目录，*表示多个任意字符 -->
-		<property name="mapperLocations" value="classpath*:/sqlmaps/**/*Mapper.xml" />
-		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
-	</bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="tr_dataSource"/>
+        <property name="typeAliasesPackage" value="com.tipray.bean"/>
+        <!-- 注意点：在classpath后面的*必不可少，缺少型号的话后面的通配符不起作用。**表示可以表示任意多级目录，*表示多个任意字符 -->
+        <property name="mapperLocations" value="classpath*:/sqlmaps/**/*Mapper.xml"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+    </bean>
 
-	<!-- scan -->
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<!-- <property name="basePackage" value="com.tipray" />
-		<property name="annotationClass" value="com.tipray.core.annotation.MyBatisAnno"/>
-		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property> -->
-		<!-- 不要使用sqlSessionFactory属性注入，使用sqlSessionFactoryBeanName注入，这样就不会立即初始化sqlSessionFactory，不会引发提前初始化问题（jdbc.properties中的信息读取不到）。 -->
-		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
-		<!-- dao层所在的包 -->
-		<property name="basePackage" value="com.tipray.dao"></property>
+    <!-- scan -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- <property name="basePackage" value="com.tipray" />
+        <property name="annotationClass" value="com.tipray.core.annotation.MyBatisAnno"/>
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"></property> -->
+        <!-- 不要使用sqlSessionFactory属性注入，使用sqlSessionFactoryBeanName注入，这样就不会立即初始化sqlSessionFactory，不会引发提前初始化问题（jdbc.properties中的信息读取不到）。 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        <!-- dao层所在的包 -->
+        <property name="basePackage" value="com.tipray.dao"></property>
 
-	</bean>
+    </bean>
 
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="tr_dataSource" />
-	</bean>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="tr_dataSource"/>
+    </bean>
 
-	<!-- 使用annotation定义事务 -->
-	<!-- proxy-target-class属性值决定是基于接口的还是基于类的代理被创建。 -->
-	<!-- 如果proxy-target-class 属性值被设置为true，那么基于类的代理将起作用（这时需要cglib库）。 -->
-	<!-- 如果proxy-target-class属值被设置为false或者这个属性被省略，那么标准的JDK 基于接口的代理将起作用。 -->
-	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+    <!-- 使用annotation定义事务 -->
+    <!-- proxy-target-class属性值决定是基于接口的还是基于类的代理被创建。 -->
+    <!-- 如果proxy-target-class 属性值被设置为true，那么基于类的代理将起作用（这时需要cglib库）。 -->
+    <!-- 如果proxy-target-class属值被设置为false或者这个属性被省略，那么标准的JDK 基于接口的代理将起作用。 -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
 
-	<!-- <import resource="applicationContext-ehcache.xml" /> -->
-	<import resource="applicationContext-webservice.xml" />
-	<import resource="applicationContext-job.xml" />
+    <!-- <import resource="applicationContext-ehcache.xml" /> -->
+    <import resource="applicationContext-webservice.xml"/>
+    <import resource="applicationContext-job.xml"/>
 </beans>

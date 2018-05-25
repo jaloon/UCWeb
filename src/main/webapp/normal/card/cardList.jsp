@@ -18,6 +18,20 @@
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/card/cardList.js"></script>
     <style type="text/css">
+        #reader {
+            width: 100px;
+            height: 36px;
+            font-size: 16px;
+            background: #478de4;
+            border: 0;
+            border-radius: 3px;
+            color: white;
+            position: relative;
+            float: right;
+            top: 10px;
+            margin-right: 30px;
+        }
+
         .card-id {
             width: 100px;
         }
@@ -165,7 +179,20 @@
             </select>
             <input type="button" class="search-btn" id="search_btn" value="查询">
             <pop:Permission ename="editCard">
-            <input type="button" id="reader" value="读卡器批量添加" onclick="findCardByReader()">
+            <input type="button" id="reader" value="批量添加" onclick="findCardByReader()">
+            <script>
+                $("#reader").click(function () {
+                    layer.open({
+                        type: 2,
+                        title: ['卡管理（读卡器批量添加卡）', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                        shadeClose: true,
+                        shade: 0.8,
+                        resize: false,
+                        area: ['523px', '430px'],
+                        content: 'cardReader.html'
+                    });
+                });
+            </script>
             <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>

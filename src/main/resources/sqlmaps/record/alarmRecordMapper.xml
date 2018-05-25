@@ -166,9 +166,9 @@
 			a.station_id,
 			fn_get_station ( a.station_type, a.station_id ) station_name,
 			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%I:%S' ) alarm_time,
-			t.is_lnglat_valid,
-			t.longitude,
-			t.latitude 
+			IFNULL(t.is_lnglat_valid, 0) is_lnglat_valid,
+			IFNULL(t.longitude, 0) longitude,
+			IFNULL(t.latitude, 0) latitude
 		FROM
 			tbl_alarm a
 			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,

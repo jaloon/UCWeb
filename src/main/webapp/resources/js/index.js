@@ -1,4 +1,122 @@
 var ws = null;
+var tipIcoObj;
+var tipIcoUrl;
+var css3filter;
+var alarmCount = 0; // 报警数
+var alarmIds = []; // 报警ID缓存
+var record; // 报警记录
+var alarmNotify; // 报警通知对象（浏览器通知）
+
+function receiveEliminat(receiveObj) {
+    var alarmId = receiveObj.id;
+    if (alarmIds.isContain(alarmId)) {
+        alarmIds.removeByValue(alarmId);
+        $("#alarm_id_" + alarmId).remove();
+        alarmCount--;
+        if (alarmCount <= 0) {
+            grayscale(tipIcoObj);
+            if (window.Notification && Notification.permission === "granted") {
+                alarmNotify.faviconClear();
+            }
+        } else {
+            if (window.Notification && Notification.permission === "granted") {
+                alarmNotify.setTitle(true).setFavicon(alarmCount);
+            }
+        }
+    }
+}
+
+function receiveAlarm(receive, receiveObj) {
+    removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
+    record = encodeURIComponent(receive);
+    addAlarm(receiveObj, record);
+    if (window.Notification && Notification.permission === "granted") {
+        alarmNotify.setTitle(true).setFavicon(alarmCount).notify({
+            title: "报警通知",
+            body: parseAlarm(receiveObj)
+        }).player();
+    } else {
+        iziToast.info({
+            title: '报警通知',
+            message: parseAlarm(receiveObj),
+            timeout: 5000,
+            position: 'bottomRight',
+            buttons: [
+                ['<button>查看报警信息</button>', function(instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOutUp' }, toast);
+                    showAlarm(record);
+                }]
+            ]
+        });
+    }
+}
+
+function cacheAlarm(receiveObj) {
+    var list = receiveObj.cacheAlarm;
+    var len = list.length;
+    if (len < 1) {
+        return;
+    }
+    removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
+    for (var i = 0; i < len; i++) {
+        var alarm = list[i];
+        addAlarm(alarm);
+    }
+    if (window.Notification && Notification.permission === "granted") {
+        alarmNotify.setTitle(true).setFavicon(alarmCount);
+    }
+    iziToast.info({
+        title: '报警通知',
+        message: '您有' + alarmCount + '条报警信息待处理！' ,
+        timeout: 5000,
+        position: 'bottomRight',
+        buttons: [
+            ['<button>查看报警信息列表</button>', function(instance, toast) {
+                instance.hide({ transitionOut: 'fadeOutUp' }, toast);
+                showAlarmBox()
+            }]
+        ]
+    });
+}
+
+function addAlarm(alarm, record) {
+    var alarmId = alarm.id;
+    if (alarmCount == 0 || !alarmIds.isContain(alarmId)) {
+        alarmIds.push(alarmId);
+        alarmCount++;
+        if (record === undefined || record === null || record === "") {
+            record = encodeURIComponent(JSON.stringify(alarm));
+        }
+        var trHtml = "<tr id='alarm_id_" + alarmId + "' onclick=\"showAlarm('" + record + "')\">" +
+            "<td class='alarm-id'>" + alarmId + "</td>" +
+            "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
+            "<td class='alarm-type'>" + alarm.typeName + "</td>" +
+            "<td class='alarm-eli' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警' title='消除报警'/></td>" +
+            "</tr>"
+        $("#alarm_tips tbody").append(trHtml);
+    }
+}
+
+function parseAlarm(receiveObj) {
+    var alarm = receiveObj.carNumber + "：";
+    var dev = receiveObj.deviceType === 1 ? "车载终端" : "锁";
+    var devId = "（" + receiveObj.deviceId + "）";
+    alarm += dev + devId + "，" + receiveObj.typeName;
+    return alarm;
+}
+
+function showAlarmBox() {
+    layer.open({
+        type: 1,
+        title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        shadeClose: true,
+        shade: 0.8,
+        area: '582px',
+        // area: ['540px', '435px'],
+        resize: false,
+        content: $('.alarm-box')
+    });
+}
 
 function eliminateAlarm(vehicleId, alarmIds) {
     $.post("../../manage/remote/asyn_alarm_eliminate_request",
@@ -51,16 +169,11 @@ $(function() {
 
     tableCont.addEventListener('scroll', scrollHandle);
 
-    var tipIcoObj = $(".alarm-tip");
-    var tipIcoUrl = tipIcoObj.attr("src");
-    var css3filter = grayscale(tipIcoObj);
+    tipIcoObj = $(".alarm-tip");
+    tipIcoUrl = tipIcoObj.attr("src");
+    css3filter = grayscale(tipIcoObj);
     var ctx = $("#ctx").val();
     var wsUrl = window.location.host + ctx;
-    var alarmCount = 0; // 报警数
-    var alarmIds = []; // 报警ID缓存
-    var currentAlarmId; // 当前报警ID
-    var record; // 报警记录
-    var alarmNotify; // 报警通知对象（浏览器通知）
     if (window.Notification) {
         alarmNotify = new iNotify({
             message: '有报警信息待处理', // 标题
@@ -118,13 +231,16 @@ $(function() {
         var biz = receiveObj.biz;
         switch (biz) {
             case 100: //消除报警
-                receiveEliminat(receiveObj);
+                Concurrent.Thread.create(receiveEliminat, receiveObj);
+                // receiveEliminat(receiveObj);
                 break;
             case 110: //报警
-                receiveAlarm(receive, receiveObj);
+                Concurrent.Thread.create(receiveAlarm, receive, receiveObj);
+                // receiveAlarm(receive, receiveObj);
                 break;
             case 111: //缓存报警
-                cacheAlarm(receiveObj);
+                Concurrent.Thread.create(cacheAlarm, receiveObj);
+                // cacheAlarm(receiveObj);
                 break;
             default:
                 break;
@@ -136,117 +252,6 @@ $(function() {
     ws.onclose = function(event) {
         if (window.console) console.log("websocket closed： " + event);
     };
-
-    function receiveEliminat(receiveObj) {
-        var alarmId = receiveObj.id;
-        if (alarmIds.isContain(alarmId)) {
-            alarmIds.removeByValue(alarmId);
-            $("#alarm_id_" + alarmId).remove();
-            alarmCount--;
-            if (alarmCount <= 0) {
-                grayscale(tipIcoObj);
-                if (window.Notification && Notification.permission === "granted") {
-                    alarmNotify.faviconClear();
-                }
-            } else {
-                if (window.Notification && Notification.permission === "granted") {
-                    alarmNotify.setTitle(true).setFavicon(alarmCount);
-                }
-            }
-        }
-    }
-
-    function receiveAlarm(receive, receiveObj) {
-        removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
-        record = encodeURIComponent(receive);
-        addAlarm(receiveObj, record);
-        if (window.Notification && Notification.permission === "granted") {
-            alarmNotify.setTitle(true).setFavicon(alarmCount).notify({
-                title: "报警通知",
-                body: parseAlarm(receiveObj)
-            }).player();
-        } else {
-            iziToast.info({
-                title: '报警通知',
-                message: parseAlarm(receiveObj),
-                timeout: 5000,
-                position: 'bottomRight',
-                buttons: [
-                    ['<button>查看报警信息</button>', function(instance, toast) {
-                        instance.hide({ transitionOut: 'fadeOutUp' }, toast);
-                        showAlarm(record);
-                    }]
-                ]
-            });
-        }
-    }
-
-    function cacheAlarm(receiveObj) {
-        var list = receiveObj.cacheAlarm;
-        var len = list.length;
-        if (len < 1) {
-            return;
-        }
-        removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
-        for (var i = 0; i < len; i++) {
-            var alarm = list[i];
-            addAlarm(alarm);
-        }
-        if (window.Notification && Notification.permission === "granted") {
-            alarmNotify.setTitle(true).setFavicon(alarmCount);
-        }
-        iziToast.info({
-            title: '报警通知',
-            message: '您有' + alarmCount + '条报警信息待处理！' ,
-            timeout: 5000,
-            position: 'bottomRight',
-            buttons: [
-                ['<button>查看报警信息列表</button>', function(instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOutUp' }, toast);
-                    showAlarmBox()
-                }]
-            ]
-        });
-    }
-
-    function addAlarm(alarm, record) {
-        var alarmId = alarm.id;
-        if (alarmCount == 0 || !alarmIds.isContain(alarmId)) {
-            alarmIds.push(alarmId);
-            alarmCount++;
-            if (record === undefined || record === null || record === "") {
-                record = encodeURIComponent(JSON.stringify(alarm));
-            }
-            var trHtml = "<tr id='alarm_id_" + alarmId + "' onclick=\"showAlarm('" + record + "')\">" +
-                "<td class='alarm-id'>" + alarmId + "</td>" +
-                "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
-                "<td class='alarm-type'>" + alarm.typeName + "</td>" +
-                "<td class='alarm-eli' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警' title='消除报警'/></td>" +
-                "</tr>"
-            $("#alarm_tips tbody").append(trHtml);
-        }
-    }
-
-    function parseAlarm(receiveObj) {
-        var alarm = receiveObj.carNumber + "：";
-        var dev = receiveObj.deviceType === 1 ? "车载终端" : "锁";
-        var devId = "（" + receiveObj.deviceId + "）";
-        alarm += dev + devId + "，" + receiveObj.typeName;
-        return alarm;
-    }
-
-    function showAlarmBox() {
-        layer.open({
-            type: 1,
-            title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
-            shade: 0.8,
-            area: '582px',
-            // area: ['540px', '435px'],
-            resize: false,
-            content: $('.alarm-box')
-        });
-    }
 
     $(".alarm-tip").click(function() {
         if (alarmCount <= 0) {
@@ -368,7 +373,8 @@ $(function() {
             "font-weight": 900,
             color: "#478de4"
         });
-        forwardUrl = $(this).find('a').attr("name") + "?token=" + generateUUID();
+        var navPage = $(this).find('a').attr("name");
+        var forwardUrl = navPage + "?ctx=" + ctx + "&token=" + generateUUID();
         window.showContent.location.href = forwardUrl; //showContent当前页的iframe名字,js控制iframe中页面跳转
     });
 

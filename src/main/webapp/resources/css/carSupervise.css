@@ -253,15 +253,15 @@ select.search-text {
 }
 
 .car-company {
-    width: 200px;
+    width: 260px;
 }
 
-.car-type {
+/*.car-type {
     width: 120px;
-}
+}*/
 
 .car-coordinate {
-    width: 200px;
+    width: 220px;
 }
 
 .car-velocity {
@@ -269,7 +269,7 @@ select.search-text {
 }
 
 .car-aspect {
-    width: 120px;
+    width: 180px;
 }
 
 .car-status {
