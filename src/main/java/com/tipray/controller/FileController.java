@@ -10,6 +10,7 @@ import com.tipray.constant.CenterConfigConst;
 import com.tipray.constant.LogTypeConst;
 import com.tipray.core.ThreadVariable;
 import com.tipray.core.base.BaseAction;
+import com.tipray.core.exception.FileException;
 import com.tipray.service.GasStationService;
 import com.tipray.service.InfoManageLogService;
 import com.tipray.service.OilDepotService;
@@ -169,14 +170,14 @@ public class FileController extends BaseAction {
 		try {
 			if (StringUtil.isEmpty(filename)) {
 			    logger.warn("file name is null!");
-				return null;
+				throw new FileException(FileException.FILE_NAME_NULL_EXCEPTION);
 			}
 			// 服务器文件存放路径
 			String downloadFilePath = new StringBuffer("d:/ftp/").append(filename).toString();
 			File file = new File(downloadFilePath);
 			if (!file.exists()) {
 			    logger.warn("file is not existed!");
-				return null;
+				throw new FileException(FileException.FILE_NOT_FOUND_EXCEPTION);
 			}
 			// http头信息
 			HttpHeaders headers = new HttpHeaders();
@@ -191,7 +192,7 @@ public class FileController extends BaseAction {
 		} catch (IOException e) {
 			logger.error("文件下载失败！filename={}, e={}", filename, e.toString());
 			logger.debug("文件下载异常堆栈信息：", e);
-			return null;
+			throw new FileException(FileException.FILE_DOWNLOAD_EXCEPTION, e);
 		}
 	}
 

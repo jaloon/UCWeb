@@ -203,9 +203,9 @@
                 <option value="2">姓名</option>
             </select>
             <input type="text" class="search-text" id="search_text">
-            <input type="button" class="search-btn" id="search_btn" value="查询">
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editUser">
-            <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
+            <input type="button" class="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>
         <div class="data-zone">

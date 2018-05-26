@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -337,28 +336,33 @@ public class VehicleServiceImpl implements VehicleService {
 	}
 
 	@Override
-	public Map<String, Object> getCarAndLockByCarNo(String carNumber) {
+	public Map<String, Object> getCarAndDriverByCarNo(String carNumber) {
         if (StringUtil.isEmpty(carNumber)) {
             return null;
         }
-		Vehicle vehicle = vehicleDao.getByCarNo(carNumber);
-		List<Driver> drivers = new ArrayList<>();
-		List<Lock> locks = new ArrayList<>();
-		List<Map<String, Object>> lockStatus = new ArrayList<>();
-		if (vehicle != null) {
-			locks = lockDao.findLocksByCarId(vehicle.getId());
-			drivers = driverDao.findByCarNo(vehicle.getCarNumber());
-		}
-		// if (!EmptyObjectUtil.isEmptyList(locks)) {
-		// 	lockStatus = lockDao.findLockStatusByLocks(locks);
-		// }
+        Map<String, Object> vehicle = vehicleDao. getByCarNoForApp(carNumber);
+        if (vehicle == null) {
+            return null;
+        }
+        List<Map<String, Object>> drivers =  driverDao.findByCarNoForApp(carNumber);
 		Map<String, Object> map = new HashMap<>();
 		map.put("vehicle", vehicle);
 		map.put("drivers", drivers);
-		map.put("locks", locks);
-		map.put("lockStatus", lockStatus);
 		return map;
 	}
+
+    @Override
+    public List<Map<String,Object>> findlocksByCarNo(String carNumber) {
+        if (StringUtil.isEmpty(carNumber)) {
+
+        }
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> findOnlineCarsForApp(){
+	    return vehicleDao.findOnlineCarsForApp();
+    }
 
 	@Override
 	public Long addLockResetRecord(Map<String, Object> map) {

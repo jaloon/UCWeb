@@ -12,6 +12,7 @@
  * @return {boolean} 是否CSS滤镜
  */
 function grayscale(obj) {
+    obj.css("cursor", "default");
     if (-[1, ]) {
         // 不是IE8及以下版本IE浏览器
         var browser = IEVersion();
@@ -40,6 +41,7 @@ function grayscale(obj) {
  * @param {*} imgUrl 原始图像路径
  */
 function removeGrayscale(obj, cssfilter, imgUrl) {
+    obj.css("cursor", "pointer");
     if (cssfilter) {
         obj.css("filter", 'grayscale(0)');
         return;

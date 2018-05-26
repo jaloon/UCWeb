@@ -158,9 +158,9 @@
         <div class="search-zone">
             <label for="search_text" class="search-type" id="search_type">加油站</label>
             <select class="search-text" id="search_text"></select>
-            <input type="button" class="search-btn" id="search_btn" value="查询">
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editHandset">
-            <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
+            <input type="button" class="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>
         <div class="data-zone">

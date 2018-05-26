@@ -225,21 +225,21 @@
             v.trans_company_id;
     </select>
 
-    <resultMap id="carMap" type="java.util.Map" >
+    <resultMap id="carNoMap" type="java.util.Map" >
         <result column="id" property="carId" javaType="java.lang.Long" />
         <result column="vehicle_number" property="carNumber" javaType="java.lang.String" />
         <result column="trans_company_id" property="comId" javaType="java.lang.Long" />
     </resultMap>
 
-    <select id="findCarNumbers" resultMap="carMap">
+    <select id="findCarNumbers" resultMap="carNoMap">
         SELECT id, vehicle_number, trans_company_id FROM tbl_vehicle WHERE is_invalid = 0
     </select>
 
-    <select id="findBindedCarNumbers" resultMap="carMap">
+    <select id="findBindedCarNumbers" resultMap="carNoMap">
         SELECT id, vehicle_number, trans_company_id FROM tbl_vehicle WHERE is_invalid = 0 AND vehicle_device_id != 0
     </select>
 
-    <select id="findOnlineCarNumbers" resultMap="carMap">
+    <select id="findOnlineCarNumbers" resultMap="carNoMap">
         SELECT
             v.id,
             v.vehicle_number,

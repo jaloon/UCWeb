@@ -64,6 +64,7 @@ select.search-text {
     margin-left: 10px;
     position: relative;
     left: 30px;
+    cursor: pointer;
 }
 
 .search-btn:hover {
@@ -72,6 +73,7 @@ select.search-text {
 
 .search-btn:disabled {
     background: #c4ccd2;
+    cursor: default;
 }
 
 .data-zone {

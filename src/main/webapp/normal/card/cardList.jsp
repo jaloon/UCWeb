@@ -177,9 +177,9 @@
                 <option value=5>普通卡</option>
                 <option value=6>管理卡</option>
             </select>
-            <input type="button" class="search-btn" id="search_btn" value="查询">
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editCard">
-            <input type="button" id="reader" value="批量添加" onclick="findCardByReader()">
+            <input type="button" class="button" id="reader" value="批量添加" onclick="findCardByReader()">
             <script>
                 $("#reader").click(function () {
                     layer.open({
@@ -188,12 +188,12 @@
                         shadeClose: true,
                         shade: 0.8,
                         resize: false,
-                        area: ['523px', '430px'],
+                        area: ['606px', '430px'],
                         content: 'cardReader.html'
                     });
                 });
             </script>
-            <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
+            <input type="button" class="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>
         <div class="data-zone">
@@ -233,7 +233,5 @@
 
     </div>
 </body>
-<script src="../../resources/plugins/CardReader/interface.js"></script>
-
 </html>
 </pop:Permission>

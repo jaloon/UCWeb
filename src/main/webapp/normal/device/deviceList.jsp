@@ -60,9 +60,9 @@
                 <option value=3>出入库读卡器</option>
                 <option value=4>手持机</option>
             </select>
-            <input type="button" class="search-btn" id="search_btn" value="查询">
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="syncDevice">
-            	<input type="button" id="add" value="同步">
+            	<input type="button" class="button" id="add" value="同步">
             	<script type="text/javascript">
 	            	$("#add").click(function() {
 	            		layer.confirm('是否确认同步设备信息？', {

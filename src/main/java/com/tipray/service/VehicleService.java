@@ -290,16 +290,34 @@ public interface VehicleService {
      * @param remoteControlId     远程操作ID
      * @param carId               车辆ID
      */
-    void updateRemoteAlterStatusResulte(Integer remoteControlStatus, Integer carStatus, Integer remoteControlId,
+    void updateRemoteAlterStatusResulte(Integer remoteControlStatus,
+                                        Integer carStatus,
+                                        Integer remoteControlId,
                                         Long carId) throws ServiceException;
 
     /**
-     * 根据车牌号获取车、锁相关信息
+     * 根据车牌号获取车、司机相关信息
      *
      * @param carNumber 车牌号
      * @return
      */
-    Map<String, Object> getCarAndLockByCarNo(String carNumber);
+    Map<String, Object> getCarAndDriverByCarNo(String carNumber);
+
+    /**
+     * 根据车牌号获取锁及其状态信息
+     *
+     * @param carNumber 车牌号
+     * @return
+     */
+    List<Map<String, Object>> findlocksByCarNo(String carNumber);
+
+    /**
+     * 获取所有在线车辆信息（车牌号、仓数、设备ID、配送卡）
+     *
+     * @return {@link Map} {id, vehicle_number, vehicle_device_id, store_num, transport_card_id}
+     */
+    List<Map<String, Object>> findOnlineCarsForApp();
+
 
     /**
      * 根据配送ID获取配送信息

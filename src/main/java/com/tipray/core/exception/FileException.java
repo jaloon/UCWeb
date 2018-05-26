@@ -10,7 +10,9 @@ package com.tipray.core.exception;
 public class FileException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	public static final String PATH_UNSPECIFIED_EXCEPTION = "文件路径未指定";
-	public static final String FILE_NOT_FOUND_EXCEPTION = "路径指定的文件不存在";
+	public static final String FILE_NOT_FOUND_EXCEPTION = "文件不存在";
+	public static final String FILE_NAME_NULL_EXCEPTION = "文件名为空";
+	public static final String FILE_DOWNLOAD_EXCEPTION = "文件名为空";
 	public static final String BAD_FILE_FORMAT_EXCEPTION = "Excel文件格式不正确";
 
 	public FileException() {

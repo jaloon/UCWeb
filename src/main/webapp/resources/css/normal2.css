@@ -48,6 +48,7 @@ select.search-text {
     position: relative;
     left: 40px;
     top: 8px;
+    cursor: pointer;
 }
 
 .search-btn {

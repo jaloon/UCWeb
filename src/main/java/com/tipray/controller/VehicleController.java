@@ -317,19 +317,44 @@ public class VehicleController extends BaseAction {
     }
 
     /**
-     * 根据车牌号获取车、锁相关信息
+     * 根据车牌号获取车、司机相关信息
      *
      * @param carNumber 车牌号
      * @return
      */
-    @RequestMapping(value = "getCarAndLockByCarNo.do")
+    @RequestMapping(value = "getCarAndDriverByCarNo.do")
     @ResponseBody
-    public Map<String, Object> getCarAndLockByCarNo(String carNumber) {
-        logger.info("getCarAndLockByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+    public Map<String, Object> getCarAndDriverByCarNo(String carNumber) {
+        logger.info("getCarAndDriverByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
         if (StringUtil.isEmpty(carNumber)) {
             return null;
         }
-        return vehicleService.getCarAndLockByCarNo(carNumber);
+        return vehicleService.getCarAndDriverByCarNo(carNumber);
+    }
+
+    /**
+     * 根据车牌号获取锁及其状态信息
+     * @param carNumber 车牌号
+     * @return
+     */
+    @RequestMapping(value = "findlocksByCarNo.do")
+    @ResponseBody
+    public List<Map<String,Object>> findlocksByCarNo(String carNumber){
+        logger.info("findlocksByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+        if (StringUtil.isEmpty(carNumber)) {
+            return null;
+        }
+        return vehicleService.findlocksByCarNo(carNumber);
+    }
+
+    /**
+     * 获取在线车辆信息
+     * @return
+     */
+    @RequestMapping(value = "findOnlineCars.do")
+    @ResponseBody
+    public List<Map<String, Object>> findOnlineCarsForApp(){
+        return vehicleService.findOnlineCarsForApp();
     }
 
     /**
@@ -352,6 +377,7 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "selectCars.do")
     @ResponseBody
     public Map<String, Object> selectCars(Integer scope) {
+
         if (scope == null || scope == 0) {
             // 选取全部车辆
             return vehicleService.selectCars(0);

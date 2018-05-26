@@ -11,12 +11,12 @@
     <script src="../../resources/js/base.js"></script>
     <style>
         .container {
-            width: 500px;
+            width: 570px;
         }
 
         .btn-box {
             width: 100%;
-            margin: 15px;
+            padding: 10px;
         }
 
         .oper-btn {
@@ -27,9 +27,8 @@
             border: 0;
             border-radius: 3px;
             color: white;
-            /*margin-left: 10px;*/
-            position: relative;
-            left: 30px;
+            margin: 5px;
+            cursor: pointer;
         }
 
         .oper-btn:hover {
@@ -38,10 +37,11 @@
 
         .oper-btn:disabled {
             background: #c4ccd2;
+            cursor: default;
         }
 
         .log-box {
-            width: 100%;
+            width: 586px;
             height: 300px;
             overflow: auto;
             border: 1px solid #d7dbe2;
@@ -139,13 +139,14 @@
 <div class="container">
     <div class="btn-box">
         <input type="button" value="连接读卡器" class="oper-btn" id="link">
-        <input type="button" value="开始寻卡" class="oper-btn" id="start">
-        <input type="button" value="停止寻卡" class="oper-btn" id="stop">
-        <input type="button" value="关闭连接" class="oper-btn" id="unlink">
+        <input type="button" value="开始寻卡" class="oper-btn" id="start" disabled>
+        <input type="button" value="停止寻卡" class="oper-btn" id="stop" disabled>
+        <input type="button" value="关闭连接" class="oper-btn" id="unlink" disabled>
+        <a href="../../manage/file/download/driver_setup.rar"><input type="button" value="下载驱动" class="oper-btn" id="down"></a>
     </div>
     <div class="log-box" id="logbox"></div>
 </div>
-<div class="card-box container">
+<div class="card-box">
     <div class="info-zone">
         <div class="base-info">
             <table class="base-table">
@@ -203,18 +204,34 @@
 </div>
 </body>
 <script>
+    var logCount = 0;
+
     var logger = {
         info: function (msg) {
             var info_msg = "<div>[" + new Date().format("yyyy-MM-dd HH:mm:ss") +
                 "]<span style='color: #478de4;'>[info ]</span>: " + msg + "</div>";
-            $("#logbox").append(info_msg);
+            addLog(info_msg);
         },
         error: function (msg) {
             var error_msg = "<div>[" + new Date().format("yyyy-MM-dd HH:mm:ss") +
                 "]<span style='color: #d80e0e;'>[error]</span>: " + msg + "</div>";
-            $("#logbox").append(error_msg);
+            addLog(error_msg);
         }
     }
+
+    function addLog(log_msg){
+        var $logbox = $("#logbox");
+        if (logCount >= 100) {
+            logCount = 1;
+            $logbox.html(log_msg)
+            return;
+        }
+        logCount++;
+        $logbox.append(log_msg);
+        $logbox.scrollTop($logbox[0].scrollHeight);
+    }
+
+
     $(function () {
         // 必填字段添加星号标识
         $('input[required]').each(function() {
@@ -227,6 +244,11 @@
         var cardLayer;
         var cardIds = [];
 
+        var btn_link = $("#link"),
+            btn_start = $("#start"),
+            btn_stop = $("#stop"),
+            btn_unlink = $("#unlink");
+
         var obj = embed_reader.getOBJ(READER_TYPE._reader_type_contactLess);
         obj.onResult(function (rData) {
             switch (rData.FunctionID) {
@@ -237,16 +259,26 @@
                         if (hdev != -1) {
                             icdev = hdev;
                             obj.beep(icdev, 10); //do a beep
-                            logger.info("读卡器连接成功！");
                             isComOpen = true; //Set reader link status
+                            btn_link.attr('disabled', true);
+                            btn_start.attr('disabled', false);
+                            btn_unlink.attr('disabled', false);
+                            logger.info("读卡器连接成功！");
                         } else {
-                            logger.error("读卡器连接失败！");
                             isComOpen = false; //Set reader link failed status
+                            logger.error("读卡器连接失败！");
                         }
-                    } else
+                    } else {
+                        isComOpen = false;
                         logger.error("读卡器驱动加载异常！");
+                    }
                     break;
                 case FUNCIDS._fid_exit:
+                    isComOpen = false;
+                    btn_link.attr('disabled', false);
+                    btn_start.attr('disabled', true);
+                    btn_stop.attr('disabled', true);
+                    btn_unlink.attr('disabled', true);
                     logger.info("读卡器连接已关闭！");
                     break;
                 case FUNCIDS._fid_findCard:
@@ -289,7 +321,7 @@
 
         });
 
-        $("#link").click(function () {
+        btn_link.click(function () {
             try {
                 if (!isComOpen) {
                     obj.initialcom(100, 115200);
@@ -299,8 +331,10 @@
             }
         });
 
-        $("#start").click(function () {
+        btn_start.click(function () {
             find = true;
+            btn_start.attr('disabled', true);
+            btn_stop.attr('disabled', false);
             logger.info("开始寻卡...");
             findCard();
         });
@@ -311,12 +345,14 @@
             }
         }
 
-        $("#stop").click(function () {
+        btn_stop.click(function () {
             find = false;
+            btn_start.attr('disabled', false);
+            btn_stop.attr('disabled', true);
             logger.info("寻卡结束！");
         });
 
-        $("#unlink").click(function () {
+        btn_unlink.click(function () {
             try {
                 if (isComOpen) {
                     obj.exit(icdev);

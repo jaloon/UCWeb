@@ -27,3 +27,18 @@ table {
     position: relative;
     /* background: #f2f2f2; */
 }
+
+.button {
+    cursor: pointer;
+    background: #478de4;
+}
+
+.button:hover {
+    background: #5ca1f7;
+}
+
+.button:disabled {
+    background: #c4ccd2;
+    cursor: default;
+}
+

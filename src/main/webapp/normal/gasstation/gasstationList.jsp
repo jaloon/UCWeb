@@ -193,7 +193,7 @@
         <div class="search-zone">
             <label for="search_text" class="search-type" id="search_type">加油站名称</label>
             <input type="text" class="search-text" id="search_text">
-            <input type="button" class="search-btn" id="search_btn" value="查询">
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editGasstation">
             <span class="file-box">
 		        <input type="file" name="file-1[]" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple />
@@ -251,7 +251,7 @@
 		        fnBack: batchImport
 		    }).listen();
 		    </script>
-            <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
+            <input type="button" class="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>
         <div class="data-zone">

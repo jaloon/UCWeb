@@ -109,7 +109,7 @@
                     <dd>
                         <a name="normal/car/carSupervise.html">车辆监控及远程操作</a>
                     </dd>
-                        <%--<dd><a name="normal/car/carMonitor.html?ctx=${pageContext.request.contextPath}">车辆实时监控</a></dd>--%>
+                        <%--<dd><a name="normal/car/carMonitor.html">车辆实时监控</a></dd>--%>
                     <pop:Permission ename="retrackModule">
                         <dd><a name="normal/car/track/carRetrack.html">车辆轨迹回放</a></dd>
                     </pop:Permission>

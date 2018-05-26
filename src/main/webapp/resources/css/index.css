@@ -129,6 +129,7 @@
     vertical-align: middle;
     background-color: #57647c;
     padding-left: 40px;
+    cursor: pointer;
 }
 
 .left-nav dd a {
