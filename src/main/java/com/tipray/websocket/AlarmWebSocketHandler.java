@@ -7,6 +7,7 @@ import com.tipray.util.JSONUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Map;
  */
 public class AlarmWebSocketHandler implements WebSocketHandler {
     private static final Logger logger = LoggerFactory.getLogger(AlarmWebSocketHandler.class);
-    private static final Map<Long, WebSocketSession> WEB_SOCKET_CLIENTS = new HashMap<Long, WebSocketSession>();
+    private static final Map<Long, ConcurrentWebSocketSessionDecorator> WEB_SOCKET_CLIENTS = new HashMap<>();
     // private static final int WEB_SOCKET_CLOSE = 0;
     private static final int WEB_SOCKET_OPEN = 1;
     private static final int ALARM_CLEAR = 100;
@@ -44,8 +45,9 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         Long sessionId = Long.parseLong(session.getId(), 16);
-        WEB_SOCKET_CLIENTS.put(sessionId, session);
-        logger.info("alarm connection established：{}", sessionId);
+        ConcurrentWebSocketSessionDecorator sessionDecorator = WebSocketUtil.decoratorSession(session);
+        WEB_SOCKET_CLIENTS.put(sessionId, sessionDecorator);
+        logger.info("alarm connection {} established.", sessionId);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
             try {
                 msgMap = JSONUtil.parseToMap(msgText);
             } catch (Exception e) {
-                logger.error("报警业务：解析浏览器发送的消息异常！\n{}", e.getMessage());
+                logger.error("报警业务：解析浏览器发送的消息异常：{}", e.getMessage());
                 return;
             }
             int biz = (int) msgMap.get("biz");
@@ -80,18 +82,19 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      * @param session {@link WebSocketSession}
      */
     private void dealWebSocketOpen(WebSocketSession session) {
-        Long sessionId = Long.parseLong(session.getId(), 16);
         // 报警业务类型 （100 消除报警，110 报警(default)，111 缓存报警）
         List<AlarmRecord> alarmRecordsCache = alarmRecordService.findNotElimited();
         if (EmptyObjectUtil.isEmptyList(alarmRecordsCache)) {
             return;
         }
-        Map<String, Object> alarmCacheMap = new HashMap<String, Object>();
-        alarmCacheMap.put("biz", ALARM_CACHE);
-        alarmCacheMap.put("cacheAlarm", alarmRecordsCache);
+        Long sessionId = Long.parseLong(session.getId(), 16);
+        ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
         try {
+            Map<String, Object> alarmCacheMap = new HashMap<>();
+            alarmCacheMap.put("biz", ALARM_CACHE);
+            alarmCacheMap.put("cacheAlarm", alarmRecordsCache);
             String alarmCacheMsg = JSONUtil.stringify(alarmCacheMap);
-            session.sendMessage(new TextMessage(alarmCacheMsg));
+            sessionDecorator.sendMessage(new TextMessage(alarmCacheMsg));
         } catch (Exception e) {
             logger.error("send cache alarm msg to {} error: {}", sessionId, e.toString());
             logger.debug("send cache alarm msg error stack: ", e);
@@ -105,7 +108,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
             try {
                 session.close();
             } catch (IOException e) {
-                logger.error("报警业务：关闭传输错误的客户端异常！\n{}", e.getMessage());
+                logger.error("报警业务：关闭传输错误的客户端异常：{}", e.getMessage());
             }
         }
         Long sessionId = Long.parseLong(session.getId(), 16);
@@ -118,12 +121,12 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         Long sessionId = Long.parseLong(session.getId(), 16);
         int closeStatusCode = closeStatus.getCode();
         // if (closeStatusCode == WebSocketCloseStatusEnum.GOING_AWAY.code()) {
-        // 	Long userId = SESSION_USER_CACHE.get(sessionId).longValue();
-        // 	Session userSession = SessionUtil.getSession(userId);
-        // 	SessionUtil.removeSession(userSession);
-        // 	Map<String, Object> attributes = session.getAttributes();
-        // 	HttpSession httpSession = (HttpSession) attributes.get(HandshakeInterceptor.HTTP_SESSION_ATTR_NAME);
-        // 	httpSession.invalidate();
+        //     Long userId = SESSION_USER_CACHE.get(sessionId).longValue();
+        //     Session userSession = SessionUtil.getSession(userId);
+        //     SessionUtil.removeSession(userSession);
+        //     Map<String, Object> attributes = session.getAttributes();
+        //     HttpSession httpSession = (HttpSession) attributes.get(HandshakeInterceptor.HTTP_SESSION_ATTR_NAME);
+        //     httpSession.invalidate();
         // }
         dealConnectionClose(sessionId);
         logger.info("alarm connection {} closed by {}", sessionId, WebSocketCloseStatusEnum.getByCode(closeStatusCode));
@@ -163,7 +166,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
             logger.error("AlarmRecord对象转为JSON字符串异常：{}", e.toString());
             return;
         }
-        WEB_SOCKET_CLIENTS.values().parallelStream().forEach(session -> WebSocketUtil.sendTextMsg(session, alarmMsg));
+        WEB_SOCKET_CLIENTS.values().parallelStream().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, alarmMsg));
     }
 
     /**
@@ -178,7 +181,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         strBuf.append("\"biz\":").append(ALARM_CLEAR).append(',');
         strBuf.append("\"id\":").append(clearAlarmId);
         strBuf.append('}');
-        WEB_SOCKET_CLIENTS.values().parallelStream().forEach(session -> WebSocketUtil.sendTextMsg(session, strBuf));
+        WEB_SOCKET_CLIENTS.values().parallelStream().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, strBuf));
     }
 
     /**

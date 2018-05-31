@@ -126,7 +126,7 @@
 	                var tableData = "<table width='100%'>";
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var card = cards[i];
-	                    tableData += "<tr onclick=\"dispatch('edit'," + card.id + ")\">" +
+	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + card.id + ")\">" +
 	                        "<td class=\"card-id\">" + card.cardId + "</td>" +
 	                        "<td class=\"card-type\">" + card.typeName + "</td>" +
 	                        "<td class=\"card-director\">" + card.director + "</td>" +
@@ -134,10 +134,10 @@
 	                        "<td class=\"card-identity\">" + card.identityCard + "</td>" +
 	                        "<td class=\"card-remark\">" + card.remark + "</td>" +
 	                        "<td class=\"card-action\">" +
-	                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + card.id + ")\">" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + card.id + ")\">" +
 	                        <pop:Permission ename="editCard">
-	                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + card.id + ")\">&emsp;" +
-	                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteCard(" + card.id + ")\">" +
+	                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + card.id + ")\">&emsp;" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteCard(" + card.id + ")\">" +
 	                        </pop:Permission>
 	                        "</td>" +
 	                        "</tr>";

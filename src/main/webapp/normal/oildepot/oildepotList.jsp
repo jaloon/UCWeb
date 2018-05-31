@@ -145,7 +145,7 @@
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var oildepot = oildepots[i];
-                    tableData += "<tr onclick=\"dispatch('edit'," + oildepot.id + ")\">" +
+                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + oildepot.id + ")\">" +
                         "<td class=\"oildepot-id\">" + oildepot.officialId + "</td>" +
                         "<td class=\"oildepot-name\">" + oildepot.name + "</td>" +
                         "<td class=\"oildepot-abbr\">" + oildepot.abbr + "</td>" +
@@ -156,10 +156,10 @@
                         "<td class=\"oildepot-company\">" + oildepot.company + "</td>" +
                         "<td class=\"oildepot-remark\">" + oildepot.remark + "</td>" +
                         "<td class=\"oildepot-action\">" +
-                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + oildepot.id + ")\">" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + oildepot.id + ")\">" +
                         <pop:Permission ename="editOildepot">
-                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + oildepot.id + ")\">&emsp;" +
-                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteOildepot(" + oildepot.id + ")\">" +
+                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + oildepot.id + ")\">&emsp;" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteOildepot(" + oildepot.id + ")\">" +
                         </pop:Permission>
                         "</td>" +
                         "</tr>";

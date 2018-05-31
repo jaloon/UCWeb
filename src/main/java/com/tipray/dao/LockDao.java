@@ -1,11 +1,11 @@
 package com.tipray.dao;
 
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * LockDao
@@ -79,4 +79,10 @@ public interface LockDao extends BaseDao<Lock> {
 	 */
     List<Lock> findVehicleIdByLocks(List<Lock> locks);
 
+    /**
+     * 根据车牌号获取锁及其状态信息
+     * @param carNumber
+     * @return 车牌号
+     */
+    List<Map<String,Object>> findlocksByCarNo(String carNumber);
 }

@@ -116,7 +116,7 @@
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var transcom = transcoms[i];
-                    tableData += "<tr onclick=\"dispatch('edit'," + transcom.id + ")\">" +
+                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + transcom.id + ")\">" +
                         "<td class=\"transcom-id\">" + transcom.id + "</td>" +
                         "<td class=\"transcom-name\">" + transcom.name + "</td>" +
                         "<td class=\"transcom-address\">" + transcom.address + "</td>" +
@@ -129,10 +129,10 @@
                     }
                     tableData += "<td class=\"transcom-remark\">" + transcom.remark + "</td>" +
                         "<td class=\"transcom-action\">" +
-                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + transcom.id + ")\">" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + transcom.id + ")\">" +
                         <pop:Permission ename="editTranscom">
-                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + transcom.id + ")\">&emsp;" +
-                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteTranscom(" + transcom.id + ")\">" +
+                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + transcom.id + ")\">&emsp;" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteTranscom(" + transcom.id + ")\">" +
                         </pop:Permission>
                         "</td>" +
                         "</tr>";

@@ -2,6 +2,7 @@ var ws = null;
 var tipIcoObj;
 var tipIcoUrl;
 var css3filter;
+var alarmBoxLayer;
 var alarmCount = 0; // 报警数
 var alarmIds = []; // 报警ID缓存
 var record; // 报警记录
@@ -15,6 +16,9 @@ function receiveEliminat(receiveObj) {
         alarmCount--;
         if (alarmCount <= 0) {
             grayscale(tipIcoObj);
+            if (alarmBoxLayer != undefined) {
+                layer.close(alarmBoxLayer);
+            }
             if (window.Notification && Notification.permission === "granted") {
                 alarmNotify.faviconClear();
             }
@@ -87,11 +91,11 @@ function addAlarm(alarm, record) {
         if (record === undefined || record === null || record === "") {
             record = encodeURIComponent(JSON.stringify(alarm));
         }
-        var trHtml = "<tr id='alarm_id_" + alarmId + "' onclick=\"showAlarm('" + record + "')\">" +
+        var trHtml = "<tr class='alarm-content' id='alarm_id_" + alarmId + "' onclick=\"showAlarm('" + record + "')\">" +
             "<td class='alarm-id'>" + alarmId + "</td>" +
             "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
             "<td class='alarm-type'>" + alarm.typeName + "</td>" +
-            "<td class='alarm-eli' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警' title='消除报警'/></td>" +
+            "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
             "</tr>"
         $("#alarm_tips tbody").append(trHtml);
     }
@@ -106,7 +110,7 @@ function parseAlarm(receiveObj) {
 }
 
 function showAlarmBox() {
-    layer.open({
+    alarmBoxLayer = layer.open({
         type: 1,
         title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
         shadeClose: true,
@@ -374,7 +378,7 @@ $(function() {
             color: "#478de4"
         });
         var navPage = $(this).find('a').attr("name");
-        var forwardUrl = navPage + "?ctx=" + ctx + "&token=" + generateUUID();
+        var forwardUrl = navPage + "?user=" + $("#id").val() + "&ctx=" + ctx + "&token=" + generateUUID();
         window.showContent.location.href = forwardUrl; //showContent当前页的iframe名字,js控制iframe中页面跳转
     });
 

@@ -148,7 +148,7 @@
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var user = users[i];
-                    tableData += "<tr onclick=\"dispatch('edit'," + user.id + ")\">" +
+                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + user.id + ")\">" +
                         "<td class=\"user-id\">" + user.id + "</td>" +
                         "<td class=\"user-account\">" + user.account + "</td>" +
                         "<td class=\"user-role\">" + user.role.name + "</td>";
@@ -162,11 +162,11 @@
                         "<td class=\"user-card\">" + user.identityCard + "</td>" +
                         "<td class=\"user-remark\">" + user.remark + "</td>" +
                         "<td class=\"user-action\">" +
-                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + user.id + ")\">" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + user.id + ")\">" +
                         <pop:Permission ename="editUser">
-                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + user.id + ")\">&emsp;" +
-                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteUser(" + user.id + ")\">&emsp;" +
-                        "<img src=\"../../resources/images/operate/repwd.png\" alt=\"重置密码\" title=\"重置密码\" onclick=\"resetPwd(" + user.id + ")\">" +
+                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + user.id + ")\">&emsp;" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteUser(" + user.id + ")\">&emsp;" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/repwd.png\" alt=\"重置密码\" title=\"重置密码\" onclick=\"resetPwd(" + user.id + ")\">" +
                         </pop:Permission>
                         "</td>" +
                         "</tr>";

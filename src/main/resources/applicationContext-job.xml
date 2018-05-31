@@ -20,8 +20,10 @@
     <task:scheduled-tasks scheduler="scheduler">
         <!--<task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/>-->
         <!--链路维护心跳任务，每隔2分钟执行一次-->
-        <task:scheduled ref="scheduledJob" method="executeHeartbeat" cron="0 */2 * * * ?"/>
+        <task:scheduled ref="scheduledJob" method="executeUdpHeartbeat" cron="0 */2 * * * ?"/>
         <!--<task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" />-->
+        <!--车辆在线状态监测任务，每隔15秒执行一次-->
+        <task:scheduled ref="scheduledJob" method="executeVehicleOnlineMonitor" cron="*/15 * * * * ?"/>
     </task:scheduled-tasks>
 
 </beans>

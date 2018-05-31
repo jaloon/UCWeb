@@ -63,7 +63,7 @@ tr {
 }
 
 .editInfo {
-	height: 26px;
+    height: 26px;
     width: 384px;
     line-height: 26px;
     border: 1px solid #d7dbe2;
@@ -90,6 +90,12 @@ tr {
     top: 50%;
     margin-top: -15px;
     right: 124px;
+    cursor: pointer;
+}
+
+#cancel:hover {
+    color: #5ca1f7;
+    border-color: #5ca1f7;
 }
 
 #confirm {
@@ -103,4 +109,9 @@ tr {
     top: 50%;
     margin-top: -15px;
     right: 14px;
+    cursor: pointer;
+}
+
+#confirm:hover {
+    background: #5ca1f7;
 }

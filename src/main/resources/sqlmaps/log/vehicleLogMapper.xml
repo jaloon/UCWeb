@@ -16,6 +16,7 @@
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
 	<sql id="select_colums">
+		vl.id,
 		vl.user_id,
 		vl.type,
 		vl.description,

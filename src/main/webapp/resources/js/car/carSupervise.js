@@ -1,5 +1,73 @@
 var ws = null;
 var wsUrl;
+var userId;
+var carOnline = [];
+var trackQueue = {
+    size: 0, // 队列元素数量
+    ids: [], // 车辆ID
+    tracks: [], // 轨迹
+    inQueue: function (track) {
+        // 入队列，添加到队列末尾
+        var carId = track.carId;
+        if (carOnline.indexOf(carId) == -1) {
+            // 车辆离线，轨迹不再入队列
+            return;
+        }
+        var index = this.ids.indexOf(carId);
+        if (index > -1) {
+            this.ids.splice(index, 1);
+            this.tracks.splice(index, 1);
+            this.size--;
+        }
+        this.ids.push(carId);
+        this.tracks.push(track);
+        this.size++;
+    },
+    outQueue: function () {
+        // 出队列，删除并返回数组的第一个元素
+        if (this.size == 0) {
+            return undefined;
+        }
+        this.ids.shift();
+        var track = this.tracks.shift();
+        if (track != undefined) {
+            this.size--;
+        }
+        return track;
+    }
+};
+
+var onlineQueue = {
+    size: 0, // 队列元素数量
+    ids: [], // 车辆ID
+    onlineInfos: [], // 在线状态信息
+    inQueue: function (onlineInfo) {
+        // 入队列，添加到队列末尾
+        var carId = onlineInfo.carId;
+        var index = this.ids.indexOf(carId);
+        if (index > -1) {
+            this.ids.splice(index, 1);
+            this.onlineInfos.splice(index, 1);
+            this.size--;
+        }
+        this.ids.push(carId);
+        this.onlineInfos.push(onlineInfo);
+        this.size++;
+    },
+    outQueue: function () {
+        // 出队列，删除并返回数组的第一个元素
+        if (this.size == 0) {
+            return undefined;
+        }
+        this.ids.shift();
+        var onlineInfo = this.onlineInfos.shift();
+        if (onlineInfo != undefined) {
+            this.size--;
+        }
+        return onlineInfo;
+    }
+};
+
 var carIds = [];
 var carMarkerMap = new Map();
 var sessionId;
@@ -9,6 +77,68 @@ var focusId;
 var realtimeId;
 var focusCancelOrder;
 
+var trackOrder = JSON.stringify({
+    biz: "track"
+})
+
+function dealOnlineCarsCache(onlineCars) {
+    var onlineCarsCount = onlineCars.length;
+    var onlineCarIndex = 0;
+    if (onlineCarsCount > 0) {
+        var onlineCacheTimer = setInterval(function () {
+            if (onlineCarIndex >= onlineCarsCount) {
+                clearInterval(onlineCacheTimer);
+                return;
+            }
+            var carId = onlineCars[onlineCarIndex];
+            var onlineIndex = carOnline.indexOf(carId);
+            if (onlineIndex == -1) {
+                carOnline.push(carId);
+            }
+            if (carIds.indexOf(carId) > -1) {
+                $("#car_" + carId).children().last().html("在线");
+            }
+            onlineCarIndex++;
+        }, 1);
+    }
+}
+
+function reFreshOnline(onlineInfo) {
+    var carId = onlineInfo.carId;
+    var carNo = onlineInfo.carNo;
+    var online = onlineInfo.online;
+    var onlineIndex = carOnline.indexOf(carId);
+    if (online == 0) {
+        if (onlineIndex > -1) {
+            carOnline.splice(onlineIndex, 1);
+            reFreshLog({
+                fail: 0,
+                task: '',
+                result: carNo + '离线'
+            });
+        }
+        if (carIds.indexOf(carId) > -1) {
+            map.removeOverlay(carMarkerMap.get(carId));
+            // carMarkerMap.delete(carId);
+            $("#car_" + carId).children().last().html("离线");
+        }
+        return;
+    }
+    if (online == 1) {
+        if (onlineIndex == -1) {
+            carOnline.push(carId);
+            reFreshLog({
+                fail: 0,
+                task: '',
+                result: carNo + '上线'
+            });
+        }
+        if (carIds.indexOf(carId) > -1) {
+            $("#car_" + carId).children().last().html("在线");
+        }
+    }
+}
+
 function reFreshLog(log) {
     var timestamp = "<span class='log-time'>[" + new Date().format("yyyy-MM-dd HH:mm:ss") + "]</span>";
     var task = isNull(log.task) ? "" : "[" + log.task + "]";
@@ -16,15 +146,6 @@ function reFreshLog(log) {
     var logHtml = "<div class='log-content'>" + timestamp + task + "&nbsp;&nbsp;" + result;
     $(".log-box").prepend(logHtml);
 }
-
-// for (var i = 0; i < 10; i++) {
-//     var log = {
-//         fail: Math.round(Math.random()),
-//         task: "锁绑定变更下发：aa通过网页对车辆桂A12345增加锁绑定。",
-//         result: "成功或失败！"
-//     }
-//     reFreshLog(log)
-// }
 
 function initCarIcon(alarm) {
     var carIcon;
@@ -43,13 +164,7 @@ function initCarIcon(alarm) {
 }
 
 function reFreshPage(track) {
-    var id = track.id;
-    // online: 0 离线，1 在线
-    if (track.online == 0 && carIds.indexOf(id) >= 0) {
-        map.removeOverlay(carMarkerMap.get(id));
-        $("#car_" + id).children().last().html("离线");
-        return;
-    }
+    var id = track.carId;
     var point = new BMap.Point(track.longitude, track.latitude);
     var carLabel = new BMap.Label(track.carNumber + ", " + track.carStatus, {
         position: point,
@@ -64,7 +179,7 @@ function reFreshPage(track) {
     });
     if (carIds.indexOf(id) >= 0) {
         map.removeOverlay(carMarkerMap.get(id));
-        var tdObjs =  $("#car_" + id).children();
+        var tdObjs = $("#car_" + id).children();
         tdObjs.eq(2).html("(" + track.longitude + ", " + track.latitude + ")");
         tdObjs.eq(3).html(track.velocity);
         tdObjs.eq(4).html(angle2aspect(track.angle));
@@ -91,7 +206,7 @@ function reFreshPage(track) {
         rotation: -track.angle
     });
     carMarker.setLabel(carLabel);
-    carMarker.addEventListener("click", function(e) {
+    carMarker.addEventListener("click", function (e) {
         layer.open({
             type: 2,
             title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -100,16 +215,9 @@ function reFreshPage(track) {
             resize: false,
             area: ['800px', '560px'],
             content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
-            '&carId=' + id + '&carNumber=' + track.carNumber + '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
-            end: function() {
-                // var order = {
-                //     biz: 'focus',
-                //     bizType: 'cancel',
-                //     session: focusId,
-                //     user: userJson,
-                //     token: generateUUID()
-                // };
-                // ws.send(JSON.stringify(order));
+            '&carId=' + id + '&carNumber=' + encodeURIComponent(track.carNumber) +
+            '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
+            end: function () {
                 ws.send(focusCancelOrder);
             }
         });
@@ -118,9 +226,9 @@ function reFreshPage(track) {
     map.addOverlay(carMarker);
 }
 
-$(function() {
+$(function () {
     // iframe高度自适应
-    $(window).resize(function() {
+    $(window).resize(function () {
         if ($('#car_info').is(':hidden')) {
             $(".map").height($(window).height() - 88);
         } else {
@@ -130,15 +238,17 @@ $(function() {
 
     // 固定表头
     var tableCont = document.querySelector('#table-cont');
+
     /**
      * scroll handle
      * @param {event} e -- scroll event
      */
-    function scrollHandle (e){
+    function scrollHandle(e) {
         // console.log(this)
         var scrollTop = this.scrollTop;
         this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
     }
+
     tableCont.addEventListener('scroll', scrollHandle);
 
     $.getJSON("../../../manage/car/selectCars.do", "scope=0",
@@ -194,12 +304,14 @@ $(function() {
         }
     });
 
+    userId = getUrlParam("user");
     var ctx = getUrlParam("ctx");
     wsUrl = window.location.host + ctx;
     if (window.console) console.log("wsUrl: " + wsUrl);
 
     var order = {
-        biz: 'general'
+        biz: 'general',
+        user: userId
     };
     var orderText = JSON.stringify(order);
 
@@ -210,22 +322,34 @@ $(function() {
     } else {
         ws = new SockJS("http://" + wsUrl + "/sockjs/track");
     }
-    ws.onopen = function(event) {
+    ws.onopen = function (event) {
         if (window.console) console.log("websocket connected");
         ws.send(orderText);
     };
-    ws.onmessage = function(event) {
+    ws.onmessage = function (event) {
         if (window.console) console.log("websocket receive message");
         var receive = event.data;
         if (receive == "repeat") {
-            ws.send(orderText);
+            layer.confirm('获取用户信息失败，是否刷新页面重试？', {
+                icon: 0,
+                title: ['获取用户信息失败', 'font-size:14px;color:#ffffff;background:#478de4;']
+            }, function () {
+                location.reload(true);
+            });
         } else {
             var receiveObj = JSON.parse(receive);
             var biz = receiveObj.biz;
             switch (biz) {
+                case "onlineCache":
+                    var onlineCars = receiveObj.cars;
+                    dealOnlineCarsCache(onlineCars);
+                    break;
+                case "online":
+                    // reFreshOnline(receiveObj);
+                    onlineQueue.inQueue(receiveObj);
+                    break;
                 case "track":
-                    Concurrent.Thread.create(reFreshPage, receiveObj);
-                    // reFreshPage(receiveObj);
+                    trackQueue.inQueue(receiveObj);
                     break;
                 case "session":
                     sessionId = receiveObj.sessionId;
@@ -257,24 +381,44 @@ $(function() {
             }
         }
     };
-    ws.onerror = function(event) {
+    ws.onerror = function (event) {
         if (window.console) console.log("websocket error");
     };
-    ws.onclose = function(event) {
+    ws.onclose = function (event) {
         if (window.console) console.log("websocket closed： " + event);
     };
 
-    $("#search_btn").click(function() {
+    setInterval(function () {
+        var onlineInfo = onlineQueue.outQueue();
+        if (onlineInfo == undefined) {
+            return;
+        }
+        reFreshOnline(onlineInfo);
+    }, 1);
+
+    setInterval(function () {
+        var track = trackQueue.outQueue();
+        if (track == undefined) {
+            return;
+        }
+        reFreshPage(track);
+    }, 1);
+
+    setInterval(function () {
+        ws.send(trackOrder);
+    }, 5000);
+
+    $("#search_btn").click(function () {
         var carNumber = trimAll($("#search_text").val());
         if (!isCarNo(carNumber)) {
-            layer.alert('车牌号不正确，请输入一个完整的车牌号！', { icon: 2 }, function(index2) {
+            layer.alert('车牌号不正确，请输入一个完整的车牌号！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#search_text").select();
             });
         }
     });
 
-    $("#car_list").click(function() {
+    $("#car_list").click(function () {
         if ($('#car_info').is(':hidden')) {
             $('#car_info').show();
             $('#car_list').css({
@@ -296,7 +440,7 @@ $(function() {
 
     /** 设备绑定 */
     // 车载终端绑定
-    $("#bind_terminal").click(function() {
+    $("#bind_terminal").click(function () {
         // bindDispatch('car');
         layer.open({
             type: 2,
@@ -309,7 +453,7 @@ $(function() {
         });
     });
     // 锁绑定
-    $("#bind_lock").click(function() {
+    $("#bind_lock").click(function () {
         // bindDispatch('lock');
         layer.open({
             type: 2,
@@ -324,7 +468,7 @@ $(function() {
 
     /** 车载终端配置 */
     // GPS配置
-    $("#gps_config").click(function() {
+    $("#gps_config").click(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -336,28 +480,28 @@ $(function() {
         });
     });
     // 车台功能启用
-    $("#func_enable").click(function() {
-    	layer.open({
-    		type: 2,
-    		title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
-    		shadeClose: true,
-    		shade: 0.8,
+    $("#func_enable").click(function () {
+        layer.open({
+            type: 2,
+            title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            shadeClose: true,
+            shade: 0.8,
             resize: false,
-    		area: ['540px', '435px'],
-    		content: 'conf/funcEnable.html'
-    	});
+            area: ['540px', '435px'],
+            content: 'conf/funcEnable.html'
+        });
     });
     // 车台软件升级
-    $("#soft_upgrade").click(function() {
-    	layer.open({
-    		type: 2,
-    		title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
-    		shadeClose: true,
-    		shade: 0.8,
+    $("#soft_upgrade").click(function () {
+        layer.open({
+            type: 2,
+            title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            shadeClose: true,
+            shade: 0.8,
             resize: false,
-    		area: ['540px', '435px'],
-    		content: 'conf/softUpgrade.html'
-    	});
+            area: ['540px', '435px'],
+            content: 'conf/softUpgrade.html'
+        });
     });
 
     /** 实时监控 */
@@ -383,7 +527,7 @@ $(function() {
         }
     });
 
-    $("#scope").change(function() {
+    $("#scope").change(function () {
         var scope = $("#scope").val();
         if (scope == 1) {
             $("#select_name").html("车牌号");
@@ -424,7 +568,7 @@ $(function() {
 
     var realtimeLayer;
 
-    $("#realtime_monitor").click(function() {
+    $("#realtime_monitor").click(function () {
         realtimeLayer = layer.open({
             type: 1,
             title: ['车辆实时监控', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -436,18 +580,18 @@ $(function() {
         });
     });
 
-    $("#cancel").click(function() {
+    $("#cancel").click(function () {
         layer.close(realtimeLayer);
     });
 
-    $("#confirm").click(function() {
+    $("#confirm").click(function () {
         var scope = $("#scope").val();
         var carNumber = "";
         var comId = 0;
         if (scope == 1) {
             carNumber = trimAll($("#carno").val());
             if (carNumber == "") {
-                layer.alert('未选择系统已有车辆！', { icon: 2 }, function(index2) {
+                layer.alert('未选择系统已有车辆！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#carno").focus();
                 });
@@ -468,7 +612,7 @@ $(function() {
             content: '../../normal/car/monitor/carMonitorRealtime.html?wsUrl=' + wsUrl + '&car=' + encodeURI(carNumber) +
             '&comId=' + comId + '&interval=' + interval + '&duration=' + duration +
             '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
-            end: function() {
+            end: function () {
                 var order = {
                     biz: 'realtime',
                     bizType: 'cancel',
@@ -486,20 +630,20 @@ $(function() {
     function remoteControl(mode) {
         var carNumber = trimAll($("#search_text").val());
         if (carNumber == "") {
-            layer.alert('未选择系统已有车辆！', { icon: 0 }, function(index2) {
+            layer.alert('未选择系统已有车辆！', {icon: 0}, function (index2) {
                 layer.close(index2);
                 $("#search_text").focus();
             });
             return;
         }
         $.getJSON("../../manage/car/getCarByNo.do", encodeURI("carNo=" + carNumber),
-            function(data) {
+            function (data) {
                 if (isNull(data)) {
                     layer.alert(carNumber + '不在车辆列表中，请重新选择车辆或先将' + carNumber + '添加到车辆列表中再绑定车载终端。');
                     return;
                 }
                 if (data.vehicleDevice == null || data.vehicleDevice.deviceId == null || data.vehicleDevice.deviceId == 0) {
-                    layer.alert(carNumber + '未绑定车载终端！', { icon: 5 });
+                    layer.alert(carNumber + '未绑定车载终端！', {icon: 5});
                     return;
                 }
                 layer.open({
@@ -515,24 +659,24 @@ $(function() {
         );
     }
 
-    $("#into_oildepot").click(function() {
+    $("#into_oildepot").click(function () {
         remoteControl(1);
     });
-    $("#quit_oildepot").click(function() {
+    $("#quit_oildepot").click(function () {
         remoteControl(2);
     });
-    $("#into_gasstation").click(function() {
+    $("#into_gasstation").click(function () {
         remoteControl(3);
     });
-    $("#quit_gasstation").click(function() {
+    $("#quit_gasstation").click(function () {
         remoteControl(4);
     });
-    $("#alter_status").click(function() {
+    $("#alter_status").click(function () {
         remoteControl(5);
     });
 
     /** 开锁重置 */
-    $("#unlock_reset").click(function() {
+    $("#unlock_reset").click(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -545,19 +689,19 @@ $(function() {
     });
 
     /** 车辆远程换站 */
-    $("#change_station").click(function() {
+    $("#change_station").click(function () {
         var carNumber = trimAll($("#search_text").val());
         if (carNumber == "") {
-            layer.alert('未选择系统已有车辆！', { icon: 0 }, function(index2) {
+            layer.alert('未选择系统已有车辆！', {icon: 0}, function (index2) {
                 layer.close(index2);
                 $("#search_text").focus();
             });
             return;
         }
         $.getJSON("../../manage/car/getDistribution.do", encodeURI("carNumber=" + carNumber),
-            function(data) {
+            function (data) {
                 if (data == undefined || data == null || data.length == 0) {
-                    layer.alert('当前车辆无处于配送中的配送单，不能换站，请查证后处理！', { icon: 5 });
+                    layer.alert('当前车辆无处于配送中的配送单，不能换站，请查证后处理！', {icon: 5});
                 } else {
                     layer.open({
                         type: 2,

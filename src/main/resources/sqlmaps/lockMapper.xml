@@ -15,7 +15,7 @@
         <result column="vehicle_number" property="carNumber" />
     </resultMap>
 	<sql id="select_colums">
-		l.*,fn_type2name('lockType',l.seat) seat_name,c.vehicle_number vehicle_number
+		l.*,fn_type2name('lockSeat',l.seat) seat_name,c.vehicle_number vehicle_number
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
@@ -113,5 +113,32 @@
 	    ) t2
 		ON t1.lock_device_id = t2.lock_device_id
 	</select>
+
+	<select id="findlocksByCarNo" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+            l.store_id,
+            l.seat,
+            l.seat_index,
+            l.lock_device_id,
+            l.is_allowed_open,
+            l.bind_status,
+            l.is_has_bind,
+            l.lock_index,
+            IFNULL( s.`status`, 0 ) `status`
+        FROM
+            tbl_lock l
+            LEFT JOIN tbl_lock_status s ON l.store_id = s.store_id
+            AND l.seat = s.seat
+            AND l.seat_index = s.seat_index
+            AND l.lock_device_id = s.lock_device_id
+            AND s.change_time = ( SELECT MAX( t.change_time ) FROM tbl_lock_status t WHERE t.store_id = s.store_id
+                                                                                    AND t.seat = s.seat
+                                                                                    AND t.seat_index = s.seat_index
+                                                                                    AND t.lock_device_id = s.lock_device_id ),
+            tbl_vehicle v
+        WHERE
+            l.vehicle_id = v.id
+            AND v.vehicle_number = #{carNumber}
+    </select>
 	
 </mapper>

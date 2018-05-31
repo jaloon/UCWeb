@@ -151,41 +151,9 @@
         <div class="base-info">
             <table class="base-table">
                 <tr>
-                    <td>卡ID:</td>
+                    <td>配送卡ID:</td>
                     <td>
                         <input type="text" class="editInfo" id="cid" readonly>
-                    </td>
-                </tr>
-                <tr>
-                    <td>卡类型:</td>
-                    <td>
-                        <input type="hidden" required>
-                        <select class="editInfo" id="type">
-                            <option value=1>应急卡</option>
-                            <option value=2>入库卡</option>
-                            <option value=3>出库卡</option>
-                            <option value=4>出入库卡</option>
-                            <option value=5>普通卡</option>
-                            <option value=6>管理卡</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>负责人:</td>
-                    <td>
-                        <input type="text" class="editInfo" id="director" required>
-                    </td>
-                </tr>
-                <tr>
-                    <td>联系电话:</td>
-                    <td>
-                        <input type="tel" class="editInfo" id="phone">
-                    </td>
-                </tr>
-                <tr>
-                    <td>身份证号:</td>
-                    <td>
-                        <input type="text" class="editInfo" id="identity">
                     </td>
                 </tr>
                 <tr>
@@ -233,10 +201,6 @@
 
 
     $(function () {
-        // 必填字段添加星号标识
-        $('input[required]').each(function() {
-            $(this).closest('tr').children().first().prepend('<span style="color:red">* </span>');
-        });
 
         var pageInit = true;
         var isComOpen = false;
@@ -382,76 +346,16 @@
 
         $("#confirm").click(function () {
             var cid = $("#cid").val();
-            var type = $("#type").val();
-            var director = $.trim($("#director").val());
-            var phone = $.trim($("#phone").val());
-            var identity = $.trim($("#identity").val());
             var remark = $.trim($("#remark").val());
-            var url = "../../manage/card/add.do";
-            var param = "cardId=" + cid + "&type=" + type + "&director=" + director + "&phone=" + phone + "&identityCard=" + identity + "&remark=" + remark;
+            var url = "../../manage/transcard/add.do";
+            var param = "transportCardId=" + cid + "&remark=" + remark;
             if (isNull(cid)) {
-                layer.alert('卡ID不能为空！', {icon: 0}, function (index2) {
+                layer.alert('配送卡ID不能为空！', {icon: 0}, function (index2) {
                     layer.close(index2);
                     $("#cid").select();
                 });
                 return;
-            } else {
-                var ajaxFlag = true; //ajax执行结果标记，用于判断是否中断整个程序（return若放在ajax回调函数中，则无法跳出ajax）
-                $.ajax({
-                    type: "post",
-                    async: false, //不异步，先执行完ajax，再干别的
-                    url: "../../manage/card/isExist.do",
-                    data: encodeURI("cardId=" + cid),
-                    dataType: "json",
-                    success: function (response) {
-                        if (response == true || response == "true") {
-                            ajaxFlag = false;
-                            layer.alert('卡ID已存在！', {icon: 5}, function (index2) {
-                                layer.close(index2);
-                                $("#cid").select();
-                            });
-                        }
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                            layer.confirm('登录失效，是否刷新页面重新登录？', {
-                                icon: 0,
-                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                            }, function () {
-                                location.reload(true);
-                            });
-                        }
-                    }
-                });
-                if (!ajaxFlag) {
-                    return;
-                }
             }
-
-            if (isNull(director)) {
-                layer.alert('负责人不能为空！', {icon: 2}, function (index2) {
-                    layer.close(index2);
-                    $("#director").select();
-                });
-                return;
-            }
-
-            // if (!isPhone(phone)) {
-            //     layer.alert('电话号码不正确！', {icon: 5}, function (index2) {
-            //         layer.close(index2);
-            //         $("#phone").select();
-            //     });
-            //     return;
-            // }
-            //
-            // if (!isIdCard(identity)) {
-            //     layer.alert('身份证号不正确！', {icon: 5}, function (index2) {
-            //         layer.close(index2);
-            //         $("#identity").select();
-            //     });
-            //     return;
-            // }
-
 
             $.post(url, encodeURI(param),
                 function (data) {

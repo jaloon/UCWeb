@@ -42,7 +42,7 @@
     <script type="text/javascript">
     <pop:Permission ename="editRole">
     deleteRole = function(id, app) {
-        if (id < 8) {
+        if (id < 21) {
             layer.alert('系统内置角色，不可删除！', { icon: 6 });
         } else {
             layer.confirm('删除后不可撤销，是否确认删除？', {
@@ -106,19 +106,26 @@
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var role = roles[i];
-                    tableData += "<tr onclick=\"dispatch('edit'," + role.id + ")\">" +
-                        "<td class=\"role-id\">" + role.id + "</td>" +
+                    if (role.id > 20) {
+                        tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + role.id + ")\">";
+                    } else {
+                        tableData += "<tr>";
+                    }
+                    tableData += "<td class=\"role-id\">" + role.id + "</td>" +
                         "<td class=\"role-name\">" + role.name + "</td>" +
                         "<td class=\"role-app\">" + (role.isApp == 0 ? "否" : "是") + "</td>" +
                         // "<td class=\"role-permissions\">" + role.permissionIds + "</td>" +
                         "<td class=\"role-remark\">" + role.remark + "</td>" +
                         "<td class=\"role-action\">" +
-                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + role.id + ")\">" +
-                        <pop:Permission ename="editRole">
-                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + role.id + ")\">&emsp;" +
-                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteRole(" + role.id + "," + role.isApp + ")\">" +
-                        </pop:Permission>
-                        "</td>" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + role.id + ")\">";
+                    <pop:Permission ename="editRole">
+                    if (role.id > 20) {
+                        tableData += "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + role.id + ")\">&emsp;" +
+                            "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteRole(" + role.id + "," + role.isApp + ")\">";
+
+                    }
+                    </pop:Permission>
+                     tableData += "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

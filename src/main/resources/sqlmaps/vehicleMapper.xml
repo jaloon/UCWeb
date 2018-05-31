@@ -308,7 +308,7 @@
 			t.id = #{transportId}
 	</select>
 	
-	<select id="findTracks" parameterType="com.tipray.bean.VehicleTrack" resultType="com.tipray.bean.VehicleTrack" useCache="false">
+	<select id="findTracks" parameterType="com.tipray.bean.VehicleTrack" resultType="com.tipray.bean.VehicleTrack">
 		SELECT
 			c.id id,
 			c.vehicle_number carNumber,
@@ -505,9 +505,9 @@
 
     <resultMap id="carMap" type="java.util.Map">
         <result column="id" property="id" javaType="java.lang.Long" />
-        <result column="vehicle_number" property="vehicle_number" javaType="java.lang.Long" />
-        <result column="vehicle_device_id" property="vehicle_device_id" javaType="java.lang.Long" />
-        <result column="store_num" property="store_num" javaType="java.lang.Long" />
+        <result column="vehicle_number" property="vehicle_number" javaType="java.lang.String" />
+        <result column="vehicle_device_id" property="vehicle_device_id" javaType="java.lang.Integer" />
+        <result column="store_num" property="store_num" javaType="java.lang.Integer" />
         <result column="transport_card_id" property="transport_card_id" javaType="java.lang.Long" />
     </resultMap>
     <select id="getByCarNoForApp" parameterType="java.lang.String" resultMap="carMap">
@@ -538,4 +538,40 @@
             AND v.id = s.vehicle_id
             AND s.is_online = 1
     </select>
+
+    <select id="findAllCarsForApp" resultMap="carMap">
+        SELECT
+            v.id,
+            v.vehicle_number,
+            v.vehicle_device_id,
+            v.store_num,
+            v.transport_card_id
+        FROM
+            tbl_vehicle v
+        WHERE
+            v.vehicle_device_id != 0
+            AND v.is_invalid = 0
+    </select>
+    
+    <select id="findOnlineCarIds" resultType="java.lang.Long">
+        <![CDATA[
+            SELECT
+                vehicle_id
+            FROM
+                tbl_vehicle_realtime_status
+            WHERE
+                is_online = 1
+                AND TIMESTAMPDIFF(SECOND, last_online_time, NOW()) <= 400;
+        ]]>
+    </select>
+
+    <update id="updateTimeoutOfflineCars">
+        <![CDATA[
+            UPDATE tbl_vehicle_realtime_status
+            SET is_online = 0
+            WHERE
+                is_online = 1
+                AND TIMESTAMPDIFF(SECOND, last_online_time, NOW()) > 400;
+        ]]>
+    </update>
 </mapper>

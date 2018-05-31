@@ -203,6 +203,15 @@
     border-bottom: 1px solid #e6e7e9;
 }
 
+/** alarm  */
+.alarm-content {
+    cursor: pointer;
+}
+
+.alarm-content:hover {
+    background: #e1e5f0;
+}
+
 .alarm-id {
     width: 100px;
 }
@@ -217,6 +226,11 @@
 
 .alarm-eli {
     width: 99px;
+    cursor: pointer;
+}
+
+.alarm-eli:hover {
+    background: #5ca1f7;
 }
 
 .highlight {

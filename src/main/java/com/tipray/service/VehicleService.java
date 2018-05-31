@@ -318,6 +318,12 @@ public interface VehicleService {
      */
     List<Map<String, Object>> findOnlineCarsForApp();
 
+    /**
+     * 获取所有车辆信息（车牌号、仓数、设备ID、配送卡）
+     *
+     * @return {@link Map} {id, vehicle_number, vehicle_device_id, store_num, transport_card_id}
+     */
+    List<Map<String, Object>> findAllCarsForApp();
 
     /**
      * 根据配送ID获取配送信息
@@ -378,4 +384,10 @@ public interface VehicleService {
      */
     List<String> findCarNumbersByTerminalIds(String terminalIds);
 
+    /**
+     * 车辆在线状态监测
+     *
+     * @return {@link Long} 在线车辆ID集合
+     */
+    List<Long> monitorVehicleOnline();
 }

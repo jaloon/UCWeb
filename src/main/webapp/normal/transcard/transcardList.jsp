@@ -20,6 +20,20 @@
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/transcard/transcardList.js"></script>
     <style type="text/css">
+        #reader {
+            width: 100px;
+            height: 36px;
+            font-size: 16px;
+            background: #478de4;
+            border: 0;
+            border-radius: 3px;
+            color: white;
+            position: relative;
+            float: right;
+            top: 10px;
+            margin-right: 30px;
+        }
+
         .transcard-id {
             width: 200px;
         }
@@ -99,7 +113,7 @@
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var transcard = transcards[i];
-                    tableData += "<tr onclick=\"dispatch('edit'," + transcard.id + ")\">" +
+                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + transcard.id + ")\">" +
                         "<td class=\"transcard-id\">" + transcard.transportCardId + "</td>";
                    	if (transcard.carNumber == undefined) {
                    		tableData += "<td class=\"transcard-carno\"></td>";
@@ -108,10 +122,10 @@
                    	}
                    	tableData += "<td class=\"transcard-remark\">" + transcard.remark + "</td>" +
                         "<td class=\"transcard-action\">" +
-                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + transcard.id + ")\">" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + transcard.id + ")\">" +
                         <pop:Permission ename="editTranscard">
-                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + transcard.id + ")\">&emsp;" +
-                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteTranscard(" + transcard.id + ")\">" +
+                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + transcard.id + ")\">&emsp;" +
+                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteTranscard(" + transcard.id + ")\">" +
                         </pop:Permission>
                         "</td>" +
                         "</tr>";
@@ -146,6 +160,20 @@
             <input type="text" class="search-text" id="search_text">
             <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editTranscard">
+            <input type="button" class="button" id="reader" value="批量添加" onclick="findCardByReader()">
+            <script>
+                $("#reader").click(function () {
+                    layer.open({
+                        type: 2,
+                        title: ['卡管理（读卡器批量添加卡）', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                        shadeClose: true,
+                        shade: 0.8,
+                        resize: false,
+                        area: ['606px', '430px'],
+                        content: 'cardReader.html'
+                    });
+                });
+            </script>
             <input type="button" class="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>

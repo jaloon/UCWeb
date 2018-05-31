@@ -94,11 +94,14 @@ public class ExternalInterface extends BaseAction {
                 Integer online = (Integer) onlineMap.get("is_online");
                 Integer vehicleId = (Integer) onlineMap.get("vehicle_id");
                 if (online == null || vehicleId == null) {
+                    logger.warn("在线信息有空值：online={}, vehicleId={}", online, vehicleId);
                     return;
                 }
-                if (online == 0) {
-                    monitorWebSocketHandler.dealOfflineUpload(vehicleId.longValue());
+                if (online < 0 || online > 1) {
+                    logger.warn("在线状态越界：online={}", online);
+                    return;
                 }
+                monitorWebSocketHandler.dealOnlineUpload(vehicleId.longValue(), online);
                 return;
             }
             if (StringUtil.isNotEmpty(vehicleCfg)) {
@@ -112,6 +115,7 @@ public class ExternalInterface extends BaseAction {
             }
         } catch (Exception e) {
             logger.error("处理监控信息异常：\n{}", e.toString());
+            logger.debug("处理监控信息异常堆栈信息：", e);
         }
     }
 

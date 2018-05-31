@@ -92,6 +92,7 @@ select.search-text {
     display: block;
     position: relative;
     /*给子ul定位用的*/
+    cursor: pointer;
 }
 
 #nav ul li:hover {
@@ -115,6 +116,7 @@ select.search-text {
     color: #445065;
     line-height: 36px;
     float: none;
+    cursor: pointer;
 }
 
 #nav ul li ul li:first-child {
@@ -287,6 +289,7 @@ select.search-text {
 .car-online {
     width: 120px;
 }
+
 /********************表格列end********************/
 
 /******************操作日志栏start*********************/
@@ -418,6 +421,12 @@ select.editInfo {
     top: 50%;
     margin-top: -15px;
     right: 124px;
+    cursor: pointer;
+}
+
+#cancel:hover {
+    color: #5ca1f7;
+    border-color: #5ca1f7;
 }
 
 #confirm {
@@ -431,6 +440,11 @@ select.editInfo {
     top: 50%;
     margin-top: -15px;
     right: 14px;
+    cursor: pointer;
+}
+
+#confirm:hover {
+    background: #5ca1f7;
 }
 
 /*************************hidden-box end**************************/

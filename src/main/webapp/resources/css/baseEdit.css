@@ -3,7 +3,7 @@
     background: #ffffff;
 }
 
-.container>table {
+.container > table {
     width: 480px;
     position: relative;
     left: 30px;
@@ -49,6 +49,12 @@ tr td:first-child {
     top: 50%;
     margin-top: -15px;
     right: 124px;
+    cursor: pointer;
+}
+
+#cancel:hover {
+    color: #5ca1f7;
+    border-color: #5ca1f7;
 }
 
 #confirm {
@@ -62,8 +68,13 @@ tr td:first-child {
     top: 50%;
     margin-top: -15px;
     right: 14px;
+    cursor: pointer;
 }
 
-input[readonly]{
-	background:#e6e7e9;
+#confirm:hover {
+    background: #5ca1f7;
+}
+
+input[readonly] {
+    background: #e6e7e9;
 }

@@ -7,20 +7,6 @@
  */
 
 /**
- * 休眠
- * @param {number} numberMillis 毫秒数
- */
-function sleep(numberMillis) {
-    var now = new Date();
-    var exitTime = now.getTime() + numberMillis;
-    while (true) {
-        now = new Date();
-        if (now.getTime() > exitTime)
-            return;
-    }
-}
-
-/**
  * 空对象判断
  * @param {*} obj
  */

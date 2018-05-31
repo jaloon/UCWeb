@@ -156,7 +156,7 @@
 	                            <td>操作</td>
 	                        </tr>
 	                        <tr>
-	                            <td><img alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addTr()"></td>
+	                            <td><img style="cursor: pointer;" alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addTr()"></td>
 	                            <td></td>
 	                            <td></td>
 	                            <td></td>
@@ -264,7 +264,7 @@
 	                            </tr>
 	                        </c:forEach>
 	                        <tr>
-	                            <td><img alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addTr()"></td>
+	                            <td><img style="cursor: pointer;" alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addTr()"></td>
 	                            <td></td>
 	                            <td></td>
 	                            <td></td>
@@ -388,7 +388,7 @@
 	                                <td>${lock.index}</td>
 	                                <td>${lock.lockId}</td>
 	                                <td>${lock.storeId}</td>
-	                                <td>${lock.seat}</td>
+	                                <td>${lock.seatName}</td>
 	                                <td>${lock.seatIndex}</td>
 	                                <td>${lock.remark}</td>
 	                            </tr>

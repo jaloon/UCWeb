@@ -126,7 +126,7 @@
 	                var tableData = "<table width='100%'>";
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var car = cars[i];
-	                    tableData += "<tr onclick=\"dispatch('edit'," + car.id + ")\">" +
+	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + car.id + ")\">" +
 	                        "<td class=\"car-num\">" + car.carNumber + "</td>" +
 	                        "<td class=\"car-company\">" + (car.transCompany.name == undefined ? "" : car.transCompany.name) + "</td>" +
 	                        "<td class=\"car-type\">" + car.typeName + "</td>";
@@ -148,10 +148,10 @@
 	                    tableData += "<td class=\"car-store\">" + car.storeNum + "</td>" +
 	                        "<td class=\"car-remark\">" + car.remark + "</td>" +
 	                        "<td class=\"car-action\">" +
-	                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + car.id + ")\">" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + car.id + ")\">" +
 	                       	<pop:Permission ename="editCar">
-	                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + car.id + ")\">&emsp;" +
-	                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteCar(" + car.id + "," + car.carNumber + ")\">" +
+	                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + car.id + ")\">&emsp;" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteCar(" + car.id + "," + car.carNumber + ")\">" +
 	                        </pop:Permission>
 	                        "</td>" +
 	                        "</tr>";
@@ -189,9 +189,9 @@
                 <option value="2">所属公司</option>
             </select>
             <input type="text" class="search-text" id="search_text">
-            <input type="button" class="search-btn" id="search_btn" value="查询">
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editCar">
-            <input type="button" id="add" value="添加" onclick="dispatch('add',0)">
+            <input type="button" class="button" id="add" value="添加" onclick="dispatch('add',0)">
             </pop:Permission>
         </div>
         <div class="data-zone">

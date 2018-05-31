@@ -117,15 +117,15 @@
                         } else {
                         	tableData += "<td class=\"handset-gasstation\">" + handset.gasStation.name + "</td>";
                         }
-                        tableData += "<td class=\"handset-director\">" + handset.director + "</td>" +
+                        tableData += "<td class='list-content' class=\"handset-director\">" + handset.director + "</td>" +
 	                        "<td class=\"handset-phone\">" + handset.phone + "</td>" +
 	                        "<td class=\"handset-identity\">" + handset.identityCard + "</td>" +
 	                        "<td class=\"handset-remark\">" + handset.remark + "</td>" +
 	                        "<td class=\"handset-action\">" +
-	                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + handset.id + ")\">" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + handset.id + ")\">" +
 	                        <pop:Permission ename="editHandset">
-	                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + handset.id + ")\">&emsp;" +
-	                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteHandset(" + handset.id + ")\">" +
+	                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + handset.id + ")\">&emsp;" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteHandset(" + handset.id + ")\">" +
 	                        </pop:Permission>
 	                        "</td>" +
 	                        "</tr>";

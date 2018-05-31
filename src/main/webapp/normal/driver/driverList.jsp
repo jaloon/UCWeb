@@ -107,17 +107,17 @@
 	                var tableData = "<table width='100%'>";
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var driver = drivers[i];
-	                    tableData += "<tr onclick=\"dispatch('edit'," + driver.id + ")\">" +
+	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + driver.id + ")\">" +
 	                        "<td class=\"driver-name\">" + driver.name + "</td>" +
 	                        "<td class=\"driver-phone\">" + driver.phone + "</td>" +
 	                        "<td class=\"driver-identity\">" + driver.identityCard + "</td>" +
 	                        "<td class=\"driver-address\">" + driver.address + "</td>" +
 	                        "<td class=\"driver-remark\">" + driver.remark + "</td>" +
 	                        "<td class=\"driver-action\">" +
-	                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + driver.id + ")\">" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + driver.id + ")\">" +
 	                        <pop:Permission ename="editDriver">
-	                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + driver.id + ")\">&emsp;" +
-	                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteDriver(" + driver.id + ")\">" +
+	                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + driver.id + ")\">&emsp;" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteDriver(" + driver.id + ")\">" +
 	                        </pop:Permission>
 	                        "</td>" +
 	                        "</tr>";

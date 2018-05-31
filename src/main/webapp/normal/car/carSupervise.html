@@ -17,10 +17,8 @@
     <!--<script src="../../resources/plugins/laydate/laydate.js"></script>-->
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/plugins/jRange/jquery.range-min.js"></script>
-    <script src="../../resources/plugins/ConcurrentThread/Concurrent.Thread.min.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/js/base.js"></script>
-    <script src="../../resources/js/car/carSupervise.js"></script>
     <!--加载百度地图api-->
     <script type="text/javascript"
             src="http://api.map.baidu.com/api?v=2.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt"></script>
@@ -39,7 +37,7 @@
         <select class="search-text" id="search_text">
             <option value="">车牌号</option>
         </select>
-        <input type="button" class="search-btn" id="search_btn" value="查询">
+        <input type="button" class="search-btn button" id="search_btn" value="查询">
         <div id="nav">
             <ul>
                 <li>设备绑定
@@ -94,18 +92,18 @@
                             <div class="table-list" id="table-cont">
                                 <table width="100%">
                                     <thead class="table-head">
-                                        <tr>
-                                            <th class="car-num">车牌号码</th>
-                                            <th class="car-company">所属公司</th>
-                                            <!--<th class="car-type">车辆类型</th>-->
-                                            <th class="car-coordinate">经纬度</th>
-                                            <th class="car-velocity">速度</th>
-                                            <th class="car-aspect">方向</th>
-                                            <th class="car-status">车辆状态</th>
-                                            <!--<th class="car-lock">锁状态</th>-->
-                                            <th class="car-alarm">报警</th>
-                                            <th class="car-online">在线状态</th>
-                                        </tr>
+                                    <tr>
+                                        <th class="car-num">车牌号码</th>
+                                        <th class="car-company">所属公司</th>
+                                        <!--<th class="car-type">车辆类型</th>-->
+                                        <th class="car-coordinate">经纬度</th>
+                                        <th class="car-velocity">速度</th>
+                                        <th class="car-aspect">方向</th>
+                                        <th class="car-status">车辆状态</th>
+                                        <!--<th class="car-lock">锁状态</th>-->
+                                        <th class="car-alarm">报警</th>
+                                        <th class="car-online">在线状态</th>
+                                    </tr>
                                     </thead>
                                     <tbody class="table-body"></tbody>
                                 </table>
@@ -152,13 +150,13 @@
                 <tr>
                     <td>轨迹上报间隔（秒）</td>
                     <td>
-                        <input type="hidden" id="interval" value="5" />
+                        <input type="hidden" id="interval" value="5"/>
                     </td>
                 </tr>
                 <tr>
                     <td>监控时长（分钟）</td>
                     <td>
-                        <input type="hidden" id="duration" value="30" />
+                        <input type="hidden" id="duration" value="30"/>
                     </td>
                 </tr>
             </table>
@@ -172,3 +170,4 @@
 </body>
 
 </html>
+<script src="../../resources/js/car/carSupervise.js"></script>

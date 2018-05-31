@@ -9,10 +9,8 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * 字节相关测试
@@ -23,6 +21,24 @@ import java.util.Random;
  */
 @SuppressWarnings({ "unused" })
 public class ByteTest {
+    @Test
+    public void test01(){
+        Set<Long> set = new CopyOnWriteArraySet<>();
+        set.add(1L);
+        set.add(2L);
+        set.add(3L);
+        set.add(4L);
+        set.add(5L);
+        set.add(1L);
+        List<Long> list = new ArrayList<>();
+        list.add(1L);
+        list.add(2L);
+        list.add(3L);
+        list.add(6L);
+        set.removeAll(list);
+        System.out.println(Arrays.toString(set.toArray()));
+    }
+
      @Test
      public void test0() {
          VehicleTerminalConfig config = new VehicleTerminalConfig();

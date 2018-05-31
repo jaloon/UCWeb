@@ -170,7 +170,7 @@
     <div class="main">
         <c:set var="mainAuth" value="<%=com.tipray.core.ThreadVariable.mainAuth()%>"></c:set>
         <c:if test="${mainAuth==true}">
-            <iframe src="normal/car/carSupervise.html?ctx=${pageContext.request.contextPath}"
+            <iframe src="normal/car/carSupervise.html?user=${user.id}&ctx=${pageContext.request.contextPath}"
                     frameborder="0" name="showContent" width="100%" height="100%"></iframe>
         </c:if>
         <c:if test="${mainAuth==false}">

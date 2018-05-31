@@ -145,7 +145,7 @@
 	                var tableData = "<table width='100%'>";
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var gasstation = gasstations[i];
-	                    tableData += "<tr onclick=\"dispatch('edit'," + gasstation.id + ")\">" +
+	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + gasstation.id + ")\">" +
 	                        "<td class=\"gasstation-id\">" + gasstation.officialId + "</td>" +
 	                        "<td class=\"gasstation-name\">" + gasstation.name + "</td>" +
 	                        "<td class=\"gasstation-abbr\">" + gasstation.abbr + "</td>" +
@@ -156,10 +156,10 @@
 	                        "<td class=\"gasstation-company\">" + gasstation.company + "</td>" +
 	                        "<td class=\"gasstation-remark\">" + gasstation.remark + "</td>" +
 	                        "<td class=\"gasstation-action\">" +
-	                        "<img src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + gasstation.id + ")\">" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + gasstation.id + ")\">" +
 	                        <pop:Permission ename="editGasstation">
-	                        "&emsp;<img src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + gasstation.id + ")\">&emsp;" +
-	                        "<img src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteGasstation(" + gasstation.id + ")\">" +
+	                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + gasstation.id + ")\">&emsp;" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteGasstation(" + gasstation.id + ")\">" +
 	                        </pop:Permission>
 	                        "</td>" +
 	                        "</tr>";

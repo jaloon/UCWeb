@@ -207,4 +207,13 @@ public class UdpReceiveResultHandler {
         MONITOR_WEB_SOCKET_HANDLER.dealTrackUploadByUdp(carId, trackList);
     }
 
+    /**
+     * 检测车辆是否在线
+     *
+     * @param carId {@link Long} 车辆ID
+     * @return {@link Boolean} 车辆是否在线
+     */
+    public static boolean checkCarOnline(long carId) {
+        return MONITOR_WEB_SOCKET_HANDLER.checkCarOnline(carId);
+    }
 }

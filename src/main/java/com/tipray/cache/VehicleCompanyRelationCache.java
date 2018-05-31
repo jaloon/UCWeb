@@ -1,13 +1,12 @@
 package com.tipray.cache;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.tipray.util.JDBCUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tipray.util.JDBCUtil;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 车辆与所属运输公司对应关系缓存
@@ -67,7 +66,7 @@ public class VehicleCompanyRelationCache {
 		} finally {
 			JDBC_UTIL.close();
 		}
-		return null;
+		return "";
 	}
 
 	private VehicleCompanyRelationCache() {

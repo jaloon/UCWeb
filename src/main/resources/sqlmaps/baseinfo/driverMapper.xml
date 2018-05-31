@@ -78,12 +78,18 @@
 		where d.is_invalid=0 and d.id=#{id}
 	</select>
 	
-	<select id="findByCarNo" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+	<select id="findByCarNoForApp" parameterType="java.lang.String" resultType="java.util.Map">
+		select d.name, d.phone
 		from tbl_driver d
 		where d.is_invalid=0 and d.vehicle_number=#{carNo}
 	</select>
-	
+
+	<select id="findByCarNo" parameterType="java.lang.String" resultMap="fullResultMap">
+		select <include refid="select_colums"></include>
+		from tbl_driver d
+		where d.is_invalid=0 and d.vehicle_number=#{carNo}
+	</select>
+
 	<select id="findFreeDrivers" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_driver d

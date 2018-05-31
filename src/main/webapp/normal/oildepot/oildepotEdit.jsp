@@ -341,7 +341,7 @@
 	                            </tr>
 	                        </c:forEach>
 	                        <tr>
-	                            <td><img alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addReaderTr()"></td>
+	                            <td><img style="cursor: pointer;" alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addReaderTr()"></td>
 	                            <td></td>
 	                            <td></td>
 	                        </tr>
@@ -364,7 +364,7 @@
 	                            </tr>
 	                        </c:forEach>
 	                        <tr>
-	                            <td><img alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addTr()"></td>
+	                            <td><img style="cursor: pointer;" alt="添加" title="添加" src="../../resources/images/operate/addNew.png" onclick="addTr()"></td>
 	                            <td></td>
 	                            <td></td>
 	                            <td></td>

@@ -358,6 +358,16 @@ public class VehicleController extends BaseAction {
     }
 
     /**
+     * 获取所有车辆信息
+     * @return
+     */
+    @RequestMapping(value = "findAllCars.do")
+    @ResponseBody
+    public List<Map<String, Object>> findAllCarsForApp(){
+        return vehicleService.findAllCarsForApp();
+    }
+
+    /**
      * 网页车辆选择控件数据获取接口
      *
      * @return

@@ -354,14 +354,20 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public List<Map<String,Object>> findlocksByCarNo(String carNumber) {
         if (StringUtil.isEmpty(carNumber)) {
-
-        }
-        return null;
+			return null;
+		}
+		List<Map<String,Object>> locks = lockDao.findlocksByCarNo(carNumber);
+		return locks;
     }
 
     @Override
     public List<Map<String, Object>> findOnlineCarsForApp(){
 	    return vehicleDao.findOnlineCarsForApp();
+    }
+
+    @Override
+    public List<Map<String, Object>> findAllCarsForApp(){
+	    return vehicleDao.findAllCarsForApp();
     }
 
 	@Override
@@ -401,5 +407,12 @@ public class VehicleServiceImpl implements VehicleService {
     public List<String> findCarNumbersByTerminalIds(String terminalIds) {
         return StringUtil.isEmpty(terminalIds) ? null : vehicleDao.findCarNumbersByTerminalIds(terminalIds);
     }
+
+	@Override
+	public List<Long> monitorVehicleOnline() {
+		List<Long> onlineCars = vehicleDao.findOnlineCarIds();
+		vehicleDao.updateTimeoutOfflineCars();
+		return onlineCars;
+	}
 
 }

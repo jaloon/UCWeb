@@ -300,4 +300,22 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      */
     List<Map<String, Object>> findOnlineCarsForApp();
 
+    /**
+     * 获取所有车辆信息（车牌号、仓数、设备ID、配送卡）
+     *
+     * @return {@link Map} {id, vehicle_number, vehicle_device_id, store_num, transport_card_id}
+     */
+    List<Map<String, Object>> findAllCarsForApp();
+
+    /**
+     * 获取在线车辆ID集合
+     *
+     * @return {@link Long} 在线车辆ID集合
+     */
+    List<Long> findOnlineCarIds();
+
+    /**
+     * 更新最后在线时间距现在超过6分钟的车辆在线状态为离线（超时用400秒）
+     */
+    void updateTimeoutOfflineCars();
 }
