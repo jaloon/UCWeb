@@ -1,19 +1,13 @@
 package com.tipray.cache;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tipray.util.EmptyObjectUtil;
-import com.tipray.util.FileUtil;
+import java.io.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 序列号缓存
@@ -25,7 +19,7 @@ import com.tipray.util.FileUtil;
  * @version 1.0 2018-01-12
  *
  */
-public class SerialNumberCache {
+public final class SerialNumberCache {
 	private static final Logger logger = LoggerFactory.getLogger(SerialNumberCache.class);
 	private static final Map<Short, Short> SERIAL_NUMBER_MAP = new ConcurrentHashMap<>();
 	private static final File CACHE_FILE = new File(FileUtil.getWebClassesPath() + "com/tipray/cache/serialNumber.cache");

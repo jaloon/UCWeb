@@ -1,14 +1,16 @@
-package com.tipray.bean;
+package com.tipray.bean.track;
+
+import com.tipray.bean.Record;
 
 import java.util.Map;
 
 /**
- * 车辆轨迹
+ * 车辆轨迹（轨迹回放）
  *
  * @author chenlong
  * @version 1.0 2018-01-22
  */
-public class VehicleTrack extends Record {
+public class ReTrack extends Record {
     private static final long serialVersionUID = 1L;
     private String carStatus;
     private boolean alarm;
@@ -88,7 +90,7 @@ public class VehicleTrack extends Record {
         if (getEnd() != null) {
             sb.append(", end='").append(getEnd()).append('\'');
         }
-        sb.replace(0, 2, "VehicleTrack{");
+        sb.replace(0, 2, "ReTrack{");
         sb.append('}');
         return sb.toString();
     }

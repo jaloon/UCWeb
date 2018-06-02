@@ -77,6 +77,13 @@
         <!-- 注意点：在classpath后面的*必不可少，缺少型号的话后面的通配符不起作用。**表示可以表示任意多级目录，*表示多个任意字符 -->
         <property name="mapperLocations" value="classpath*:/sqlmaps/**/*Mapper.xml"/>
         <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+
+        <property name="plugins">
+            <array>
+                <!-- Mybatis返回Map而不是List<Map>插件 -->
+                <bean class="com.tipray.core.interceptor.MapResultInterceptor"/>
+            </array>
+        </property>
     </bean>
 
     <!-- scan -->

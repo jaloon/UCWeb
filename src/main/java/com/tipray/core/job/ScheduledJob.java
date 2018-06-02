@@ -1,9 +1,9 @@
 package com.tipray.core.job;
 
+import com.tipray.bean.track.LastTrack;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.service.VehicleService;
-import com.tipray.util.EmptyObjectUtil;
 import com.tipray.websocket.MonitorWebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 定时任务
@@ -43,17 +44,20 @@ public class ScheduledJob {
      * 车辆在线状态监测
      */
 	public void executeVehicleOnlineMonitor() {
-        List<Long> onlineCars = vehicleService.monitorVehicleOnline();
-        if (!EmptyObjectUtil.isEmptyList(onlineCars)) {
+        Map<Long, String> onlineCars = vehicleService.monitorVehicleOnline();
+        // if (!EmptyObjectUtil.isEmptyMap(onlineCars)) {
             monitorWebSocketHandler.monitorVehicleOnline(onlineCars);
-        }
+        // }
     }
 
     /**
      * 最新车辆轨迹查询
      */
     public void executeLastTtracksQuery() {
-
+        List<LastTrack> lastTracks = vehicleService.findLastTracks();
+        if (lastTracks == null) {
+            return;
+        }
+        monitorWebSocketHandler.pushLastTracks(lastTracks);
     }
-
 }

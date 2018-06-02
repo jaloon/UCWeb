@@ -6,20 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <link rel="stylesheet" href="iziToast/iziToast.min.css">
     <script src="jquery-3.2.1.min.js"></script>
     <script src="SelectBox.min.js"></script>
     <script src="iNotify/iNotify.js"></script>
+    <script src="iziToast/iziToast.min.js"></script>
 </head>
-
 
 <body>
 
-    <div id="select1">1546546456</div>
-    <div id="select3">1546546456</div>
-    <input type="button" id="test" value="test"><br>
+<div id="select1">1546546456</div>
+<div id="select3">1546546456</div>
+<input type="button" id="test" value="test"><br>
+<input type="button" id="test2" value="test2"><br>
 </body>
 <script>
-    $(function() {
+    var count = 0;
+    var count2 = 1;
+    $(function () {
         var iN = new iNotify({
             effect: 'flash',
             interval: 500,
@@ -36,16 +40,62 @@
         console.log(iN.isPermission());
 
         function inotifyTest() {
-            iN.setFavicon(10).setTitle('新标题').notify({
+            iN.setFavicon(count).setTitle('新标题').notify({
                 title: "新通知",
                 body: "欢迎来到UW3C技术分享~"
             })
         }
 
-        $("#test").click(() => {
-            inotifyTest()
-            console.log(iN.isPermission())
-    })
+        function iziToastTest() {
+            var toast = document.querySelector('.iziToast');
+            if (toast == null) {
+                count2 = 1;
+                iziToast.info({
+                    title: '报警通知',
+                    message: '报警信息'+count2,
+                    timeout: 1000,
+                    position: 'bottomRight',
+                    buttons: [
+                        ['<button>查看报警信息</button>', function(instance, toast) {
+                            instance.hide({ transitionOut: 'fadeOutUp' }, toast);
+                            console.log("查看报警信息");
+                        }]
+                    ]
+                });
+            } else {
+                iziToast.destroy();
+                count2++;
+                iziToast.info({
+                    title: '报警通知',
+                    message: count2,
+                    timeout: 5000,
+                    position: 'bottomRight',
+                    buttons: [
+                        ['<button>查看报警信息</button>', function(instance, toast) {
+                            instance.hide({ transitionOut: 'fadeOutUp' }, toast);
+                            console.log("查看报警信息");
+                        }]
+                    ]
+                });
+            }
+
+
+            // }else {
+            //     var toast = document.querySelector('.iziToast');
+            //     console.log(toast)
+            //     // iziToast.destroy();
+            // }
+        }
+
+        $("#test").click(function () {
+            count++;
+            inotifyTest();
+            console.log(iN.isPermission());
+        })
+        $("#test2").click(function () {
+            // count2++;
+            iziToastTest();
+        })
         //     var humens = [{
         //         html: '张三',
         //         value: '12岁',

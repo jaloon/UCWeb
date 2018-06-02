@@ -34,7 +34,11 @@
         .user-app {
             width: 100px;
         }
-        
+
+        .user-com {
+            width: 200px;
+        }
+
         .user-name {
             width: 100px;
         }
@@ -157,7 +161,8 @@
                     } else {
                     	tableData += "<td class=\"user-app\">" + user.appRole.name + "</td>";
                     } 
-                    tableData += "<td class=\"user-name\">" + user.name + "</td>" +
+                    tableData += "<td class=\"user-com\">" + user.comName + "</td>" +
+                        "<td class=\"user-name\">" + user.name + "</td>" +
                         "<td class=\"user-phone\">" + user.phone + "</td>" +
                         "<td class=\"user-card\">" + user.identityCard + "</td>" +
                         "<td class=\"user-remark\">" + user.remark + "</td>" +
@@ -217,6 +222,7 @@
                             <th class="user-account">账号</th>
                             <th class="user-role">角色</th>
                             <th class="user-app">APP角色</th>
+                            <th class="user-com">所属运输公司</th>
                             <th class="user-name">姓名</th>
                             <th class="user-phone">联系电话</th>
                             <th class="user-card">身份证号</th>

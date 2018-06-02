@@ -19,16 +19,23 @@
     <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/user/userEdit.js"></script>
     <style type="text/css">
+        tr td:first-child {
+            width: 100px;
+        }
+        input.editInfo {
+            width: 364px;
+        }
         select.editInfo {
-            width: 398px;
+            width: 378px;
             height: 28px;
         }
     </style>
+    <c:if test="${mode=='add' || mode=='edit'}">
     <script>
         $(function() {
             $.getJSON("../../manage/role/findAllRoles.do",
                 function(data) {
-                    for (let i = 0, len = data.length; i < len; i++) {
+                    for (var i = 0, len = data.length; i < len; i++) {
                     	var role = data[i];
                     	if (role.isApp > 0) {
                     		$("#appRoleId").append("<option value=" + role.id + ">" + role.name + "</option>");
@@ -51,8 +58,31 @@
                     });
                 }
             });
+            $.getJSON("../../manage/transcom/getCompanyList.do",
+                function(data) {
+                    var companies = eval(data);
+                    var len = companies.length;
+                    for (var i = 0; i < len; i++) {
+                        var company = companies[i];
+                        $("#comId").append("<option value=" + company.id + ">" + company.name + "</option>");
+                    }
+                    <c:if test="${mode=='edit'}">
+                    $("#comId").val("${user.comId}");
+                    </c:if>
+                }
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                    layer.confirm('登录失效，是否刷新页面重新登录？', {
+                        icon: 0,
+                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                    }, function() {
+                        location.reload(true);
+                    });
+                }
+            });
         });
     </script>
+    </c:if>
 </head>
 
 <body>
@@ -83,6 +113,12 @@
                     <td>APP角色:</td>
                     <td>
                         <input type="text" class="editInfo" id="appRole" value="${user.appRole.name}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>所属运输公司:</td>
+                    <td>
+                        <input type="text" class="editInfo" id="comName" value="${user.comName}" readonly>
                     </td>
                 </tr>
                 <tr>
@@ -133,6 +169,15 @@
                     	<input type="hidden" required>
                         <select class="editInfo" id="appRoleId">
                         	<option value=0>不授予APP角色</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>所属运输公司:</td>
+                    <td>
+                        <input type="hidden" required>
+                        <select class="editInfo" id="comId">
+                            <option value=0>无</option>
                         </select>
                     </td>
                 </tr>
@@ -197,6 +242,15 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>所属运输公司:</td>
+                    <td>
+                        <input type="hidden" required>
+                        <select class="editInfo" id="comId">
+                            <option value=0>无</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
                     <td>姓名:</td>
                     <td>
                         <input type="text" class="editInfo" id="name" value="${user.name}" required>
@@ -257,6 +311,13 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>所属运输公司:</td>
+                    <td>
+                        <input type="hidden" id="comId" value="${user.comId}">
+                        <input type="text" class="editInfo" id="comName" value="${user.comName}" readonly>
+                    </td>
+                </tr>
+                <tr>
                     <td>姓名:</td>
                     <td>
                         <input type="text" class="editInfo" id="name" value="${user.name}" required>
@@ -290,15 +351,15 @@
             <input type="hidden" id="id" class="editInfo" value="${user.id}">
             <table>
                 <tr>
-                    <td>原密码</td>
+                    <td>原密码:</td>
                     <td><input type="password" class="editInfo" id="oldPwd" required></td>
                 </tr>
                 <tr>
-                    <td>新密码</td>
+                    <td>新密码:</td>
                     <td><input type="password" class="editInfo" id="pwd" required></td>
                 </tr>
                 <tr>
-                    <td>确认密码</td>
+                    <td>确认新密码:</td>
                     <td><input type="password" class="editInfo" id="repwd" required></td>
                 </tr>
             </table>

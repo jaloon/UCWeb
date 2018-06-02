@@ -59,17 +59,20 @@ $(function() {
             var account = $.trim($("#account").val());
             var roleId = $("#roleId").val();
             var appRoleId = $("#appRoleId").val();
+            var comId = $("#comId").val();
             var name = $.trim($("#name").val());
             var phone = $.trim($("#phone").val());
             var identityCard = $.trim($("#identityCard").val());
             var remark = $.trim($("#remark").val());
             var url = "../../manage/user/update.do";
-            var param = "id=" + id + "&account=" + account + "&role.id=" + roleId + "&appRole.id=" + appRoleId + "&name=" + name + "&phone=" + phone + "&identityCard=" + identityCard + "&remark=" + remark;
+            var param = "id=" + id + "&account=" + account + "&role.id=" + roleId + "&appRole.id=" + appRoleId + "&comId="
+                + comId + "&name=" + name + "&phone=" + phone + "&identityCard=" + identityCard + "&remark=" + remark;
 
             if ("add" == mode) {
                 account = $.trim($("#account").val());
                 url = "../../manage/user/add.do";
-                param = "account=" + account + "&role.id=" + roleId + "&appRole.id=" + appRoleId + "&name=" + name + "&phone=" + phone + "&identityCard=" + identityCard + "&remark=" + remark;
+                param = "account=" + account + "&role.id=" + roleId + "&appRole.id=" + appRoleId + "&comId=" + comId +
+                    "&name=" + name + "&phone=" + phone + "&identityCard=" + identityCard + "&remark=" + remark;
                 success_zh_text = "添加成功！";
                 error_zh_text = "添加失败！";
                 if (!isAccount(account)) {

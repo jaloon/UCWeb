@@ -26,6 +26,14 @@ public class User extends BaseBean {
      */
     private Role appRole;
     /**
+     * 所属车队ID
+     */
+    private Long comId;
+    /**
+     * 所属车队名称
+     */
+    private String comName = "无";
+    /**
      * 账号
      */
     private String account;
@@ -60,6 +68,25 @@ public class User extends BaseBean {
 
     public void setAppRole(Role appRole) {
         this.appRole = appRole;
+    }
+
+    public Long getComId() {
+        return comId;
+    }
+
+    public void setComId(Long comId) {
+        this.comId = comId;
+    }
+
+    public String getComName() {
+        return comName;
+    }
+
+    public void setComName(String comName) {
+        if (comName == null) {
+            return;
+        }
+        this.comName = comName;
     }
 
     public String getAccount() {
@@ -113,6 +140,10 @@ public class User extends BaseBean {
         }
         if (appRole != null) {
             sb.append(", appRole=").append(appRole);
+        }
+        if (comId != null) {
+            sb.append(", comId=").append(comId);
+            sb.append(", comName='").append(comName).append('\'');
         }
         if (account != null) {
             sb.append(", account='").append(account).append('\'');

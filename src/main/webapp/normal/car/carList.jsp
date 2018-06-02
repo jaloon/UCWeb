@@ -118,13 +118,16 @@
 	                }
 	                $("#page_id").val(gridPage.page);
 
-	                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
+	                var dataCount = gridPage.currentRows;
+	                $("#page_info").html("页(" + dataCount + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
 	                $("#cnum").val(gridPage.t.carNumber);
 	                $("#ccom").val(gridPage.t.transCompany.id);
-	                $(".table-body").html("");
+	                if (dataCount == 0) {
+                        layer.msg("当前权限范围内无匹配车辆！", { icon: 2});
+                    }
 	                var cars = gridPage.dataList;
 	                var tableData = "<table width='100%'>";
-	                for (var i = 0; i < gridPage.currentRows; i++) {
+	                for (var i = 0; i < dataCount; i++) {
 	                    var car = cars[i];
 	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + car.id + ")\">" +
 	                        "<td class=\"car-num\">" + car.carNumber + "</td>" +
@@ -162,13 +165,26 @@
 	            },
 	            "json"
 	        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
-                        location.reload(true);
-                    });
+                if (XMLHttpRequest.readyState == 4) {
+                    var httpStatus = XMLHttpRequest.status;
+                    if (httpStatus == 200 && textStatus == "parsererror") {
+                        layer.confirm('登录失效，是否刷新页面重新登录？', {
+                            icon: 0,
+                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                        }, function () {
+                            location.reload(true);
+                        });
+                        return;
+                    }
+                    if (httpStatus == 406 && textStatus == "error") {
+                        layer.alert('权限不足，请重新选择权限范围内的车辆进行查询！', {
+                            icon: 5,
+                            title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']
+                        }, function(index2) {
+                            layer.close(index2);
+                            $("#search_text").select();
+                        });
+                    }
                 }
             });
 	    }

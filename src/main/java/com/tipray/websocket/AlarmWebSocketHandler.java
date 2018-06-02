@@ -166,7 +166,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
             logger.error("AlarmRecord对象转为JSON字符串异常：{}", e.toString());
             return;
         }
-        WEB_SOCKET_CLIENTS.values().parallelStream().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, alarmMsg));
+        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, alarmMsg));
     }
 
     /**
@@ -181,7 +181,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         strBuf.append("\"biz\":").append(ALARM_CLEAR).append(',');
         strBuf.append("\"id\":").append(clearAlarmId);
         strBuf.append('}');
-        WEB_SOCKET_CLIENTS.values().parallelStream().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, strBuf));
+        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, strBuf));
     }
 
     /**

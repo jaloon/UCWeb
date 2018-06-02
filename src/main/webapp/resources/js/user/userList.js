@@ -3,14 +3,14 @@ var refreshPage;
 $(function() {
     dispatch = function(mode, id) {
         var title = "添加操作员";
-        var h = "395px";
+        var h = "415px";
         if ("edit" == mode) {
             title = "修改操作员信息";
-            h = "433px";
+            h = "451px";
         }
         if ("view" == mode) {
             title = "查看操作员信息";
-            h = "379px";
+            h = "399px";
         }
         layer.open({
             type: 2,

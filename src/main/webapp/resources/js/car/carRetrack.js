@@ -1,4 +1,5 @@
 var play;
+var validCarCount = 0;
 $(function() {
     $(window).resize(function() {
         $(".map").height($(window).height() - 68);
@@ -7,10 +8,27 @@ $(function() {
     $.getJSON("../../../manage/car/selectCars.do", "scope=0",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
-            selectObj.append(data.com);
             var cars = data.car;
+            validCarCount = cars.length;
+            if (validCarCount == 0) {
+                selectObj.hide();
+                var $hiddenCar = $("#hidden_car");
+                $hiddenCar.css({
+                    display: 'block',
+                    opacity: 1,
+                    color: '#d80e0e',
+                    'font-size': 10
+                });
+                $hiddenCar.val("当前账号权限下无可查询车辆！");
+                $("#text_begin").attr('disabled', true);
+                $("#text_end").attr('disabled', true);
+                $("#btn_start").attr('disabled', true);
+                layer.alert("当前账号权限下无可查询车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
+                return;
+            }
+            selectObj.append(data.com);
             var groupObj;
-            for (var i = 0, len = cars.length; i < len; i++) {
+            for (var i = 0; i < validCarCount; i++) {
                 var car = cars[i];
                 groupObj = $("#com_" + car.comId);
                 groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
@@ -145,6 +163,10 @@ $(function() {
     };
 
     function start() {
+        if (validCarCount == 0) {
+            layer.alert("当前账号权限下无可查询车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
+            return;
+        }
         carNumber = trimAll($("#text_car").val());
         if (carNumber == "") {
             layer.alert('未选择系统已有车辆！', { icon: 2 }, function(index2) {
@@ -182,40 +204,6 @@ $(function() {
                 }
             });
     }
-
-
-    // var times = [];
-    // var t100 = 0;
-    // function start() {
-    //     carNumber = trimAll($("#text_car").val());
-    //     begin = $("#text_begin").val();
-    //     end = $("#text_end").val();
-    //     for (var i = 0; i < 100; i++) {
-    //         var t1 = new Date().getTime();
-    //         $.ajax({
-    //             type: "get",
-    //             async: false, //不异步，先执行完ajax，再干别的
-    //             url: "../../../manage/car/retrack.do",
-    //             data: encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
-    //             dataType: "json",
-    //             success: function(response) {
-    //                 if (isNull(response) || response.length == 0) {
-    //                     layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
-    //                 } else {
-    //                     var t2 = new Date().getTime() - t1;
-    //                     t100 += t2;
-    //                     times.push(t2);
-    //                 }
-    //             }
-    //         });
-    //     }
-    //     console.log(JSON.stringify(times))
-    //     console.log(t100/100);
-    //     times= [];
-    //     t100 = 0;
-    // }
-
-
 
     function stop() {
         btn_start.attr('disabled', false);

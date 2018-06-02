@@ -179,7 +179,7 @@ public class OilDepot extends BaseBean {
 		if (radius != null) {
 			sb.append(", radius=").append(radius);
 		}
-        if (cover != null) {
+        if (cover != null && cover.length > 0) {
             sb.append(", cover=");
             sb.append('[');
             for (int i = 0, len = cover.length; i < len; ++i)

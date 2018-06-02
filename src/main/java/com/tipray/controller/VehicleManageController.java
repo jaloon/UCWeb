@@ -1495,7 +1495,7 @@ public class VehicleManageController {
      * @param isApp       {@link Integer} 是否手机操作（0 否， 1 是）
      * @return {@link Map}
      */
-    @RequestMapping(value = "asyn_vehicle_manage_response", method = RequestMethod.GET)
+    @RequestMapping(value = "asyn_vehicle_manage_response", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public Map<String, Object> asynVehicleManageResponse(
             @RequestParam(value = "udp_id", required = false) Short udpBizId,

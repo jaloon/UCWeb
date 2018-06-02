@@ -7,8 +7,6 @@ function showBMap(id) {
         area: ['800px', '560px'],
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=inout&id=' + id)
     });
-    // 阻止事件冒泡到DOM树上
-    event.stopPropagation();
 }
 $(function() {
     $.getJSON("../../../manage/car/selectCars.do", "scope=0",

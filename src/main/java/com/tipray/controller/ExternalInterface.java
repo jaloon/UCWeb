@@ -218,9 +218,6 @@ public class ExternalInterface extends BaseAction {
 
             int remoteId = 0;
 
-
-
-
         } catch (Exception e) {
             // removeCache(cacheId, null);
             result = "失败，发送更新车台配置请求异常！";

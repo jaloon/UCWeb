@@ -2,12 +2,11 @@ package com.tipray.mq;
 
 import com.tipray.net.UdpProtocol;
 import com.tipray.pool.ThreadPool;
+import com.tipray.util.BytesConverterByLittleEndian;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.concurrent.*;
 
 /**
  * 自定义消息队列
@@ -25,7 +24,7 @@ public class MyQueue {
     /**
      * 轨迹队列
      */
-    private static final TrackQueue TRACK_QUEUE = new TrackQueue();
+    private static final ConcurrentSkipListMap<Integer, byte[]> TRACK_QUEUE = new ConcurrentSkipListMap<>();
 
     /**
      * 出队列任务体
@@ -53,8 +52,7 @@ public class MyQueue {
                 return;
             }
             for (int i = 0; i < len; i++) {
-                TrackQueueElement element = TRACK_QUEUE.poll();
-                UDP_PROTOCOL.dealProtocolForTrackUpload(element);
+                UDP_PROTOCOL.dealProtocolForTrackUpload(TRACK_QUEUE.pollFirstEntry());
             }
         }
     };
@@ -81,19 +79,13 @@ public class MyQueue {
     /**
      * 入队列（轨迹队列）
      *
-     * @param element {@link TrackQueueElement} 队列元素
-     */
-    public static void inQueue(TrackQueueElement element) {
-        TRACK_QUEUE.offer(element);
-    }
-
-    /**
-     * 入队列（轨迹队列）
-     *
      * @param receiveBuf {@link byte[]} 接收到的轨迹数据
      */
-    public static void inQueue(byte[] receiveBuf) {
-        TRACK_QUEUE.offer(receiveBuf);
+    public static void inTrackQueue(byte[] receiveBuf) {
+        // 车台设备ID
+        byte[] terminalIdDWord = Arrays.copyOfRange(receiveBuf, 1, 5);
+        int terminalId = BytesConverterByLittleEndian.getInt(terminalIdDWord);
+        TRACK_QUEUE.put(terminalId, receiveBuf);
     }
 
     /**
@@ -102,8 +94,8 @@ public class MyQueue {
      * @param terminalId {@link int} 车台设备ID
      * @param receiveBuf {@link byte[]} 接收到的轨迹数据
      */
-    public static void inQueue(int terminalId, byte[] receiveBuf) {
-        TRACK_QUEUE.offer(terminalId, receiveBuf);
+    public static void inTrackQueue(int terminalId, byte[] receiveBuf) {
+        TRACK_QUEUE.put(terminalId, receiveBuf);
     }
 
     /**
@@ -143,20 +135,10 @@ public class MyQueue {
     /**
      * 队列任务（轨迹队列：入队列，同时启用另一线程出队列）
      *
-     * @param element {@link TrackQueueElement} 队列元素
-     */
-    public static void queueTaskForTrack(TrackQueueElement element) {
-        TRACK_QUEUE.offer(element);
-        ThreadPool.CACHED_THREAD_POOL.execute(OUT_TRACK_QUEUE_TASK);
-    }
-
-    /**
-     * 队列任务（轨迹队列：入队列，同时启用另一线程出队列）
-     *
      * @param receiveBuf {@link byte[]} 接收到的轨迹数据
      */
     public static void queueTaskForTrack(byte[] receiveBuf) {
-        TRACK_QUEUE.offer(receiveBuf);
+        inTrackQueue(receiveBuf);
         ThreadPool.CACHED_THREAD_POOL.execute(OUT_TRACK_QUEUE_TASK);
     }
 
@@ -167,7 +149,7 @@ public class MyQueue {
      * @param receiveBuf {@link byte[]} 接收到的轨迹数据
      */
     public static void queueTaskForTrack(int terminalId, byte[] receiveBuf) {
-        TRACK_QUEUE.offer(terminalId, receiveBuf);
+        inTrackQueue(terminalId, receiveBuf);
         ThreadPool.CACHED_THREAD_POOL.execute(OUT_TRACK_QUEUE_TASK);
     }
 

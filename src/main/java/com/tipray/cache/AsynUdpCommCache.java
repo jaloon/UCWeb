@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenlong
  * @version 1.0 2018-04-08
  */
-public class AsynUdpCommCache {
+public final class AsynUdpCommCache {
     /**
      * 心跳缓存
      */

@@ -191,6 +191,9 @@
             LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
         WHERE
             v.is_invalid = 0
+            <if test="_parameter > 0">
+                AND v.trans_company_id = #{comId}
+            </if>
         GROUP BY
             v.trans_company_id;
     </select>
@@ -204,6 +207,9 @@
             LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
         WHERE
             v.is_invalid = 0 AND v.vehicle_device_id != 0
+        <if test="_parameter > 0">
+            AND v.trans_company_id = #{comId}
+        </if>
         GROUP BY
             v.trans_company_id;
     </select>
@@ -221,6 +227,9 @@
             AND v.vehicle_device_id != 0
             AND v.id = s.vehicle_id
             AND s.is_online = 1
+        <if test="_parameter > 0">
+            AND v.trans_company_id = #{comId}
+        </if>
         GROUP BY
             v.trans_company_id;
     </select>
@@ -233,10 +242,16 @@
 
     <select id="findCarNumbers" resultMap="carNoMap">
         SELECT id, vehicle_number, trans_company_id FROM tbl_vehicle WHERE is_invalid = 0
+        <if test="_parameter > 0">
+            AND trans_company_id = #{comId}
+        </if>
     </select>
 
     <select id="findBindedCarNumbers" resultMap="carNoMap">
         SELECT id, vehicle_number, trans_company_id FROM tbl_vehicle WHERE is_invalid = 0 AND vehicle_device_id != 0
+        <if test="_parameter > 0">
+            AND trans_company_id = #{comId}
+        </if>
     </select>
 
     <select id="findOnlineCarNumbers" resultMap="carNoMap">
@@ -252,6 +267,9 @@
             AND v.vehicle_device_id != 0
             AND v.id = s.vehicle_id
             AND s.is_online = 1
+        <if test="_parameter > 0">
+            AND v.trans_company_id = #{comId}
+        </if>
     </select>
 
 	
@@ -308,7 +326,7 @@
 			t.id = #{transportId}
 	</select>
 	
-	<select id="findTracks" parameterType="com.tipray.bean.VehicleTrack" resultType="com.tipray.bean.VehicleTrack">
+	<select id="findTracks" parameterType="com.tipray.bean.track.ReTrack" resultType="com.tipray.bean.track.ReTrack">
 		SELECT
 			c.id id,
 			c.vehicle_number carNumber,
@@ -552,15 +570,22 @@
             v.vehicle_device_id != 0
             AND v.is_invalid = 0
     </select>
-    
-    <select id="findOnlineCarIds" resultType="java.lang.Long">
+
+    <resultMap id="carOnlineMap" type="java.util.Map" >
+        <result column="vehicle_id" property="carId" javaType="java.lang.Long" />
+        <result column="vehicle_number" property="carNumber" javaType="java.lang.String" />
+    </resultMap>
+    <select id="findOnlineCarIds" resultMap="carNoMap">
         <![CDATA[
             SELECT
-                vehicle_id
+                s.vehicle_id,
+                v.vehicle_number
             FROM
-                tbl_vehicle_realtime_status
+                tbl_vehicle_realtime_status s,
+                tbl_vehicle v
             WHERE
-                is_online = 1
+                s.is_online = 1
+                AND s.vehicle_id = v.id
                 AND TIMESTAMPDIFF(SECOND, last_online_time, NOW()) <= 400;
         ]]>
     </select>
@@ -574,4 +599,5 @@
                 AND TIMESTAMPDIFF(SECOND, last_online_time, NOW()) > 400;
         ]]>
     </update>
+
 </mapper>

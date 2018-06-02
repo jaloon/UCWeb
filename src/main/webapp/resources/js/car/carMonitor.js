@@ -25,9 +25,9 @@ $(function() {
     var orderText = JSON.stringify(order);
 
     if ('WebSocket' in window) {
-        ws = new WebSocket("ws://" + wsUrl + "/track");
+        ws = new WebSocket("mws://" + wsUrl + "/track");
     } else if ('MozWebSocket' in window) {
-        ws = new MozWebSocket("ws://" + wsUrl + "/track");
+        ws = new MozWebSocket("mws://" + wsUrl + "/track");
     } else {
         ws = new SockJS("http://" + wsUrl + "/sockjs/track");
     }

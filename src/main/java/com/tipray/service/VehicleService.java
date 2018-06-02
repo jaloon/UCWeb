@@ -5,6 +5,8 @@ import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.track.LastTrack;
+import com.tipray.bean.track.ReTrack;
 import com.tipray.core.exception.ServiceException;
 
 import java.util.List;
@@ -118,8 +120,9 @@ public interface VehicleService {
      * 为车辆选择控件提供车辆信息
      *
      * @param scope 选取范围（0 全部车辆，1 绑定车台的，2 在线）
+     * @param comId 运输公司ID
      */
-    Map<String, Object> selectCars(int scope);
+    Map<String, Object> selectCars(int scope, long comId);
 
     /**
      * 查询未使用的车台
@@ -189,7 +192,7 @@ public interface VehicleService {
      * @param carTrack
      * @return
      */
-    List<VehicleTrack> findTracks(VehicleTrack carTrack);
+    List<ReTrack> findTracks(ReTrack carTrack);
 
     /**
      * 根据车辆ID获取车载终端ID
@@ -387,7 +390,14 @@ public interface VehicleService {
     /**
      * 车辆在线状态监测
      *
-     * @return {@link Long} 在线车辆ID集合
+     * @return {@link Long} 在线车辆集合（车辆ID，车牌号）
      */
-    List<Long> monitorVehicleOnline();
+    Map<Long, String> monitorVehicleOnline();
+
+    /**
+     * 查询最新在线车辆轨迹
+     *
+     * @return {@link LastTrack} 最新轨迹信息
+     */
+    List<LastTrack> findLastTracks();
 }

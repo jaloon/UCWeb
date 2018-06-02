@@ -5,6 +5,7 @@ import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.log.VehicleManageLog;
+import com.tipray.bean.track.LastTrack;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
 import com.tipray.constant.LogTypeConst;
@@ -27,7 +28,6 @@ import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * SpringWebSocket实时监控业务处理
@@ -42,9 +42,9 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      */
     private static final Map<Long, ConcurrentWebSocketSessionDecorator> WEB_SOCKET_CLIENTS = new ConcurrentHashMap<>();
     /**
-     * 普通监控客户端缓存Map&lt;WebSocketSession-Id, User-Account&gt;
+     * 普通监控客户端缓存Map&lt;WebSocketSession-Id, User-comId&gt;
      */
-    private static final Map<Long, String> GENERAL_CLIENTS = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> GENERAL_CLIENTS = new ConcurrentHashMap<>();
     /**
      * 重点监控客户端缓存Map&lt;WebSocketSession-Id, 重点监控发起时间&gt;
      */
@@ -62,13 +62,13 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      */
     private static final Map<Long, List<Long>> REALTIME_CARS = new ConcurrentHashMap<>();
     /**
-     * 车辆轨迹缓存Map&lt;车辆ID, 最后轨迹&gt;
+     * 轨迹缓存
      */
-    private static final Map<Long, String> CAR_TRACKS = new ConcurrentHashMap<>();
+    private static final TrackCache TRACK_CACHE = new TrackCache();
     /**
      * 在线车辆缓存
      */
-    private static final Set<Long> ONLINE_CARS = new CopyOnWriteArraySet<>();
+    private static final Map<Long, String> ONLINE_CARS = new ConcurrentHashMap<>();
     /**
      * UDP缓存Map&lt;UDP缓存ID, WebSocketSession-Id&gt;
      */
@@ -105,8 +105,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * 业务取消
      */
     private static final String BIZ_CANCEL = "cancel";
-
-    private static boolean isTrackUpdate;
     /**
      * 实时监控请求指令执行结果：至少一辆车执行成功
      */
@@ -125,7 +123,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         Long sessionId = Long.parseLong(session.getId(), 16);
         ConcurrentWebSocketSessionDecorator sessionDecorator = WebSocketUtil.decoratorSession(session);
         WEB_SOCKET_CLIENTS.put(sessionId, sessionDecorator);
-        logger.debug("monitor connection {} established.", sessionId);
+        logger.info("monitor connection {} established.", sessionId);
     }
 
     @Override
@@ -161,9 +159,6 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 break;
             case REALTIME_MONITOR:
                 dealRealtimeMonitor(sessionId, sessionDecorator, msgMap);
-                break;
-            case "track":
-                CAR_TRACKS.values().parallelStream().forEach(carTrack -> WebSocketUtil.sendConcurrentMsg(sessionDecorator, carTrack));
                 break;
             default:
                 break;
@@ -205,7 +200,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         // FOCUS_CARS.remove(sessionId);
         // REALTIME_CLIENTS.remove(sessionId);
         // REALTIME_CARS.remove(sessionId);
-        // UDP_CACHE.keySet().parallelStream().forEach(cacheId -> {
+        // UDP_CACHE.keySet().forEach(cacheId -> {
         //     if (UDP_CACHE.get(cacheId).equals(sessionId)) {
         //         UDP_CACHE.remove(cacheId);
         //         REALTIME_CARS_CACHE.remove(cacheId);
@@ -242,8 +237,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             logger.warn("ID为【{}】的用户不存在！", userIdStr);
             WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
         } else {
-            String account = user.getAccount();
-            GENERAL_CLIENTS.put(sessionId, account);
+            Long comId = user.getComId();
+            GENERAL_CLIENTS.put(sessionId, comId);
             try {
                 Map<String, Object> sessionMap = new HashMap<>();
                 sessionMap.put("biz", "session");
@@ -252,13 +247,16 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 sessionMap.put("userAccount", user.getAccount());
                 sessionMap.put("userName", user.getName());
                 session.sendMessage(new TextMessage(JSONUtil.stringify(sessionMap)));
-                if (ONLINE_CARS.size() > 0) {
+                if (!ONLINE_CARS.isEmpty()) {
                     Map<String, Object> onlineCarsCahe = new HashMap<>();
                     onlineCarsCahe.put("biz", "onlineCache");
-                    onlineCarsCahe.put("cars", ONLINE_CARS);
+                    onlineCarsCahe.put("cars", ONLINE_CARS.keySet());
                     session.sendMessage(new TextMessage(JSONUtil.stringify(onlineCarsCahe)));
+                    String trackMsg = TRACK_CACHE.cacheTracks(comId);
+                    if (StringUtil.isNotEmpty(trackMsg)) {
+                        WebSocketUtil.sendConcurrentMsg(session, trackMsg);
+                    }
                 }
-                CAR_TRACKS.values().parallelStream().forEach(carTrack -> WebSocketUtil.sendConcurrentMsg(session, carTrack));
             } catch (Exception e) {
                 logger.error("普通监控：WebSocket通信异常：{}", e.getMessage());
             }
@@ -326,7 +324,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     Long timestamp = System.currentTimeMillis();
                     FOCUS_CLIENTS.put(sessionId, timestamp);
                     FOCUS_CARS.put(sessionId, carId);
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, CAR_TRACKS.get(carId));
+                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, TRACK_CACHE.cacheTrack(carId));
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，重点监控异常！";
@@ -468,7 +466,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 List<Long> carIds = new ArrayList<>();
                 // 指令执行失败的车辆车牌号码字符串拼接处理
                 StringBuffer carNoBuf = new StringBuffer();
-                cars.parallelStream().forEach(car -> {
+                cars.forEach(car -> {
                     VehicleManageLog vehicleManageLog = new VehicleManageLog(user, 0);
                     Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TRACK
                             | LogTypeConst.TYPE_REALTIME_MONITOR | LogTypeConst.RESULT_DONE;
@@ -500,7 +498,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         succuessAtLeastOne = true;
                         carIds.add(car.getId());
                         REALTIME_CARS_CACHE.put(cacheId, car.getId());
-                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, CAR_TRACKS.get(car.getId()));
+                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, TRACK_CACHE.cacheTrack(car.getId()));
                     } catch (Exception e) {
                         removeUdpCache(cacheId, description);
                         result = "失败，实时监控异常！";
@@ -541,7 +539,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 List<Long> ids = REALTIME_CARS.get(cancelSessionId);
                 REALTIME_CARS.remove(cancelSessionId);
                 if (!EmptyObjectUtil.isEmptyList(ids)) {
-                    ids.parallelStream().forEach(carId -> dealRealtimeCancel(user, carId, cancelSessionId, token));
+                    ids.forEach(carId -> dealRealtimeCancel(user, carId, cancelSessionId, token));
                 }
                 break;
             default:
@@ -648,19 +646,19 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     }
 
     /**
-     * 处理上报轨迹转发到普通监控页面
+     * 处理上报信息转发到普通监控页面
      *
-     * @param track 车辆轨迹
+     * @param msg 上报信息
      */
-    private void sendToGeneralPage(String track) {
+    private void sendToGeneralPage(String msg) {
         // 普通监控页面全发
-        GENERAL_CLIENTS.keySet().parallelStream().forEach(sessionId -> {
+        GENERAL_CLIENTS.keySet().forEach(sessionId -> {
             ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
-            if (sessionDecorator.isOpen()) {
-                WebSocketUtil.sendConcurrentMsg(sessionDecorator, track);
-            } else {
+            if (sessionDecorator == null || !sessionDecorator.isOpen()) {
                 GENERAL_CLIENTS.remove(sessionId);
+                return;
             }
+            WebSocketUtil.sendConcurrentMsg(sessionDecorator, msg);
         });
     }
 
@@ -672,7 +670,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      */
     private void sendToRealtimePage(Long carId, String track) {
         // 实时监控页面只发关注的车辆
-        REALTIME_CARS.keySet().parallelStream().forEach(sessionId -> {
+        REALTIME_CARS.keySet().forEach(sessionId -> {
             if (REALTIME_CARS.get(sessionId).contains(carId)) {
                 Long current = System.currentTimeMillis();
                 Map<String, Long> timeInfo = REALTIME_CLIENTS.get(sessionId);
@@ -692,7 +690,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      */
     private void sendToFocusPage(Long carId, String track) {
         // 重点监控页面只发关注的车辆
-        FOCUS_CARS.keySet().parallelStream().forEach(sessionId -> {
+        FOCUS_CARS.keySet().forEach(sessionId -> {
             if (FOCUS_CARS.get(sessionId).equals(carId)) {
                 Long current = System.currentTimeMillis();
                 Long timestamp = FOCUS_CLIENTS.get(sessionId);
@@ -717,16 +715,16 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                              Map<Long, ?> clientCache,
                              Map<Long, ?> carCahe) {
         ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
-        if (sessionDecorator.isOpen()) {
-            if (timeout) {
-                WebSocketUtil.sendConcurrentMsg(sessionDecorator, "timeout");
-                return;
-            }
-            WebSocketUtil.sendConcurrentMsg(sessionDecorator, track);
-        } else {
+        if (sessionDecorator == null || !sessionDecorator.isOpen()) {
             clientCache.remove(sessionId);
             carCahe.remove(sessionId);
+            return;
         }
+        if (timeout) {
+            WebSocketUtil.sendConcurrentMsg(sessionDecorator, "timeout");
+            return;
+        }
+        WebSocketUtil.sendConcurrentMsg(sessionDecorator, track);
     }
 
     /**
@@ -797,7 +795,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @return {@link Boolean} 车辆是否在线
      */
     public boolean checkCarOnline(long carId) {
-        return ONLINE_CARS.contains(carId);
+        return ONLINE_CARS.keySet().contains(carId);
     }
 
     /**
@@ -805,18 +803,21 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      *
      * @param onlineCars {@link Long} 在线车辆ID集合
      */
-    public void monitorVehicleOnline(List<Long> onlineCars) {
+    public void monitorVehicleOnline(Map<Long, String> onlineCars) {
         synchronized (ONLINE_CARS) {
-            List<Long> offlineCars = new ArrayList<>(ONLINE_CARS);
-            offlineCars.removeAll(onlineCars);
-            onlineCars.removeAll(ONLINE_CARS);
-            ONLINE_CARS.removeAll(offlineCars);
-            ONLINE_CARS.addAll(onlineCars);
-            if (!EmptyObjectUtil.isEmptyList(offlineCars)) {
-                offlineCars.forEach(carId -> dealOnlineUpload(carId, 0));
+            Set<Long> offlineCars = new HashSet<>(ONLINE_CARS.keySet());
+            offlineCars.removeAll(onlineCars.keySet());
+            Set<Long> newOnlineCars = onlineCars.keySet();
+            newOnlineCars.removeAll(ONLINE_CARS.keySet());
+            ONLINE_CARS.putAll(onlineCars);
+            if (!EmptyObjectUtil.isEmptySet(offlineCars)) {
+                for (Long carId : offlineCars) {
+                    broadcastOnline(carId, ONLINE_CARS.get(carId), 0);
+                    ONLINE_CARS.remove(carId);
+                }
             }
-            if (!EmptyObjectUtil.isEmptyList(onlineCars)) {
-                onlineCars.forEach(carId -> dealOnlineUpload(carId, 1));
+            if (!EmptyObjectUtil.isEmptySet(newOnlineCars)) {
+                newOnlineCars.forEach(carId -> broadcastOnline(carId, onlineCars.get(carId), 1));
             }
         }
     }
@@ -836,21 +837,24 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             logger.warn("在线状态越界：online={}", online);
             return;
         }
+        String carNumber = SpringBeanUtil.getBean(VehicleService.class).getCarNumberById(vehicleId);
         if (online == 0) {
             ONLINE_CARS.remove(vehicleId);
         } else if (online == 1) {
-            ONLINE_CARS.add(vehicleId);
+            ONLINE_CARS.put(vehicleId, carNumber);
         }
-        String carNumber = SpringBeanUtil.getBean(VehicleService.class).getCarNumberById(vehicleId);
+        broadcastOnline(vehicleId, carNumber, online);
+    }
+
+    private void broadcastOnline(Long carId, String carNumber, Integer online) {
         StringBuffer strBuf = new StringBuffer();
         strBuf.append('{');
         strBuf.append("\"biz\":\"online\",");
-        strBuf.append("\"carId\":").append(vehicleId.toString()).append(',');
+        strBuf.append("\"carId\":").append(carId.toString()).append(',');
         strBuf.append("\"carNo\":\"").append(carNumber).append('\"').append(',');
         strBuf.append("\"online\":").append(online.toString());
         strBuf.append('}');
-        broadcastCarTrackAndOnline(vehicleId, strBuf.toString());
-
+        broadcastCarTrackAndOnline(carId, strBuf.toString());
     }
 
     /**
@@ -944,8 +948,9 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         int size = trackList.size();
         if (size == 1) {
             String track = trackList.get(0);
-            CAR_TRACKS.put(carId, track);
+            // CAR_TRACKS.put(carId, track);
             // broadcastCarTrackAndOnline(carId, track);
+            // UPDATE_TRACKS.put(carId, track);
             sendToFocusPage(carId, track);
             sendToRealtimePage(carId, track);
             return;
@@ -953,16 +958,35 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         for (int i = 0; i < size; i++) {
             String track = trackList.get(i);
             sendToFocusPage(carId, track);
-            // 轨迹缓存只保留最后一条轨迹
-            if (i == size - 1) {
-                CAR_TRACKS.put(carId, track);
-                sendToGeneralPage(track);
-            }
+            // // 轨迹缓存只保留最后一条轨迹
+            // if (i == size - 1) {
+            //     CAR_TRACKS.put(carId, track);
+            //     sendToGeneralPage(track);
+            // }
         }
     }
 
     /**
-     * 广播远程操作请求
+     * 最新车辆轨迹推送
+     */
+    public void pushLastTracks(List<LastTrack> lastTracks) {
+        TRACK_CACHE.flushCache(lastTracks);
+        GENERAL_CLIENTS.entrySet().parallelStream().forEach(entry -> {
+            Long sessionId = entry.getKey();
+            ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
+            if (sessionDecorator == null || !sessionDecorator.isOpen()) {
+                GENERAL_CLIENTS.remove(sessionId);
+                return;
+            }
+            String trackMsg = TRACK_CACHE.updateTracks(entry.getValue());
+            if (StringUtil.isNotEmpty(trackMsg)) {
+                WebSocketUtil.sendConcurrentMsg(sessionDecorator, trackMsg);
+            }
+        });
+    }
+
+    /**
+     * 广播远程操作日志
      *
      * @param isFail {@link Integer} 是否失败（1 失败，0 成功）
      * @param task   {@link String} 请求任务描述

@@ -6,9 +6,7 @@ import com.tipray.cache.VehicleCompanyRelationCache;
 import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.constant.CenterConfigConst;
 import com.tipray.constant.reply.ErrorTagConst;
-import com.tipray.mq.MyQueue;
 import com.tipray.mq.MyQueueElement;
-import com.tipray.mq.TrackQueueElement;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
 import com.tipray.net.constant.UdpReplyErrorTag;
@@ -603,7 +601,7 @@ public class UdpProtocol {
         }
         if (bizId == UdpBizId.UDP_TRACK_UPLOAD) {
             // 轨迹上报业务
-            MyQueue.queueTaskForTrack(receiveBizBuf);
+            // MyQueue.queueTaskForTrack(receiveBizBuf);
             return;
         }
         if (Arrays.binarySearch(UdpBizId.RESPONSE_BIZ_IDS, bizId) >= 0) {
@@ -629,24 +627,27 @@ public class UdpProtocol {
             logger.error("协议号：{}，错误！", "0x" + BytesUtil.byteToHex(protocolId, false));
             return;
         }
-        index += 1;
-
-        // 源地址(不做验证)
-        // byte[] localAddrDWord = Arrays.copyOfRange(receiveDataBuf, index, index + 4);
+        // index += 1;
+        //
+        // // 源地址(不做验证)
+        // byte[] localAddrDWord = Arrays.copyOfRange(replyBizBuf, index, index + 4);
         // int localAddr = BytesConverterByLittleEndian.getInt(localAddrDWord);
-        index += 4;
+        // index += 4;
 
+        index += 5;
         // 目的地址
         byte[] remoteAddrDWord = Arrays.copyOfRange(replyBizBuf, index, index + 4);
         int remoteAddress = BytesConverterByLittleEndian.getInt(remoteAddrDWord);
         if (remoteAddress != UdpProtocol.WEB_SERVER_ID) {
-            logger.error("目的地址：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(remoteAddrDWord), false));
+            logger.error("目的地址：0x{}，错误！", BytesUtil.bytesToHex(ArraysUtil.reverse(remoteAddrDWord), false));
             return;
         }
-        index += 4;
+        // index += 4;
+        //
+        // // 业务ID
+        // index += 2;
 
-        // 业务ID
-        index += 2;
+        index += 6;
 
         // 序列号
         byte[] serialNoWord = Arrays.copyOfRange(replyBizBuf, index, index + 2);
@@ -771,7 +772,7 @@ public class UdpProtocol {
         // 协议号
         byte protocolId = receiveDataBuf[index];
         if (protocolId != UdpProtocol.PROTOCOL_ID) {
-            logger.error("协议号：{}，错误！", "0x" + BytesUtil.byteToHex(protocolId, false));
+            logger.error("协议号：0x{}，错误！", BytesUtil.byteToHex(protocolId, false));
             return;
         }
         index += 1;
@@ -788,10 +789,10 @@ public class UdpProtocol {
     /**
      * 处理UDP轨迹上报业务
      *
-     * @param receiveDataBuf {@link byte[]} 接收到的轨迹数据
+     * @param element {@link Map.Entry} 轨迹队列元素
      */
-    public void dealProtocolForTrackUpload(TrackQueueElement element) {
-        byte[] receiveDataBuf = element.getReceiveBuf();
+    public void dealProtocolForTrackUpload(Map.Entry<Integer, byte[]> element) {
+        byte[] receiveDataBuf = element.getValue();
         int index = 0;
         // 协议号
         byte protocolId = receiveDataBuf[index];
@@ -802,7 +803,7 @@ public class UdpProtocol {
         index += 1;
 
         // 源地址（车台设备ID）
-        int terminalId = element.getTerminalId();
+        int terminalId = element.getKey();
         index += 4;
 
         parseTrackBuf(index, terminalId, receiveDataBuf);
@@ -821,31 +822,32 @@ public class UdpProtocol {
         byte[] remoteAddrDWord = Arrays.copyOfRange(receiveDataBuf, index, index + 4);
         int remoteAddress = BytesConverterByLittleEndian.getInt(remoteAddrDWord);
         if (remoteAddress != UdpProtocol.WEB_SERVER_ID) {
-            logger.error("目的地址：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(remoteAddrDWord), false));
+            logger.error("目的地址：0x{}，错误！", BytesUtil.bytesToHex(ArraysUtil.reverse(remoteAddrDWord), false));
             return;
         }
-        index += 4;
+        // index += 4;
 
-        // 业务ID（不必再次验证）
+        // // 业务ID（不必再次验证）
         // byte[] bizIdWord = Arrays.copyOfRange(receiveDataBuf, index, index + 2);
         // short bizId = BytesConverterByLittleEndian.getShort(bizIdWord);
         // if (bizId != UdpBizId.UDP_TRACK_UPLOAD) {
-        //     logger.error("应答业务ID：{}，无效！", "0x" +
-        //             BytesUtil.bytesToHex(ArraysUtil.reverse(bizIdWord), false));
+        //     logger.error("应答业务ID：0x{}，无效！",  BytesUtil.bytesToHex(ArraysUtil.reverse(bizIdWord), false));
         //     return;
         // }
-        index += 2;
+        // index += 2;
 
-        // 序列号（暂时不做验证）
+        // // 序列号（暂时不做验证）
         // byte[] serialNoWord = Arrays.copyOfRange(receiveDataBuf, index, index + 2);
         // short serialNo = BytesConverterByLittleEndian.getShort(serialNoWord);
-        index += 2;
+        // index += 2;
+
+        index += 8;
 
         // 数据体版本号
         byte[] dataVerWord = Arrays.copyOfRange(receiveDataBuf, index, index + 2);
         short dataVer = BytesConverterByLittleEndian.getShort(dataVerWord);
         if (dataVer != UdpProtocol.DATA_VER) {
-            logger.error("数据体版本号：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(dataVerWord), false));
+            logger.error("数据体版本号：0x{}，错误！", BytesUtil.bytesToHex(ArraysUtil.reverse(dataVerWord), false));
             return;
         }
         index += 2;
@@ -885,12 +887,12 @@ public class UdpProtocol {
             trackBuf.append('{');
             trackBuf.append("\"biz\":\"track\",");
             trackBuf.append("\"carId\":").append(carId).append(',');
-            trackBuf.append("\"terminalId\":").append(terminalId).append(',');
+            // trackBuf.append("\"terminalId\":").append(terminalId).append(',');
             trackBuf.append("\"carNumber\":\"").append(carNumber).append('\"').append(',');
             trackBuf.append("\"carCom\":\"").append(carCom).append('\"').append(',');
             // 经纬度是否有效
-            byte isLocationValid = receiveDataBuf[index];
-            trackBuf.append("\"isLocationValid\":").append(isLocationValid).append(',');
+            // byte isLocationValid = receiveDataBuf[index];
+            // trackBuf.append("\"coorValid\":").append(isLocationValid).append(',');
             index++;
             // 经度
             byte[] longitudeDword = Arrays.copyOfRange(receiveDataBuf, index, index + 4);
@@ -910,14 +912,15 @@ public class UdpProtocol {
             // 速度
             byte speed = receiveDataBuf[index];
             trackBuf.append("\"velocity\":").append(speed).append(',');
-            index++;
+            // index++;
             // 定位时间
-            byte[] positionTimeDWord = Arrays.copyOfRange(receiveDataBuf, index, index + 4);
-            int positonTimeSecond = BytesConverterByLittleEndian.getInt(positionTimeDWord);
-            Date date = DateUtil.getDateByIntTime(positonTimeSecond);
-            String positonTime = DateUtil.formatDate(date, DateUtil.FORMAT_DATETIME);
-            trackBuf.append("\"positonTime\":\"").append(positonTime).append('\"').append(',');
-            index += 4;
+            // byte[] positionTimeDWord = Arrays.copyOfRange(receiveDataBuf, index, index + 4);
+            // int positonTimeSecond = BytesConverterByLittleEndian.getInt(positionTimeDWord);
+            // Date date = DateUtil.getDateByIntTime(positonTimeSecond);
+            // String positonTime = DateUtil.formatDate(date, DateUtil.FORMAT_DATETIME);
+            // trackBuf.append("\"trackTime\":\"").append(positonTime).append('\"').append(',');
+            // index += 4;
+            index += 5;
             // 车辆状态[ 1在途2返程3在油库4在加油站5应急]
             byte carStatus = receiveDataBuf[index];
             trackBuf.append("\"carStatus\":\"").append(getCarStatus(carStatus)).append('\"').append(',');
@@ -932,13 +935,11 @@ public class UdpProtocol {
             byte[] lockAlarms = Arrays.copyOfRange(receiveDataBuf, index, index + lockNum);
             index += lockNum;
             // 是否报警
-            boolean alarm = isAlarm(terminalAlarm, lockNum, lockAlarms);
-            trackBuf.append("\"alarm\":\"").append(alarm ? '是' : '否').append('\"').append(',');
-            trackBuf.append("\"online\":1"); // online：0.离线；1.在线
+            char alarm = isAlarm(terminalAlarm, lockNum, lockAlarms);
+            trackBuf.append("\"alarm\":\"").append(alarm).append('\"');
+            // trackBuf.append("\"alarm\":\"").append(alarm).append('\"').append(',');
+            // trackBuf.append("\"online\":1"); // online：0.离线；1.在线
             trackBuf.append('}');
-            // String trackInfo = trackBuf.toString();
-            // logger.info("receive track: {}", trackInfo);
-            // trackList.add(trackInfo);
             trackList.add(trackBuf.toString());
         }
         UdpReceiveResultHandler.handleTrack(carId, trackList);
@@ -965,6 +966,8 @@ public class UdpProtocol {
                 return "返程中";
             case 5:
                 return "应急";
+            case 6:
+                return "待入库";
             default:
                 break;
         }
@@ -977,9 +980,9 @@ public class UdpProtocol {
      * @param terminalAlarm 车台报警信息
      * @param lockNum       锁数量
      * @param lockAlarms    锁报警信息数组
-     * @return
+     * @return 是/否
      */
-    private boolean isAlarm(byte terminalAlarm, byte lockNum, byte[] lockAlarms) {
+    private char isAlarm(byte terminalAlarm, byte lockNum, byte[] lockAlarms) {
         // 车台报警信息位说明：以下位序从低位开始
         // ------------------------------------------------------------------------------
         // |8		|7 		|6 		|5 		|4 		|3 		|2 				|1 			|
@@ -988,7 +991,7 @@ public class UdpProtocol {
         // ------------------------------------------------------------------------------
 
         if ((terminalAlarm & AlarmBitMarkConst.VALID_TERMINAL_ALARM_BITS) > 0) {
-            return true;
+            return '是';
         }
         // 锁报警信息位说明：以下位序从低位开始
         // --------------------------------------------------------------------------------------
@@ -999,10 +1002,10 @@ public class UdpProtocol {
         for (int i = 0; i < lockNum; i++) {
             byte lockAlarm = lockAlarms[i];
             if ((lockAlarm & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {
-                return true;
+                return '是';
             }
         }
-        return false;
+        return '否';
     }
 
 }

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.TrackDao">
+    <resultMap id="tackInfoMap" type="com.tipray.bean.track.TrackInfo">
+        <id column="id" property="id"/>
+        <result column="vehicle_id" property="carId"/>
+        <result column="is_lnglat_valid" property="coorValid"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="vehicle_status" property="carStatus"/>
+        <result column="vehicle_alarm_status" property="terminalAlarm"/>
+        <result column="angle" property="angle"/>
+        <result column="speed" property="speed"/>
+        <result column="lock_status_info" property="lockStatusInfo"/>
+        <result column="track_time" property="trackTime"/>
+        <result column="gmt_create" property="createTime"/>
+    </resultMap>
+
+    <!-- 存储过程调用 -->
+    <select id="findTracksByTrackIds" statementType="CALLABLE" parameterType="java.lang.String" resultMap="tackInfoMap">
+		<![CDATA[
+            {CALL prd_get_track_info_by_trackid(
+	            #{trackIds,  mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <!-- 存储过程调用 -->
+    <select id="findTracksByCarIdsAndBeginTime" statementType="CALLABLE" resultMap="tackInfoMap">
+		<![CDATA[
+            {CALL prd_get_track_info_by_vehicle_time(
+	            #{carIds,     mode=IN,  jdbcType=VARCHAR},
+	            #{beginTime,  mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <!-- 存储过程调用 -->
+    <select id="findTracksByCarIdAndTimeRange" statementType="CALLABLE" resultMap="tackInfoMap">
+		<![CDATA[
+            {CALL prd_get_track_info_by_vehicle_time_range(
+	            #{carId,      mode=IN,  jdbcType=INTEGER},
+	            #{beginTime,  mode=IN,  jdbcType=VARCHAR},
+	            #{endTime,    mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <resultMap id="lastTrackMap" type="com.tipray.bean.track.LastTrack">
+        <id column="id" property="id"/>
+        <result column="vehicle_id" property="carId"/>
+        <result column="vehicle_number" property="carNumber"/>
+        <result column="com_id" property="comId"/>
+        <result column="com_name" property="carCom"/>
+        <result column="is_lnglat_valid" property="coorValid"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="vehicle_status" property="carStatus"/>
+        <result column="vehicle_alarm_status" property="terminalAlarm"/>
+        <result column="angle" property="angle"/>
+        <result column="speed" property="speed"/>
+        <result column="lock_status_info" property="lockStatusInfo"/>
+        <result column="track_time" property="trackTime"/>
+        <result column="gmt_modified" property="createTime"/>
+    </resultMap>
+
+    <select id="findLastTracks" resultMap="lastTrackMap" useCache="false" flushCache="true">
+        <![CDATA[
+        SELECT
+            t2.*,
+            t1.longitude,
+            t1.latitude,
+            t1.vehicle_status,
+            t1.vehicle_alarm_status,
+            t1.angle,
+            t1.speed,
+            t1.lock_status_info,
+            t1.track_time
+        FROM
+            tbl_vehicle_newest_track t1,
+            (
+            SELECT
+                s.vehicle_id,
+                v.vehicle_number,
+                v.trans_company_id com_id,
+                IFNULL( c.NAME, '' ) com_name
+            FROM
+                tbl_vehicle_realtime_status s,
+                tbl_vehicle v
+                LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
+            WHERE
+                s.is_online = 1
+                AND s.vehicle_id = v.id
+                AND TIMESTAMPDIFF( SECOND, last_online_time, NOW( ) ) <= 400
+            ) t2
+        WHERE
+            t1.vehicle_id = t2.vehicle_id
+            AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
+
+        ]]>
+    </select>
+
+</mapper>

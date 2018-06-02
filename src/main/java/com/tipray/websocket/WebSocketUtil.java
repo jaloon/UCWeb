@@ -26,7 +26,7 @@ public class WebSocketUtil {
      * @return {@link ConcurrentWebSocketSessionDecorator}
      */
     public static ConcurrentWebSocketSessionDecorator decoratorSession(WebSocketSession session) {
-        return new ConcurrentWebSocketSessionDecorator(session, 15000, 5000);
+        return new ConcurrentWebSocketSessionDecorator(session, 15000, 100000);
     }
 
     /**

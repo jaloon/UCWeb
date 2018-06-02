@@ -7,8 +7,6 @@ function showBMap(id) {
         area: ['800px', '560px'],
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=lock&id=' + id)
     });
-    // 阻止事件冒泡到DOM树上
-    event.stopPropagation();
 }
 $(function() {
 

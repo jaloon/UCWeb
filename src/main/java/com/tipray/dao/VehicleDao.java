@@ -4,6 +4,8 @@ import com.tipray.bean.*;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.track.ReTrack;
+import com.tipray.core.annotation.MapResultAnno;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
 import org.apache.ibatis.annotations.Param;
@@ -37,44 +39,50 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 查找车辆对应运输公司
      *
+     * @param comId 运输公司ID
      * @return
      */
-    List<Map<String, Object>> findComsWithCar();
+    List<Map<String, Object>> findComsWithCar(long comId);
 
     /**
      * 查找绑定车台车辆对应运输公司
      *
+     * @param comId 运输公司ID
      * @return
      */
-    List<Map<String, Object>> findComsWithBindedCar();
+    List<Map<String, Object>> findComsWithBindedCar(long comId);
 
     /**
      * 查找在线车辆对应运输公司
      *
+     * @param comId 运输公司ID
      * @return
      */
-    List<Map<String, Object>> findComsWithOnlineCar();
+    List<Map<String, Object>> findComsWithOnlineCar(long comId);
 
     /**
      * 查找车辆车牌号
      *
+     * @param comId 运输公司ID
      * @return
      */
-    List<Map<String, Object>> findCarNumbers();
+    List<Map<String, Object>> findCarNumbers(long comId);
 
     /**
      * 查找绑定车台车辆车牌号
      *
+     * @param comId 运输公司ID
      * @return
      */
-    List<Map<String, Object>> findBindedCarNumbers();
+    List<Map<String, Object>> findBindedCarNumbers(long comId);
 
     /**
      * 查找在线车辆车牌号
      *
+     * @param comId 运输公司ID
      * @return
      */
-    List<Map<String, Object>> findOnlineCarNumbers();
+    List<Map<String, Object>> findOnlineCarNumbers(long comId);
 
     /**
      * 根据车牌号获取车辆信息
@@ -165,10 +173,10 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 获取车辆轨迹
      *
-     * @param carTrack {@link VehicleTrack} 轨迹查询统计
-     * @return {@link VehicleTrack} 轨迹列表
+     * @param carTrack {@link ReTrack} 轨迹查询统计
+     * @return {@link ReTrack} 轨迹列表
      */
-    List<VehicleTrack> findTracks(VehicleTrack carTrack);
+    List<ReTrack> findTracks(ReTrack carTrack);
 
     /**
      * 根据车辆ID获取车载终端ID
@@ -310,12 +318,14 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 获取在线车辆ID集合
      *
-     * @return {@link Long} 在线车辆ID集合
+     * @return {@link Map} 在线车辆集合（carId：车辆ID，carNumber：车牌号）
      */
-    List<Long> findOnlineCarIds();
+    @MapResultAnno(keyType = Long.class, valType = String.class)
+    Map<Long, String> findOnlineCarIds();
 
     /**
      * 更新最后在线时间距现在超过6分钟的车辆在线状态为离线（超时用400秒）
      */
     void updateTimeoutOfflineCars();
+
 }

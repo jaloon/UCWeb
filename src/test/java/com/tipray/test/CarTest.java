@@ -7,11 +7,11 @@ import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.record.AlarmRecord;
+import com.tipray.bean.track.LastTrack;
+import com.tipray.bean.track.TrackInfo;
+import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.core.exception.ServiceException;
-import com.tipray.dao.AlarmRecordDao;
-import com.tipray.dao.DistributionRecordDao;
-import com.tipray.dao.LockDao;
-import com.tipray.dao.VehicleManageLogDao;
+import com.tipray.dao.*;
 import com.tipray.service.VehicleService;
 import com.tipray.util.JSONUtil;
 import org.junit.Test;
@@ -45,6 +45,106 @@ public class CarTest {
 	private LockDao lockDao;
 	@Resource
 	private AlarmRecordDao alarmRecordDao;
+	@Resource
+	private TrackDao trackDao;
+
+	@Test
+    public void findTracksByTrackIds() {
+        List<TrackInfo> list = trackDao.findTracksByTrackIds("1,2");
+        System.out.println(list);
+    }
+
+    @Test
+    public void findTracksByCarIdsAndBeginTime() {
+        List<TrackInfo> list = trackDao.findTracksByCarIdsAndBeginTime("56", "2018-06-01 11:03:05");
+        System.out.println(list);
+    }
+    @Test
+    public void findTracksByCarIdAndTimeRange() {
+        List<TrackInfo> list = trackDao.findTracksByCarIdAndTimeRange(56L, "2018-06-01 11:03:05", "2018-06-01 11:08:05");
+        System.out.println(list.size());
+    }
+    @Test
+    public void findLastTracks() {
+	    long t1= System.currentTimeMillis();
+        List<LastTrack> lastTracks = trackDao.findLastTracks();
+        int len = lastTracks.size();
+        StringBuffer strBuf = new StringBuffer();
+        LastTrack lastTrack;
+        for (int i = 0; i < len; i++) {
+            lastTrack = lastTracks.get(i);
+            strBuf.append(',').append('{');
+            strBuf.append("\"carId\":").append(lastTrack.getCarId()).append(',');
+            strBuf.append("\"carNumber\":\"").append(lastTrack.getCarNumber()).append('\"').append(',');
+            strBuf.append("\"carCom\":\"").append(lastTrack.getCarCom()).append('\"').append(',');
+            strBuf.append("\"longitude\":").append(lastTrack.getLongitude()).append(',');
+            strBuf.append("\"latitude\":").append(lastTrack.getLatitude()).append(',');
+            strBuf.append("\"angle\":").append(lastTrack.getAngle()).append(',');
+            strBuf.append("\"speed\":").append(lastTrack.getSpeed()).append(',');
+            strBuf.append("\"carStatus\":\"").append(getCarStatus(lastTrack.getCarStatus())).append('\"').append(',');
+            strBuf.append("\"alarm\":\"").append(isAlarm(lastTrack.getTerminalAlarm(),lastTrack.getLockStatusInfo())).append('\"');
+            strBuf.append('}');
+        }
+        // lastTracks.forEach(track -> {
+        //     strBuf.append('{');
+        //     strBuf.append("\"carId\":").append(track.getCarId()).append(',');
+        //     strBuf.append("\"carNumber\":\"").append(track.getCarNumber()).append('\"').append(',');
+        //     strBuf.append("\"carCom\":\"").append(track.getCarCom()).append('\"').append(',');
+        //     strBuf.append("\"longitude\":").append(track.getLongitude()).append(',');
+        //     strBuf.append("\"latitude\":").append(track.getLatitude()).append(',');
+        //     strBuf.append("\"angle\":").append(track.getAngle()).append(',');
+        //     strBuf.append("\"speed\":").append(track.getSpeed()).append(',');
+        //     strBuf.append("\"carStatus\":\"").append(getCarStatus(track.getCarStatus())).append('\"').append(',');
+        //     strBuf.append("\"alarm\":\"").append(isAlarm(track.getTerminalAlarm(),track.getLockStatusInfo())).append('\"');
+        //     strBuf.append('}').append(',');
+        // });
+        strBuf.replace(0, 1, "{\"biz\":\"tracks\",\"tracks\":[");
+        strBuf.append("]}");
+        System.out.println(strBuf.toString());
+        long t2= System.currentTimeMillis();
+        System.out.println("time: " + (t2-t1) + ", size: " + len);
+    }
+
+    private String getCarStatus(int carStatus) {
+        switch (carStatus) {
+            case 0:
+                return "未知";
+            case 1:
+                return "在油库";
+            case 2:
+                return "在途中";
+            case 3:
+                return "在加油站";
+            case 4:
+                return "返程中";
+            case 5:
+                return "应急";
+            case 6:
+                return "待入库";
+            default:
+                break;
+        }
+        return "未知";
+    }
+
+    private char isAlarm(int terminalAlarm, byte[] lockAlarms) {
+        if ((terminalAlarm & AlarmBitMarkConst.VALID_TERMINAL_ALARM_BITS) > 0) {
+            return '是';
+        }
+        for (int i = 0, len = lockAlarms.length; i < len; i++) {
+            byte lockAlarm = lockAlarms[i];
+            if ((lockAlarm & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {
+                return '是';
+            }
+        }
+        return '否';
+    }
+
+	@Test
+    public void carOnline(){
+        Map<Long, String> map = carService.monitorVehicleOnline();
+        System.out.println(map);
+    }
 
 	@Test
     public void alarm(){

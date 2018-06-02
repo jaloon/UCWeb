@@ -6,12 +6,12 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import com.tipray.bean.track.ReTrack;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tipray.bean.VehicleTrack;
 import com.tipray.service.VehicleService;
 import com.tipray.util.HttpRequestUtil;
 import com.tipray.util.JSONUtil;
@@ -24,13 +24,13 @@ public class WebSocketTest {
 
 	@Test
 	public void test1() throws Exception {
-		VehicleTrack carTrack = new VehicleTrack();
+		ReTrack carTrack = new ReTrack();
 		carTrack.setCarNumber("桂A12345");
 		carTrack.setBegin("2017-12-11 08:06:50");
 		carTrack.setEnd("2017-12-13 07:06:50");
-		List<VehicleTrack> list = carService.findTracks(carTrack);
+		List<ReTrack> list = carService.findTracks(carTrack);
 		Map<String, Object> map = new HashMap<>();
-		for (VehicleTrack track : list) {
+		for (ReTrack track : list) {
 			map.put("biz", "track");
 			map.put("id", track.getId());
 			map.put("carNumber", track.getCarNumber());
@@ -50,13 +50,13 @@ public class WebSocketTest {
 
 	@Test
 	public void test2() throws Exception {
-		VehicleTrack carTrack = new VehicleTrack();
+		ReTrack carTrack = new ReTrack();
 		carTrack.setCarNumber("桂B42133");
 		carTrack.setBegin("2017-12-12 09:06:50");
 		carTrack.setEnd("2017-12-12 17:06:58");
-		List<VehicleTrack> list = carService.findTracks(carTrack);
+		List<ReTrack> list = carService.findTracks(carTrack);
 		Map<String, Object> map = new HashMap<>();
-		for (VehicleTrack track : list) {
+		for (ReTrack track : list) {
 			map.put("biz", "track");
 			map.put("id", track.getId());
 			map.put("carNumber", track.getCarNumber());

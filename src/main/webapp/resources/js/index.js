@@ -7,6 +7,7 @@ var alarmCount = 0; // 报警数
 var alarmIds = []; // 报警ID缓存
 var record; // 报警记录
 var alarmNotify; // 报警通知对象（浏览器通知）
+var receiveAlarmCount = 1 ;
 
 function receiveEliminat(receiveObj) {
     var alarmId = receiveObj.id;
@@ -40,18 +41,37 @@ function receiveAlarm(receive, receiveObj) {
             body: parseAlarm(receiveObj)
         }).player();
     } else {
-        iziToast.info({
-            title: '报警通知',
-            message: parseAlarm(receiveObj),
-            timeout: 5000,
-            position: 'bottomRight',
-            buttons: [
-                ['<button>查看报警信息</button>', function(instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOutUp' }, toast);
-                    showAlarm(record);
-                }]
-            ]
-        });
+        var toast = document.querySelector('.iziToast');
+        if (toast == null) {
+            receiveAlarmCount = 1 ;
+            iziToast.info({
+                title: '报警通知',
+                message: parseAlarm(receiveObj),
+                timeout: 5000,
+                position: 'bottomRight',
+                buttons: [
+                    ['<button>查看报警信息</button>', function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOutUp'}, toast);
+                        showAlarm(record);
+                    }]
+                ]
+            });
+        } else {
+            iziToast.destroy();
+            receiveAlarmCount++ ;
+            iziToast.info({
+                title: '报警通知',
+                message: '收到' + receiveAlarmCount + "条新报警信息！",
+                timeout: 5000,
+                position: 'bottomRight',
+                buttons: [
+                    ['<button>查看报警信息</button>', function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOutUp'}, toast);
+                        showAlarmBox();
+                    }]
+                ]
+            });
+        }
     }
 }
 
@@ -72,12 +92,12 @@ function cacheAlarm(receiveObj) {
     iziToast.info({
         title: '报警通知',
         message: '您有' + alarmCount + '条报警信息待处理！' ,
-        timeout: 5000,
+        timeout: 3000,
         position: 'bottomRight',
         buttons: [
             ['<button>查看报警信息列表</button>', function(instance, toast) {
                 instance.hide({ transitionOut: 'fadeOutUp' }, toast);
-                showAlarmBox()
+                showAlarmBox();
             }]
         ]
     });
@@ -96,7 +116,7 @@ function addAlarm(alarm, record) {
             "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
             "<td class='alarm-type'>" + alarm.typeName + "</td>" +
             "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
-            "</tr>"
+            "</tr>";
         $("#alarm_tips tbody").append(trHtml);
     }
 }
@@ -294,11 +314,11 @@ $(function() {
     }
 
     $("#info-edit").click(function() {
-        setUser("info", "395px");
+        setUser("info", "451px");
     });
 
     $("#pwd-edit").click(function() {
-        setUser("pwd", "244px");
+        setUser("pwd", "235px");
     });
 
     $("#logout").click(function() {

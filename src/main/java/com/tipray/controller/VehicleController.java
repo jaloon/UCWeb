@@ -1,15 +1,16 @@
 package com.tipray.controller;
 
 import com.tipray.bean.*;
-import com.tipray.bean.baseinfo.Device;
-import com.tipray.bean.baseinfo.Lock;
-import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.baseinfo.*;
 import com.tipray.bean.log.InfoManageLog;
+import com.tipray.bean.track.ReTrack;
 import com.tipray.constant.LogTypeConst;
 import com.tipray.constant.reply.FindTracksByCarNumberErrorEnum;
+import com.tipray.constant.reply.PermissionErrorEnum;
 import com.tipray.core.ThreadVariable;
 import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
+import com.tipray.core.exception.PermissionException;
 import com.tipray.service.GasStationService;
 import com.tipray.service.InfoManageLogService;
 import com.tipray.service.OilDepotService;
@@ -142,6 +143,20 @@ public class VehicleController extends BaseAction {
     @ResponseBody
     public GridPage<Vehicle> ajaxFindCarsForPage(@ModelAttribute Vehicle car, @ModelAttribute Page page) {
         logger.info("car list page, car={}, page={}", car, page);
+        User user = ThreadVariable.getUser();
+        Long userComId = user.getComId();
+        TransCompany transCompany = car.getTransCompany();
+        if (userComId > 0 && transCompany != null) {
+            Long carComId = transCompany.getId();
+            if (carComId == null) {
+                transCompany.setId(userComId);
+                car.setTransCompany(transCompany);
+            } else if (!userComId.equals(carComId)) {
+                logger.warn("操作员{}({})属于运输公司【{}】，请求查询运输公司【{}】的车辆，权限不足！",
+                        user.getAccount(), user.getName(), userComId, carComId);
+                throw new PermissionException(PermissionErrorEnum.PERMISSION_DENIED);
+            }
+        }
         GridPage<Vehicle> gridPage = vehicleService.findCarsForPage(car, page);
         return gridPage;
     }
@@ -310,9 +325,9 @@ public class VehicleController extends BaseAction {
      */
     @RequestMapping(value = "retrack.do")
     @ResponseBody
-    public List<VehicleTrack> reTrack(VehicleTrack carTrack) {
+    public List<ReTrack> reTrack(ReTrack carTrack) {
         logger.info("retrack, carTrack={}", carTrack);
-        List<VehicleTrack> list = vehicleService.findTracks(carTrack);
+        List<ReTrack> list = vehicleService.findTracks(carTrack);
         return list;
     }
 
@@ -387,16 +402,16 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "selectCars.do")
     @ResponseBody
     public Map<String, Object> selectCars(Integer scope) {
-
+        Long comId = ThreadVariable.getUser().getComId();
         if (scope == null || scope == 0) {
             // 选取全部车辆
-            return vehicleService.selectCars(0);
+            return vehicleService.selectCars(0, comId);
         } else if (scope == 1) {
             // 只选取绑定了车台的车辆
-            return vehicleService.selectCars(1);
+            return vehicleService.selectCars(1, comId);
         } else if (scope == 2){
             // 只选取在线车辆
-            return vehicleService.selectCars(2);
+            return vehicleService.selectCars(2, comId);
         }
         return null;
     }
