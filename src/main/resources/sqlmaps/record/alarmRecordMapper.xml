@@ -7,36 +7,28 @@
         <result column="vehicle_number" property="carNumber" />
         <result column="vehicle_id" property="vehicleId" />
         <result column="terminal_id" property="terminalId" />
-        <result column="longitude" property="longitude" />
-        <result column="latitude" property="latitude" />
-        <result column="speed" property="velocity" />
-        <result column="angle" property="angle" />
         <result column="device_type" property="deviceType" />
-        <result column="device_id" property="deviceId" />
-        <result column="type" property="type" />
-        <result column="typeName" property="typeName" />
-        <result column="alarm_status" property="status" />
-        <result column="lock_status_info" property="lockStatusInfo" />
-        <result column="alarm_time" property="createDate" />
+		<result column="device_id" property="deviceId" />
+		<result column="type" property="type" />
+		<result column="typeName" property="typeName" />
+		<result column="alarm_status" property="status" />
+		<result column="track_id" property="trackId" />
+        <result column="alarm_time" property="alarmTime" />
         <result column="station" property="station" />
     </resultMap>
 	<sql id="select_colums">
-		a.id											id,
-		c.vehicle_number								vehicle_number,
-		a.vehicle_id									vehicle_id,
-		c.vehicle_device_id								terminal_id,
-		a.device_type									device_type,
-		a.device_id										device_id,
-		a.type											type,
-		fn_get_alarm_type ( a.device_type, a.type )		typeName,
-		fn_type2name ( 'alarmStatus', a.`status` )		alarm_status,
-		fn_get_station ( a.station_type, a.station_id )	station,
-		t.longitude										longitude,
-		t.latitude										latitude,
-		t.speed											speed,
-		t.angle											angle,
-		t.lock_status_info								lock_status_info,
-		a.alarm_time									alarm_time
+		a.id											  id,
+		c.vehicle_number								  vehicle_number,
+		a.vehicle_id									  vehicle_id,
+		c.vehicle_device_id								  terminal_id,
+		a.device_type									  device_type,
+		a.device_id										  device_id,
+		a.type											  type,
+		fn_get_alarm_type ( a.device_type, a.type )		  typeName,
+		fn_type2name ( 'alarmStatus', a.`status` )		  alarm_status,
+		fn_get_station ( a.station_type, a.station_id )	  station,
+		a.vehicle_track_id								  track_id,
+        DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%I:%S' )  alarm_time
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
@@ -53,8 +45,7 @@
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		SELECT <include refid="select_colums"></include>
 		FROM
-			tbl_alarm a
-			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_alarm a,
 			tbl_vehicle c
 		WHERE
 			a.vehicle_id = c.id AND a.id=#{id}
@@ -89,11 +80,10 @@
 		</if>
 	</select>
 	
-	<select id="findByPage" resultMap="fullResultMap">
+	<select id="findByPage" resultMap="fullResultMap" resultType="java.util.Map">
 		SELECT <include refid="select_colums"></include>
 		FROM
-			tbl_alarm a
-			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_alarm a,
 			tbl_vehicle c
 		WHERE
             a.vehicle_id = c.id
@@ -112,6 +102,24 @@
 		order by a.id asc  
 		limit #{page.startRow}, #{page.rows}
 	</select>
+
+	<select id="findSameAlarmIdsById" parameterType="java.lang.Long" resultType="java.lang.Long">
+        <![CDATA[
+        SELECT
+            t1.id
+        FROM
+            tbl_alarm t1,
+            (SELECT id, vehicle_id, device_type, device_id, lock_id, type, alarm_time FROM tbl_alarm  WHERE id = #{id}) t2
+        WHERE
+            t1.vehicle_id = t2.vehicle_id
+            AND t1.device_type = t2.device_type
+            AND (t1.device_id = t2.device_id OR t1.lock_id = t2.lock_id)
+            AND t1.type = t2.type
+            AND t1.alarm_time <= t2.alarm_time
+            AND t1.`status` = 0
+        ]]>
+    </select>
+
 	
 	<insert id="addEliminateAlarm" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO tbl_remote_alarm_eliminate ( user_id, vehicle_id, alarm_id_list, is_app, is_lnglat_valid, longitude, latitude )
@@ -134,12 +142,23 @@
 	<update id="updateEliminateAlarmDone">
 		UPDATE tbl_alarm
 		SET
-			eliminate_trigger_type = 6,
-			eliminate_trigger_id = #{eliminateId},
-			eliminate_time = NOW( ),
 			`status` = 1
 		WHERE
-			id In ( ${alarmIds} );
+            id IN (${_parameter})
+	</update>
+
+	<update id="updateAlarmEliminated" parameterType="java.util.List">
+		UPDATE tbl_alarm
+		SET
+            eliminate_trigger_type = 6,
+            eliminate_trigger_id = #{eliminateId},
+            eliminate_time = NOW( ),
+			`status` = 3
+		WHERE
+            id IN
+        <foreach collection="alarmIdList" item="alarmId" index="index" separator="," open="(" close=")">
+            #{alarmId, jdbcType=INTEGER}
+        </foreach>
 	</update>
 
 	<select id="findNotElimited" resultMap="fullResultMap">
@@ -153,29 +172,27 @@
 			AND a.status = 0
 	</select>
 	
-	<select id="findNotElimitedForApp" resultType="java.util.LinkedHashMap">
+	<select id="findNotElimitedForApp" resultType="java.util.Map">
 		SELECT
 			a.id alarm_id,
 			a.vehicle_id,
 			c.vehicle_number,
 			a.device_type,
 			a.device_id,
+			a.lock_id,
 			a.type alarm_type,
-			fn_get_alarm_type(a.device_type, a.type) alarm_type_name,
+			fn_get_alarm_type ( a.device_type, a.type ) alarm_type_name,
 			a.station_type,
 			a.station_id,
-			fn_get_station ( a.station_type, a.station_id ) station_name,
+			fn_get_alarm_station ( a.station_type, a.station_id ) station_name,
 			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%I:%S' ) alarm_time,
-			IFNULL(t.is_lnglat_valid, 0) is_lnglat_valid,
-			IFNULL(t.longitude, 0) longitude,
-			IFNULL(t.latitude, 0) latitude
+			a.vehicle_track_id
 		FROM
-			tbl_alarm a
-			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
+			tbl_alarm a,
 			tbl_vehicle c
 		WHERE
 			a.vehicle_id = c.id
-			AND a.status = 0
+			AND a.`status` = 0
 	</select>
 	
 </mapper>

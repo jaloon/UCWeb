@@ -58,69 +58,12 @@ public class UdpReplyErrorTag {
 	public static final short COMMON_ERROR_LOCK_BINDED = 22;
 	/** 轨迹时间小于2017年或者其它时间错误 */
 	public static final short COMMON_ERROR_TRACK_TIME = 23;
-
-	// 车辆轨迹实时上报请求错误类型
-	/** 车辆轨迹实时上报sessionId错误 */
-	public static final short TRACK_TASK_ERROR_SESSION_ID = 1;
-	/** 车辆轨迹实时上报上报间隔错误 */
-	public static final short TRACK_TASK_ERROR_INTERVAL = 2;
-	/** 车辆轨迹实时上报错误 */
-	public static final short TRACK_TASK_ERROR_UP_MIN = 3;
-	/** 车辆轨迹实时上报持续时间错误 */
-	public static final short TRACK_TASK_ERROR_DURATION = 4;
-
-	// 车辆轨迹列表上报请求错误类型
-	/** 车辆轨迹列表上报轨迹数目错误 */
-	public static final short TRACK_LIST_ERROR_TRACK_NUM = 1;
-	/** 车辆轨迹列表上报数据库插入错误 */
-	public static final short TRACK_LIST_ERROR_DB_INSERT = 2;
-
-	// 报警消除上报协议错误
-	/** 报警消除上报设备类型错误 */
-	public static final short ALARM_ELIMINATE_ERROR_DEVICE_TYPE = 1;
-	/** 报警消除上报设备ID错误 */
-	public static final short ALARM_ELIMINATE_ERROR_DEVICE_ID = 2;
-	/** 报警消除上报报警类型错误 */
-	public static final short ALARM_ELIMINATE_ERROR_ALARM_TYPE = 3;
-	/** 报警消除上报触发方式错误 */
-	public static final short ALARM_ELIMINATE_ERROR_TRIGGER_TYPE = 4;
-	/** 报警消除上报触发ID错误 */
-	public static final short ALARM_ELIMINATE_ERROR_TRIGGER_ID = 5;
-	/** 报警消除上报消除时间错误 */
-	public static final short ALARM_ELIMINATE_ERROR_ELIMINATE_TIME = 6;
-	/** 报警消除上报站点类型错误 */
-	public static final short ALARM_ELIMINATE_ERROR_STATION_TYPE = 7;
-	/** 报警消除上报站点ID错误 */
-	public static final short ALARM_ELIMINATE_ERROR_STATION_ID = 8;
-	/** 报警不存在或者已经消除（车台需特殊处理） */
-	public static final short ALARM_ELIMINATE_ERROR_NONEXISTENT_OR_ELIMINATED = 9;
-
-	// 远程换站协议错误
-	/** 远程换站仓号错误 */
-	public static final short CHANGE_STATION_ERROR_STORE_ID = 1;
-	/** 远程换站新配送ID错误 */
-	public static final short CHANGE_STATION_ERROR_TRANSPORT_ID_NEW = 2;
-	/** 远程换站新加油站ID错误 */
-	public static final short CHANGE_STATION_ERROR_GASSTATION_ID_NEW = 3;
-
-	// 远程控制状态协议错误
-	/** 远程控制ID错误 */
-	public static final short REMOTE_CONTROL_ERROR_CONTROL_ID = 1;
-	/** 远程控制状态事件错误 */
-	public static final short REMOTE_CONTROL_ERROR_STATUS_INCIDENT = 2;
-	/** 远程控制车辆状态错误 */
-	public static final short REMOTE_CONTROL_ERROR_VEHICLE_STATUS = 3;
-
-	// 锁待绑定监听协议错误
-	/** 锁待绑定监听值错误 */
-	public static final short LOCK_LISTEN_ERROR_VALUE = 1;
-
-	// 锁绑定信息变更协议错误
-	/** 锁绑定变更类型错误 */
-	public static final short LOCK_BIND_ERROR_ALTER_TYPE = 1;
-	/** 锁绑定锁信息错误 */
-	public static final short LOCK_BIND_ERROR_LOCK_INFO = 2;
+	/** 记录ID不合法 */
+	public static final short COMMON_ERROR_RECORD_ID = 24;
+	/** 设备ID不合法 */
+	public static final short COMMON_ERROR_DEVICE_ID = 25;
+	/** 车台应答超时 */
+	public static final short COMMON_ERROR_TIME_OUT = 26;
 
 	private UdpReplyErrorTag() {}
-	
 }

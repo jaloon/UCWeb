@@ -115,24 +115,6 @@ public class NioUdpServer {
 							// 接受来自客户端通道的数据
 							InetSocketAddress address = (InetSocketAddress) clientChannel.receive(receiveBuffer);
 
-                            // short i = receiveBuffer.getShort(0);
-                            // DeferredResult<ResponseMsg> deferredResult =AsynUdpCommCache.getAndRemoveDeferredResultCache((int)i);
-                            // if (deferredResult != null) {
-                            //     deferredResult.setResult(ResponseMsgUtil.success("recieve: " + i));
-                            //     System.out.println("recieve: " + i);
-                            //     continue;
-                            // }
-                            // AsyncContext asyncContext = AsynUdpCommCache.getAsyncContextCache((int)i);
-                            // if (asyncContext != null) {
-                            //     PrintWriter out = asyncContext.getResponse().getWriter();
-                            //     out.write("recieve: " + i);
-                            //     out.flush();
-                            //     out.close();
-                            //     asyncContext.complete();
-                            //     System.out.println("recieve: " + i);
-                            //     continue;
-                            // }
-
 							// 1.判断是否来自预期地址和端口号
 							// InetSocketAddress.getHostName()获取的主机名称是计算机名，InetAddress.getHostAddress()获取的才是IP地址
 							String host = address.getAddress().getHostAddress();

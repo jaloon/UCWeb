@@ -76,9 +76,9 @@ var SmartReader = {
         reader.createSocket = function() {
             try {
                 if ("WebSocket" in window) {
-                    socket = new WebSocket("mws://localhost:81/webReaderServer");
+                    socket = new WebSocket("ws://localhost:81/webReaderServer");
                 } else if ("MozWebSocket" in window) {
-                    socket = new MozWebSocket("mws://localhost:81/webReaderServer");
+                    socket = new MozWebSocket("ws://localhost:81/webReaderServer");
                 } else {
                     alert("None");
                     return false;

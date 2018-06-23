@@ -275,15 +275,27 @@
 	
 	<select id="getCarStatus" parameterType="java.lang.String" resultType="com.tipray.bean.VehicleStatus">
 		SELECT
-			v.vehicle_number carNumber,
-			s.is_online `online`,
-			s.`status` `status`,
-			fn_type2name ( 'carStatus', s.`status` ) statusName 
-		FROM
-			tbl_vehicle v
-			LEFT JOIN tbl_vehicle_realtime_status s ON v.id = s.vehicle_id 
-		WHERE
-			v.vehicle_number = #{carNumber}
+            v.vehicle_number carNumber,
+            rs.is_online `online`,
+            ss.`status` `status`,
+            fn_type2name ( 'carStatus', ss.`status` ) statusName
+        FROM
+            tbl_vehicle v
+            LEFT JOIN tbl_vehicle_realtime_status rs ON v.id = rs.vehicle_id
+            LEFT JOIN (
+						SELECT
+							t.vehicle_id,
+							t.`status`
+						FROM
+							tbl_vehicle_seal_status t
+						WHERE
+							t.vehicle_id = ( SELECT id FROM tbl_vehicle WHERE vehicle_number = #{carNumber} )
+						ORDER BY
+							t.trigger_time DESC
+							LIMIT 1
+					  ) ss ON v.id = ss.vehicle_id
+        WHERE
+            v.vehicle_number = #{carNumber}
 	</select>
 	
 	<select id="getDistributionsByCarNumber" parameterType="java.lang.String" resultType="com.tipray.bean.ChangeInfo">
@@ -352,6 +364,14 @@
 	<select id="getCarNumberById" parameterType="java.lang.Long" resultType="java.lang.String">
 		SELECT vehicle_number FROM tbl_vehicle WHERE id = #{id}
 	</select>
+
+    <select id="getIdByCarNo" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT id FROM tbl_vehicle WHERE vehicle_number = #{carNo}
+    </select>
+
+	<select id="findCarNumbersByTerminalIds" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT vehicle_number FROM tbl_vehicle WHERE vehicle_device_id IN (${_parameter})
+    </select>
 	
 	<!-- 存储过程调用 -->
 	<select id="terminalConfig" statementType="CALLABLE" parameterType="com.tipray.bean.VehicleTerminalConfig">
@@ -368,48 +388,59 @@
         	)}
         ]]>
 	</select>
-	
-	<insert id="terminalEnable" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
-		REPLACE INTO tbl_vehicle_param_cfg ( vehicle_device_id, param_cfg_name, param_cfg_value )
+
+    <select id="countTerminalEnable" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM tbl_vehicle_param_cfg WHERE vehicle_device_id = 0 AND param_cfg_name = 'VehicleWorkOnOff'
+    </select>
+
+    <select id="getTerminalEnable" resultType="java.lang.Integer">
+       SELECT param_cfg_value FROM tbl_vehicle_param_cfg WHERE vehicle_device_id = 0 AND param_cfg_name = 'VehicleWorkOnOff'
+    </select>
+
+    <update id="updateTerminalEnable" parameterType="java.lang.Integer">
+        UPDATE tbl_vehicle_param_cfg
+        SET param_cfg_value = #{functionEnable}
+        WHERE
+            vehicle_device_id = 0
+            AND param_cfg_name = 'VehicleWorkOnOff'
+    </update>
+
+	<insert id="addTerminalEnable" useGeneratedKeys="true" keyProperty="id" parameterType="java.lang.Integer">
+		INSERT INTO tbl_vehicle_param_cfg ( vehicle_device_id, param_cfg_name, param_cfg_value )
 		VALUES
-			( #{deviceId}, 'VehicleWorkOnOff', #{functionEnable} );
+			( 0, 'VehicleWorkOnOff', #{functionEnable} );
 	</insert>
 	
 	<insert id="addRemoteControlRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO 
-			tbl_remote_control(user_id, vehicle_id, type, station_id, vehicle_seal_status_id, is_app, is_lnglat_valid, longitude, latitude)
+			tbl_remote_control(user_id, vehicle_id, `type`, station_type, station_id, is_app, is_lnglat_valid, longitude, latitude)
 		VALUES(
 			#{userId},
 			#{carId}, 
 			#{type}, 
+			IFNULL(#{stationType}, 0),
 			IFNULL(#{stationId}, 0),
-		 	IFNULL((SELECT id from tbl_vehicle_seal_status where vehicle_id = #{carId} ORDER BY trigger_time DESC LIMIT 1), 0),
 		  	IFNULL(#{isApp}, 0),
 		  	IFNULL(#{isLocationValid}, 0),
 		  	IFNULL(#{longitude}, 0),
 		  	IFNULL(#{latitude}, 0)
 		  )
 	</insert>
+
 	<select id="getRemoteControlIdByCarIdAndControlType" resultType="java.lang.Integer">
 		SELECT id FROM tbl_remote_control WHERE vehicle_id = #{carId} AND type = #{type} ORDER BY id DESC LIMIT 1
 	</select>
-	
-	<update id="remoteAlterCarStatus" >
-		UPDATE tbl_vehicle_seal_status SET
-			status = #{status},
-			pre_status = ( SELECT t.status FROM ( SELECT status FROM tbl_vehicle_seal_status WHERE vehicle_id = #{carId} ) t ),
-			status_incident = 7,
-			trigger_type = 6,
-			trigger_id = #{remoteControlId} 
-		WHERE
-			vehicle_id = #{carId};
-	</update>
-	
-	<update id="updateRemoteControlStatus">
-		UPDATE tbl_remote_control SET
-			status = #{remoteControlStatus}
-		WHERE id = #{remoteControlId}
-	</update>
+
+    <update id="updateRemoteControlStatus">
+        UPDATE tbl_remote_control
+        <set>
+            <if test="remoteControlStatus == 2">
+                finish_time = NOW(),
+            </if>
+            status = #{remoteControlStatus}
+        </set>
+        WHERE id = #{remoteControlId}
+    </update>
 	
 	<insert id="addLockResetRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO tbl_unlock_reset (
@@ -476,32 +507,73 @@
 			AND t.track_time > #{beginTime}
 			AND v.vehicle_number IN ( ${carNumbers} );
 	</select>
-	
-	<select id="findBindedVehicleTree" resultType="java.util.Map">
-		SELECT
+    
+	<select id="findBindedVehicleTree" resultType="com.tipray.bean.upgrade.VehicleTree">
+        <!-- 只查在线车辆 -->
+-- 		SELECT
+--             tc.`id`,
+--             tc.`name`,
+--             tc.`parent_company_id` `pId`
+--         FROM
+--             `tbl_trans_company` tc
+--         WHERE
+--             tc.`id` IN
+--               ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v, `tbl_vehicle_realtime_status` s
+--                 WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 AND v.`id` = s.`vehicle_id` AND s.`is_online` = 1)
+--             AND tc.`is_invalid` = 0 UNION ALL
+--         SELECT
+--             tv.`vehicle_device_id` `id`,
+--             tv.`vehicle_number` `name`,
+--             tv.`trans_company_id` `pId`
+--         FROM
+--             `tbl_vehicle` tv,
+--             `tbl_vehicle_realtime_status` ts
+--         WHERE
+--             tv.`vehicle_device_id` != 0
+--             AND tv.`is_invalid` = 0
+--             AND tv.`id` = ts.`vehicle_id`
+--             AND ts.`is_online` = 1
+
+--         SELECT
+--             tc.`id`,
+--             tc.`name`,
+--             tc.`parent_company_id` `pId`
+--         FROM
+--             `tbl_trans_company` tc
+--         WHERE
+--             tc.`id` IN ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 )
+--             AND tc.`is_invalid` = 0 UNION ALL
+--         SELECT
+--             tv.`vehicle_device_id` `id`,
+--             tv.`vehicle_number` `name`,
+--             tv.`trans_company_id` `pId`
+--         FROM
+--             `tbl_vehicle` tv
+--         WHERE
+--             tv.`vehicle_device_id` != 0
+--             AND tv.`is_invalid` = 0
+        SELECT
             tc.`id`,
             tc.`name`,
-            tc.`parent_company_id` `pId`
+            tc.`parent_company_id` `pId`,
+            0 `ver`
         FROM
             `tbl_trans_company` tc
         WHERE
-            tc.`id` IN
-              ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v, `tbl_vehicle_realtime_status` s
-                WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 AND v.`id` = s.`vehicle_id` AND s.`is_online` = 1)
+            tc.`id` IN ( SELECT v.`trans_company_id` FROM `tbl_vehicle` v WHERE v.`vehicle_device_id` != 0 AND v.`is_invalid` = 0 )
             AND tc.`is_invalid` = 0 UNION ALL
         SELECT
             tv.`vehicle_device_id` `id`,
             tv.`vehicle_number` `name`,
-            tv.`trans_company_id` `pId`
+            tv.`trans_company_id` `pId`,
+            td.`device_version` `ver`
         FROM
             `tbl_vehicle` tv,
-            `tbl_vehicle_realtime_status` ts
+            `tbl_device` td
         WHERE
             tv.`vehicle_device_id` != 0
+            AND tv.`vehicle_device_id` = td.`device_id`
             AND tv.`is_invalid` = 0
-            AND tv.`id` = ts.`vehicle_id`
-            AND ts.`is_online` = 1
-            <!-- 只查在线车辆 -->
 	</select>
 	
     <select id="getVehicleRealtimeStatus" parameterType="java.lang.Long" resultType="com.tipray.bean.VehicleRealtimeStatus">
@@ -509,8 +581,8 @@
             s.vehicle_id vehicleId,
             v.vehicle_number carNumber,
             s.is_online `online`,
-            s.`status`,
-            fn_type2name ( 'carStatus', s.`status` ) statusName,
+--             s.`status`,
+--             fn_type2name ( 'carStatus', s.`status` ) statusName,
             s.param_status paramStatus,
             s.last_online_time lastOnline
         FROM
@@ -575,7 +647,7 @@
         <result column="vehicle_id" property="carId" javaType="java.lang.Long" />
         <result column="vehicle_number" property="carNumber" javaType="java.lang.String" />
     </resultMap>
-    <select id="findOnlineCarIds" resultMap="carNoMap">
+    <select id="findOnlineCarIds" resultMap="carOnlineMap">
         <![CDATA[
             SELECT
                 s.vehicle_id,
@@ -599,5 +671,15 @@
                 AND TIMESTAMPDIFF(SECOND, last_online_time, NOW()) > 400;
         ]]>
     </update>
+
+    <select id="findCarIdsByCarNumbers" parameterType="java.lang.String" resultType="java.util.Map" >
+        SELECT
+            id,
+            vehicle_number
+        FROM
+            tbl_vehicle
+        WHERE
+            vehicle_number IN ( ${_parameter} );
+    </select>
 
 </mapper>

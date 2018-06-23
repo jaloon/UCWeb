@@ -22,23 +22,29 @@
 		select
 		<include refid="select_colums"></include>
 		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and is_has_bind = 1
+		where l.vehicle_id=c.id and l.is_has_bind = 1
 	</select>
 	
-	<select id="getByLockId" parameterType="java.lang.Integer" resultMap="fullResultMap">
+	<select id="getByLockId" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
 		from tbl_lock l,tbl_vehicle c
 		where l.vehicle_id=c.id
-		and l.lock_device_id=#{lockId} and is_has_bind = 1
+		and l.is_has_bind = 1
+		and l.lock_device_id=#{lockId}
+		and c.id=#{carId}
 	</select>
 	
 	<select id="findLocksByCarId" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
 		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and is_has_bind = 1
+		where l.vehicle_id=c.id and l.is_has_bind = 1
 		and c.id=#{carId}
+	</select>
+
+	<select id="getMaxLockIndexByCarId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		select max(lock_index) from tbl_lock where vehicle_id = #{carId}
 	</select>
 	
 	<select id="findUnusedLocks" resultType="java.lang.Integer">
@@ -65,11 +71,11 @@
 		</foreach>
 	</insert>
 	
-	<select id="findBindingLockDeviceIds" parameterType="java.lang.Long" resultType="java.lang.Integer">
-		select lock_device_id from tbl_lock_binding where vehicle_id = #{carId} and last_valid_time > now()
+	<select id="findBindingLockDeviceIds" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select l.lock_device_id from tbl_lock_binding l, tbl_vehicle v
+		where l.vehicle_id = v.id and l.last_valid_time > now() and v.vehicle_number = #{carNumber}
 	</select>
-	
-	
+
 	<select id="findLockStatusByLocks" parameterType="java.util.List" resultType="java.util.Map">
 		SELECT * FROM `tbl_lock_status` WHERE
 		<foreach collection="list" item="lock" index="index" separator="or">
@@ -93,7 +99,7 @@
 	<select id="findVehicleIdByLocks" parameterType="java.util.List" resultMap="fullResultMap">
 		SELECT t1.vehicle_id, t2.lock_device_id FROM
 		(
-		SELECT vehicle_id, lock_device_id FROM `tbl_lock` WHERE 
+		SELECT vehicle_id, lock_device_id FROM tbl_lock WHERE
 		<foreach collection="list" item="lock" index="index" separator="or">
 	        (
 	        lock_device_id = #{lock.lockId} 
@@ -116,6 +122,8 @@
 
 	<select id="findlocksByCarNo" parameterType="java.lang.String" resultType="java.util.Map">
         SELECT
+        	l.vehicle_id,
+        	l.id lock_id,
             l.store_id,
             l.seat,
             l.seat_index,
@@ -123,22 +131,54 @@
             l.is_allowed_open,
             l.bind_status,
             l.is_has_bind,
-            l.lock_index,
-            IFNULL( s.`status`, 0 ) `status`
+            l.lock_index
+--             IFNULL( s.`status`, 0 ) switch_status
         FROM
-            tbl_lock l
-            LEFT JOIN tbl_lock_status s ON l.store_id = s.store_id
-            AND l.seat = s.seat
-            AND l.seat_index = s.seat_index
-            AND l.lock_device_id = s.lock_device_id
-            AND s.change_time = ( SELECT MAX( t.change_time ) FROM tbl_lock_status t WHERE t.store_id = s.store_id
-                                                                                    AND t.seat = s.seat
-                                                                                    AND t.seat_index = s.seat_index
-                                                                                    AND t.lock_device_id = s.lock_device_id ),
+            tbl_lock l,
+--             LEFT JOIN tbl_lock_status s ON l.store_id = s.store_id
+--             AND l.seat = s.seat
+--             AND l.seat_index = s.seat_index
+--             AND l.lock_device_id = s.lock_device_id
+--             AND s.id = ( SELECT MAX( t.id ) FROM tbl_lock_status t WHERE t.store_id = s.store_id
+--                                                                                     AND t.seat = s.seat
+--                                                                                     AND t.seat_index = s.seat_index
+--                                                                                     AND t.lock_device_id = s.lock_device_id ),
             tbl_vehicle v
         WHERE
             l.vehicle_id = v.id
             AND v.vehicle_number = #{carNumber}
     </select>
-	
+
+	<select id="getLockStatus" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT
+            `status`
+        FROM
+            tbl_lock_status
+        WHERE
+            vehicle_id = #{vehicle_id}
+            AND store_id = #{store_id}
+            AND seat = #{seat}
+            AND seat_index = #{seat_index}
+            AND lock_device_id = #{lock_device_id}
+        ORDER BY
+            change_time DESC
+            LIMIT 1
+    </select>
+
+	<select id="getByIdForAppAlarm" parameterType="java.lang.Long" resultType="java.util.Map">
+		SELECT
+			id lock_id,
+			lock_device_id,
+			store_id,
+			seat,
+			seat_index,
+			is_allowed_open,
+			bind_status,
+			is_has_bind,
+			lock_index
+		FROM
+			tbl_lock
+		WHERE id = #{id}
+	</select>
+
 </mapper>

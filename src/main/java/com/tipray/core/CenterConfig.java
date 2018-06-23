@@ -1,15 +1,14 @@
 package com.tipray.core;
 
+import com.tipray.constant.CenterConfigConst;
+import com.tipray.util.FileUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.tipray.constant.CenterConfigConst;
-import com.tipray.util.FileUtil;
 
 /**
  * 用户中心配置
@@ -51,6 +50,7 @@ public class CenterConfig {
 	private static String sqliteFilePath;
 	private static String imageFilePath;
 	private static String excelFilePath;
+	private static String upgradeFilePath;
 
 	static {
 		init();
@@ -156,7 +156,11 @@ public class CenterConfig {
 		return excelFilePath;
 	}
 
-	private static void init() {
+    public static String getUpgradeFilePath() {
+        return upgradeFilePath;
+    }
+
+    private static void init() {
 		Properties properties = new Properties();
 		try {
 			properties.load(CenterConfig.class.getClassLoader().getResourceAsStream("center.properties"));
@@ -204,9 +208,11 @@ public class CenterConfig {
 		sqliteFilePath = new StringBuffer(ftpLocalPath).append("/sqlite").toString();
 		imageFilePath = new StringBuffer(ftpLocalPath).append("/image").toString();
 		excelFilePath = new StringBuffer(ftpLocalPath).append("/excel").toString();
+		upgradeFilePath = new StringBuffer(ftpLocalPath).append("/upgrade").toString();
 		FileUtil.createPath(sqliteFilePath);
 		FileUtil.createPath(imageFilePath);
 		FileUtil.createPath(excelFilePath);
+		FileUtil.createPath(upgradeFilePath);
 	}
 
 }

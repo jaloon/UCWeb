@@ -55,14 +55,17 @@
 			<if test="result != null and result != ''">
 				`result`		= #{result},
 			</if>
-			<if test="responseMsg != null">
-				`response_msg`	= JSON_OBJECT (
-												'id',		#{responseMsg.id},
-												'result',	#{responseMsg.result},
-												'tag',		#{responseMsg.tag},
-												'code',		#{responseMsg.code},
-												'msg',		#{responseMsg.msg}
-												),
+			<!--<if test="responseMsg != null">-->
+				<!--`response_msg`	= JSON_OBJECT (-->
+												<!--'id',		#{responseMsg.id},-->
+												<!--'result',	#{responseMsg.result},-->
+												<!--'tag',		#{responseMsg.tag},-->
+												<!--'code',		#{responseMsg.code},-->
+												<!--'msg',		#{responseMsg.msg}-->
+												<!--),-->
+			<!--</if>-->
+			<if test="responseMsgJson != null">
+				`response_msg`	= #{responseMsgJson}
 			</if>
 		</set>
 		WHERE
@@ -166,5 +169,20 @@
 			<!-- AND request_time >= #{requestTime} -->
 		ORDER BY id DESC LIMIT 1
 	</select>
-	
+
+    <select id="findUdpReplyLog" parameterType="java.util.Map" resultType="com.tipray.bean.log.VehicleManageLog">
+        SELECT
+            description,
+            result,
+            response_msg responseMsgJson
+        FROM
+            tbl_vehicle_manage_log
+        WHERE
+            user_id = #{userId}
+            AND is_app = #{isApp}
+            AND udp_id = #{udpBizId}
+            AND token = fn_uuid_to_bin(#{token})
+        ORDER BY id DESC LIMIT 1
+    </select>
+
 </mapper>

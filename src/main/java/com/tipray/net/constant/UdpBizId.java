@@ -48,9 +48,9 @@ public class UdpBizId {
 	/** 锁待绑定列表清除下发应答（UDP） */
 	public static final short LOCK_CLEAR_RESPONSE = 0x1286;
 	/** 锁绑定触发开启关闭控制下发（UDP） */
-	public static final short LOCK_BIND_TRIGGER_REQUEST = 0x1209;
+	public static final short LOCK_BIND_TRIGGER_REQUEST = 0x120A;
 	/** 锁绑定触发开启关闭控制下发应答（UDP） */
-	public static final short LOCK_BIND_TRIGGER_RESPONSE = 0x1289;
+	public static final short LOCK_BIND_TRIGGER_RESPONSE = 0x128A;
 	/** 锁绑定变更下发（UDP） */
 	public static final short LOCK_BIND_MODIFY_REQUEST = 0x1207;
 	/** 锁绑定变更下发应答（UDP） */
@@ -60,6 +60,10 @@ public class UdpBizId {
 	public static final short TERMINAL_SOFTWARE_UPGRADE_REQUEST = 0x1208;
 	/** 车台软件升级下发应答（UDP） */
 	public static final short TERMINAL_SOFTWARE_UPGRADE_RESPONSE = 0x1288;
+	/** 车台功能启用配置下发（UDP） */
+	public static final short TERMINAL_FUNCTION_ENABLE_REQUEST = 0x1209;
+	/** 车台功能启用配置下发应答（UDP） */
+	public static final short TERMINAL_FUNCTION_ENABLE_RESPONSE = 0x1289;
 
 	/** 车辆轨迹实时上报请求（UDP） */
 	public static final short REALTIME_MONITOR_REQUEST = 0x1301;
@@ -102,10 +106,10 @@ public class UdpBizId {
 	/** 开锁重置应答（UDP） */
 	public static final short LOCK_OPEN_RESET_RESPONSE = 0x1485;
 
-	/** 道闸开启请求（UDP） */
-	public static final short BARRIER_OPEN_REQUEST = 0x1406;
-    /** 道闸开启应答（UDP） */
-	public static final short BARRIER_OPEN_RESPONSE = 0x1486;
+	// /** 道闸开启请求（UDP） */
+	// public static final short BARRIER_OPEN_REQUEST = 0x1406;
+    // /** 道闸开启应答（UDP） */
+	// public static final short BARRIER_OPEN_RESPONSE = 0x1486;
 
 	private UdpBizId() {
 	}

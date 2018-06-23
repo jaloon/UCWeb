@@ -17,10 +17,10 @@ public class VehicleRealtimeStatus implements Serializable {
     private String carNumber;
     /** 车辆在线状态（0 离线，1 在线） */
     private Integer online;
-    /** 车辆状态 */
-    private Integer status;
-    /** 状态名称 */
-    private String statusName;
+    // /** 车辆状态 */
+    // private Integer status;
+    // /** 状态名称 */
+    // private String statusName;
     /** 绑定状态 */
     private Integer paramStatus;
     /** 最后在线时间 */
@@ -50,21 +50,21 @@ public class VehicleRealtimeStatus implements Serializable {
         this.online = online;
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
+    // public Integer getStatus() {
+    //     return status;
+    // }
+    //
+    // public void setStatus(Integer status) {
+    //     this.status = status;
+    // }
+    //
+    // public String getStatusName() {
+    //     return statusName;
+    // }
+    //
+    // public void setStatusName(String statusName) {
+    //     this.statusName = statusName;
+    // }
 
     public Integer getParamStatus() {
         return paramStatus;
@@ -88,8 +88,8 @@ public class VehicleRealtimeStatus implements Serializable {
         sb.append("vehicleId=").append(vehicleId);
         sb.append(", carNumber='").append(carNumber).append('\'');
         sb.append(", online=").append(online);
-        sb.append(", status=").append(status);
-        sb.append(", statusName='").append(statusName).append('\'');
+        // sb.append(", status=").append(status);
+        // sb.append(", statusName='").append(statusName).append('\'');
         sb.append(", paramStatus=").append(paramStatus);
         sb.append(", lastOnline=").append(lastOnline);
         sb.append('}');

@@ -1,4 +1,4 @@
-<%@ page import="java.util.UUID"%>
+<%@ page import="java.util.Calendar" %>
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="pop" uri="/pop-tags" %>
@@ -20,7 +20,6 @@
 </head>
 
 <body>
-	<c:set var="uuid" value="<%=UUID.randomUUID().toString() %>"></c:set>
 	<div class="container">
 		<input type="hidden" id="requestUrl" value="${param.requestUrl}">
 		<div class="top">
@@ -31,8 +30,6 @@
 					<div class="welcome-zh">欢迎登录</div>
 					<div class="welcome-en">WELCOME LOGIN</div>
 				</div>
-				<%-- <form id="loginForm" action="${path}/manage/session/login.do" method="post">
-					<input type="hidden" id="secretKey" name="secretKey" value="${uuid }"> --%>
 				<div class="account-form">
 					<img class="form-logo" src="resources/images/login/login-account.png" />
 					<input class="form-input" type="text" id="account" name="account" placeholder="请输入账号" />
@@ -43,11 +40,9 @@
 				</div>
 
 				<input type="button" id="login" value="登&emsp;&emsp;录" />
-				<%-- </form> --%>
 			</div>
 		</div>
-
-		<div class="bottom">Copyright&copy;2016-2018 普利通信息科技有限公司</div>
+		<div class="bottom">Copyright&copy;2016-<%=Calendar.getInstance().get(Calendar.YEAR) %> 普利通信息科技有限公司</div>
 	</div>
 </body>
 

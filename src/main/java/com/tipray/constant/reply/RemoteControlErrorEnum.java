@@ -2,7 +2,7 @@ package com.tipray.constant.reply;
 
 /**
  * 远程操作错误枚举
- * 
+ *
  * @author chenlong
  * @version 1.0 2018-03-23
  *
@@ -18,18 +18,26 @@ public enum RemoteControlErrorEnum {
 	CONTROL_TYPE_NULL(4, "远程操作类型为空"),
 	/** 远程操作类型无效 */
 	CONTROL_TYPE_INVALID(5, "远程操作类型无效！"),
+    /** 站点类型为空 */
+	STATION_TYPE_NULL(6, "站点类型为空！"),
+    /** 站点类型无效 */
+    STATION_TYPE_INVALID(7, "站点类型无效！"),
 	/** 站点ID为空 */
-	STATION_ID_NULL(6, "站点ID为空"),
+	STATION_ID_NULL(8, "站点ID为空"),
 	/** 车辆状态为空 */
-	CAR_STATUS_NULL(7, "车辆状态为空"),
+	CAR_STATUS_NULL(9, "车辆状态为空"),
 	/** 车辆状态无效 */
-	CAR_STATUS_INVALID(8, "车辆状态无效！"),
+	CAR_STATUS_INVALID(10, "车辆状态无效！"),
 	/** 车辆离线 */
-    VEHICLE_OFFLINE(9, "车辆离线！"),
+    VEHICLE_OFFLINE(11, "车辆离线！"),
+	/** 油库未指定道闸转发读卡器 */
+	DEPOT_BARRIER_READER_NULL(12, "油库未指定道闸转发读卡器！"),
+    /** 油库道闸转发读卡器太多 */
+    DEPOT_BARRIER_READER_TOO_MUCH(13, "油库道闸转发读卡器太多！"),
 	/** 请求发起时间为空 */
-	REQUEST_TIME_NULL(9, "请求发起时间为空！"),
+	REQUEST_TIME_NULL(14, "请求发起时间为空！"),
 	/** 时间格式不正确 */
-	TIME_FORMAT_INVALID(10, "时间格式不正确！");
+	TIME_FORMAT_INVALID(15, "时间格式不正确！");
 
 	private int code;
 	private String msg;
@@ -49,7 +57,7 @@ public enum RemoteControlErrorEnum {
 
 	/**
 	 * 根据code获取远程操作错误枚举
-	 * 
+	 *
 	 * @param code
 	 *            {@link int}
 	 * @return

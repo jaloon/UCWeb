@@ -5,10 +5,6 @@
 	<resultMap id="fullResultMap" type="com.tipray.bean.record.LockRecord" >
         <id column="id" property="id" />
         <result column="vehicle_number" property="carNumber" />
-        <result column="car_longitude" property="longitude" />
-        <result column="car_latitude" property="latitude" />
-        <result column="speed" property="velocity" />
-        <result column="angle" property="angle" />
         <result column="lock_index" property="index" />
         <result column="lock_device_id" property="lockId" />
         <result column="store_id" property="storeId" />
@@ -16,9 +12,9 @@
 		<result column="seat_name" property="seatName" />
 		<result column="seat_index" property="seatIndex" />
         <result column="lock_status" property="statusName" />
-        <result column="lock_status_info" property="lockStatusInfo" />
         <result column="change_time" property="createDate" />
         <result column="station" property="station" />
+		<result column="track_id" property="trackId" />
     </resultMap>
 	<sql id="select_colums">
 		l.id											id,
@@ -29,12 +25,8 @@
 		l.lock_device_id								lock_device_id,
         tl.lock_index                                   lock_index,
 		fn_type2name('lockStatus', l.`status`)			lock_status,
-		t.longitude										car_longitude,
-		t.latitude										car_latitude,
 		fn_get_station(l.station_type, l.station_id)	station,
-		t.speed											speed,
-		t.angle											angle,
-		t.lock_status_info								lock_status_info,
+		l.vehicle_track_id								track_id,
 		l.change_time									change_time
 	</sql>
 	
@@ -42,7 +34,7 @@
 		SELECT
 		    <include refid="select_colums"></include>
 		FROM
-            (tbl_lock_status l LEFT JOIN tbl_vehicle_track t ON l.vehicle_track_id=t.id),
+            tbl_lock_status l,
             tbl_vehicle v,
             tbl_lock tl
         WHERE
@@ -57,7 +49,7 @@
 		SELECT
 		    <include refid="select_colums"></include>
 		FROM
-            (tbl_lock_status l LEFT JOIN tbl_vehicle_track t ON l.vehicle_track_id = t.id),
+			tbl_lock_status l,
             tbl_vehicle v,
             tbl_lock tl
         WHERE
@@ -89,7 +81,7 @@
 		SELECT
 		  <include refid="select_colums"></include>
 		FROM
-            (tbl_lock_status l LEFT JOIN tbl_vehicle_track t ON l.vehicle_track_id=t.id),
+			tbl_lock_status l,
             tbl_vehicle v,
             tbl_lock tl
         WHERE

@@ -116,7 +116,7 @@ $(function () {
                     tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + alarm.id + ")\">") +
                         "<td class=\"alarm-id\">" + alarm.id + "</td>" +
                         "<td class=\"alarm-car\">" + alarm.carNumber + "</td>" +
-                        "<td class=\"alarm-time\">" + alarm.createDate + "</td>" +
+                        "<td class=\"alarm-time\">" + alarm.alarmTime + "</td>" +
                         "<td class=\"alarm-station\">" + alarm.station + "</td>";
                     if (coordFlag) {
                         tableData += "<td class=\"alarm-coordinate\">数据库记录异常</td>";

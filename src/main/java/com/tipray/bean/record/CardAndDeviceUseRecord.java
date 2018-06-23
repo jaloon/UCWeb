@@ -11,6 +11,10 @@ import com.tipray.bean.Record;
 public class CardAndDeviceUseRecord extends Record {
     private static final long serialVersionUID = 1L;
     /**
+     * 车辆ID
+     */
+    private Long carId;
+    /**
      * 设备ID
      */
     private Integer devId;
@@ -23,13 +27,25 @@ public class CardAndDeviceUseRecord extends Record {
      */
     private String typeName;
     /**
-     * 报警
+     * 是否报警（是/否）
      */
     private String alarm;
+    /**
+     * 报警类型
+     */
+    private String alarmType;
     /**
      * 锁状态
      */
     private String lockStatus;
+
+    public Long getCarId() {
+        return carId;
+    }
+
+    public void setCarId(Long carId) {
+        this.carId = carId;
+    }
 
     public Integer getDevId() {
         return devId;
@@ -63,6 +79,14 @@ public class CardAndDeviceUseRecord extends Record {
         this.alarm = alarm;
     }
 
+    public String getAlarmType() {
+        return alarmType;
+    }
+
+    public void setAlarmType(String alarmType) {
+        this.alarmType = alarmType;
+    }
+
     public String getLockStatus() {
         return lockStatus;
     }
@@ -76,6 +100,9 @@ public class CardAndDeviceUseRecord extends Record {
         final StringBuffer sb = new StringBuffer();
         if (getId() != null) {
             sb.append(", id=").append(getId());
+        }
+        if (carId != null) {
+            sb.append(", carId=").append(carId);
         }
         if (getCarNumber() != null) {
             sb.append(", carNumber='").append(getCarNumber()).append('\'');
@@ -91,6 +118,9 @@ public class CardAndDeviceUseRecord extends Record {
         }
         if (alarm != null) {
             sb.append(", alarm='").append(alarm).append('\'');
+        }
+        if (alarmType != null) {
+            sb.append(", alarmType='").append(alarmType).append('\'');
         }
         if (lockStatus != null) {
             sb.append(", lockStatus='").append(lockStatus).append('\'');

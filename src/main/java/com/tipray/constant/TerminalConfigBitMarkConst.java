@@ -52,8 +52,8 @@ public class TerminalConfigBitMarkConst {
 	public static final int FUNCTION_CONFIG_BIT_3_GPS_CHECK_STATION_UNLOCK = 1 << 2;
 	/** 车台功能启用配置信息位4：油库开锁是否启动GPS校验 */
 	public static final int FUNCTION_CONFIG_BIT_4_GPS_CHECK_DEPOT_UNLOCK = 1 << 3;
-	/** 车台功能启用配置信息位5：是否检测站点信息合法 */
-	public static final int FUNCTION_CONFIG_BIT_5_STATION_INFO_CHECK = 1 << 4;
+	/** 车台功能启用配置信息位5：是否检测基站信息合法 */
+	public static final int FUNCTION_CONFIG_BIT_5_BASE_STATION_CHECK = 1 << 4;
 	/** 车台功能启用配置信息位6：是否可在不同解封中多次开锁 */
 	public static final int FUNCTION_CONFIG_BIT_6_MULTIPLE_UNLOCK = 1 << 5;
 	/** 车台功能启用配置信息位7：是否只允许一次开锁 */

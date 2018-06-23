@@ -5,8 +5,9 @@
 	<sql id="select_colums">
 		d.id id,
 		d.device_id deviceId,
-		d.type type,
-		fn_type2name("deviceType",d.type) typeName,
+		d.type `type`,
+		fn_type2name('deviceType',d.type) typeName,
+		d.device_version deviceVer,
 		d.center_id centerId,
 		d.model model,
 		d.produce_time produceTime,
@@ -152,9 +153,19 @@
 	
 	<insert id="addDevices" parameterType="java.util.List">
 		insert into
-		tbl_device(id,device_id,type,center_id,produce_time,delivery_time,model,remark) values
+		tbl_device(id,device_id,`type`,device_version,center_id,produce_time,delivery_time,model,remark) values
 		<foreach collection="list" item="device" index="index" separator="," > 
-			(#{device.id},#{device.deviceId},#{device.type},#{device.centerId},#{device.produceTime},#{device.deliveryTime},ifnull(#{device.model},''),ifnull(#{device.remark},''))
+			(
+			#{device.id},
+			#{device.deviceId},
+			#{device.type},
+			ifnull(#{device.deviceVer},0),
+			#{device.centerId},
+			#{device.produceTime},
+			#{device.deliveryTime},
+			ifnull(#{device.model},''),
+			ifnull(#{device.remark},'')
+			)
 		</foreach>
 	</insert>
 	

@@ -8,8 +8,10 @@ package com.tipray.constant.reply;
  *
  */
 public enum RemoteEliminateAlarmErrorEnum {
-	/** 车辆ID为空 */
-	VEHICLE_ID_NULL(1, "车辆ID为空！"),
+	/** 车牌号为空 */
+	CARNUMBER_NULL(1, "车牌号为空！"),
+	/** 车辆不存在 */
+	VEHICLE_INVALID(1, "车辆不存在！"),
 	/** 报警ID为空 */
 	ALARM_ID_NULL(2, "报警ID为空！"),
     /** 消除报警的设备不唯一 */

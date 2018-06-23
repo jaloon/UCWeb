@@ -5,6 +5,7 @@ import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.track.ReTrack;
+import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.core.annotation.MapResultAnno;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
@@ -87,10 +88,18 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 根据车牌号获取车辆信息
      *
-     * @param carNo {@link Vehicle} 车牌号
+     * @param carNo {@link String} 车牌号
      * @return {@link Vehicle} 车辆信息
      */
     Vehicle getByCarNo(String carNo);
+
+    /**
+     * 根据车牌号获取车辆ID
+     *
+     * @param carNo {@link String} 车牌号
+     * @return {@link Long} 车辆ID
+     */
+    Long getIdByCarNo(String carNo);
 
     /**
      * 根据车载终端ID获取车辆信息
@@ -200,13 +209,26 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     void terminalConfig(VehicleTerminalConfig terminalConfig);
 
     /**
-     * 车台功能启用
-     *
-     * @param map 参数<br>
-     *            deviceId 车台设备ID <br>
-     *            functionEnable 启用功能
+     * 查询台功能启用配置记录数目
      */
-    void terminalEnable(Map<String, Integer> map);
+    Integer countTerminalEnable();
+
+    /**
+     * 查询台功能启用配置记录数目
+     */
+    Integer getTerminalEnable();
+
+    /**
+     * 更新车台功能启用配置
+     * @param functionEnable {@link Integer} 启用功能
+     */
+    void updateTerminalEnable(Integer functionEnable);
+
+    /**
+     * 添加车台功能启用配置
+     * @param functionEnable {@link Integer} 启用功能
+     */
+    void addTerminalEnable(Integer functionEnable);
 
     /**
      * 添加远程操作记录
@@ -223,17 +245,6 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      * @return {@link Integer} 远程操作ID
      */
     Integer getRemoteControlIdByCarIdAndControlType(@Param("carId") Long carId, @Param("type") Integer type);
-
-    /**
-     * 远程变更车辆状态
-     *
-     * @param status          {@link Integer} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急）
-     * @param remoteControlId {@link Integer} 远程操作ID
-     * @param carId           {@link Long} 车辆ID
-     */
-    void remoteAlterCarStatus(@Param("status") Integer status,
-                              @Param("remoteControlId") Integer remoteControlId,
-                              @Param("carId") Long carId);
 
     /**
      * 更新远程操作状态
@@ -275,7 +286,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      *
      * @return 车辆的树形结构数据
      */
-    List<Map<String, Object>> findBindedVehicleTree();
+    List<VehicleTree> findBindedVehicleTree();
 
     /**
      * 根据车辆ID获取车辆实时状态
@@ -328,4 +339,12 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      */
     void updateTimeoutOfflineCars();
 
+    /**
+     * 根据车牌号获取车辆id
+     *
+     * @param carNumbers {@link String} 车牌号，英文逗号“,”分隔
+     * @return {@link Map} 车辆id集合(vehicle_id 车辆ID， vehicle_number 车牌号)
+     */
+    @MapResultAnno(keyType = Long.class, valType = String.class)
+    Map<Long, String> findCarIdsByCarNumbers(String carNumbers);
 }

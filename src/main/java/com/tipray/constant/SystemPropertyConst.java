@@ -22,6 +22,8 @@ public class SystemPropertyConst {
 	public static final String LINE_SEP = System.getProperty("line.separator");
 	/** JRE平台架构（x32/x64）JRE_ARCHITECTURE */
 	public static final String JRE_ARCH = System.getProperty("sun.arch.data.model");
+	/** dll/accredit */
+	public static final String ACCREDIT_DLL_PATH = new StringBuffer("dll/").append(JRE_ARCH).append("/accredit").toString();
 	/** dll/crc */
 	public static final String CRC_DLL_PATH = new StringBuffer("dll/").append(JRE_ARCH).append("/crc").toString();
 	/** dll/libotp */

@@ -147,7 +147,7 @@ public final class TrackCache {
     /**
      * 解析车辆状态
      *
-     * @param carStatus 车辆状态码
+     * @param carStatus 车辆状态码（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区)
      * @return 车辆状态
      */
     private String parseCarStatus(int carStatus) {
@@ -165,7 +165,9 @@ public final class TrackCache {
             case 5:
                 return "应急";
             case 6:
-                return "待入库";
+                return "待入油区";
+            case 7:
+                return "在油区";
             default:
                 break;
         }

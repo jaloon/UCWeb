@@ -1,14 +1,19 @@
 package com.tipray.controller;
 
-import com.tipray.bean.*;
+import com.tipray.bean.ChangeInfo;
+import com.tipray.bean.ResponseMsg;
+import com.tipray.bean.VehicleTerminalConfig;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.log.VehicleManageLog;
 import com.tipray.bean.record.AlarmRecord;
+import com.tipray.bean.upgrade.TerminalUpgradeFile;
+import com.tipray.bean.upgrade.TerminalUpgradeInfo;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
+import com.tipray.cache.TerminalUpgradeCache;
 import com.tipray.constant.LogTypeConst;
 import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
@@ -30,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -52,6 +58,8 @@ public class VehicleManageController {
     private ChangeRecordService changeRecordService;
     @Resource
     private AlarmRecordService alarmRecordService;
+    @Resource
+    private InOutReaderService inOutReaderService;
     @Resource
     private VehicleManageLogService vehicleManageLogService;
     @Resource
@@ -176,14 +184,13 @@ public class VehicleManageController {
      * 车台功能启用
      *
      * @param token           {@link String} UUID令牌
-     * @param carNumber       {@link String} 车牌号
      * @param functionEnable  {@link Integer} 车台功能启用配置参数，通过位来表示开启和关闭的设置，位序从低位开始
      *                        <ol>
      *                        <li>加油站内施解封是否启动GPS校验</li>
      *                        <li>油库出入库是否启动GPS校验</li>
      *                        <li>加油站开锁是否启动GPS校验</li>
      *                        <li>油库开锁是否启动GPS校验</li>
-     *                        <li>是否检测站点信息合法</li>
+     *                        <li>是否检测基站信息合法</li>
      *                        <li>是否可在不同解封中多次开锁</li>
      *                        <li>是否只允许一次开锁</li>
      *                        </ol>
@@ -194,12 +201,10 @@ public class VehicleManageController {
      * @return {@link ResponseMsg}
      * @see TerminalConfigBitMarkConst
      */
-    @PermissionAnno("paramModule")
     @RequestMapping(value = "asyn_terminal_enable_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynTerminalEnableRequest(
             @RequestParam(value = "token", required = false) String token,
-            @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "func_enable", required = false) Integer functionEnable,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
@@ -212,8 +217,8 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车台功能启用配置：token={}, carNumber={}, functionEnable={}, token={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber,
+                "车台功能启用配置：token={}, functionEnable={}, token={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token,
                 functionEnable == null ? null : functionEnable + "[0b" + Integer.toBinaryString(functionEnable) + "]",
                 isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
@@ -222,46 +227,40 @@ public class VehicleManageController {
                 | LogTypeConst.TYPE_TERMINAL_ENABLE_CONFIG | LogTypeConst.RESULT_DONE;
         String description = new StringBuffer("车台功能启用配置：").append(user.getName()).append("通过")
                 .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("配置车台功能启用。").toString();
+        Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+        if (logId == null || logId == 0L) {
+            return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
+        }
         String result = "";
+        int cacheId = 0;
         try {
-            if (StringUtil.isEmpty(carNumber)) {
-                result = "失败，车牌号为空！";
-                logger.error("车台功能启用配置失败：{}", TerminalConfigUpdateErrorEnum.CARNUMBER_NULL);
-                return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.CARNUMBER_NULL);
-            }
             if (functionEnable == null) {
                 result = "失败，车台功能启用配置参数为空！";
                 logger.error("车台功能启用配置失败：{}", TerminalConfigUpdateErrorEnum.CONFIG_PARAM_NULL);
                 return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.CONFIG_PARAM_NULL);
             }
-            Vehicle vehicle = vehicleService.getByCarNo(carNumber);
-            if (vehicle == null) {
-                result = "失败，车辆不存在！";
-                logger.error("车台功能启用配置失败：{}", TerminalConfigUpdateErrorEnum.VEHICLE_INVALID);
-                return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.VEHICLE_INVALID);
+            vehicleService.terminalEnable(functionEnable);
+
+            cacheId = addCache(UdpBizId.TERMINAL_FUNCTION_ENABLE_REQUEST, logId, description, null);
+
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x1209(functionEnable);
+            boolean isSend = udpServer.send(src);
+            if (!isSend) {
+                throw new UdpException("UDP发送数据异常！");
             }
-            if (vehicle.getVehicleDevice() == null || vehicle.getVehicleDevice().getDeviceId() == 0) {
-                result = "失败，车辆未绑定车台！";
-                logger.error("车台功能启用配置失败：{}", TerminalConfigUpdateErrorEnum.VEHICLE_UNBINDED);
-                return ResponseMsgUtil.error(TerminalConfigUpdateErrorEnum.VEHICLE_UNBINDED);
-            }
-            vehicleService.terminalEnable(vehicle.getVehicleDevice().getDeviceId(), functionEnable);
+            addTimeoutTask(src, cacheId);
+            vehicleManageLog.setUdpBizId(UdpBizId.TERMINAL_FUNCTION_ENABLE_REQUEST);
+
             logger.info("车台功能启用配置成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
+            removeCache(cacheId, null);
             result = "失败，车台功能启用配置异常！";
             logger.error("车台功能启用配置异常：e={}", e.toString());
             logger.debug("车台功能启用配置异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
-            if (result.length() > 0) {
-                type++;
-                monitorWebSocketHandler.broadcastLog(1, description, result);
-            } else {
-                result = "成功！";
-                monitorWebSocketHandler.broadcastLog(0, description, result);
-            }
-            OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, result, token, vehicleManageLogService, logger);
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
     }
 
@@ -647,7 +646,7 @@ public class VehicleManageController {
             cacheId = addCache(UdpBizId.LOCK_BIND_TRIGGER_REQUEST, logId, description, null);
 
             int terminalId = vehicle.getVehicleDevice().getDeviceId();
-            ByteBuffer src = SendPacketBuilder.buildProtocol0x1209(terminalId, triggerState.byteValue());
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x120A(terminalId, triggerState.byteValue());
             boolean isSend = udpServer.send(src);
             if (!isSend) {
                 throw new UdpException("UDP发送数据异常！");
@@ -824,26 +823,123 @@ public class VehicleManageController {
     }
 
     /**
+     * 获取车台升级文件
+     *
+     * @param token       {@link String} UUID令牌
+     * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
+     * @param ftpPath     {@link String} ftp更新路径
+     * @param upgradeType {@link Byte} 升级类型（1、App，2、内核+文件系统，3、内核+文件系统+App）
+     * @param matchVer    {@link Integer} 升级是否匹配版本（0 否， 1 是）
+     * @return {@link ResponseMsg}
+     */
+    @RequestMapping(value = "terminal_upgrade_file_info", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public ResponseMsg terminalUpgradeFileInfo(
+            @RequestParam(value = "token", required = false) String token,
+            @RequestParam(value = "terminal_ids", required = false) String terminalIds,
+            @RequestParam(value = "ftp_path", required = false) String ftpPath,
+            @RequestParam(value = "upgrade_type", required = false) Byte upgradeType,
+            @RequestParam(value = "match_ver", required = false, defaultValue = "0") Integer matchVer) {
+        if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
+            return null;
+        } else {
+            session.setAttribute("token", token);
+        }
+        logger.info("获取车台升级文件：token={}, terminalIds={}, ftpPath={}, upgradeType={}, matchVer={}",
+                token, terminalIds, ftpPath, upgradeType, matchVer);
+        try {
+            if (StringUtil.isEmpty(terminalIds)) {
+                logger.error("获取车台升级文件失败：{}", TerminalSoftwareUpgradeErrorEnum.TERMINAL_IDS_NULL);
+                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.TERMINAL_IDS_NULL);
+            }
+            if (StringUtil.isEmpty(ftpPath)) {
+                logger.error("获取车台升级文件失败：{}", TerminalSoftwareUpgradeErrorEnum.FTP_PATH_NULL);
+                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.FTP_PATH_NULL);
+            }
+            if (upgradeType == null) {
+                logger.error("获取车台升级文件失败：{}", TerminalSoftwareUpgradeErrorEnum.UPGRADE_TYPE_NULL);
+                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.UPGRADE_TYPE_NULL);
+            }
+            if (upgradeType < 1 || upgradeType > 3) {
+                logger.error("获取车台升级文件失败：{}", TerminalSoftwareUpgradeErrorEnum.UPGRADE_TYPE_INVALID);
+                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.UPGRADE_TYPE_INVALID);
+            }
+
+            String[] terminalIdStrs = terminalIds.split(",");
+            List<Integer> terminalIdList = new ArrayList<>();
+            for (String terminalId : terminalIdStrs) {
+                terminalIdList.add(Integer.parseInt(terminalId, 10));
+            }
+
+            List<TerminalUpgradeFile> files = new ArrayList<>();
+            switch (upgradeType) {
+                case 1:
+                    // APP，文件：
+                    // 100 APP： app.tar.bz2
+                    files.add(FtpUtil.downloadFileApp(ftpPath));
+                    break;
+                case 2:
+                    // 内核+文件系统，文件：
+                    // 2 内核：zImage
+                    // 3 文件系统：rootfs.mx6ul.tar.bz2
+                    // 4 设备树：imx6ul-cz0101.dtb
+                    files.add(FtpUtil.downloadFileKernel(ftpPath));
+                    files.add(FtpUtil.downloadFileSys(ftpPath));
+                    files.add(FtpUtil.downloadFileDeviceTree(ftpPath));
+                    break;
+                case 3:
+                    // 内核+文件系统+App，文件：
+                    // 2 内核：zImage
+                    // 3 文件系统：rootfs.mx6ul.tar.bz2
+                    // 4 设备树：imx6ul-cz0101.dtb
+                    // 100 APP：app.tar.bz2
+                    files.add(FtpUtil.downloadFileKernel(ftpPath));
+                    files.add(FtpUtil.downloadFileSys(ftpPath));
+                    files.add(FtpUtil.downloadFileDeviceTree(ftpPath));
+                    files.add(FtpUtil.downloadFileApp(ftpPath));
+                    break;
+                default:
+                    break;
+            }
+            String verStr = null;
+            if (upgradeType != 2 && matchVer > 0) {
+                verStr = FtpUtil.downloadVer(ftpPath);
+            }
+
+            Integer ver = verStr == null ? 0 : FtpUtil.parseVerToInt(verStr);
+
+            Long index = System.currentTimeMillis();
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("index", index);
+            map.put("ver", verStr);
+            map.put("files", files);
+            TerminalUpgradeCache.putCache(index, ftpPath, upgradeType, terminalIdList, ver, files);
+            logger.info("获取车台升级文件成功！");
+            return ResponseMsgUtil.success(map);
+        } catch (Exception e) {
+            logger.error("获取车台升级文件异常：", e);
+            return ResponseMsgUtil.excetion(e);
+        }
+    }
+
+    /**
      * 车台软件升级
      *
-     * @param token            {@link String} UUID令牌
-     * @param terminalIds      {@link String} 车台设备ID，英文逗号“,”分隔
-     * @param ftpPath          {@link String} ftp更新路径
-     * @param upgradeFilesInfo {@link String} 升级文件信息json，结构如下：
-     *                         [{"type":1,"name":"file_1","size":1024,"crc32":45}]
-     * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude        {@link Integer} 手机定位经度
-     * @param latitude         {@link Integer} 手机定位纬度
-     * @param isLocationValid  {@link Integer} 手机定位是否有效
+     * @param token           {@link String} UUID令牌
+     * @param index           {@link Long} 车台升级缓存索引
+     * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
+     * @param longitude       {@link Integer} 手机定位经度
+     * @param latitude        {@link Integer} 手机定位纬度
+     * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "asyn_terminal_upgrade_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynTerminalUpgradeRequest(
             @RequestParam(value = "token", required = false) String token,
-            @RequestParam(value = "terminal_ids", required = false) String terminalIds,
-            @RequestParam(value = "ftp_path", required = false) String ftpPath,
-            @RequestParam(value = "upgrade_files", required = false) String upgradeFilesInfo,
+            @RequestParam(value = "index", required = false) Long index,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
@@ -855,8 +951,8 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车台软件升级：token={}, terminalIds={}, ftpPath={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
-                token, terminalIds, ftpPath, isApp, longitude, latitude, isLocationValid);
+                "车台软件升级：token={}, index={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, index, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
@@ -870,25 +966,25 @@ public class VehicleManageController {
         String result = "";
         int cacheId = 0;
         try {
-            if (StringUtil.isEmpty(terminalIds)) {
-                result = "失败，车牌号为空！";
-                logger.error("车台软件升级失败：{}", TerminalSoftwareUpgradeErrorEnum.TERMINAL_IDS_NULL);
-                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.TERMINAL_IDS_NULL);
-            }
-            if (StringUtil.isEmpty(ftpPath)) {
-                result = "失败，升级文件列表为空！";
-                logger.error("车台软件升级失败：{}", TerminalSoftwareUpgradeErrorEnum.FTP_PATH_NULL);
-                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.FTP_PATH_NULL);
-            }
-            if (StringUtil.isEmpty(upgradeFilesInfo)) {
-                result = "失败，升级文件列表为空！";
-                logger.error("车台软件升级失败：{}", TerminalSoftwareUpgradeErrorEnum.UPLOAD_FILES_NULL);
-                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.UPLOAD_FILES_NULL);
-            }
+            String ftpPath = TerminalUpgradeCache.getAndRemoveFtpPath(index);
+            Byte upgradeType = TerminalUpgradeCache.getAndRemoveUpgradeType(index);
+            List<Integer> terminalIdList = TerminalUpgradeCache.getAndRemoveTerminalIds(index);
+            Integer ver = TerminalUpgradeCache.getAndRemoveUpgradeVersion(index);
+            List<TerminalUpgradeFile> files = TerminalUpgradeCache.getAndRemoveUpgradeFiles(index);
+
+            byte[] info = SendPacketBuilder.buildTerminalSoftwareUpgradeInfo(upgradeType, ftpPath, files);
+
+            TerminalUpgradeInfo terminalUpgradeInfo = new TerminalUpgradeInfo();
+            terminalUpgradeInfo.setPath(ftpPath);
+            terminalUpgradeInfo.setType(upgradeType);
+            terminalUpgradeInfo.setVer(ver);
+            terminalUpgradeInfo.setInfo(info);
+
+            vehicleService.terminalUpgrade(terminalUpgradeInfo, terminalIdList);
+
             cacheId = addCache(UdpBizId.TERMINAL_SOFTWARE_UPGRADE_REQUEST, logId, description, null);
 
-            List<TerminalUpgradeFile> files = JSONUtil.parseToList(upgradeFilesInfo, TerminalUpgradeFile.class);
-            ByteBuffer src = SendPacketBuilder.buildProtocol0x1208(terminalIds, ftpPath, files);
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x1208(terminalIdList, info);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
                 throw new UdpException("UDP发送数据异常！");
@@ -1041,7 +1137,7 @@ public class VehicleManageController {
      * 远程报警消除
      *
      * @param token           {@link String} UUID令牌
-     * @param vehicleId       {@link Long} 车辆ID
+     * @param carNumber       {@link String} 车牌号
      * @param alarmIds        {@link String} 报警ID集合，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
      * @param longitude       {@link Integer} 手机定位经度
@@ -1053,7 +1149,7 @@ public class VehicleManageController {
     @ResponseBody
     public ResponseMsg asynAlarmEliminateRequest(
             @RequestParam(value = "token", required = false) String token,
-            @RequestParam(value = "vehicle_id", required = false) Long vehicleId,
+            @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "alarm_ids", required = false) String alarmIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
@@ -1065,8 +1161,8 @@ public class VehicleManageController {
         } else {
             session.setAttribute("token", token);
         }
-        logger.info("远程报警消除：token={}, vehicleId, alarmIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
-                token, vehicleId, alarmIds, isApp, longitude, latitude, isLocationValid);
+        logger.info("远程报警消除：token={}, carNumber={}, alarmIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, alarmIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_ALARM | LogTypeConst.TYPE_ALARM_ELIMINATE
@@ -1083,16 +1179,24 @@ public class VehicleManageController {
         Map<String, Object> params = new HashMap<>();
         boolean isOk = false;
         try {
-            if (vehicleId == null) {
-                result = "失败，车辆ID为空！";
-                logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.VEHICLE_ID_NULL);
-                return ResponseMsgUtil.error(RemoteEliminateAlarmErrorEnum.VEHICLE_ID_NULL);
+            if (StringUtil.isEmpty(carNumber)) {
+                result = "失败，车牌号为空！";
+                logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.CARNUMBER_NULL);
+                return ResponseMsgUtil.error(RemoteEliminateAlarmErrorEnum.CARNUMBER_NULL);
             }
             if (StringUtil.isEmpty(alarmIds)) {
                 result = "失败，报警ID为空！";
                 logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.ALARM_ID_NULL);
                 return ResponseMsgUtil.error(RemoteEliminateAlarmErrorEnum.ALARM_ID_NULL);
             }
+
+            Long vehicleId = vehicleService.getIdByCarNo(carNumber);
+            if (vehicleId == null) {
+                result = "失败，车辆不存在！";
+                logger.error("远程报警消除失败：{}", RemoteEliminateAlarmErrorEnum.VEHICLE_INVALID);
+                return ResponseMsgUtil.error(RemoteEliminateAlarmErrorEnum.VEHICLE_INVALID);
+            }
+
             alarmIds = StringUtil.pretreatStrWithComma(alarmIds);
             int devNum = alarmRecordService.countAlarmDeviceByIds(alarmIds);
             if (devNum > 1) {
@@ -1108,7 +1212,7 @@ public class VehicleManageController {
             ByteBuffer alarmIdBuf = ByteBuffer.allocate(num * 4);
             for (int i = 0; i < num; i++) {
                 int alarmId = Integer.parseInt(alarmIdStrs[i], 10);
-                alarmIdList.add((long) alarmId);
+                alarmIdList.addAll(alarmRecordService.findSameAlarmIdsById((long) alarmId));
                 alarmIdBuf.put(BytesConverterByLittleEndian.getBytes(alarmId));
             }
             List<AlarmRecord> alarmRecords = alarmRecordService.getAlarmRecordsByIdsAndCar(alarmIds, vehicleId);
@@ -1201,10 +1305,11 @@ public class VehicleManageController {
      * 远程控制
      *
      * @param token           {@link String} UUID令牌
-     * @param controlType     {@link Integer} 远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5：远程状态变更）
+     * @param controlType     {@link Integer} 远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5 进入应急 | 6 取消应急 | 7：状态强制变更 | 8：待进油区 | 9 进油区 | 10 出油区）
      * @param carNumber       {@link String} 车牌号
+     * @param stationType     {@link Integer} 站点类型（1：在油库 | 2：在加油站）
      * @param stationId       {@link Integer} 站点ID
-     * @param status          {@link Integer} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入库）
+     * @param status          {@link Integer} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区）
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
      * @param longitude       {@link Integer} 手机定位经度
      * @param latitude        {@link Integer} 手机定位纬度
@@ -1217,6 +1322,7 @@ public class VehicleManageController {
             @RequestParam(value = "token", required = false) String token,
             @RequestParam(value = "control_type", required = false) Integer controlType,
             @RequestParam(value = "car_number", required = false) String carNumber,
+            @RequestParam(value = "station_type", required = false) Integer stationType,
             @RequestParam(value = "station_id", required = false) Integer stationId,
             @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
@@ -1239,7 +1345,7 @@ public class VehicleManageController {
         String description = new StringBuffer("远程控制：").append(user.getName()).append("通过")
                 .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("远程控制车辆").append(carNumber)
                 .append(getRemoteControlType(controlType))
-                .append(controlType == null ? "" : controlType == 5 ? getCarStatus(status) : stationId.toString()).toString();
+                .append(controlType == null ? "" : controlType == 7 ? getCarStatus(status) : stationId.toString()).toString();
         Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
         if (logId == null || logId == 0L) {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
@@ -1253,7 +1359,7 @@ public class VehicleManageController {
                 logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CONTROL_TYPE_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CONTROL_TYPE_NULL);
             }
-            if (controlType < 1 || controlType > 5) {
+            if (controlType < 1 || controlType > 10) {
                 result = "失败，远程操作类型无效！";
                 logger.error("车辆远程控制失败：远程操作类型【{}】无效！", controlType);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CONTROL_TYPE_INVALID);
@@ -1261,18 +1367,42 @@ public class VehicleManageController {
             switch (controlType) {
                 case RemoteControlConst.REMOTE_INTO_DEPOT:
                     type |= LogTypeConst.TYPE_IN_OIL_DEPOT;
+                    stationType = 1;
                     break;
                 case RemoteControlConst.REMOTE_QUIT_DEPOT:
                     type |= LogTypeConst.TYPE_OUT_OIL_DEPOT;
+                    stationType = 1;
                     break;
                 case RemoteControlConst.REMOTE_INTO_STATION:
                     type |= LogTypeConst.TYPE_IN_GAS_STATION;
+                    stationType = 2;
                     break;
                 case RemoteControlConst.REMOTE_QUIT_STATION:
                     type |= LogTypeConst.TYPE_OUT_GAS_STATION;
+                    stationType = 2;
+                    break;
+                case RemoteControlConst.REMOTE_INTO_URGENT:
+                    type |= LogTypeConst.TYPE_IN_URGENT;
+                    stationType = 0;
+                    break;
+                case RemoteControlConst.REMOTE_QUIT_URGENT:
+                    type |= LogTypeConst.TYPE_OUT_URGENT;
+                    stationType = 0;
                     break;
                 case RemoteControlConst.REMOTE_ALTER_STATUS:
                     type |= LogTypeConst.TYPE_CAR_STATUS_ALTER;
+                    break;
+                case RemoteControlConst.REMOTE_WAIT_OILDOM:
+                    type |= LogTypeConst.TYPE_WAIT_OILDOM;
+                    stationType = 1;
+                    break;
+                case RemoteControlConst.REMOTE_INTO_OILDOM:
+                    type |= LogTypeConst.TYPE_BARRIER_IN;
+                    stationType = 1;
+                    break;
+                case RemoteControlConst.REMOTE_QUIT_OILDOM:
+                    type |= LogTypeConst.TYPE_BARRIER_OUT;
+                    stationType = 1;
                     break;
                 default:
                     break;
@@ -1282,18 +1412,28 @@ public class VehicleManageController {
                 logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CARNUMBER_NULL);
             }
-            if (controlType < 5 && stationId == null) {
+            if (stationId == null) {
                 result = "失败，站点ID为空！";
                 logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.STATION_ID_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_ID_NULL);
             }
-            if (controlType == 5) {
+            if (controlType == 7) {
+                if (stationType == null) {
+                    result = "失败，站点类型为空！";
+                    logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.STATION_TYPE_NULL);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_NULL);
+                }
+                if (stationType < 1 || stationType > 2) {
+                    result = "失败，站点类型无效！";
+                    logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                }
                 if (status == null) {
                     result = "失败，车辆状态为空！";
                     logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CAR_STATUS_NULL);
                     return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_NULL);
                 }
-                if (status < 1 || status > 6) {
+                if (status < 1 || status > 7) {
                     result = "失败，车辆状态无效！";
                     logger.error("车辆远程控制失败：车辆状态【{}】无效！", status);
                     return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_INVALID);
@@ -1316,22 +1456,37 @@ public class VehicleManageController {
             map.put("userId", user.getId());
             map.put("carId", vehicle.getId());
             map.put("type", controlType);
+            map.put("stationType", stationType);
             map.put("stationId", stationId);
             map.put("isApp", isApp);
             map.put("longitude", longitude);
             map.put("latitude", latitude);
             map.put("isLocationValid", isLocationValid);
 
-            // 添加远程操作记录
-            Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
             String userName = user.getName();
 
-            params.put("remoteControlId", remoteControlId);
-            if (controlType < 5) {
-                // 远程车辆进出
+            if (controlType != 7) { // 远程车辆进出
+                int readerId = 0;
+                if (controlType > 8) { // 进出油区
+                    List<Integer> readerIds = inOutReaderService.findBarrierReaderIdByDepotId(stationId, controlType == 5 ? 1 : 2);
+                    if (EmptyObjectUtil.isEmptyList(readerIds)) {
+                        result = "失败，油库未指定道闸转发读卡器！";
+                        logger.error("车辆远程控制失败：油库【{}】未指定道闸转发读卡器！", stationId);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_NULL);
+                    }
+                    if (readerIds.size() > 1) {
+                        result = "失败，油库道闸转发读卡器太多！";
+                        logger.error("车辆远程控制失败：油库【{}】道闸转发读卡器太多！", stationId);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_TOO_MUCH);
+                    }
+                    readerId = readerIds.get(0);
+                }
+                // 添加远程操作记录
+                Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
+                params.put("remoteControlId", remoteControlId);
                 cacheId = addCache(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST, logId, description, params);
 
-                ByteBuffer src = SendPacketBuilder.buildProtocol0x1403(terminalId, remoteControlId,
+                ByteBuffer src = SendPacketBuilder.buildProtocol0x1403(terminalId, remoteControlId, readerId,
                         controlType.byteValue(), stationId, userName);
                 boolean isSend = udpServer.send(src);
                 if (!isSend) {
@@ -1339,14 +1494,16 @@ public class VehicleManageController {
                 }
                 addTimeoutTask(src, cacheId);
                 vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST);
-            } else {
-                // 远程状态变更
-                params.put("status", status);
-                params.put("carId ", vehicle.getId());
+            } else { // 远程状态变更
+                // 添加远程操作记录
+                Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
+
+                params.put("remoteControlId", remoteControlId);
+
                 cacheId = addCache(UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST, logId, description, params);
 
                 ByteBuffer src = SendPacketBuilder.buildProtocol0x1404(terminalId, remoteControlId, status.byteValue(),
-                        stationId, userName);
+                        stationType.byteValue(), stationId == null ? 0 : stationId, userName);
                 boolean isSend = udpServer.send(src);
                 if (!isSend) {
                     throw new UdpException("UDP发送数据异常！");
@@ -1500,7 +1657,7 @@ public class VehicleManageController {
     public Map<String, Object> asynVehicleManageResponse(
             @RequestParam(value = "udp_id", required = false) Short udpBizId,
             @RequestParam(value = "token", required = false) String token,
-            @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp) {
+            @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp) throws IOException {
         logger.info("获取用户车辆管理指令回复：udpBizId={}, token={}, isApp={}", udpBizId, token, isApp);
         if (udpBizId == null) {
             logger.warn("UDP业务ID为空！");
@@ -1520,7 +1677,20 @@ public class VehicleManageController {
         map.put("isApp", isApp);
         map.put("udpBizId", udpBizId);
         map.put("token", token);
-        return vehicleManageLogService.findUdpResult(map);
+
+        VehicleManageLog vehicleManageLog = vehicleManageLogService.findUdpReplyLog(map);
+        if (vehicleManageLog == null) {
+            return null;
+        }
+        ResponseMsg responseMsg = JSONUtil.parseToObject(vehicleManageLog.getResponseMsgJson(), ResponseMsg.class);
+
+        map = new HashMap<>();
+        map.put("token", token);
+        map.put("description", vehicleManageLog.getDescription());
+        map.put("result", vehicleManageLog.getResult());
+        map.put("response_msg", responseMsg);
+
+        return map;
     }
 
     /**
@@ -1644,7 +1814,17 @@ public class VehicleManageController {
             case 4:
                 return "出加油站";
             case 5:
+                return "进入应急";
+            case 6:
+                return "取消应急";
+            case 7:
                 return "变更车辆状态为";
+            case 8:
+                return "待进油区";
+            case 9:
+                return "进油区";
+            case 10:
+                return "出油区";
             default:
                 return "远程操作类型越界";
         }
@@ -1653,8 +1833,7 @@ public class VehicleManageController {
     /**
      * 获取车辆状态
      *
-     * @param carStatus {@link Integer} 车辆状态值（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 |
-     *                  5：应急）
+     * @param carStatus {@link Integer} 车辆状态值（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区)
      * @return {@link String} 车辆状态名称
      */
     private String getCarStatus(Integer carStatus) {
@@ -1669,6 +1848,10 @@ public class VehicleManageController {
                 return "返程中";
             case 5:
                 return "应急";
+            case 6:
+                return "待入油区";
+            case 7:
+                return "在油区";
             default:
                 return "未知";
         }

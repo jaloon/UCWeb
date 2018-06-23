@@ -3,7 +3,7 @@ var refreshPage;
 $(function() {
     dispatch = function(mode, id) {
         var title = "添加司机";
-        var h = "319px";
+        var h = "308px";
         if ("edit" == mode) {
             title = "修改司机信息";
         }

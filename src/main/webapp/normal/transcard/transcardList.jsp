@@ -160,7 +160,7 @@
             <input type="text" class="search-text" id="search_text">
             <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editTranscard">
-            <input type="button" class="button" id="reader" value="批量添加" onclick="findCardByReader()">
+            <input type="button" class="button" id="reader" value="批量添加">
             <script>
                 $("#reader").click(function () {
                     layer.open({

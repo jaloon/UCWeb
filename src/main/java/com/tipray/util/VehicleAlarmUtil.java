@@ -30,8 +30,9 @@ public class VehicleAlarmUtil {
 
     /**
      * 车辆是否报警
+     *
      * @param TerminalAlarmStatus {@link Byte} 车台报警状态
-     * @param lockStatusInfo {@link byte[]} 锁状态信息流
+     * @param lockStatusInfo      {@link byte[]} 锁状态信息流
      * @return
      */
     public static boolean isAlarm(byte TerminalAlarmStatus, byte[] lockStatusInfo) {
@@ -41,16 +42,38 @@ public class VehicleAlarmUtil {
         return isLockAlarm(lockStatusInfo);
     }
 
-	/**
-	 * 获取锁报警信息
-	 * 
-	 * @param lockStatusInfo
-	 * @return
-	 */
-	public static String getLockAlarmInfo(byte[] lockStatusInfo) {
-		if (lockStatusInfo != null && lockStatusInfo.length > 0) {
-			StringBuffer alarm = new StringBuffer();
-			for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+    /**
+     * 获取车台报警信息
+     *
+     * @param TerminalAlarmStatus {@link Byte} 车台报警状态
+     * @return {@link String} 车台报警信息
+     */
+    public static String getTerminalAlarmInfo(byte TerminalAlarmStatus) {
+        StringBuffer alarm = new StringBuffer();
+        if ((TerminalAlarmStatus & AlarmBitMarkConst.LOCK_ALARM_BIT_1_COMM_ANOMALY) > 0) {
+            alarm.append('、').append("未施封越界");
+        }
+        if ((TerminalAlarmStatus & AlarmBitMarkConst.LOCK_ALARM_BIT_2_LOW_BATTERY) > 0) {
+            alarm.append('、').append("时钟电池报警");
+        }
+        if (alarm.length() > 0) {
+            alarm.deleteCharAt(0);
+            alarm.insert(0, "车载终端：");
+            alarm.append('。');
+        }
+        return alarm.toString();
+    }
+
+    /**
+     * 获取锁报警信息
+     *
+     * @param lockStatusInfo
+     * @return
+     */
+    public static String getLockAlarmInfo(byte[] lockStatusInfo) {
+        if (lockStatusInfo != null && lockStatusInfo.length > 0) {
+            StringBuffer alarm = new StringBuffer();
+            for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
                 byte lock = lockStatusInfo[i];
                 if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) == 0) {
                     continue;
@@ -71,164 +94,164 @@ public class VehicleAlarmUtil {
                 if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
                     alarm.append("无、");
                 }
-				alarm.setCharAt(alarm.length() - 1, '；');
-			}
-			if (alarm.length() > 0) {
+                alarm.setCharAt(alarm.length() - 1, '；');
+            }
+            if (alarm.length() > 0) {
                 alarm.setCharAt(alarm.length() - 1, '。');
             }
-			return alarm.toString();
-		}
-		return "数据库记录异常。";
-	}
+            return alarm.toString();
+        }
+        return "数据库记录异常。";
+    }
 
-	/**
-	 * 获取锁报警信息
-	 * 
-	 * @param lockStatusInfo
-	 * @return
-	 */
-	public static Map<Integer, String> getLockAlarmMap(byte[] lockStatusInfo) {
-		if (lockStatusInfo != null && lockStatusInfo.length > 0) {
-			Map<Integer, String> alarmMap = new HashMap<>();
-			for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
-				StringBuffer alarm = new StringBuffer();
-				byte lock = lockStatusInfo[i];
-				if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) == 0) {
-				    continue;
+    /**
+     * 获取锁报警信息
+     *
+     * @param lockStatusInfo
+     * @return
+     */
+    public static Map<Integer, String> getLockAlarmMap(byte[] lockStatusInfo) {
+        if (lockStatusInfo != null && lockStatusInfo.length > 0) {
+            Map<Integer, String> alarmMap = new HashMap<>();
+            for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+                StringBuffer alarm = new StringBuffer();
+                byte lock = lockStatusInfo[i];
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) == 0) {
+                    continue;
                 }
-				if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_1_COMM_ANOMALY) > 0) {
-					alarm.append("通讯异常报警、");
-				}
-				if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_2_LOW_BATTERY) > 0) {
-					alarm.append("电池低电压报警、");
-				}
-				if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK) > 0) {
-					alarm.append("异常开锁报警、");
-				}
-				if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
-					alarm.append("进入应急、");
-				}
-				if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
-					alarm.append("无、");
-				}
-				alarm.deleteCharAt(alarm.length() - 1);
-				alarmMap.put(i + 1, alarm.toString());
-			}
-			return alarmMap;
-		}
-		return null;
-	}
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_1_COMM_ANOMALY) > 0) {
+                    alarm.append("通讯异常报警、");
+                }
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_2_LOW_BATTERY) > 0) {
+                    alarm.append("电池低电压报警、");
+                }
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK) > 0) {
+                    alarm.append("异常开锁报警、");
+                }
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
+                    alarm.append("进入应急、");
+                }
+                if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
+                    alarm.append("无、");
+                }
+                alarm.deleteCharAt(alarm.length() - 1);
+                alarmMap.put(i + 1, alarm.toString());
+            }
+            return alarmMap;
+        }
+        return null;
+    }
 
-	/**
-	 * 根据锁序号获取锁报警信息
-	 * 
-	 * @param lockStatusInfo
-	 * @param lockIndex
-	 * @return
-	 */
-	public static String getLockAlarmByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
-		StringBuffer alarm = new StringBuffer();
-		byte lock = lockStatusInfo[lockIndex - 1];
+    /**
+     * 根据锁序号获取锁报警信息
+     *
+     * @param lockStatusInfo
+     * @param lockIndex
+     * @return
+     */
+    public static String getLockAlarmByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
+        StringBuffer alarm = new StringBuffer();
+        byte lock = lockStatusInfo[lockIndex - 1];
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_1_COMM_ANOMALY) > 0) {
-            alarm.append("通讯异常报警、");
+            alarm.append("、通讯异常报警");
         }
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_2_LOW_BATTERY) > 0) {
-            alarm.append("电池低电压报警、");
+            alarm.append("、电池低电压报警");
         }
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK) > 0) {
-            alarm.append("异常开锁报警、");
+            alarm.append("、异常开锁报警");
         }
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
-            alarm.append("进入应急、");
+            alarm.append("、进入应急");
         }
         if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
-            alarm.append("无、");
+            alarm.append("、无");
         }
         if (alarm.length() > 0) {
-            alarm.deleteCharAt(alarm.length() - 1);
+            alarm.deleteCharAt(0);
         }
-		return alarm.toString();
-	}
+        return alarm.toString();
+    }
 
-	/**
-	 * 是否报警
-	 * 
-	 * @param lockStatusInfo
-	 * @return
-	 */
-	public static boolean isLockAlarm(byte[] lockStatusInfo) {
-		for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
-			byte lock = lockStatusInfo[i];
-			if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {
-				return true;
-			}
-		}
-		return false;
-	}
+    /**
+     * 是否报警
+     *
+     * @param lockStatusInfo
+     * @return
+     */
+    public static boolean isLockAlarm(byte[] lockStatusInfo) {
+        for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+            byte lock = lockStatusInfo[i];
+            if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * 根据锁序号获取锁报警状态
-	 * 
-	 * @param lockStatusInfo
-	 * @param lockIndex
-	 * @return
-	 */
-	public static boolean isLockAlarmByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
-		byte lock = lockStatusInfo[lockIndex - 1];
+    /**
+     * 根据锁序号获取锁报警状态
+     *
+     * @param lockStatusInfo
+     * @param lockIndex
+     * @return
+     */
+    public static boolean isLockAlarmByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
+        byte lock = lockStatusInfo[lockIndex - 1];
         return (lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0;
     }
 
-	/**
-	 * 获取锁状态
-	 * 
-	 * @param lockStatusInfo
-	 * @return
-	 */
-	public static String getLockStatus(byte[] lockStatusInfo) {
-		if (lockStatusInfo != null && lockStatusInfo.length > 0) {
-			StringBuffer locks = new StringBuffer();
-			for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
-				locks.append((i + 1) + "号锁：");
-				byte status = (byte) (lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
-				if (status == 1) {
-					locks.append("开；");
-				} else {
-					locks.append("关；");
-				}
-			}
-			locks.setCharAt(locks.length() - 1, '。');
-			return locks.toString();
-		}
-		return "数据库记录异常。";
-	}
+    /**
+     * 获取锁状态
+     *
+     * @param lockStatusInfo
+     * @return
+     */
+    public static String getLockStatus(byte[] lockStatusInfo) {
+        if (lockStatusInfo != null && lockStatusInfo.length > 0) {
+            StringBuffer locks = new StringBuffer();
+            for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+                locks.append((i + 1) + "号锁：");
+                byte status = (byte) (lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+                if (status == 1) {
+                    locks.append("开；");
+                } else {
+                    locks.append("关；");
+                }
+            }
+            locks.setCharAt(locks.length() - 1, '。');
+            return locks.toString();
+        }
+        return "数据库记录异常。";
+    }
 
-	/**
-	 * 获取锁状态
-	 * 
-	 * @param lockStatusInfo
-	 * @return
-	 */
-	public static Map<Integer, String> getLockMap(byte[] lockStatusInfo) {
-		if (lockStatusInfo != null && lockStatusInfo.length > 0) {
-			Map<Integer, String> lockMap = new HashMap<>();
-			for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
-				byte status = (byte) (lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
-				lockMap.put(i + 1, status == 0 ? "关" : "开");
-			}
-			return lockMap;
-		}
-		return null;
-	}
+    /**
+     * 获取锁状态
+     *
+     * @param lockStatusInfo
+     * @return
+     */
+    public static Map<Integer, String> getLockMap(byte[] lockStatusInfo) {
+        if (lockStatusInfo != null && lockStatusInfo.length > 0) {
+            Map<Integer, String> lockMap = new HashMap<>();
+            for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+                byte status = (byte) (lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+                lockMap.put(i + 1, status == 0 ? "关" : "开");
+            }
+            return lockMap;
+        }
+        return null;
+    }
 
-	/**
-	 * 根据锁序号获取锁状态
-	 * 
-	 * @param lockStatusInfo
-	 * @param index
-	 * @return
-	 */
-	public static String getLockStatusByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
-		byte status = (byte) (lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
-		return status == 0 ? "关" : "开";
-	}
+    /**
+     * 根据锁序号获取锁状态
+     *
+     * @param lockStatusInfo
+     * @param index
+     * @return
+     */
+    public static String getLockStatusByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
+        byte status = (byte) (lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+        return status == 0 ? "关" : "开";
+    }
 }

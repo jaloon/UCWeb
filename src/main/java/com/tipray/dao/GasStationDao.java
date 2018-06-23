@@ -1,11 +1,12 @@
 package com.tipray.dao;
 
-import java.util.List;
-import java.util.Map;
-
+import com.tipray.bean.Station;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * GasStationDao
@@ -116,4 +117,10 @@ public interface GasStationDao extends BaseDao<GasStation> {
 	 * @return
 	 */
     List<Map<String, Object>> findIdAndNameOfAllGasStations();
+
+    /**
+     * h获取加油站信息
+     * @return
+     */
+    List<Station> findStationsForApp();
 }

@@ -16,8 +16,18 @@ public class RemoteControlConst {
 	public final static int REMOTE_INTO_STATION = 3;
 	/** 远程出加油站 */
 	public final static int REMOTE_QUIT_STATION = 4;
+	/** 进入应急 */
+	public final static int REMOTE_INTO_URGENT = 5;
+	/** 取消应急 */
+    public final static int REMOTE_QUIT_URGENT = 6;
 	/** 远程状态变更 */
-	public final static int REMOTE_ALTER_STATUS = 5;
+	public final static int REMOTE_ALTER_STATUS = 7;
+	/** 待进油区 */
+	public final static int REMOTE_WAIT_OILDOM = 8;
+	/** 远程进油区 */
+	public final static int REMOTE_INTO_OILDOM = 9;
+	/** 远程出油区 */
+	public final static int REMOTE_QUIT_OILDOM = 10;
 
 	/** 远程操作/换站未完成 */
 	public final static int REMOTE_PROGRESS_FAIL = 0;

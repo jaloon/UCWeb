@@ -15,6 +15,10 @@ public class Record extends BaseBean {
      */
     private String carNumber;
     /**
+     * 轨迹ID
+     */
+    private Long trackId;
+    /**
      * 经度
      */
     private Float longitude;
@@ -61,6 +65,14 @@ public class Record extends BaseBean {
 
     public void setCarNumber(String carNumber) {
         this.carNumber = carNumber;
+    }
+
+    public Long getTrackId() {
+        return trackId;
+    }
+
+    public void setTrackId(Long trackId) {
+        this.trackId = trackId;
     }
 
     public Float getLongitude() {
@@ -151,6 +163,9 @@ public class Record extends BaseBean {
         }
         if (carNumber != null) {
             sb.append(", carNumber='").append(carNumber).append('\'');
+        }
+        if (trackId != null) {
+            sb.append(", trackId=").append(trackId);
         }
         if (longitude != null) {
             sb.append(", longitude=").append(longitude);

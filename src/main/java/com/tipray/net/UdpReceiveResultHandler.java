@@ -6,14 +6,12 @@ import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.net.constant.UdpBizId;
+import com.tipray.net.constant.UdpReplyErrorTag;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.service.ChangeRecordService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
-import com.tipray.util.EmptyObjectUtil;
-import com.tipray.util.OperateLogUtil;
-import com.tipray.util.ResponseMsgUtil;
-import com.tipray.util.SpringBeanUtil;
+import com.tipray.util.*;
 import com.tipray.websocket.AlarmWebSocketHandler;
 import com.tipray.websocket.MonitorWebSocketHandler;
 import org.slf4j.Logger;
@@ -74,10 +72,10 @@ public class UdpReceiveResultHandler {
                         Integer alarmEliminateId = (Integer) params.get("alarmEliminateId");
                         List<Long> alarmIdList = (List<Long>) params.get("alarmIdList");
                         if (isOk) {
-                            ALARM_SERVICE.updateEliminateAlarm(alarmEliminateId, 2, alarmIds);
+                            ALARM_SERVICE.updateEliminateAlarm(alarmEliminateId, 2, alarmIds, alarmIdList);
                             ALARM_WEB_SOCKET_HANDLER.broadcastClearAlarms(alarmIdList);
                         } else {
-                            ALARM_SERVICE.updateEliminateAlarm(alarmEliminateId, 0, alarmIds);
+                            ALARM_SERVICE.updateEliminateAlarm(alarmEliminateId, 0, alarmIds, alarmIdList);
                         }
                         break;
                     case UdpBizId.REMOTE_CAR_IN_OUT_RESPONSE:
@@ -90,11 +88,8 @@ public class UdpReceiveResultHandler {
                         break;
                     case UdpBizId.REMOTE_CAR_STATUS_ALTER_RESPONSE:
                         Integer remoteAlterId = (Integer) params.get("remoteControlId");
-                        Integer status = (Integer) params.get("status");
-                        Long carId = (Long) params.get("carId");
                         if (isOk) {
-                            VEHICLE_SERVICE.updateRemoteAlterStatusResulte(RemoteControlConst.REMOTE_PROGRESS_DONE, status,
-                                    remoteAlterId, carId);
+                            VEHICLE_SERVICE.updateRemoteControlStatus(RemoteControlConst.REMOTE_PROGRESS_DONE, remoteAlterId);
                         } else {
                             VEHICLE_SERVICE.updateRemoteControlStatus(RemoteControlConst.REMOTE_PROGRESS_FAIL, remoteAlterId);
                         }
@@ -106,9 +101,6 @@ public class UdpReceiveResultHandler {
                         } else {
                             VEHICLE_SERVICE.batchUpdateResetRecord(resetIds, 0);
                         }
-                        break;
-                    case UdpBizId.BARRIER_OPEN_REQUEST:
-
                         break;
                     default:
                         return;
@@ -133,6 +125,12 @@ public class UdpReceiveResultHandler {
                 VehicleManageLog vehicleManageLog = new VehicleManageLog(logId);
                 vehicleManageLog.setResult(result);
                 vehicleManageLog.setResponseMsg(msg);
+                try {
+                    vehicleManageLog.setResponseMsgJson(JSONUtil.stringify(msg));
+                } catch (Exception e) {
+                    logger.error("对象转JSON异常：", e.toString());
+                    vehicleManageLog.setResponseMsgJson("服务器数据处理异常！");
+                }
                 OperateLogUtil.updateVehicleManageLog(vehicleManageLog, LOG_SERVICE, logger);
             }
         }
@@ -178,8 +176,10 @@ public class UdpReceiveResultHandler {
                 int workError = errorId & 0xFFFF;
                 StringBuffer strBuf = new StringBuffer("失败，");
                 if (commonError > 0) {
-                    if (commonError == 15) {
+                    if (commonError == UdpReplyErrorTag.COMMON_ERROR_DEVICE_OFFLINE) {
                         strBuf.append("车载终端离线，");
+                    }else if (commonError == UdpReplyErrorTag.COMMON_ERROR_TIME_OUT) {
+                        strBuf.append("车载终端应答超时，");
                     } else {
                         strBuf.append("UDP请求公共错误，");
                     }

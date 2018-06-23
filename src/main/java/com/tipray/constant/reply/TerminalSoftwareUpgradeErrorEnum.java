@@ -12,12 +12,14 @@ public enum TerminalSoftwareUpgradeErrorEnum {
 	TERMINAL_IDS_NULL(1, "车台设备ID为空！"),
 	/** ftp路径为空 */
 	FTP_PATH_NULL(2, "ftp路径为空！"),
-	/** 升级文件列表为空 */
-	UPLOAD_FILES_NULL(3, "升级文件列表为空！"),
+	/** 升级类型为空 */
+	UPGRADE_TYPE_NULL(3, "升级类型为空！"),
+    /** 升级类型无效 */
+    UPGRADE_TYPE_INVALID(4, "升级类型无效！"),
 	/** 请求发起时间为空 */
-	REQUEST_TIME_NULL(4, "请求发起时间为空！"),
+	REQUEST_TIME_NULL(5, "请求发起时间为空！"),
 	/** 时间格式不正确 */
-	TIME_FORMAT_INVALID(5, "时间格式不正确！");
+	TIME_FORMAT_INVALID(6, "时间格式不正确！");
 
 	private int code;
 	private String msg;

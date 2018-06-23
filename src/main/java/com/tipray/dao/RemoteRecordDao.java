@@ -13,5 +13,4 @@ import com.tipray.core.base.BaseDao;
  */
 @MyBatisAnno
 public interface RemoteRecordDao extends BaseDao<RemoteRecord> {
-
 }

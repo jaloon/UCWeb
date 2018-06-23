@@ -110,8 +110,7 @@ $(function() {
                         "<td class=\"duse-aspect\">" + angle2aspect(duse.angle) + "</td>" +
                         "<td class=\"duse-dev\">" + duse.devId + "</td>" +
                         "<td class=\"duse-type\">" + duse.typeName + "</td>" +
-                        "<td class=\"duse-alarm\">" + duse.alarm + "</td>" +
-                        "<td class=\"duse-lock\">" + duse.lockStatus + "</td>" +
+                        "<td class=\"duse-alarm\">" + (duse.alarm == undefined ? "数据库记录异常" : duse.alarm) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

@@ -22,7 +22,11 @@
         .device-type {
             width: 120px;
         }
-        
+
+        .device-ver {
+            width: 120px;
+        }
+
         .device-model {
             width: 200px;
         }
@@ -68,11 +72,12 @@
 	            		layer.confirm('是否确认同步设备信息？', {
 	        	            icon: 0,
 	        	            title: ['同步设备', 'font-size:14px;color:#ffffff;background:#478de4;']
-	        	        }, function() {
+	        	        }, function(index2) {
+	            		    layer.close(index2);
 	        	        	var index = layer.load(); 
-		                    $.post("../../manage/device/sync.do",
+                            $.post("../../manage/device/sync.do",
 		                        function(data) {
-		                    		layer.close(index); 
+		                    		layer.close(index);
 		                            if (data.msg == "success") {
 		                                layer.msg('同步成功！', { icon: 1, time: 1000 });
 		                                showList("", 1);
@@ -81,7 +86,7 @@
 		                            }
 		                        },
 		                        "json"
-		                    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
                                 if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
                                     layer.confirm('登录失效，是否刷新页面重新登录？', {
                                         icon: 0,
@@ -103,6 +108,7 @@
                         <tr>
                             <th class="device-id">设备ID</th>
                             <th class="device-type">设备类型</th>
+                            <th class="device-ver">设备版本</th>
                             <th class="device-model">设备型号</th>
                             <th class="device-produce">出厂时间</th>
                             <th class="device-delivery">交付时间</th>

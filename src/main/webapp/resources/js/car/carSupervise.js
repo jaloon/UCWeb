@@ -348,6 +348,7 @@ $(function () {
                     trackQueue.inQueue(receiveObj);
                     break;
                 case "tracks":
+                    console.log(receive)
                     var tracks = receiveObj.tracks;
                     tracks.forEach(function (track, index, tracks) {
                         // reFreshPage(track);

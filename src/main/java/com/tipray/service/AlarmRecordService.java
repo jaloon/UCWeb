@@ -1,11 +1,10 @@
 package com.tipray.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.record.AlarmRecord;
 import com.tipray.core.exception.ServiceException;
-import org.apache.poi.ss.formula.functions.T;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * AlarmRecordService
@@ -32,7 +31,14 @@ public interface AlarmRecordService extends RecordService<AlarmRecord> {
      */
     Integer countAlarmDeviceByIds(String ids);
 
-	/**
+    /**
+     * 根据报警ID查询同位置设备同类型报警的报警ID
+     * @param id {@link Long} 报警ID
+     * @return 同位置设备同类型报警的报警ID
+     */
+    List<Long> findSameAlarmIdsById(Long id);
+
+    /**
 	 * 添加消除报警记录
 	 * 
 	 * @param eAlarmMap
@@ -59,10 +65,12 @@ public interface AlarmRecordService extends RecordService<AlarmRecord> {
 	 *            1：报警消除请求中<br>
 	 *            2：报警消除完成
 	 * @param alarmIds
-	 *            {@link String} 报警ID集合，英文“,”分隔
+	 *            {@link String} 远程消除的报警ID集合
+	 * @param alarmIdList
+	 *            {@link Long} 同位置设备同类报警的报警ID集合
 	 * @throws ServiceException
 	 */
-    void updateEliminateAlarm(Integer eliminateId, Integer eliminateStatus, String alarmIds) throws ServiceException;
+    void updateEliminateAlarm(Integer eliminateId, Integer eliminateStatus, String alarmIds, List<Long> alarmIdList) throws ServiceException;
 
 	/**
 	 * 获取未消除的报警信息

@@ -21,4 +21,13 @@ public interface CrcDll extends Library {
      * @return {@link Byte} CRC校验码
      */
     byte GetCRC(byte[] data, int dataLen);
+
+    /**
+     * 获取4字节CRC32校验码
+     *
+     * @param data    {@link byte[]} 待校验字节数组
+     * @param dataLen {@link Integer} 待校验的字节数
+     * @return {@link Integer} CRC32校验码
+     */
+    int GetCRC32(byte[] data, int dataLen);
 }

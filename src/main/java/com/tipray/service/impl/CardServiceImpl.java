@@ -1,18 +1,5 @@
 package com.tipray.service.impl;
 
-import java.nio.ByteBuffer;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Card;
@@ -20,21 +7,32 @@ import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
+import com.tipray.constant.CardTypeConst;
+import com.tipray.constant.DatabaseOperateTypeEnum;
 import com.tipray.constant.SqliteFileConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
-import com.tipray.constant.DatabaseOperateTypeEnum;
-import com.tipray.core.exception.ServiceException;
+import com.tipray.dao.CardDao;
+import com.tipray.dao.GasStationDao;
+import com.tipray.dao.OilDepotDao;
 import com.tipray.dao.VehicleParamVerDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
-import com.tipray.dao.CardDao;
-import com.tipray.dao.GasStationDao;
-import com.tipray.dao.OilDepotDao;
 import com.tipray.service.CardService;
 import com.tipray.util.FtpUtil;
 import com.tipray.util.JDBCUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.nio.ByteBuffer;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 卡管理业务层
@@ -53,17 +51,7 @@ public class CardServiceImpl implements CardService {
 	private static final JDBCUtil JDBC_UTIL_MANAGE = new JDBCUtil();
 	/** 操作sqlite出入库卡信息 */
 	private static final JDBCUtil JDBC_UTIL_IN_OUT = new JDBCUtil();
-	/** 应急卡 */
-	private static final Integer TYPE_URGENT = 1;
-	/** 管理卡 */
-	private static final Integer TYPE_MANAGE = 6;
-	/** 入库卡 */
-	private static final Integer TYPE_IN = 2;
-	/** 出库卡 */
-	private static final Integer TYPE_OUT = 3;
-	/** 出入库卡 */
-	private static final Integer TYPE_IN_OUT = 4;
-	
+
 	@Resource
 	private NioUdpServer udpServer;
 	
@@ -89,9 +77,10 @@ public class CardServiceImpl implements CardService {
 	public Card updateCard(Card card) {
 		if (card != null) {
 			Card cardInDb = new Card();
-			if (card.getType() == TYPE_URGENT || card.getType() == TYPE_MANAGE) {
-				cardInDb = cardDao.getById(card.getId());
-			}
+			int cardType = card.getType();
+			if (cardType == CardTypeConst.CARD_TYPE_1_URGENT || cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
+                cardInDb = cardDao.getById(card.getId());
+            }
 			cardDao.update(card);
 			if (!card.getDirector().equals(cardInDb.getDirector())) {
 				setCardInSqliteDb(card, DatabaseOperateTypeEnum.UPDATE);
@@ -187,7 +176,7 @@ public class CardServiceImpl implements CardService {
 		try {
 			String sql = null;
 			byte commonConfig = 0;
-			if (cardType == TYPE_URGENT) {
+			if (cardType == CardTypeConst.CARD_TYPE_1_URGENT) {
 				JDBC_UTIL_URGENT.createSqliteConnection(SqliteFileConst.URGENT_CARD);
 				switch (sqlType) {
 				case INSERT:
@@ -206,7 +195,7 @@ public class CardServiceImpl implements CardService {
 				setParamVer(JDBC_UTIL_URGENT, SqliteFileConst.URGENT_CARD);
 				FtpUtil.upload(SqliteFileConst.URGENT_CARD_DB_FILE);
 				commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_1_URGENT_CARD;
-			} else if (cardType == TYPE_MANAGE) {
+			} else if (cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
 				JDBC_UTIL_MANAGE.createSqliteConnection(SqliteFileConst.MANAGE_CARD);
 				switch (sqlType) {
 				case INSERT:
@@ -226,7 +215,9 @@ public class CardServiceImpl implements CardService {
 				FtpUtil.upload(SqliteFileConst.MANAGE_CARD_DB_FILE);
 				commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_2_MANAGE_CARD;
 			} else {
-				boolean belongInOut = cardType == TYPE_IN || cardType == TYPE_OUT || cardType == TYPE_IN_OUT;
+				boolean belongInOut = cardType == CardTypeConst.CARD_TYPE_2_IN
+                        || cardType == CardTypeConst.CARD_TYPE_3_OUT
+                        || cardType == CardTypeConst.CARD_TYPE_4_INOUT;
 				if (belongInOut) {
 					JDBC_UTIL_IN_OUT.createSqliteConnection(SqliteFileConst.IN_OUT_CARD);
 					if (sqlType.equals(DatabaseOperateTypeEnum.DELETE)) {
@@ -300,9 +291,9 @@ public class CardServiceImpl implements CardService {
 	 *            卡类型
 	 */
 	private void rollback(Integer cardType) {
-		if (cardType == TYPE_URGENT) {
+		if (cardType == CardTypeConst.CARD_TYPE_1_URGENT) {
 			JDBC_UTIL_URGENT.rollback();
-		} else if (cardType == TYPE_MANAGE) {
+		} else if (cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
 			JDBC_UTIL_MANAGE.rollback();
 		} else {
 			JDBC_UTIL_IN_OUT.rollback();
@@ -316,9 +307,9 @@ public class CardServiceImpl implements CardService {
 	 *            卡类型
 	 */
 	private void close(Integer cardType) {
-		if (cardType == TYPE_URGENT) {
+		if (cardType == CardTypeConst.CARD_TYPE_1_URGENT) {
 			JDBC_UTIL_URGENT.close();
-		} else if (cardType == TYPE_MANAGE) {
+		} else if (cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
 			JDBC_UTIL_MANAGE.close();
 		} else {
 			JDBC_UTIL_IN_OUT.close();

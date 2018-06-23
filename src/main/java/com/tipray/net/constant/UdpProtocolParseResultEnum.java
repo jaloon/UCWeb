@@ -30,7 +30,7 @@ public enum UdpProtocolParseResultEnum {
 	SERIAL_NO_INCONSISTENT(9, "序列号错误"), 
 	/** 数据体字节数不符 */
 	DATA_LEN_INVALID(10, "数据体字节数不符！"),
-	/** 应答数据体通用错误 */
+	/** 应答数据体回复错误 */
 	DATA_REPLY_ERROR(11, "应答数据体回复错误！"),
 	/** 应答数据体通用错误 */
 	DATA_COMMEN_ERROR(12, "应答数据体通用错误！"),

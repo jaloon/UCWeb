@@ -9,13 +9,13 @@ $.ajax({
         	reader_select_html += "<option value=" + reader.devId + ">" + reader.devId + "</option>";
         });
         reader_select_html += "</select></td>" +
-            "<td style='display:none;'></td>" +
+            // "<td style='display:none;'></td>" +
             "<td><select>" +
             "<option value=1>入库读卡器</option>" +
             "<option value=2>出库读卡器</option>" +
             "<option value=3>出入库读卡器</option>" +
-            "</select></td><td>" +
-            "<td style='display:none;'></td>" +
+            "</select></td>" +
+            // "<td style='display:none;'></td>" +
             "<td><select>" +
             "<option value=0>未指定</option>" +
             "<option value=1>入库道闸</option>" +
@@ -45,26 +45,28 @@ function addReaderTr() {
 function confirmReaderTr(obj) {
     var tr = $(obj).closest('tr');
     tr.addClass("readerTrs");
-    var id = tr.children().first();
-    var readerId = id.children().first().val();
+    var trChildren = tr.children();
+    var td_id = trChildren.first();
+    var readerId = td_id.children().first().val();
     var reg = new RegExp("<option value=" + readerId + ">" + readerId + "</option>", "g");
     reader_select_html = reader_select_html.replace(reg, "");
-    id.html(readerId);
-    var type = tr.children().eq(2);
-    var readerType = type.children().first().val();
-    var typeName = type.children().first().find("option:selected").text();
-    tr.children().eq(1).html(readerType);
-    type.html(typeName);
+    td_id.html(readerId);
+    // var td_type = trChildren.eq(2);
+    // var obj_type = td_type.children().first();
+    // var readerType = obj_type.val();
+    // var typeName = obj_type.find("option:selected").text();
+    // trChildren.eq(1).html(readerType);
+    // td_type.html(typeName);
 
-    var barrierObj = tr.children().eq(4);
-    var barrier = barrierObj.children().first().val();
-    var barrierName = barrierObj.children().first().find("option:selected").text();
-    tr.children().eq(3).html(barrier);
-    type.html(barrierName);
-    var oper = tr.children().last();
+    // var td_barrier = trChildren.eq(4);
+    // var obj_barrier = td_barrier.children().first();
+    // var barrier = obj_barrier.val();
+    // var barrierName = obj_barrier.find("option:selected").text();
+    // trChildren.eq(3).html(barrier);
+    // td_barrier.html(barrierName);
+    var oper = trChildren.last();
     oper.html("<img alt=\"删除\" title=\"删除\" src=\"../../resources/images/operate/delete.png\" onclick=\"deleteTr(this)\">");
 }
-
 
 function deleteTr(obj, type) {
     $(obj).closest('tr').remove();
@@ -88,7 +90,6 @@ function confirmTr(obj, cardType, cardId) {
 }
 
 function changeCardId(obj) {
-    var oilDepotId = $("#id").val();
     var type = obj.value;
     var td = $(obj).closest('tr').children().eq(2);
     td.empty();
@@ -197,14 +198,14 @@ $(function() {
             var readers = [];
             var barrierCount = parseInt($("#barrierCount").val(), 10);
             $(".readerTrs").each(function() {
-                var barrier = parseInt($(this).children().eq(3).html(), 10);
+                var barrier = parseInt($(this).children().eq(2).children().first().val(), 10);
                 if (barrier > 0) {
                     barrierCount++;
                 }
                 var reader = {
                     oilDepotId: id,
                     devId: parseInt($(this).children().first().html(), 10),
-                    type: parseInt($(this).children().eq(1).html(), 10),
+                    type: parseInt($(this).children().eq(1).children().first().val(), 10),
                     barrier: barrier
                 };
                 readers.push(reader);

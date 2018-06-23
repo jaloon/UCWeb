@@ -1,5 +1,7 @@
 package com.tipray.util;
 
+import com.tipray.bean.Point;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +57,36 @@ public class CoverRegionUtil {
             }
         }
         return regionBuf.toString();
+    }
+
+    /**
+     * 浮点数值字节数组转为坐标点集合
+     *
+     * @param cover {@link byte[]} 占地范围 （经纬度浮点值字节数组）
+     * @return {@link Point} 坐标点集合
+     */
+    public static List<Point> coverToPoints(byte[] cover) {
+        if (cover == null) {
+            return null;
+        }
+        int length = cover.length;
+        if (length == 0) {
+            return null;
+        }
+        if (isOdd(length) || isOdd(length >> 2)) {
+            throw new IllegalArgumentException("字节长度或浮点数值个数为奇数，无法准确表示点");
+        } else {
+            List<Point> points = new ArrayList<>();
+            for (int i = 0; i < length; i += 4) {
+                byte[] xBytes = Arrays.copyOfRange(cover, i, i + 4);
+                float x = BytesConverterByLittleEndian.getFloat(xBytes);
+                i += 4;
+                byte[] yBytes = Arrays.copyOfRange(cover, i, i + 4);
+                float y = BytesConverterByLittleEndian.getFloat(yBytes);
+                points.add(new Point(x, y));
+            }
+            return points;
+        }
     }
 
     /**

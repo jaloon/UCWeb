@@ -18,6 +18,11 @@
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/plugins/SelectBox.min.js"></script>
     <script src="../../resources/js/base.js"></script>
+    <style>
+        input[readonly] {
+            background: #e6e7e9;
+        }
+    </style>
 </head>
 
 <body>

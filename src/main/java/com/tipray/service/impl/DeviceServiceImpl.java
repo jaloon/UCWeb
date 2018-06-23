@@ -97,7 +97,7 @@ public class DeviceServiceImpl implements DeviceService {
 		return deviceDao.getByDeviceId(deviceId);
 	}
 
-	public Device setTime(Device device) {
+	private Device setTime(Device device) {
 		String pattern = "yyyy-MM-dd HH:mm:ss";
 		device.setProduceTime(DateUtil.convertDateStrToDate(device.getProduce(), pattern));
 		device.setDeliveryTime(DateUtil.convertDateStrToDate(device.getDelivery(), pattern));

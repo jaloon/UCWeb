@@ -111,6 +111,11 @@
     bottom: 36px;
     left: 50%;
     margin-left: -117px;
+    cursor: pointer;
+}
+
+#login:hover {
+    background: #5ca1f7;
 }
 
 .bottom {

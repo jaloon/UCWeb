@@ -32,12 +32,12 @@
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.OilDepot">
 		insert into
-		tbl_oildepot(official_id,name,short_name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark)
+		tbl_oildepot(official_id,`name`,short_name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark)
 		values(#{officialId},#{name},#{abbr},#{director},#{phone},#{address},#{company},#{longitude},#{latitude},#{radius},#{cover},ifnull(#{remark},''))
 	</insert>
 	<insert id="addOilDepots" parameterType="java.util.List">
 		insert into
-		tbl_oildepot(official_id,name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark) values
+		tbl_oildepot(official_id,`name`,short_name,director,phone,address,company,longitude,latitude,cover_radius,cover_lonlatlist_region,remark) values
 		<foreach collection="list" item="item" index="index" separator="," >
 			(
 				#{item.officialId},
@@ -144,10 +144,28 @@
 	</select>
 	
 	<select id="findIdAndNameOfAllOilDepots" resultType="java.util.Map">
-		SELECT id, name FROM tbl_oildepot ORDER BY id
+        SELECT
+            id,
+            `name`
+        FROM
+            tbl_oildepot
+	</select>
+
+	<select id="findStationsForApp" resultType="com.tipray.bean.Station">
+		<![CDATA[
+			SELECT
+                id,
+                IF(ISNULL(short_name) || LENGTH(TRIM(short_name)) < 1, `name`, short_name) `name`,
+                longitude,
+                latitude,
+                cover_lonlatlist_region cover
+            FROM
+                tbl_oildepot
+		]]>
 	</select>
 
 	<select id="barrierCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
         SELECT COUNT(*) FROM tbl_oildepot_device WHERE oildepot_id = #{oilDepotId} AND is_barrier_gate_type > 0;
     </select>
+
 </mapper>

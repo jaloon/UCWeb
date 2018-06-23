@@ -20,8 +20,9 @@
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/js/base.js"></script>
     <!--加载百度地图api-->
-    <script type="text/javascript"
-            src="http://api.map.baidu.com/api?v=3.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt"></script>
+    <script src="../../resources/plugins/BMapLib/TextIconOverlay.min.js"></script>
+    <script src="../../resources/plugins/BMapLib/MarkerClusterer.js"></script>
 </head>
 
 <body>
@@ -51,6 +52,7 @@
                         <li id="gps_config">GPS配置</li>
                         <li id="func_enable">功能启用</li>
                         <li id="soft_upgrade">软件升级</li>
+                        <li id="cancel_upgrade">取消升级</li>
                     </ul>
                 </li>
                 <li id="realtime_monitor">实时监控</li>
@@ -60,6 +62,11 @@
                         <li id="quit_oildepot">出油库</li>
                         <li id="into_gasstation">进加油站</li>
                         <li id="quit_gasstation">出加油站</li>
+                        <li id="into_urgent">进入应急</li>
+                        <li id="quit_urgent">取消应急</li>
+                        <li id="wait_oildom">待进油区</li>
+                        <li id="into_oildom">进油区</li>
+                        <li id="quit_oildom">出油区</li>
                         <li id="alter_status">远程状态变更</li>
                         <li id="unlock_reset">开锁重置</li>
                     </ul>
@@ -81,6 +88,9 @@
                 anchor: BMAP_ANCHOR_BOTTOM_RIGHT
             })); // 右下角，添加比例尺
             map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
+            var center = map.getCenter(); // 返回地图当前中心点
+            map.centerAndZoom(center, 12);
+            console.log(map.getBounds())
         </script>
 
         <div class="table">
@@ -121,7 +131,7 @@
         </div>
     </div>
 </div>
-<div class="hidden-box container">
+<div class="hidden-box container" id="monitor_conf">
     <div class="info-zone">
         <div class="base-info">
             <div class="info-title">
@@ -170,4 +180,4 @@
 </body>
 
 </html>
-<script src="../../resources/js/car/carSupervise.js"></script>
+<script src="../../resources/js/car/carSupervise2.js"></script>

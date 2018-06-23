@@ -88,6 +88,9 @@ $(function() {
 
         }
         var type = $("#text_type").val();
+        if (!isNull(type)){
+            type = parseInt(type, 16);
+        }
         var begin = $("#text_begin").val();
         var end = $("#text_end").val();
         showList(account, name, type, begin, end, 1);

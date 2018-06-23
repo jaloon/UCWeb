@@ -1,16 +1,13 @@
 package com.tipray.service.impl;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
+import com.tipray.bean.baseinfo.InOutReader;
+import com.tipray.dao.InOutReaderDao;
+import com.tipray.service.InOutReaderService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tipray.bean.baseinfo.InOutReader;
-import com.tipray.core.exception.ServiceException;
-import com.tipray.dao.InOutReaderDao;
-import com.tipray.service.InOutReaderService;
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 出入库读卡器管理业务层
@@ -59,6 +56,11 @@ public class InOutReaderServiceImpl implements InOutReaderService {
 	@Override
 	public void deleteByOilDepotId(Long oilDepotId) {
 		inOutReaderDao.deleteByOilDepotId(oilDepotId);
+	}
+
+	@Override
+	public List<Integer> findBarrierReaderIdByDepotId(Integer oilDepotId, Integer barrierType) {
+		return inOutReaderDao.findBarrierReaderIdByDepotId(oilDepotId, barrierType);
 	}
 
 }

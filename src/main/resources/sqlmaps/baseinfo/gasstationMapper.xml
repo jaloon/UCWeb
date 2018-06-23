@@ -127,20 +127,45 @@
 		from tbl_gasstation g, tbl_gasstation_card cg
 		where g.is_invalid=0 and g.id=cg.gasstation_id and cg.card_id = #{cardId}
 	</select>
-	
-	<select id="getStationForChangeById" parameterType="java.lang.Long" resultType="java.util.Map">
+
+	<resultMap id="changeStationMap" type="java.util.Map" >
+		<result column="name" property="name" javaType="java.lang.String" />
+		<result column="longitude" property="longitude" javaType="java.lang.Float" />
+		<result column="latitude" property="latitude" javaType="java.lang.Float" />
+		<result column="cover_radius" property="radius" javaType="java.lang.Integer" />
+		<result column="cover_lonlatlist_region" property="cover" />
+		<result column="handset_device_id" property="handset" javaType="java.lang.Integer" />
+		<result column="device_version" property="handver" javaType="java.lang.Integer" />
+	</resultMap>
+
+	<select id="getStationForChangeById" parameterType="java.lang.Long" resultMap="changeStationMap">
+		<![CDATA[
 		SELECT
-			<!-- g.name name, -->
-			g.short_name name,
-			g.longitude longitude,
-			g.latitude latitude,
-			g.cover_radius radius,
-			g.cover_lonlatlist_region cover,
-			h.handset_device_id handset
+			IF(ISNULL(g.short_name) || LENGTH(TRIM(g.short_name)) < 1, g.`name`, g.short_name) `name`,
+			g.longitude,
+			g.latitude,
+			g.cover_radius,
+			g.cover_lonlatlist_region,
+			t.handset_device_id,
+			t.device_version
 		FROM
-			tbl_gasstation g LEFT JOIN tbl_handset h ON g.id = h.gasstation_id
+			tbl_gasstation g
+			LEFT JOIN
+				(
+					SELECT
+						h.handset_device_id,
+						h.gasstation_id,
+						d.device_version
+					FROM
+						tbl_handset h,
+						tbl_device d
+					WHERE
+						h.handset_device_id = d.device_id
+				) t
+			ON g.id = t.gasstation_id
 		WHERE
 			g.id = #{id}
+		]]>
 	</select>
 	
 	<select id="findOrdinaryCardById" parameterType="java.lang.Long" resultType="java.lang.Long">
@@ -179,7 +204,24 @@
 	</select>
 	
 	<select id="findIdAndNameOfAllGasStations" resultType="java.util.Map">
-		SELECT id, name FROM tbl_gasstation ORDER BY id
+        SELECT
+            id,
+            `name`
+        FROM
+            tbl_gasstation
 	</select>
-	
+
+	<select id="findStationsForApp" resultType="com.tipray.bean.Station">
+		<![CDATA[
+			SELECT
+                id,
+                IF( ISNULL( short_name ) || LENGTH( TRIM( short_name ) ) < 1, `name`, short_name ) `name`,
+                longitude,
+                latitude,
+                cover_lonlatlist_region cover
+            FROM
+                tbl_gasstation
+		]]>
+	</select>
+
 </mapper>

@@ -72,6 +72,11 @@ tr {
     color: #57647c;
 }
 
+select.editInfo {
+    width: 398px;
+    height: 28px;
+}
+
 .oper-zone {
     width: 540px;
     height: 54px;
@@ -114,4 +119,8 @@ tr {
 
 #confirm:hover {
     background: #5ca1f7;
+}
+
+input[readonly] {
+    background: #e6e7e9;
 }

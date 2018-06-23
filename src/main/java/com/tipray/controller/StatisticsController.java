@@ -180,4 +180,15 @@ public class StatisticsController extends BaseAction {
         return distributionRecordService.findDistributionsByVehicle(carNumber, storeId);
     }
 
+    /**
+     * 根据报警ID获取报警记录
+     * @param alarmId 报警ID
+     * @return 报警记录
+     */
+    @RequestMapping(value = "getAlarmRecordById.do")
+    @ResponseBody
+    public AlarmRecord getAlarmRecordById(Long alarmId){
+        return alarmRecordService.getRecordById(alarmId);
+    }
+
 }

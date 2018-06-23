@@ -33,6 +33,7 @@ $(function() {
                     tableData += "<tr>" +
                         "<td class=\"device-id\">" + device.deviceId + "</td>" +
                         "<td class=\"device-type\">" + device.typeName + "</td>" +
+                        "<td class=\"device-ver\">" + device.deviceVer + "</td>" +
                         "<td class=\"device-model\">" + device.model + "</td>" +
                         "<td class=\"device-produce\">" + device.produce + "</td>" +
                         "<td class=\"device-delivery\">" + device.delivery + "</td>" +

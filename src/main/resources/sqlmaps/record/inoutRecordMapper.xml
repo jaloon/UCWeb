@@ -4,52 +4,56 @@
 <mapper namespace="com.tipray.dao.InOutRecordDao">
 	<resultMap id="fullResultMap" type="com.tipray.bean.record.InOutRecord" >
         <id column="id" property="id" />
+        <result column="vehicle_id" property="carId" />
         <result column="vehicle_number" property="carNumber" />
-        <result column="longitude" property="longitude" />
-        <result column="latitude" property="latitude" />
-        <result column="speed" property="velocity" />
-        <result column="angle" property="angle" />
         <result column="status_incident" property="type" />
-        <result column="typeName" property="typeName" />
-        <result column="lock_status_info" property="lockStatusInfo" />
+        <result column="type_name" property="typeName" />
+        <result column="station" property="station" />
         <result column="trigger_time" property="createDate" />
+		<result column="track_id" property="trackId" />
     </resultMap>
 	<sql id="select_colums">
-		c.*,
-		v.vehicle_number vehicle_number,
-		fn_type2name('inoutType',c.status_incident) typeName,
-		t.longitude longitude,
-		t.latitude latitude,
-		t.speed speed,
-		t.angle angle,
-		t.lock_status_info lock_status_info
+		s.id,
+		s.vehicle_id,
+        s.status_incident,
+        fn_get_station ( s.station_type, s.station_id ) station,
+        s.trigger_time,
+        s.vehicle_track_id track_id,
+        v.vehicle_number vehicle_number,
+        fn_type2name ( 'inoutType', s.status_incident ) type_name
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
-		select
-		<include refid="select_colums"></include>
-		from 
-			tbl_vehicle_seal_status c left 
-		join
-			tbl_vehicle_track t
-		 on c.vehicle_track_id=t.id
-		where c.trigger_type in (1,2,3,4)
+        SELECT
+		    <include refid="select_colums"></include>
+        FROM
+            tbl_vehicle_seal_status s,
+            tbl_vehicle v
+        WHERE
+            s.vehicle_id = v.id
+            AND s.status_incident IN ( 1, 2, 3, 4 )
 	</select>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id,tbl_vehicle v
-		where c.vehicle_id = v.id and c.status_incident in (1,2,3,4) and c.id=#{id}
+        SELECT
+            <include refid="select_colums"></include>
+        FROM
+            tbl_vehicle_seal_status s,
+            tbl_vehicle v
+        WHERE
+            s.vehicle_id = v.id
+            AND s.status_incident IN ( 1, 2, 3, 4 )
+            AND s.id = #{id}
 	</select>
 
 	<select id="count" parameterType="com.tipray.bean.record.InOutRecord" resultType="java.lang.Long">
-		select count(*) from tbl_vehicle_seal_status c,tbl_vehicle v
-		where c.vehicle_id = v.id and c.status_incident in (1,2,3,4)
+		select count(*) from tbl_vehicle_seal_status s,tbl_vehicle v
+		where s.vehicle_id = v.id and s.status_incident in (1,2,3,4)
 		<if test="begin != null and begin != '' and end != null and end != ''">
-			and c.trigger_time between #{begin} and #{end}
+			and s.trigger_time between #{begin} and #{end}
 		</if> 
 		<if test="type != null and type != -2">
-			and c.trigger_type = #{type}
+			and s.trigger_type = #{type}
 		</if>
 		<if test="carNumber != null and carNumber != ''">
 			and v.vehicle_number like CONCAT('%',#{carNumber},'%')
@@ -57,19 +61,24 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id,tbl_vehicle v
-		where c.vehicle_id = v.id and c.status_incident in (1,2,3,4)
+        SELECT
+            <include refid="select_colums"></include>
+        FROM
+            tbl_vehicle_seal_status s,
+            tbl_vehicle v
+        WHERE
+            s.vehicle_id = v.id
+            AND s.status_incident IN ( 1, 2, 3, 4 )
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
-			and c.trigger_time between #{entity.begin} and #{entity.end} 
+            AND s.trigger_time BETWEEN #{entity.begin} AND #{entity.end}
 		</if>
 		<if test="entity.type != null and entity.type != -2">
-			and c.trigger_type = #{entity.type}
+            AND s.trigger_type = #{entity.type}
 		</if>
 		<if test="entity.carNumber != null and entity.carNumber != ''">
-			and v.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
+            AND v.vehicle_number LIKE CONCAT('%',#{entity.carNumber},'%')
 		</if>
-		order by c.id asc  
+		ORDER BY s.id ASC
 		limit #{page.startRow}, #{page.rows}
 	</select>
 </mapper>

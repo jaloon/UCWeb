@@ -33,6 +33,10 @@ public class Device extends BaseBean {
      */
     private String typeName;
     /**
+     * 设备版本
+     */
+    private Integer deviceVer;
+    /**
      * 用户中心ID
      */
     private Integer centerId;
@@ -85,6 +89,14 @@ public class Device extends BaseBean {
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public Integer getDeviceVer() {
+        return deviceVer;
+    }
+
+    public void setDeviceVer(Integer deviceVer) {
+        this.deviceVer = deviceVer;
     }
 
     public Integer getCenterId() {
@@ -157,6 +169,9 @@ public class Device extends BaseBean {
         }
         if (typeName != null) {
             sb.append(", typeName='").append(typeName).append('\'');
+        }
+        if (deviceVer != null) {
+            sb.append(", deviceVer=").append(deviceVer);
         }
         if (centerId != null) {
             sb.append(", centerId=").append(centerId);

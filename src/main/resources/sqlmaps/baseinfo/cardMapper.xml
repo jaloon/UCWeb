@@ -92,13 +92,27 @@
 		from tbl_card c, tbl_oildepot_card co
 		where c.is_invalid=0 and c.card_id = co.card_id and co.oildepot_id=#{oilDepotId}
 	</select>
+
 	<select id="findInOutCardsByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_card c, tbl_oildepot_card co
 		where c.is_invalid=0 and c.card_id = co.card_id and c.type in (2,3,4)
 		and co.oildepot_id=#{oilDepotId}
 	</select>
-	
+
+	<select id="findInOutCardIdsByOilDepotId" parameterType="java.lang.Long" resultType="java.lang.Long">
+		SELECT
+            co.card_id
+        FROM
+            tbl_card c,
+            tbl_oildepot_card co
+        WHERE
+            c.is_invalid = 0
+            AND c.card_id = co.card_id
+            AND c.type IN ( 2, 3, 4 )
+            AND co.oildepot_id = #{oilDepotId}
+	</select>
+
 	<select id="findByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_card c, tbl_gasstation_card cg

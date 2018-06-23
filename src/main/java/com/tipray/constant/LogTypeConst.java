@@ -135,8 +135,14 @@ public class LogTypeConst {
 	public static final int TYPE_IN_GAS_STATION = 0x00_00_63_00;
 	/** 出加油站 */
 	public static final int TYPE_OUT_GAS_STATION = 0x00_00_64_00;
+	/** 进入应急 */
+	public static final int TYPE_IN_URGENT = 0x00_00_65_00;
+	/** 取消应急 */
+	public static final int TYPE_OUT_URGENT = 0x00_00_66_00;
 	/** 车辆状态变更 */
-	public static final int TYPE_CAR_STATUS_ALTER = 0x00_00_65_00;
+	public static final int TYPE_CAR_STATUS_ALTER = 0x00_00_67_00;
+    /** 待进油区 */
+    public final static int TYPE_WAIT_OILDOM = 0x00_00_68_00;
 
 	/** 道闸开启 */
 	public static final int TYPE_BARRIER_OPEN = 0x00_00_70_00;

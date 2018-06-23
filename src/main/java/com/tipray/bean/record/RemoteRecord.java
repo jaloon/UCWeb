@@ -26,7 +26,11 @@ public class RemoteRecord extends Record {
     /**
      * 操作状态
      */
-    private String status;
+    private Integer status;
+    /**
+     * 状态名称
+     */
+    private String statusName;
 
     public User getUser() {
         return user;
@@ -52,12 +56,20 @@ public class RemoteRecord extends Record {
         this.typeName = typeName;
     }
 
-    public String getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
     }
 
     @Override
@@ -79,7 +91,10 @@ public class RemoteRecord extends Record {
             sb.append(", typeName='").append(typeName).append('\'');
         }
         if (status != null) {
-            sb.append(", status='").append(status).append('\'');
+            sb.append(", status=").append(status);
+        }
+        if (statusName != null) {
+            sb.append(", statusName='").append(statusName).append('\'');
         }
         if (getLongitude() != null) {
             sb.append(", longitude=").append(getLongitude());

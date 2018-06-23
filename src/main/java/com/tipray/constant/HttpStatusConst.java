@@ -193,4 +193,19 @@ public final class HttpStatusConst {
 	 * HTTP Status-Code 505: HTTP Version Not Supported.
 	 */
 	public static final int HTTP_505_VERSION = 505;
+
+	/* 6XX: login error（自定义） */
+
+    /**
+     * 登录失效或未登录
+     */
+    public static final int HTTP_601_LOGIN_INVALID = 601;
+    /**
+     * 登录超时
+     */
+	public static final int HTTP_602_LOGIN_TIME_OUT = 602;
+    /**
+     * 异地登录
+     */
+	public static final int HTTP_603_OFFSITE_LOGIN = 603;
 }

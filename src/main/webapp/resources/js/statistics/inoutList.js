@@ -109,8 +109,8 @@ $(function() {
                     tableData += "<td class=\"inout-velocity\">" + (inout.velocity == undefined ? "数据库记录异常" : inout.velocity) + "</td>" +
                         "<td class=\"inout-aspect\">" + angle2aspect(inout.angle) + "</td>" +
                         "<td class=\"inout-type\">" + inout.typeName + "</td>" +
-                        "<td class=\"inout-alarm\">" + inout.alarm + "</td>" +
-                        "<td class=\"inout-lock\">" + inout.lockStatus + "</td>" +
+                        "<td class=\"inout-station\">" + inout.station + "</td>" +
+                        "<td class=\"inout-alarm\">" + (inout.alarm == undefined ? "数据库记录异常" : inout.alarm) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

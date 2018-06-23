@@ -1,11 +1,11 @@
 package com.tipray.util;
 
-import java.util.Random;
-
 import com.tipray.core.dll.OtpDll;
 
+import java.util.Random;
+
 /**
- * OPT一次性密码算法工具类
+ * OTP一次性密码算法工具类
  * 
  * @author chenlong
  * @version 1.0 2018-02-24

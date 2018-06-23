@@ -1,6 +1,6 @@
-package com.tipray.bean;
+package com.tipray.bean.upgrade;
 
-import com.tipray.constant.TerminalUpgradeFileConst;
+import com.tipray.constant.TerminalUpgradeConst;
 
 import java.io.Serializable;
 
@@ -9,22 +9,12 @@ import java.io.Serializable;
  * 
  * @author chenlong
  * @version 1.0 2018-04-09
- * @see TerminalUpgradeFileConst
+ * @see TerminalUpgradeConst
  */
 public class TerminalUpgradeFile implements Serializable {
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 文件类型
-	 * <ul>
-	 * <li>1：BOOTLOADER</li>
-	 * <li>2：内核</li>
-	 * <li>3：内核+文件系统</li>
-	 * <li>4：BOOTLOADER+内核+文件系统</li>
-	 * <li>20：APP</li>
-	 * <li>21：CONFIG</li>
-	 * </ul>
-	 */
-	private Integer type;
+	/** 文件类型 */
+	private Byte type;
 	/** 文件名 */
 	private String name;
 	/** 文件大小 */
@@ -32,11 +22,21 @@ public class TerminalUpgradeFile implements Serializable {
 	/** 文件CRC32（4字节16进制字符串） */
 	private String crc32;
 
-	public Integer getType() {
+    public TerminalUpgradeFile() {
+    }
+
+    public TerminalUpgradeFile(Byte type, String name, Integer size, String crc32) {
+        this.type = type;
+        this.name = name;
+        this.size = size;
+        this.crc32 = crc32;
+    }
+
+    public Byte getType() {
 		return type;
 	}
 
-	public void setType(Integer type) {
+	public void setType(Byte type) {
 		this.type = type;
 	}
 

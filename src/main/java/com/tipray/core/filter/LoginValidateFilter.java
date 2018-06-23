@@ -1,9 +1,10 @@
 package com.tipray.core.filter;
 
 import com.tipray.bean.Session;
-import com.tipray.constant.reply.LoginErrorEnum;
+import com.tipray.constant.HttpStatusConst;
 import com.tipray.core.GridProperties;
 import com.tipray.util.HttpRequestUtil;
+import com.tipray.util.NetUtil;
 import com.tipray.util.SessionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,8 @@ import java.nio.charset.StandardCharsets;
  * @version 1.0 2017-12-22
  */
 public class LoginValidateFilter implements Filter {
-    private LoginErrorEnum LoginError;
+    // private LoginErrorEnum LoginError;
+    private int loginStatus;
     private String errorMessage;
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -35,7 +37,7 @@ public class LoginValidateFilter implements Filter {
 
             // 令牌检查
             // HttpSession session = request.getSession();
-            // String token = (String) session.getAttribute("token");
+            // String token = (String) request.getParameter("token");
             // if (!UUIDUtil.verifyUUIDToken(token, session)) {
             //     return;
             // } else {
@@ -56,7 +58,7 @@ public class LoginValidateFilter implements Filter {
                 }
                 chain.doFilter(servletRequest, servletResponse);
             } else {
-                //判断是否为ajax请求
+                // 判断是否为ajax请求
                 // String requestType = request.getHeader("X-Requested-With");
                 // boolean isAjaxRequest = requestType != null && ("XMLHttpRequest").equals(requestType);
                 // if (isAjaxRequest) {
@@ -66,6 +68,13 @@ public class LoginValidateFilter implements Filter {
                 //     response.flushBuffer();
                 //     return;
                 // }
+
+                // 是否手机APP请求
+                boolean appReq = NetUtil.isMobile(request);
+                if (appReq) {
+                    response.setStatus(loginStatus);
+                    return;
+                }
 
                 String path = request.getContextPath();
                 String requestUrl = HttpRequestUtil.getRequestUrl(request);
@@ -100,11 +109,13 @@ public class LoginValidateFilter implements Filter {
             Session oldSession = SessionUtil.getOldSession(request);
             // 异地登录
             if (oldSession != null) {
-                LoginError = LoginErrorEnum.OFFSITE_LOGIN;
+                // LoginError = LoginErrorEnum.OFFSITE_LOGIN;
+                loginStatus = HttpStatusConst.HTTP_603_OFFSITE_LOGIN;
                 errorMessage = encodeUrl(new StringBuffer("<div style=\"font-size:15px;line-height:20px;\">您的账号在异地登录(")
                         .append(oldSession.getIp()).append(")<br>如非授权，建议修改密码</div>").toString());
             } else {
-                LoginError = LoginErrorEnum.LOGIN_INVALID;
+                // LoginError = LoginErrorEnum.LOGIN_INVALID;
+                loginStatus = HttpStatusConst.HTTP_601_LOGIN_INVALID;
                 errorMessage = encodeUrl("");
             }
             return false;
@@ -113,7 +124,8 @@ public class LoginValidateFilter implements Filter {
         if (SessionUtil.isLoginTimeout(session)) {
             SessionUtil.removeSession(session);
             request.getSession().invalidate();
-            LoginError = LoginErrorEnum.LOGIN_TIME_OUT;
+            // LoginError = LoginErrorEnum.LOGIN_TIME_OUT;
+            loginStatus = HttpStatusConst.HTTP_602_LOGIN_TIME_OUT;
             errorMessage = encodeUrl("因长时间未操作，系统已自动退出，请重新登录");
             return false;
         }

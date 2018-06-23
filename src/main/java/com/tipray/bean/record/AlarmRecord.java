@@ -43,6 +43,10 @@ public class AlarmRecord extends Record {
      */
     private String lockStatus;
     /**
+     * 报警时间
+     */
+    private String alarmTime;
+    /**
      * 报警业务类型 （100 消除报警，110 报警(default)，120 延时推送报警，130 忽略报警）
      */
     private int biz = 110;
@@ -111,6 +115,14 @@ public class AlarmRecord extends Record {
         this.lockStatus = lockStatus;
     }
 
+    public String getAlarmTime() {
+        return alarmTime;
+    }
+
+    public void setAlarmTime(String alarmTime) {
+        this.alarmTime = alarmTime;
+    }
+
     public int getBiz() {
         return biz;
     }
@@ -151,6 +163,9 @@ public class AlarmRecord extends Record {
         }
         if (lockStatus != null) {
             sb.append(", lockStatus='").append(lockStatus).append('\'');
+        }
+        if (alarmTime != null) {
+            sb.append(", alarmTime='").append(alarmTime).append('\'');
         }
         sb.append(", biz=").append(biz);
         if (getLongitude() != null) {

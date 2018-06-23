@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * @version 1.0 2018-02-02
  *
  */
-@WebServlet(description = "文件下载控制器", urlPatterns = { "/download" })
+@WebServlet(description = "文件下载控制器", urlPatterns = { "/downloadUpgradeFile" })
 public class DownLoadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 

@@ -3,17 +3,17 @@ var tipIcoObj;
 var tipIcoUrl;
 var css3filter;
 var alarmBoxLayer;
+var alarmId;
 var alarmCount = 0; // 报警数
 var alarmIds = []; // 报警ID缓存
-var record; // 报警记录
 var alarmNotify; // 报警通知对象（浏览器通知）
 var receiveAlarmCount = 1 ;
 
 function receiveEliminat(receiveObj) {
-    var alarmId = receiveObj.id;
-    if (alarmIds.isContain(alarmId)) {
-        alarmIds.removeByValue(alarmId);
-        $("#alarm_id_" + alarmId).remove();
+    var alarm_id = receiveObj.id;
+    if (alarmIds.isContain(alarm_id)) {
+        alarmIds.removeByValue(alarm_id);
+        $("#alarm_id_" + alarm_id).remove();
         alarmCount--;
         if (alarmCount <= 0) {
             grayscale(tipIcoObj);
@@ -31,10 +31,9 @@ function receiveEliminat(receiveObj) {
     }
 }
 
-function receiveAlarm(receive, receiveObj) {
+function receiveAlarm(receiveObj) {
     removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
-    record = encodeURIComponent(receive);
-    addAlarm(receiveObj, record);
+    addAlarm(receiveObj);
     if (window.Notification && Notification.permission === "granted") {
         alarmNotify.setTitle(true).setFavicon(alarmCount).notify({
             title: "报警通知",
@@ -52,7 +51,7 @@ function receiveAlarm(receive, receiveObj) {
                 buttons: [
                     ['<button>查看报警信息</button>', function (instance, toast) {
                         instance.hide({transitionOut: 'fadeOutUp'}, toast);
-                        showAlarm(record);
+                        showAlarm(receiveObj.id);
                     }]
                 ]
             });
@@ -82,10 +81,22 @@ function cacheAlarm(receiveObj) {
         return;
     }
     removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
+    var trHtml = "";
     for (var i = 0; i < len; i++) {
         var alarm = list[i];
-        addAlarm(alarm);
+        var alarm_id = alarm.id;
+        if (alarmCount == 0 || !alarmIds.isContain(alarm_id)) {
+            alarmIds.push(alarm_id);
+            alarmCount++;
+            trHtml += "<tr class='alarm-content' id='alarm_id_" + alarm_id + "' onclick=\"showAlarm(" + alarm_id + ")\">" +
+                "<td class='alarm-id'>" + alarm_id + "</td>" +
+                "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
+                "<td class='alarm-type'>" + alarm.typeName + "</td>" +
+                "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarm.carNumber + "," + alarm_id + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
+                "</tr>";
+        }
     }
+    $("#alarm_tips tbody").append(trHtml);
     if (window.Notification && Notification.permission === "granted") {
         alarmNotify.setTitle(true).setFavicon(alarmCount);
     }
@@ -103,19 +114,16 @@ function cacheAlarm(receiveObj) {
     });
 }
 
-function addAlarm(alarm, record) {
-    var alarmId = alarm.id;
+function addAlarm(alarm) {
+    alarmId = alarm.id;
     if (alarmCount == 0 || !alarmIds.isContain(alarmId)) {
         alarmIds.push(alarmId);
         alarmCount++;
-        if (record === undefined || record === null || record === "") {
-            record = encodeURIComponent(JSON.stringify(alarm));
-        }
-        var trHtml = "<tr class='alarm-content' id='alarm_id_" + alarmId + "' onclick=\"showAlarm('" + record + "')\">" +
+        var trHtml = "<tr class='alarm-content' id='alarm_id_" + alarmId + "' onclick=\"showAlarm(" + alarmId + ")\">" +
             "<td class='alarm-id'>" + alarmId + "</td>" +
             "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
             "<td class='alarm-type'>" + alarm.typeName + "</td>" +
-            "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarm.vehicleId + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
+            "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarm.carNumber + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
             "</tr>";
         $("#alarm_tips tbody").append(trHtml);
     }
@@ -142,9 +150,9 @@ function showAlarmBox() {
     });
 }
 
-function eliminateAlarm(vehicleId, alarmIds) {
+function eliminateAlarm(carNumber, alarmIds) {
     $.post("../../manage/remote/asyn_alarm_eliminate_request",
-        "vehicle_id=" + vehicleId + "&alarm_ids=" + alarmIds + "&token=" + generateUUID(),
+        "car_number=" + carNumber + "&alarm_ids=" + alarmIds + "&token=" + generateUUID(),
         function(data) {
             if (data.id > 0) {
                 layer.msg(data.msg, {
@@ -167,7 +175,7 @@ function eliminateAlarm(vehicleId, alarmIds) {
     event.stopPropagation();
 }
 
-function showAlarm(record) {
+function showAlarm(alarmId) {
     layer.open({
         type: 2,
         title: ['报警信息查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -175,7 +183,7 @@ function showAlarm(record) {
         shade: 0.8,
         resize: false,
         area: ['800px', '560px'],
-        content: 'normal/alarm/alarmTipView.html?record=' + record
+        content: 'normal/alarm/alarmTipView.html?alarmId=' + alarmId
     });
 }
 
@@ -204,7 +212,7 @@ $(function() {
             effect: 'flash', // flash | scroll 闪烁还是滚动
             onclick: function(n) { // 点击通知弹窗事件
                 n.close();
-                showAlarm(record);
+                showAlarm(alarmId);
             },
             // 可选播放声音
             audio: {
@@ -259,7 +267,7 @@ $(function() {
                 // receiveEliminat(receiveObj);
                 break;
             case 110: //报警
-                Concurrent.Thread.create(receiveAlarm, receive, receiveObj);
+                Concurrent.Thread.create(receiveAlarm, receiveObj);
                 // receiveAlarm(receive, receiveObj);
                 break;
             case 111: //缓存报警

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.TerminalUpgradeDao">
+
+	<insert id="addTerminalUpgradeInfo" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.upgrade.TerminalUpgradeInfo">
+		INSERT INTO tbl_vehicle_device_version_upgrade_info ( version, `type`, ftp_url, version_info )
+		VALUES
+			( IFNULL(#{ver}, 0), #{type},  #{path}, #{info} )
+	</insert>
+
+	<select id="findUnfinishedUpgradeByTerminalId" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        SELECT
+            id
+        FROM
+            tbl_vehicle_device_version_upgrade 
+        WHERE
+            device_id = #{terminalId} 
+            AND is_has_upgrade != 2;
+    </select>
+    
+    <insert id="addTerminalUpgradeRecord" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.upgrade.TerminalUpgradeRecord">
+		INSERT INTO tbl_vehicle_device_version_upgrade ( device_id, upgrade_id, version )
+		VALUES
+			( #{deviceId}, #{upgradeId}, #{ver} )
+	</insert>
+
+    <update id="updateTerminalUpgradeRecord" parameterType="com.tipray.bean.upgrade.TerminalUpgradeRecord">
+        UPDATE tbl_vehicle_device_version_upgrade
+        SET upgrade_id = #{upgradeId},
+        version = #{ver},
+        is_has_upgrade = 0
+        WHERE
+            id = #{id}
+    </update>
+
+    <delete id="deleteTerminalUpgradeRecord" parameterType="java.util.List">
+        DELETE FROM tbl_vehicle_device_version_upgrade WHERE id IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item, jdbcType=INTEGER}
+        </foreach>
+    </delete>
+
+    <delete id="batchDeleteUpgradeRecord" parameterType="java.lang.String">
+        DELETE FROM tbl_vehicle_device_version_upgrade WHERE id IN ( $(_parameter) )
+    </delete>
+
+    <select id="findUnfinishUpgradeVehicles" parameterType="com.tipray.bean.upgrade.UpgradeCancelVehicle">
+        SELECT
+            tr.id,
+            tv.vehicle_number carNumber,
+            tr.device_id terminalId,
+            td.device_version ver,
+            tr.version upVer ,
+            ti.type upType
+        FROM
+            tbl_vehicle_device_version_upgrade tr,
+            tbl_vehicle_device_version_upgrade_info ti,
+            tbl_vehicle tv,
+            tbl_device td
+        WHERE
+            tr.is_has_upgrade != 2
+            AND tr.upgrade_id = ti.id
+            AND tr.device_id = tv.vehicle_device_id
+            AND tr.device_id = td.device_id
+    </select>
+
+</mapper>

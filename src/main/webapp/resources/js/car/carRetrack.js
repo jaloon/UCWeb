@@ -178,8 +178,10 @@ $(function() {
         begin = $("#text_begin").val();
         end = $("#text_end").val();
         interval = $("#text_interval").val();
+        var index = layer.load();
         $.post("../../../manage/car/retrack.do", encodeURI("carNumber=" + carNumber + "&begin=" + begin + "&end=" + end),
             function(data) {
+                layer.close(index);
                 if (isNull(data) || data.length == 0) {
                     layer.alert('无当前时段车辆轨迹信息，无法回放轨迹', { icon: 5 });
                 } else {

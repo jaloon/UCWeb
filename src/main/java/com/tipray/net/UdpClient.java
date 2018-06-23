@@ -1,5 +1,16 @@
 package com.tipray.net;
 
+import com.tipray.bean.ResponseMsg;
+import com.tipray.bean.upgrade.TerminalUpgradeFile;
+import com.tipray.bean.baseinfo.Lock;
+import com.tipray.cache.SerialNumberCache;
+import com.tipray.constant.CenterConfigConst;
+import com.tipray.core.exception.UdpException;
+import com.tipray.net.constant.UdpBizId;
+import com.tipray.util.BytesConverterByLittleEndian;
+import com.tipray.util.ResponseMsgUtil;
+import org.springframework.web.socket.WebSocketSession;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
@@ -10,18 +21,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.web.socket.WebSocketSession;
-
-import com.tipray.bean.ResponseMsg;
-import com.tipray.bean.TerminalUpgradeFile;
-import com.tipray.bean.baseinfo.Lock;
-import com.tipray.cache.SerialNumberCache;
-import com.tipray.constant.CenterConfigConst;
-import com.tipray.core.exception.UdpException;
-import com.tipray.net.constant.UdpBizId;
-import com.tipray.util.BytesConverterByLittleEndian;
-import com.tipray.util.ResponseMsgUtil;
 
 /**
  * UDP客户端
@@ -691,6 +690,7 @@ public class UdpClient {
 	 * 
 	 * @param terminalIds
 	 *            {@link String} 车台设备ID，英文逗号“,”分隔
+	 * @param upgradeType {@link byte} 升级类型
 	 * @param ftpPath
 	 *            {@link String} ftp更新路径，UTF-8编码
 	 * @param files
@@ -698,9 +698,9 @@ public class UdpClient {
 	 * @return {@link ResponseMsg}
 	 * @throws UdpException
 	 */
-	public static ResponseMsg udpForTerminalSoftwareUpdateToMsg(String terminalIds, String ftpPath,
+	public static ResponseMsg udpForTerminalSoftwareUpdateToMsg(String terminalIds, byte upgradeType, String ftpPath,
 			List<TerminalUpgradeFile> files) throws UdpException {
-		ByteBuffer dataBuffer = SendPacketBuilder.buildDataBufForTerminalSoftwareUpgrade(terminalIds, ftpPath, files);
+		ByteBuffer dataBuffer = SendPacketBuilder.buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeType, ftpPath, files);
 		return udpForTerminalSoftwareUpdateToMsg(dataBuffer);
 	}
 

@@ -17,7 +17,26 @@
     </resultMap>
 
     <!-- 存储过程调用 -->
+    <select id="getTrackByTrackId" statementType="CALLABLE" parameterType="java.lang.String" resultMap="tackInfoMap">
+		<![CDATA[
+            {CALL prd_get_track_info_by_trackid(
+	            #{trackId,  mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <!-- 存储过程调用 -->
     <select id="findTracksByTrackIds" statementType="CALLABLE" parameterType="java.lang.String" resultMap="tackInfoMap">
+		<![CDATA[
+            {CALL prd_get_track_info_by_trackid(
+	            #{trackIds,  mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <!-- 存储过程调用 -->
+    <select id="findTrackMapByTrackIds" statementType="CALLABLE" parameterType="java.lang.String"
+            resultMap="tackInfoMap" resultType="java.util.Map">
 		<![CDATA[
             {CALL prd_get_track_info_by_trackid(
 	            #{trackIds,  mode=IN,  jdbcType=VARCHAR}
@@ -36,7 +55,30 @@
 	</select>
 
     <!-- 存储过程调用 -->
+    <select id="findTrackMapByCarIdsAndBeginTime" statementType="CALLABLE" resultMap="tackInfoMap"
+            resultType="java.util.Map">
+		<![CDATA[
+            {CALL prd_get_track_info_by_vehicle_time(
+	            #{carIds,     mode=IN,  jdbcType=VARCHAR},
+	            #{beginTime,  mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <!-- 存储过程调用 -->
     <select id="findTracksByCarIdAndTimeRange" statementType="CALLABLE" resultMap="tackInfoMap">
+		<![CDATA[
+            {CALL prd_get_track_info_by_vehicle_time_range(
+	            #{carId,      mode=IN,  jdbcType=INTEGER},
+	            #{beginTime,  mode=IN,  jdbcType=VARCHAR},
+	            #{endTime,    mode=IN,  jdbcType=VARCHAR}
+        	)}
+        ]]>
+	</select>
+
+    <!-- 存储过程调用 -->
+    <select id="findTrackMapByCarIdAndTimeRange" statementType="CALLABLE" resultMap="tackInfoMap"
+            resultType="java.util.Map">
 		<![CDATA[
             {CALL prd_get_track_info_by_vehicle_time_range(
 	            #{carId,      mode=IN,  jdbcType=INTEGER},
@@ -96,8 +138,28 @@
         WHERE
             t1.vehicle_id = t2.vehicle_id
             AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
-
         ]]>
     </select>
+
+    <select id="getLastTrackTime" parameterType="java.lang.Long" resultType="java.util.Date">
+        SELECT track_time FROM tbl_vehicle_newest_track WHERE vehicle_id = #{carId}
+    </select>
+
+    <update id="updateTracks" parameterType="java.util.List">
+        update tbl_vehicle_newest_track set
+        longitude =
+        <foreach collection="list" item="item" index="index" separator=" " open="case ID" close="end">
+            when #{item.id} then #{item.lng}
+        </foreach>
+        , latitude =
+        <foreach collection="list" item="item" index="index" separator=" " open="case ID" close="end">
+            when #{item.id} then #{item.lat}
+        </foreach>
+        , track_time = NOW()
+        where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item.id,jdbcType=INTEGER}
+        </foreach>
+    </update>
 
 </mapper>

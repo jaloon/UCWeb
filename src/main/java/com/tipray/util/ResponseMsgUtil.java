@@ -96,7 +96,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（根据车牌号获取车辆轨迹错误）
      *
-     * @param devBindError {@link FindTracksByCarNumberErrorEnum} 根据车牌号获取车辆轨迹错误
+     * @param findTracksError {@link FindTracksByCarNumberErrorEnum} 根据车牌号获取车辆轨迹错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(FindTracksByCarNumberErrorEnum findTracksError) {
@@ -106,7 +106,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（权限错误）
      *
-     * @param devBindError {@link PermissionErrorEnum} 权限错误
+     * @param permissionError {@link PermissionErrorEnum} 权限错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(PermissionErrorEnum permissionError) {
@@ -116,7 +116,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（远程换站错误）
      *
-     * @param devBindError {@link RemoteChangeErrorEnum} 远程换站错误
+     * @param remoteChangeError {@link RemoteChangeErrorEnum} 远程换站错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(RemoteChangeErrorEnum remoteChangeError) {
@@ -126,7 +126,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（远程操作错误）
      *
-     * @param devBindError {@link RemoteControlErrorEnum} 远程操作错误
+     * @param remoteControlError {@link RemoteControlErrorEnum} 远程操作错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(RemoteControlErrorEnum remoteControlError) {
@@ -136,7 +136,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（远程消除报警错误）
      *
-     * @param devBindError {@link RemoteEliminateAlarmErrorEnum} 远程消除报警错误
+     * @param eliminateAlarmError {@link RemoteEliminateAlarmErrorEnum} 远程消除报警错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(RemoteEliminateAlarmErrorEnum eliminateAlarmError) {
@@ -146,7 +146,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（远程开锁重置错误）
      *
-     * @param devBindError {@link RemoteLockResetErrorEnum} 远程开锁重置错误
+     * @param lockResetError {@link RemoteLockResetErrorEnum} 远程开锁重置错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(RemoteLockResetErrorEnum lockResetError) {
@@ -156,7 +156,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（车台配置更新错误）
      *
-     * @param devBindError {@link TerminalConfigUpdateErrorEnum} 车台配置更新错误
+     * @param terminalConfigError {@link TerminalConfigUpdateErrorEnum} 车台配置更新错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(TerminalConfigUpdateErrorEnum terminalConfigError) {
@@ -166,7 +166,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（车台软件升级错误）
      *
-     * @param devBindError {@link TerminalSoftwareUpgradeErrorEnum} 车台软件升级错误
+     * @param terminalUpgradeError {@link TerminalSoftwareUpgradeErrorEnum} 车台软件升级错误
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(TerminalSoftwareUpgradeErrorEnum terminalUpgradeError) {
@@ -176,7 +176,7 @@ public class ResponseMsgUtil {
     /**
      * 错误回复（UDP协议解析结果）
      *
-     * @param devBindError {@link UdpProtocolParseResultEnum} UDP协议解析结果
+     * @param protocolParseResult {@link UdpProtocolParseResultEnum} UDP协议解析结果
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg error(UdpProtocolParseResultEnum protocolParseResult) {
@@ -202,7 +202,8 @@ public class ResponseMsgUtil {
      * @return {@link ResponseMsg}
      */
     public static ResponseMsg excetion(Exception e) {
-        return new ResponseMsg(ID_EXCEPTON, ERROR, ErrorTagConst.EXCEPTON_MESSAGE_TAG, 10, e.getMessage());
+        String msg = e.getMessage() == null ? e.toString() : e.getMessage();
+        return new ResponseMsg(ID_EXCEPTON, ERROR, ErrorTagConst.EXCEPTON_MESSAGE_TAG, 10, msg);
     }
 
 }

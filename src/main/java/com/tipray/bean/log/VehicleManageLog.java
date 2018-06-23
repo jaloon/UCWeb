@@ -44,6 +44,10 @@ public class VehicleManageLog extends BaseBean {
      * UDP回复信息
      */
     private ResponseMsg responseMsg;
+    /**
+     * UDP回复信息json字符串
+     */
+    private String responseMsgJson;
 
     /**
      * 开始时间
@@ -145,6 +149,14 @@ public class VehicleManageLog extends BaseBean {
 
     public void setResponseMsg(ResponseMsg responseMsg) {
         this.responseMsg = responseMsg;
+    }
+
+    public String getResponseMsgJson() {
+        return responseMsgJson;
+    }
+
+    public void setResponseMsgJson(String responseMsgJson) {
+        this.responseMsgJson = responseMsgJson;
     }
 
     public String getBegin() {

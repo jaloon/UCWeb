@@ -7,6 +7,9 @@ import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.ReTrack;
+import com.tipray.bean.upgrade.TerminalUpgradeInfo;
+import com.tipray.bean.upgrade.UpgradeCancelVehicle;
+import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.core.exception.ServiceException;
 
 import java.util.List;
@@ -47,39 +50,46 @@ public interface VehicleService {
     /**
      * 根据Id获取车辆信息
      *
-     * @param id
-     * @return
+     * @param id 车辆ID
+     * @return 车辆信息
      */
     Map<String, Object> getCarById(Long id);
 
     /**
      * 根据车牌号获取车辆信息
      *
-     * @param carNo
-     * @return
+     * @param carNo 车牌号
+     * @return 车辆信息
      */
     Vehicle getByCarNo(String carNo);
 
     /**
+     * 根据车牌号获取车辆ID
+     *
+     * @param carNo 车牌号
+     * @return 车辆ID
+     */
+    Long getIdByCarNo(String carNo);
+
+    /**
      * 根据车载终端ID获取车辆信息
      *
-     * @param terminalId
-     * @return
+     * @param terminalId 车载终端ID
+     * @return 车辆信息
      */
     Vehicle getCarByTerminalId(Integer terminalId);
 
     /**
      * 根据所属运输公司获取车辆信息
      *
-     * @param transCompany
-     * @return
+     * @param transCompany 运输公司
+     * @return 车辆信息
      */
     List<Vehicle> findByTransCompany(TransCompany transCompany);
 
     /**
      * 查询所有的车辆信息列表
      *
-     * @param
      * @return
      */
     List<Vehicle> findAllCars();
@@ -226,14 +236,19 @@ public interface VehicleService {
     void terminalConfig(VehicleTerminalConfig terminalConfig) throws ServiceException;
 
     /**
+     * 获取车台已启用的功能
+     *
+     * @return 车台已启用的功能
+     */
+    Integer getFuncEnable();
+
+    /**
      * 车台功能启用
      *
-     * @param deviceId       车台设备ID
      * @param functionEnable 启用功能
-     * @return 配置表记录ID
      * @throws ServiceException
      */
-    Integer terminalEnable(Integer deviceId, Integer functionEnable) throws ServiceException;
+    void terminalEnable(Integer functionEnable) throws ServiceException;
 
     /**
      * 根据车辆ID获取绑定的锁列表
@@ -252,12 +267,12 @@ public interface VehicleService {
     void bindLocks(List<Lock> locks) throws ServiceException;
 
     /**
-     * 根据车辆ID获取待绑定锁设备ID列表
+     * 根据车牌号获取待绑定锁设备ID列表
      *
-     * @param carId
+     * @param carNumber 车牌号
      * @return
      */
-    List<Integer> findBindingLockDeviceIds(Long carId);
+    List<Integer> findBindingLockDeviceIds(String carNumber);
 
     /**
      * 根据待绑定锁信息集合获取车辆id集合
@@ -284,19 +299,6 @@ public interface VehicleService {
      * @throws ServiceException
      */
     void updateRemoteControlStatus(Integer remoteControlStatus, Integer remoteControlId) throws ServiceException;
-
-    /**
-     * 更新远程变更车辆状态结果
-     *
-     * @param remoteControlStatus 操作状态（0 未完成，1 远程操作请求中，2 远程操作完成）
-     * @param carStatus           车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急）
-     * @param remoteControlId     远程操作ID
-     * @param carId               车辆ID
-     */
-    void updateRemoteAlterStatusResulte(Integer remoteControlStatus,
-                                        Integer carStatus,
-                                        Integer remoteControlId,
-                                        Long carId) throws ServiceException;
 
     /**
      * 根据车牌号获取车、司机相关信息
@@ -365,11 +367,20 @@ public interface VehicleService {
     List<Map<String, Object>> findTracksByCarNumbers(String carNumbers, String beginTime);
 
     /**
+     * 根据车牌号获取轨迹信息
+     *
+     * @param carNumber   车牌号
+     * @param beginMillis 轨迹开始时间毫秒值
+     * @return
+     */
+    List<Map<String, Object>> findTracksByCarNumber(String carNumber, Long beginMillis);
+
+    /**
      * 获取已绑定车台的车辆的树形结构数据
      *
      * @return
      */
-    List<Map<String, Object>> findBindedVehicleTree();
+    List<VehicleTree> findBindedVehicleTree();
 
     /**
      * 根据车辆ID获取车辆实时状态
@@ -400,4 +411,18 @@ public interface VehicleService {
      * @return {@link LastTrack} 最新轨迹信息
      */
     List<LastTrack> findLastTracks();
+
+    /**
+     * 车台升级
+     * @param terminalUpgradeInfo 车台升级信息
+     * @param terminalIdList 车台ID集合
+     */
+    void terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList);
+
+    /**
+     * 查询未完成升级的车辆信息
+     *
+     * @return 未完成升级的车辆信息
+     */
+    List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles();
 }

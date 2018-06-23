@@ -1,9 +1,10 @@
 package com.tipray.net;
 
-import com.tipray.bean.TerminalUpgradeFile;
+import com.tipray.bean.upgrade.TerminalUpgradeFile;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.cache.SerialNumberCache;
 import com.tipray.net.constant.UdpBizId;
+import com.tipray.util.ArraysUtil;
 import com.tipray.util.BytesConverterByLittleEndian;
 import com.tipray.util.BytesUtil;
 import org.springframework.web.socket.WebSocketSession;
@@ -172,7 +173,7 @@ public class SendPacketBuilder {
      * @param dataBuffer {@link ByteBuffer} 数据体
      * @return {@link ByteBuffer} 待发送数据
      */
-    public static ByteBuffer buildProtocol0x1209(int terminalId,
+    public static ByteBuffer buildProtocol0x120A(int terminalId,
                                                  ByteBuffer dataBuffer) {
         return buildSendPacket(terminalId, UdpBizId.LOCK_BIND_TRIGGER_REQUEST, dataBuffer);
     }
@@ -186,10 +187,10 @@ public class SendPacketBuilder {
      *                     2 结束锁绑定触发
      * @return {@link ByteBuffer} 待发送数据
      */
-    public static ByteBuffer buildProtocol0x1209(int terminalId,
+    public static ByteBuffer buildProtocol0x120A(int terminalId,
                                                  byte triggerState) {
         ByteBuffer dataBuffer = buildDataBufForLockTrigger(triggerState);
-        return buildProtocol0x1209(terminalId, dataBuffer);
+        return buildProtocol0x120A(terminalId, dataBuffer);
     }
 
     /**
@@ -233,15 +234,79 @@ public class SendPacketBuilder {
      * 车台软件升级下发
      *
      * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
+     * @param upgradeInfo {@link byte[]} 车台软件升级信息流
+     * @return {@link ByteBuffer} 待发送数据
+     */
+    public static ByteBuffer buildProtocol0x1208(String terminalIds, byte[] upgradeInfo) {
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeInfo);
+        return buildProtocol0x1208(dataBuffer);
+    }
+
+    /**
+     * 车台软件升级下发
+     *
+     * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
+     * @param upgradeType {@link byte} 升级类型
      * @param ftpPath     {@link String} ftp更新路径，UTF-8编码
      * @param files       {@link TerminalUpgradeFile} 升级文件列表
      * @return {@link ByteBuffer} 待发送数据
      */
     public static ByteBuffer buildProtocol0x1208(String terminalIds,
+                                                 byte upgradeType,
                                                  String ftpPath,
                                                  List<TerminalUpgradeFile> files) {
-        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIds, ftpPath, files);
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeType, ftpPath, files);
         return buildProtocol0x1208(dataBuffer);
+    }
+
+    /**
+     * 车台软件升级下发
+     *
+     * @param terminalIdList {@link Integer} 车台设备ID集合
+     * @param upgradeInfo    {@link byte[]} 车台软件升级信息流
+     * @return {@link ByteBuffer} 待发送数据
+     */
+    public static ByteBuffer buildProtocol0x1208(List<Integer> terminalIdList, byte[] upgradeInfo) {
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIdList, upgradeInfo);
+        return buildProtocol0x1208(dataBuffer);
+    }
+
+    /**
+     * 车台软件升级下发
+     *
+     * @param terminalIdList {@link Integer} 车台设备ID集合
+     * @param upgradeType    {@link byte} 升级类型
+     * @param ftpPath        {@link String} ftp更新路径，UTF-8编码
+     * @param files          {@link TerminalUpgradeFile} 升级文件列表
+     * @return {@link ByteBuffer} 待发送数据
+     */
+    public static ByteBuffer buildProtocol0x1208(List<Integer> terminalIdList,
+                                                 byte upgradeType,
+                                                 String ftpPath,
+                                                 List<TerminalUpgradeFile> files) {
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIdList, upgradeType, ftpPath, files);
+        return buildProtocol0x1208(dataBuffer);
+    }
+
+    /**
+     * 车台功能启用配置下发
+     *
+     * @param dataBuffer {@link ByteBuffer} 数据体
+     * @return {@link ByteBuffer} 待发送数据
+     */
+    public static ByteBuffer buildProtocol0x1209(ByteBuffer dataBuffer) {
+        return buildSendPacket(UdpProtocol.COMM_SERVER_ID, UdpBizId.TERMINAL_FUNCTION_ENABLE_REQUEST, dataBuffer);
+    }
+
+    /**
+     * 车台功能启用配置下发
+     *
+     * @param func {@link int} 启用功能
+     * @return {@link ByteBuffer} 待发送数据
+     */
+    public static ByteBuffer buildProtocol0x1209(int func) {
+        ByteBuffer dataBuffer = buildDataBufForTerminalFunctionEnable(func);
+        return buildProtocol0x1209(dataBuffer);
     }
 
     /**
@@ -418,23 +483,31 @@ public class SendPacketBuilder {
     /**
      * 远程车辆进出请求
      *
-     * @param terminalId      {@link int} 车载终端设备ID
-     * @param remoteControlId {@link int} 远程控制ID
-     * @param controlType     {@link byte} 操作类型<br>
-     *                        1 入库<br>
-     *                        2 出库<br>
-     *                        3 入加油站<br>
-     *                        4 出加油站<br>
-     * @param stationId       {@link int} 站点ID（加油站ID、油库ID）
-     * @param userName        {@link String} 操作员姓名，UTF-8编码
+     * @param terminalId  {@link int} 车载终端设备ID
+     * @param remoteId    {@link int} 远程控制ID
+     * @param readerId    {@link int} 可支持（道闸）转发的读卡器ID
+     * @param controlType {@link byte} 操作类型<br>
+     *                    0 未知<br>
+     *                    1 入库<br>
+     *                    2 出库<br>
+     *                    3 入加油站<br>
+     *                    4 出加油站<br>
+     *                    5 进入应急<br>
+     *                    6 取消应急<br>
+     *                    8 待进油区<br>
+     *                    9 进油区<br>
+     *                    10 出油区<br>
+     * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
+     * @param userName    {@link String} 操作员姓名，UTF-8编码
      * @return {@link ByteBuffer} 待发送数据
      */
     public static ByteBuffer buildProtocol0x1403(int terminalId,
-                                                 int remoteControlId,
+                                                 int remoteId,
+                                                 int readerId,
                                                  byte controlType,
                                                  int stationId,
                                                  String userName) {
-        ByteBuffer dataBuffer = buildDataBufForCarInOut(remoteControlId, controlType, stationId, userName);
+        ByteBuffer dataBuffer = buildDataBufForCarInOut(remoteId, readerId, controlType, stationId, userName);
         return buildProtocol0x1403(terminalId, dataBuffer);
     }
 
@@ -456,11 +529,14 @@ public class SendPacketBuilder {
      * @param terminalId      {@link int} 车载终端设备ID
      * @param remoteControlId {@link int} 远程控制ID
      * @param carStatus       {@link byte} 车辆状态<br>
-     *                        1 在途<br>
-     *                        2 返程<br>
-     *                        3 在油库<br>
-     *                        4 在加油站<br>
-     *                        5 应急
+     *                        1 在油库<br>
+     *                        2 在途<br>
+     *                        3 在加油站<br>
+     *                        4 返程<br>
+     *                        5 应急<br>
+     *                        6 待进油区<br>
+     *                        7 在油区<br>
+     * @param stationType     {@link Integer} 站点类型（1：在油库 | 2：在加油站）
      * @param stationId       {@link int} 站点ID（加油站ID、油库ID）
      * @param userName        {@link String} 操作员姓名，UTF-8编码
      * @return {@link ByteBuffer} 待发送数据
@@ -468,9 +544,10 @@ public class SendPacketBuilder {
     public static ByteBuffer buildProtocol0x1404(int terminalId,
                                                  int remoteControlId,
                                                  byte carStatus,
+                                                 byte stationType,
                                                  int stationId,
                                                  String userName) {
-        ByteBuffer dataBuffer = buildDataBufForCarStatusAlter(remoteControlId, carStatus, stationId, userName);
+        ByteBuffer dataBuffer = buildDataBufForCarStatusAlter(remoteControlId, carStatus, stationType, stationId, userName);
         return buildProtocol0x1404(terminalId, dataBuffer);
     }
 
@@ -501,37 +578,6 @@ public class SendPacketBuilder {
                                                  String userName) {
         ByteBuffer dataBuffer = buildDataBufForLockReset(lockNum, list, userName);
         return buildProtocol0x1405(terminalId, dataBuffer);
-    }
-
-    /**
-     * 道闸开启
-     *
-     * @param terminalId {@link int} 车载终端设备ID
-     * @param dataBuffer {@link ByteBuffer} 数据体
-     * @return {@link ByteBuffer} 待发送数据
-     */
-    public static ByteBuffer buildProtocol0x1406(int terminalId,
-                                                 ByteBuffer dataBuffer) {
-        return buildSendPacket(terminalId, UdpBizId.BARRIER_OPEN_REQUEST, dataBuffer);
-    }
-
-    /**
-     * 道闸开启
-     *
-     * @param terminalId {@link int} 车载终端设备ID
-     * @param remoteId   {@link int} 远程操作ID
-     * @param readerId   {@link int} 油库读卡器设备ID
-     * @param depotId    {@link int} 油库ID
-     * @param sign       {@link byte} 进出闸标志（1 进闸，2 出闸）
-     * @return {@link ByteBuffer} 待发送数据
-     */
-    public static ByteBuffer buildProtocol0x1406(int terminalId,
-                                                 int remoteId,
-                                                 int readerId,
-                                                 int depotId,
-                                                 byte sign) {
-        ByteBuffer dataBuffer = buildDataBufForBarrierOpen(remoteId, readerId, depotId, sign);
-        return buildProtocol0x1406(terminalId, dataBuffer);
     }
 
     /**
@@ -648,8 +694,8 @@ public class SendPacketBuilder {
                                                      List<Lock> locks) {
         // 锁数量
         int lockNum = locks.size();
-        // 缓冲区容量（每把锁9个字节）
-        int capacity = 2 + 9 * lockNum;
+        // 缓冲区容量（每把锁8个字节）
+        int capacity = 2 + 8 * lockNum;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
         // 添加变更类型，1个字节
@@ -657,7 +703,7 @@ public class SendPacketBuilder {
         // 添加锁个数，1个字节
         dataBuffer.put((byte) lockNum);
         for (Lock lock : locks) {
-            // 添加单个锁信息，9个字节
+            // 添加单个锁信息，8个字节
             // 添加锁设备ID，4个字节
             dataBuffer.put(BytesConverterByLittleEndian.getBytes(lock.getLockId()));
             // 添加仓号，1个字节
@@ -668,8 +714,6 @@ public class SendPacketBuilder {
             dataBuffer.put(lock.getSeatIndex().byteValue());
             // 添加是否允许开锁（1 不能，2 能），1个字节
             dataBuffer.put(lock.getAllowOpen().byteValue());
-            // 添加绑定状态（1 待车台触发确认， 2 车台已触发确认），1个字节
-            dataBuffer.put((byte) 1);
         }
         return dataBuffer;
     }
@@ -678,20 +722,31 @@ public class SendPacketBuilder {
      * 构建车台软件升级下发业务数据体
      *
      * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
+     * @param upgradeType {@link byte} 升级类型
      * @param ftpPath     {@link String} ftp更新路径，UTF-8编码
      * @param files       {@link TerminalUpgradeFile} 升级文件列表
      * @return {@link ByteBuffer} 数据体
      */
     public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(String terminalIds,
+                                                                    byte upgradeType,
                                                                     String ftpPath,
                                                                     List<TerminalUpgradeFile> files) {
+        byte[] upgradeInfo = buildTerminalSoftwareUpgradeInfo(upgradeType, ftpPath, files);
+        return buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeInfo);
+    }
+
+    /**
+     * 构建车台软件升级下发业务数据体
+     *
+     * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
+     * @param upgradeInfo {@link byte[]} 车台软件升级信息流
+     * @return {@link ByteBuffer} 数据体
+     */
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(String terminalIds, byte[] upgradeInfo) {
         String[] terminalIdStrs = terminalIds.split(",");
         int terminalNum = terminalIdStrs.length;
-        byte[] ftpPathBuf = ftpPath.getBytes(StandardCharsets.UTF_8);
-        int ftpPathBufLen = ftpPathBuf.length;
-        int fileNum = files.size();
         // 缓冲区容量
-        int capacity = 3 + 4 * terminalNum + ftpPathBufLen;
+        int capacity = 1 + 4 * terminalNum + upgradeInfo.length;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
         // 添加设备数量，1个字节
@@ -700,6 +755,72 @@ public class SendPacketBuilder {
             // 添加设备ID，4个字节
             dataBuffer.put(BytesConverterByLittleEndian.getBytes(Integer.parseInt(terminalId, 10)));
         }
+        // 添加车台软件升级信息流
+        dataBuffer.put(upgradeInfo);
+        return dataBuffer;
+    }
+
+    /**
+     * 构建车台软件升级下发业务数据体
+     *
+     * @param terminalIdList {@link Integer} 车台设备ID集合
+     * @param upgradeType    {@link byte} 升级类型
+     * @param ftpPath        {@link String} ftp更新路径，UTF-8编码
+     * @param files          {@link TerminalUpgradeFile} 升级文件列表
+     * @return {@link ByteBuffer} 数据体
+     */
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(List<Integer> terminalIdList,
+                                                                    byte upgradeType,
+                                                                    String ftpPath,
+                                                                    List<TerminalUpgradeFile> files) {
+        byte[] upgradeInfo = buildTerminalSoftwareUpgradeInfo(upgradeType, ftpPath, files);
+        return buildDataBufForTerminalSoftwareUpgrade(terminalIdList, upgradeInfo);
+    }
+
+    /**
+     * 构建车台软件升级下发业务数据体
+     *
+     * @param terminalIdList {@link Integer} 车台设备ID集合
+     * @param upgradeInfo    {@link byte[]} 车台软件升级信息流
+     * @return {@link ByteBuffer} 数据体
+     */
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(List<Integer> terminalIdList, byte[] upgradeInfo) {
+        int terminalNum = terminalIdList.size();
+        // 缓冲区容量
+        int capacity = 1 + 4 * terminalNum + upgradeInfo.length;
+        // 构建协议数据体
+        ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加设备数量，1个字节
+        dataBuffer.put((byte) terminalNum);
+        for (Integer terminalId : terminalIdList) {
+            // 添加设备ID，4个字节
+            dataBuffer.put(BytesConverterByLittleEndian.getBytes(terminalId));
+        }
+        // 添加车台软件升级信息流
+        dataBuffer.put(upgradeInfo);
+        return dataBuffer;
+    }
+
+    /**
+     * 构建车台软件升级信息流
+     *
+     * @param upgradeType {@link byte} 升级类型
+     * @param ftpPath     {@link String} ftp更新路径，UTF-8编码
+     * @param files       {@link TerminalUpgradeFile} 升级文件列表
+     * @return {@link byte[]} 车台软件升级信息流
+     */
+    public static byte[] buildTerminalSoftwareUpgradeInfo(byte upgradeType,
+                                                          String ftpPath,
+                                                          List<TerminalUpgradeFile> files) {
+        byte[] ftpPathBuf = ftpPath.getBytes(StandardCharsets.UTF_8);
+        int ftpPathBufLen = ftpPathBuf.length;
+        int fileNum = files.size();
+        // 缓冲区容量
+        int capacity = 3 + ftpPathBufLen;
+        // 构建车台升级信息
+        ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加升级类型，1个字节
+        dataBuffer.put(upgradeType);
         // 添加ftp更新路径长度，1个字节
         dataBuffer.put((byte) ftpPathBufLen);
         // 添加ftp更新路径，UTF-8编码
@@ -722,8 +843,22 @@ public class SendPacketBuilder {
             // 添加文件大小，4个字节
             dataBuffer.put(BytesConverterByLittleEndian.getBytes(updateFile.getSize()));
             // 添加文件CRC32，4个字节
-            dataBuffer.put(BytesUtil.hexStringToBytes(updateFile.getCrc32()));
+            dataBuffer.put(ArraysUtil.reverse(BytesUtil.hexStringToBytes(updateFile.getCrc32())));
         }
+        return dataBuffer.array();
+    }
+
+    /**
+     * 构建车台功能启用配置下发业务数据体
+     *
+     * @param func {@link int} 启用功能
+     * @return {@link ByteBuffer} 数据体
+     */
+    public static ByteBuffer buildDataBufForTerminalFunctionEnable(int func) {
+        // 构建协议数据体
+        ByteBuffer dataBuffer = ByteBuffer.allocate(4);
+        // 添加启用功能，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(func));
         return dataBuffer;
     }
 
@@ -831,27 +966,37 @@ public class SendPacketBuilder {
      * 构建远程车辆进出请求业务数据体
      *
      * @param remoteId    {@link int} 远程控制ID
+     * @param readerId    {@link int} 可支持（道闸）转发的读卡器ID
      * @param controlType {@link byte} 操作类型<br>
+     *                    0 未知<br>
      *                    1 入库<br>
      *                    2 出库<br>
      *                    3 入加油站<br>
      *                    4 出加油站<br>
+     *                    5 进入应急<br>
+     *                    6 取消应急<br>
+     *                    8 待进油区<br>
+     *                    9 进油区<br>
+     *                    10 出油区<br>
      * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
      * @param userName    {@link String} 操作员姓名，UTF-8编码
      * @return {@link ByteBuffer} 数据体
      */
     public static ByteBuffer buildDataBufForCarInOut(int remoteId,
+                                                     int readerId,
                                                      byte controlType,
                                                      int stationId,
                                                      String userName) {
         byte[] userNameBuf = userName.getBytes(StandardCharsets.UTF_8);
         int userNameBufLen = userNameBuf.length;
         // 缓冲区容量
-        int capacity = 10 + userNameBufLen;
+        int capacity = 14 + userNameBufLen;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
-        // 远程控制ID，4个字节
+        // 添加远程控制ID，4个字节
         dataBuffer.put(BytesConverterByLittleEndian.getBytes(remoteId));
+        // 添加读卡器ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(readerId));
         // 添加操作类型，1个字节
         dataBuffer.put(controlType);
         // 添加站点ID，4个字节
@@ -866,31 +1011,37 @@ public class SendPacketBuilder {
     /**
      * 构建远程车辆状态强制变更业务数据体
      *
-     * @param remoteId  {@link int} 远程控制ID
-     * @param carStatus {@link byte} 车辆状态<br>
-     *                  1 在途<br>
-     *                  2 返程<br>
-     *                  3 在油库<br>
-     *                  4 在加油站<br>
-     *                  5 应急
-     * @param stationId {@link int} 站点ID（加油站ID、油库ID）
-     * @param userName  {@link String} 操作员姓名，UTF-8编码
+     * @param remoteId    {@link int} 远程控制ID
+     * @param carStatus   {@link byte} 车辆状态<br>
+     *                    1 在油库<br>
+     *                    2 在途<br>
+     *                    3 在加油站<br>
+     *                    4 返程<br>
+     *                    5 应急<br>
+     *                    6 待进油区<br>
+     *                    7 在油区<br>
+     * @param stationType {@link Integer} 站点类型（1：在油库 | 2：在加油站）
+     * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
+     * @param userName    {@link String} 操作员姓名，UTF-8编码
      * @return {@link ByteBuffer} 数据体
      */
     public static ByteBuffer buildDataBufForCarStatusAlter(int remoteId,
                                                            byte carStatus,
+                                                           byte stationType,
                                                            int stationId,
                                                            String userName) {
         byte[] userNameBuf = userName.getBytes(StandardCharsets.UTF_8);
         int userNameBufLen = userNameBuf.length;
         // 缓冲区容量
-        int capacity = 10 + userNameBufLen;
+        int capacity = 11 + userNameBufLen;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
         // 远程控制ID，4个字节
         dataBuffer.put(BytesConverterByLittleEndian.getBytes(remoteId));
         // 添加车辆状态，1个字节
         dataBuffer.put(carStatus);
+        // 添加站点类型，1个字节
+        dataBuffer.put(stationType);
         // 添加站点ID，4个字节
         dataBuffer.put(BytesConverterByLittleEndian.getBytes(stationId));
         // 添加姓名长度，1个字节
@@ -931,35 +1082,6 @@ public class SendPacketBuilder {
         dataBuffer.put(userNameBuf);
         return dataBuffer;
     }
-
-    /**
-     * 构建道闸开启业务数据体
-     *
-     * @param remoteId {@link int} 远程操作ID
-     * @param readerId {@link int} 油库读卡器设备ID
-     * @param depotId  {@link int} 油库ID
-     * @param sign     {@link byte} 进出闸标志（1 进闸，2 出闸）
-     * @return {@link ByteBuffer} 数据体
-     */
-    public static ByteBuffer buildDataBufForBarrierOpen(int remoteId,
-                                                        int readerId,
-                                                        int depotId,
-                                                        byte sign) {
-        // 缓冲区容量
-        int capacity = 13;
-        // 构建协议数据体
-        ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
-        // 添加远程操作ID，4个字节
-        dataBuffer.put(BytesConverterByLittleEndian.getBytes(remoteId));
-        // 添加油库读卡器设备ID，4个字节
-        dataBuffer.put(BytesConverterByLittleEndian.getBytes(readerId));
-        // 添加油库ID，4个字节
-        dataBuffer.put(BytesConverterByLittleEndian.getBytes(depotId));
-        // 添加进出闸标志，1个字节
-        dataBuffer.put(sign);
-        return dataBuffer;
-    }
-
 
     /**
      * 构建发送数据包

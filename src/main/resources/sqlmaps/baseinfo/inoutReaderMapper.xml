@@ -33,9 +33,9 @@
 			(#{oilDepotId}, #{devId}, ifnull(#{type}, 0), ifnull(#{barrier}, 0))
 	</insert>
 	<insert id="addReaderList" parameterType="java.util.List">
-		insert into tbl_oildepot_device(oildepot_id,device_id,reader_type) values
+		insert into tbl_oildepot_device(oildepot_id,device_id,reader_type,is_barrier_gate_type) values
 		<foreach collection="list" item="item" index="index" separator="," >
-			(#{item.oilDepotId},#{item.devId},#{item.type})
+			(#{item.oilDepotId},#{item.devId},#{item.type},#{item.barrier})
 		</foreach>
 	</insert>
 	
@@ -87,5 +87,14 @@
 			AND d.type = 3
 			AND d.device_id NOT IN ( SELECT od.device_id FROM tbl_oildepot_device od )
 	</select>
-	
+
+	<select id="findBarrierReaderIdByDepotId" resultType="java.lang.Integer">
+        SELECT
+            device_id
+        FROM
+            tbl_oildepot_device
+        WHERE
+            oildepot_id = #{oilDepotId}
+            AND ( is_barrier_gate_type = 3 OR is_barrier_gate_type = #{barrierType} )
+    </select>
 </mapper>

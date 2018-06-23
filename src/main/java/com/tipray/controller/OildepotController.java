@@ -173,6 +173,12 @@ public class OildepotController extends BaseAction {
         return oilDepotService.findOilDepotsForPage(oilDepot, page);
     }
 
+    @RequestMapping(value = "getAllOilDepotsAndGasStations.do")
+    @ResponseBody
+    public Map<String, Object> getIdAndNameOfAllOilDepotsAndGasStations() {
+        return oilDepotService.getIdAndNameOfAllOilDepotsAndGasStations();
+    }
+
     @RequestMapping(value = "getIdAndNameOfAllOilDepotsAndGasStations.do")
     @ResponseBody
     public Map<String, Object> getIdAndNameOfAllOilDepotsAndGasStations(Long depotVer, Long stationVer) {

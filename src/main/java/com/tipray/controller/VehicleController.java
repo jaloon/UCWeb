@@ -4,6 +4,8 @@ import com.tipray.bean.*;
 import com.tipray.bean.baseinfo.*;
 import com.tipray.bean.log.InfoManageLog;
 import com.tipray.bean.track.ReTrack;
+import com.tipray.bean.upgrade.UpgradeCancelVehicle;
+import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.constant.LogTypeConst;
 import com.tipray.constant.reply.FindTracksByCarNumberErrorEnum;
 import com.tipray.constant.reply.PermissionErrorEnum;
@@ -256,22 +258,22 @@ public class VehicleController extends BaseAction {
     }
 
     /**
-     * 根据车辆ID获取待绑定锁设备ID列表
+     * 根据车牌号获取待绑定锁设备ID列表
      *
-     * @param vehicleId 车辆ID
+     * @param carNumber 车牌号
      * @return
      */
     @RequestMapping(value = "getBindingLocks.do")
     @ResponseBody
-    public List<Integer> getBindingLocks(Long vehicleId) {
-        logger.info("get binding locks, vehicleId={}", vehicleId);
-        return vehicleService.findBindingLockDeviceIds(vehicleId);
+    public List<Integer> getBindingLocks(String carNumber) {
+        logger.info("get binding locks, carNumber={}", carNumber);
+        return vehicleService.findBindingLockDeviceIds(carNumber);
     }
 
     /**
      * 远程操作转发控制
      *
-     * @param mode      远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5：远程状态变更）
+     * @param mode      远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5 进油区 | 6 出油区 | 7：状态强制变更 ）
      * @param carNumber 车牌号
      * @param modelMap
      * @return
@@ -282,15 +284,15 @@ public class VehicleController extends BaseAction {
         modelMap.put("mode", mode);
         VehicleStatus carStatus = vehicleService.getCarStatus(carNumber);
         if (carStatus.getStatus() == null) {
-            carStatus.setOnline(0);
+            // carStatus.setOnline(0);
             carStatus.setStatus(0);
             carStatus.setStatusName("未知");
         }
         modelMap.put("carStatus", carStatus);
-        if (mode < 3) {
+        if (mode == 1 || mode == 2 || mode == 8 || mode == 9 || mode == 10) {
             List<Map<String, Object>> depots = oilDepotService.getIdAndNameOfAllOilDepots();
             modelMap.put("depots", depots);
-        } else if (mode < 5) {
+        } else if (mode == 3 || mode == 4) {
             List<Map<String, Object>> stations = gasStationService.getIdAndNameOfAllGasStations();
             modelMap.put("stations", stations);
         }
@@ -349,12 +351,13 @@ public class VehicleController extends BaseAction {
 
     /**
      * 根据车牌号获取锁及其状态信息
+     *
      * @param carNumber 车牌号
      * @return
      */
     @RequestMapping(value = "findlocksByCarNo.do")
     @ResponseBody
-    public List<Map<String,Object>> findlocksByCarNo(String carNumber){
+    public List<Map<String, Object>> findlocksByCarNo(String carNumber) {
         logger.info("findlocksByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
         if (StringUtil.isEmpty(carNumber)) {
             return null;
@@ -364,28 +367,30 @@ public class VehicleController extends BaseAction {
 
     /**
      * 获取在线车辆信息
+     *
      * @return
      */
     @RequestMapping(value = "findOnlineCars.do")
     @ResponseBody
-    public List<Map<String, Object>> findOnlineCarsForApp(){
+    public List<Map<String, Object>> findOnlineCarsForApp() {
         return vehicleService.findOnlineCarsForApp();
     }
 
     /**
      * 获取所有车辆信息
+     *
      * @return
      */
     @RequestMapping(value = "findAllCars.do")
     @ResponseBody
-    public List<Map<String, Object>> findAllCarsForApp(){
+    public List<Map<String, Object>> findAllCarsForApp() {
         return vehicleService.findAllCarsForApp();
     }
 
     /**
      * 网页车辆选择控件数据获取接口
      *
-     * @return
+     * @return 网页车辆选择控件数据
      */
     @RequestMapping(value = "selectDropdownData.do")
     @ResponseBody
@@ -409,7 +414,7 @@ public class VehicleController extends BaseAction {
         } else if (scope == 1) {
             // 只选取绑定了车台的车辆
             return vehicleService.selectCars(1, comId);
-        } else if (scope == 2){
+        } else if (scope == 2) {
             // 只选取在线车辆
             return vehicleService.selectCars(2, comId);
         }
@@ -420,8 +425,8 @@ public class VehicleController extends BaseAction {
      * 查询某【几】辆车某个时间点以后的轨迹信息
      *
      * @param carNumbers 车牌号，英文逗号“,”分隔
-     * @param beginTime  轨迹开始时间
-     * @return
+     * @param beginTime 轨迹开始时间
+     * @return 轨迹信息
      */
     @RequestMapping(value = "findTracksByCarNumbers.do")
     @ResponseBody
@@ -455,13 +460,75 @@ public class VehicleController extends BaseAction {
     }
 
     /**
+     * 查询某辆车某个时间点以后的轨迹信息
+     *
+     * @param carNumber 车牌号，英文逗号“,”分隔
+     * @param beginTime 轨迹开始时间
+     * @return 轨迹信息
+     */
+    @RequestMapping(value = "findTracksByCarNumber.do")
+    @ResponseBody
+    public ResponseMsg findTracksByCarNumber(String carNumber, String beginTime) {
+        logger.info("findTracksByCarNumber: 某辆车某个时间点以后的轨迹信息, carNumber={}, beginTime={}", carNumber, beginTime);
+        if (StringUtil.isEmpty(carNumber)) {
+            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
+            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
+        }
+        if (StringUtil.isEmpty(beginTime)) {
+            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.BEGIN_TIME_NULL);
+            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.BEGIN_TIME_NULL);
+        }
+        long beginMillis;
+        try {
+            Date beginDate = new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(beginTime);
+            beginMillis = beginDate.getTime();
+            // long timeDiff = System.currentTimeMillis() - beginMillis;
+            // if (timeDiff > DateUtil.DAY_DIFF) {
+            //     logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TIME_OUT_OF_SCOPE);
+            //     return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TIME_OUT_OF_SCOPE);
+            // }
+        } catch (ParseException e) {
+            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TIME_FORMAT_INVALID);
+            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TIME_FORMAT_INVALID);
+        }
+        List<Map<String, Object>> list = vehicleService.findTracksByCarNumber(carNumber, beginMillis);
+        if (EmptyObjectUtil.isEmptyList(list)) {
+            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TRACK_NULL);
+            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TRACK_NULL);
+        }
+        return ResponseMsgUtil.success(list);
+    }
+
+    /**
      * 获取已绑定车台的车辆的树形结构数据
      *
-     * @return
+     * @return 辆的树形结构数据
      */
     @RequestMapping(value = "findBindedVehicleTree.do")
     @ResponseBody
-    public List<Map<String, Object>> findBindedVehicleTree() {
+    public List<VehicleTree> findBindedVehicleTree() {
         return vehicleService.findBindedVehicleTree();
+    }
+
+    /**
+     * 获取车台已启用的功能
+     *
+     * @return 车台已启用的功能
+     */
+    @RequestMapping(value = "getFuncEnable.do")
+    @ResponseBody
+    public Integer getFuncEnable() {
+        return vehicleService.getFuncEnable();
+    }
+
+    /**
+     * 查询未完成升级的车辆信息
+     *
+     * @return 未完成升级的车辆信息
+     */
+    @RequestMapping(value = "findUnfinishUpgradeVehicles.do")
+    @ResponseBody
+    public List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles() {
+        return vehicleService.findUnfinishUpgradeVehicles();
     }
 }

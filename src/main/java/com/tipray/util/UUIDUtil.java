@@ -1,10 +1,9 @@
 package com.tipray.util;
 
+import javax.servlet.http.HttpSession;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpSession;
 
 /**
  * UUID工具类

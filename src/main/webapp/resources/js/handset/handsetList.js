@@ -3,14 +3,13 @@ var refreshPage;
 $(function() {
     dispatch = function(mode, id) {
         var title = "添加手持机";
-        var h = "357px";
+        var h = "343px";
         if ("edit" == mode) {
             title = "修改手持机信息";
-            // h = "395px";
         }
         if ("view" == mode) {
             title = "查看手持机信息";
-            h = "306px";
+            h = "290px";
         }
         layer.open({
             type: 2,

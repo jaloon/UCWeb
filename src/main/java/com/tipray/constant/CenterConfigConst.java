@@ -1,8 +1,8 @@
 package com.tipray.constant;
 
-import java.net.InetAddress;
-
 import com.tipray.core.CenterConfig;
+
+import java.net.InetAddress;
 
 /**
  * 用户中心配置常量
@@ -82,6 +82,8 @@ public class CenterConfigConst extends CenterConfig {
 	public static final String IMAGE_FILE_PATH = CenterConfig.getImageFilePath();
 	/** Excel文件存放路径 */
 	public static final String EXCEL_FILE_PATH = CenterConfig.getExcelFilePath();
+	/** 车台升级文件存放路径 */
+	public static final String UPGRADE_FILE_PATH = CenterConfig.getUpgradeFilePath();
 
 	private CenterConfigConst() {}
 }

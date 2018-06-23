@@ -110,14 +110,14 @@
 	                var tableData = "<table width='100%'>";
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var handset = handsets[i];
-	                    tableData += "<tr onclick=\"dispatch('edit'," + handset.id + ")\">" +
+	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + handset.id + ")\">" +
 	                        "<td class=\"handset-id\">" + handset.deviceId + "</td>";
                         if (handset.gasStation.name == undefined) {
                         	tableData += "<td class=\"handset-gasstation\"></td>";
                         } else {
                         	tableData += "<td class=\"handset-gasstation\">" + handset.gasStation.name + "</td>";
                         }
-                        tableData += "<td class='list-content' class=\"handset-director\">" + handset.director + "</td>" +
+                        tableData += "<td class=\"handset-director\">" + handset.director + "</td>" +
 	                        "<td class=\"handset-phone\">" + handset.phone + "</td>" +
 	                        "<td class=\"handset-identity\">" + handset.identityCard + "</td>" +
 	                        "<td class=\"handset-remark\">" + handset.remark + "</td>" +

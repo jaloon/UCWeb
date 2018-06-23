@@ -92,9 +92,6 @@
 	        // 阻止事件冒泡到DOM树上
 	        event.stopPropagation();
 	    }
-	    function findCardByReader() {
-            
-        }
     </pop:Permission>
 	    function showList(cardType, pageId) {
 	        var rows = $("#page_size").val();
@@ -179,7 +176,7 @@
             </select>
             <input type="button" class="search-btn button" id="search_btn" value="查询">
             <pop:Permission ename="editCard">
-            <input type="button" class="button" id="reader" value="批量添加" onclick="findCardByReader()">
+            <input type="button" class="button" id="reader" value="批量添加">
             <script>
                 $("#reader").click(function () {
                     layer.open({

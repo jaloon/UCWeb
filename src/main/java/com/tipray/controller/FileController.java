@@ -161,12 +161,12 @@ public class FileController extends BaseAction {
 	 * @param filename
 	 *            下载文件名
 	 */
-	// 此处必须写成value = "download/{filename:.+}"。
-	// 若写为value = "download/{filename}"，则接收的参数filename若包含特殊字符会从特殊字符出截断
+	// 此处必须写成value = "downloadUpgradeFile/{filename:.+}"。
+	// 若写为value = "downloadUpgradeFile/{filename}"，则接收的参数filename若包含特殊字符会从特殊字符出截断
 	@RequestMapping(value = "download/{filename:.+}", method = { RequestMethod.GET, RequestMethod.POST })
 	@ResponseBody
 	public ResponseEntity<byte[]> download(@PathVariable(value = "filename") String filename) {
-	    logger.info("download file, filename={}", filename);
+	    logger.info("downloadUpgradeFile file, filename={}", filename);
 		try {
 			if (StringUtil.isEmpty(filename)) {
 			    logger.warn("file name is null!");

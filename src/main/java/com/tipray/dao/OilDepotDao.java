@@ -1,5 +1,6 @@
 package com.tipray.dao;
 
+import com.tipray.bean.Station;
 import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
@@ -93,6 +94,13 @@ public interface OilDepotDao extends BaseDao<OilDepot> {
 	 * @return
 	 */
     List<Map<String, Object>> findIdAndNameOfAllOilDepots();
+
+	/**
+	 * 获取所有油库信息
+	 *
+	 * @return
+	 */
+    List<Station> findStationsForApp();
 
     /**
      * 获取油库用于转发道闸通知的读卡器个数

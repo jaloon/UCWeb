@@ -102,14 +102,18 @@ $(function() {
                         "<td class=\"remote-car\">" + remote.carNumber + "</td>" +
                         "<td class=\"remote-time\">" + remote.createDate + "</td>";
                     if (coordFlag) {
-                        tableData += "<td class=\"remote-coordinate\">数据库记录异常</td>";
+                        if (remote.status < 2) {
+                            tableData += "<td class=\"remote-coordinate\">未知</td>";
+                        } else {
+                            tableData += "<td class=\"remote-coordinate\">数据库记录异常</td>";
+                        }
                     } else {
                         tableData += "<td class=\"remote-coordinate\"><a href=\"javascript:showBMap(" + remote.id + ")\">("
                             + remote.longitude + ", " + remote.latitude + ")</a></td>";
                     }
                     tableData += "<td class=\"remote-type\">" + remote.typeName + "</td>" +
                         "<td class=\"remote-user\">" + remote.user.name + "(" + remote.user.account + ")" + "</td>" +
-                        "<td class=\"remote-result\">" + remote.status + "</td>" +
+                        "<td class=\"remote-result\">" + remote.statusName + "</td>" +
                         "<td class=\"remote-app\">" + (remote.isApp > 0 ? "是" : "否") + "</td>" +
                         "</tr>";
                 }

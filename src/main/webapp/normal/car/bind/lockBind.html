@@ -76,6 +76,12 @@
             top: 50%;
             margin-top: -15px;
             right: 124px;
+            cursor: pointer;
+        }
+
+        .hidden-cancel:hover {
+            color: #5ca1f7;
+            border-color: #5ca1f7;
         }
 
         .hidden-confirm {
@@ -89,6 +95,10 @@
             top: 50%;
             margin-top: -15px;
             right: 14px;
+        }
+
+        .hidden-confirm:hover {
+            background: #5ca1f7;
         }
 
         .dropdown-main ul {
@@ -211,9 +221,8 @@
         }
         lockLayer = layer.open({
             type: 1,
-            title: [title + '待重置锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            // area: ['500px', '501px'],
-            area: ['500px', '301px'],
+            title: [title + '待变更的锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            area: ['500px', '289px'],
             content: $('.lock'),
             end: clearLockDiv()
         });

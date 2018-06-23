@@ -3,10 +3,10 @@ var refreshPage;
 $(function() {
     dispatch = function(mode, id) {
         var title = "添加运输公司";
-        var h = "358px";
+        var h = "344px";
         if ("edit" == mode) {
             title = "修改运输公司信息";
-            h = "395px";
+            h = "380px";
         }
         if ("view" == mode) {
             title = "查看运输公司信息";

@@ -5,58 +5,60 @@
 	<resultMap id="fullResultMap" type="com.tipray.bean.record.RemoteRecord" >
         <id column="id" property="id" />
         <result column="vehicle_number" property="carNumber" />
-        <result column="car_longitude" property="longitude" />
-        <result column="car_latitude" property="latitude" />
-        <result column="speed" property="velocity" />
-        <result column="angle" property="angle" />
         <result column="user_id" property="user.id" />
         <result column="user_account" property="user.account" />
         <result column="user_name" property="user.name" />
         <result column="type" property="type" />
-        <result column="typeName" property="typeName" />
+        <result column="type_name" property="typeName" />
         <result column="remote_status" property="status" />
-        <result column="lock_status_info" property="lockStatusInfo" />
+        <result column="status_name" property="statusName" />
         <result column="happen_time" property="createDate" />
         <result column="station" property="station" />
 		<result column="is_app" property="isApp" />
+		<result column="track_id" property="trackId" />
     </resultMap>
 	<sql id="select_colums">
-		r.*,
+		r.id,
+		r.happen_time,
+		r.is_app,
+		r.is_barrier_gate,
 		v.vehicle_number vehicle_number,
-		fn_type2name('remoteType',r.type) typeName,
-		fn_type2name('remoteStatus',r.status) remote_status,
-		u.account user_account,
-		u.name user_name,
-		t.longitude car_longitude,
-		t.latitude car_latitude,
-		t.speed speed,
-		t.angle angle,
-		t.lock_status_info lock_status_info
+		r.type,
+		fn_type2name ( 'remoteType', r.type ) type_name,
+		r.`status` remote_status,
+		fn_type2name ( 'remoteStatus', r.`status` ) status_name,
+		IFNULL(u.account, IF(r.is_barrier_gate = 1,'道闸','未知')) user_account,
+		IFNULL(u.`name`, IF(r.is_barrier_gate = 1,'道闸','未知')) user_name,
+		s.vehicle_track_id track_id
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
-		from (tbl_remote_control r left join 
-				(tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id)
-			on r.vehicle_seal_status_id=c.id),tbl_user u,tbl_vehicle v
-		where c.vehicle_id = v.id and r.user_id = u.id
+		from
+            tbl_remote_control r
+            left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id
+            left join tbl_user u on r.user_id = u.id,
+            tbl_vehicle v
+        where r.vehicle_id = v.id
 	</select>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
-		from (tbl_remote_control r left join 
-				(tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id)
-			on r.vehicle_seal_status_id=c.id),tbl_user u,tbl_vehicle v
-		where c.vehicle_id = v.id and r.user_id = u.id and r.id=#{id}
+		from
+            tbl_remote_control r
+            left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id
+            left join tbl_user u on r.user_id = u.id,
+            tbl_vehicle v
+        where r.vehicle_id = v.id and r.id=#{id}
 	</select>
 
 	<select id="count" parameterType="com.tipray.bean.record.RemoteRecord" resultType="java.lang.Long">
 		select count(*) from 
-		tbl_remote_control r left join tbl_vehicle_seal_status c on r.vehicle_seal_status_id=c.id,
+		tbl_remote_control r left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id,
 		tbl_vehicle v
-		where c.vehicle_id = v.id
+		where r.vehicle_id = v.id
 		<if test="begin != null and begin != '' and end != null and end != ''">
 			and r.happen_time between #{begin} and #{end}
 		</if> 
@@ -71,10 +73,12 @@
 	<select id="findByPage" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
-		from (tbl_remote_control r left join 
-				(tbl_vehicle_seal_status c left join tbl_vehicle_track t on c.vehicle_track_id=t.id)
-			on r.vehicle_seal_status_id=c.id),tbl_user u,tbl_vehicle v
-		where c.vehicle_id = v.id and r.user_id = u.id
+		from
+			tbl_remote_control r
+            left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id
+            left join tbl_user u on r.user_id = u.id,
+			tbl_vehicle v
+		where r.vehicle_id = v.id
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
 			and r.happen_time between #{entity.begin} and #{entity.end} 
 		</if>
@@ -87,4 +91,5 @@
 		order by r.id asc  
 		limit #{page.startRow}, #{page.rows}
 	</select>
+
 </mapper>
