@@ -186,7 +186,7 @@
                 var cars = data.car;
                 var len = cars.length;
                 if (len == 0) {
-                    layer.alert('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+                    layer.msg('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
                         layer.close(index2);
                         parent.layer.close(index);
                     });

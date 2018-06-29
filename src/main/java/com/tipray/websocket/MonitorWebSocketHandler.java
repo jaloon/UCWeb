@@ -535,7 +535,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 }
                 break;
             case BIZ_CANCEL:
-                Long cancelSessionId = ((Integer) msgMap.get("sessionDecorator")).longValue();
+                Long cancelSessionId = ((Integer) msgMap.get("session")).longValue();
                 List<Long> ids = REALTIME_CARS.get(cancelSessionId);
                 REALTIME_CARS.remove(cancelSessionId);
                 if (!EmptyObjectUtil.isEmptyList(ids)) {

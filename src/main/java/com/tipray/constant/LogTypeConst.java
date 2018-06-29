@@ -94,6 +94,8 @@ public class LogTypeConst {
 	public static final int TYPE_TERMINAL_ENABLE_CONFIG = 0x00_00_14_00;
 	/** 车台软件升级 */
 	public static final int TYPE_TERMINAL_SOFTWARE_UPGRADE = 0x00_00_15_00;
+	/** 车台取消升级 */
+	public static final int TYPE_TERMINAL_CANCEL_UPGRADE = 0x00_00_16_00;
 
 	/** 监听待绑定锁列表 */
 	public static final int TYPE_LOCK_LISTEN = 0x00_00_21_00;

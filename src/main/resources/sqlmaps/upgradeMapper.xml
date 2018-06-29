@@ -42,10 +42,10 @@
     </delete>
 
     <delete id="batchDeleteUpgradeRecord" parameterType="java.lang.String">
-        DELETE FROM tbl_vehicle_device_version_upgrade WHERE id IN ( $(_parameter) )
+        DELETE FROM tbl_vehicle_device_version_upgrade WHERE id IN ( ${_parameter} ) AND is_has_upgrade != 2
     </delete>
 
-    <select id="findUnfinishUpgradeVehicles" parameterType="com.tipray.bean.upgrade.UpgradeCancelVehicle">
+    <select id="findUnfinishUpgradeVehicles" parameterType="java.lang.String" resultType="com.tipray.bean.upgrade.UpgradeCancelVehicle">
         SELECT
             tr.id,
             tv.vehicle_number carNumber,
@@ -63,6 +63,13 @@
             AND tr.upgrade_id = ti.id
             AND tr.device_id = tv.vehicle_device_id
             AND tr.device_id = td.device_id
+        <if test="_parameter != null and _parameter != ''">
+            AND tv.vehicle_number LIKE CONCAT('%',#{carNumber, jdbcType=VARCHAR},'%')
+        </if>
+    </select>
+
+    <select id="getUpgradeStatusById" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT is_has_upgrade FROM tbl_vehicle_device_version_upgrade WHERE id = #{upgradeRecordId}
     </select>
 
 </mapper>

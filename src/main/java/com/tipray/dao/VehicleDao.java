@@ -347,4 +347,11 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      */
     @MapResultAnno(keyType = Long.class, valType = String.class)
     Map<Long, String> findCarIdsByCarNumbers(String carNumbers);
+
+    /**
+     * 根据车辆ID查询车辆是否在线
+     * @param carId {@link Long} 车辆ID
+     * @return {@link Integer} 1 在线，0 离线
+     */
+    Integer getOnline(Long carId);
 }

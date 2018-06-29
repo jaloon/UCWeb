@@ -40,6 +40,7 @@ $(function() {
                 layer.close(index2);
                 $("#search_text").select();
             });
+            return;
         }
         showList(oildepotName, 1);
     });

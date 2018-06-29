@@ -243,11 +243,12 @@ $(function() {
         alarmNotify.faviconClear();
     }
     if ('WebSocket' in window) {
-        ws = new WebSocket("ws://" + wsUrl + "/alarm");
-    } else if ('MozWebSocket' in window) {
-        ws = new MozWebSocket("ws://" + wsUrl + "/alarm");
+        ws = new ReconnectingWebSocket("ws://" + wsUrl + "/alarm");
+    // } else if ('MozWebSocket' in window) {
+    //     ws = new MozWebSocket("ws://" + wsUrl + "/alarm");
     } else {
-        ws = new SockJS("http://" + wsUrl + "/sockjs/alarm");
+        // ws = new SockJS("http://" + wsUrl + "/sockjs/alarm");
+        layer.alert("您的浏览器不支持websocket协议，建议使用新版谷歌、火狐等浏览器，请勿使用IE10以下浏览器，360浏览器请使用极速模式，不要使用兼容模式！");
     }
     ws.onopen = function(event) {
         if (window.console) console.log("websocket connected");

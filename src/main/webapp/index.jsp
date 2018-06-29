@@ -15,6 +15,7 @@
     <link rel="stylesheet" type="text/css" href="resources/css/index.css"/>
     <link rel="stylesheet" type="text/css" href="resources/plugins/iziToast/iziToast.min.css"/>
     <script src="resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="resources/plugins/ReconnectingWebSocket/reconnecting-websocket.min.js"></script>
     <script src="resources/plugins/ConcurrentThread/Concurrent.Thread.min.js"></script>
     <script src="resources/plugins/iNotify/iNotify.js"></script>
     <script src="resources/plugins/iziToast/iziToast.min.js"></script>

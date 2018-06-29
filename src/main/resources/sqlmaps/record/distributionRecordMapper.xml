@@ -149,22 +149,30 @@
 			IF(ISNULL(o.short_name) || LENGTH(TRIM(o.short_name)) < 1, o.`name`, o.short_name) oildepot_name,
 			t.gasstation_id,
 			IF(ISNULL(g.short_name) || LENGTH(TRIM(g.short_name)) < 1, g.`name`, g.short_name) gasstation_name,
-			t.`status`,
+			t.`status` transport_status,
 			DATE_FORMAT( t.issue_time, '%Y-%m-%d %H:%I:%S' ) issue_time
 		]]>
 	</sql>
 	
 	<select id="findDistributionsByGasStationId" parameterType="java.lang.Long" resultType="java.util.LinkedHashMap">
 		SELECT
-			<include refid="select_distribution"></include> 
+			<include refid="select_distribution"></include>
+-- 			,IF(ISNULL(s.is_online) || s.is_online = 0, -1, tt.vehicle_status) vehicle_status
+-- 			,tt.is_lnglat_valid
+-- 			,tt.longitude
+-- 			,tt.latitude
 		FROM
-			tbl_transport t,
-			tbl_vehicle c,
-			tbl_oildepot o,
-			tbl_gasstation g 
+			tbl_transport t
+			,tbl_vehicle c
+			,tbl_oildepot o
+			,tbl_gasstation g
+-- 			,tbl_vehicle_newest_track tt
+-- 			,tbl_vehicle_realtime_status s
 		WHERE
-			t.vehicle_id = c.id 
-			AND t.oildepot_id = o.id 
+			t.vehicle_id = c.id
+-- 			AND tt.vehicle_id = c.id
+-- 			AND s.vehicle_id = c.id
+			AND t.oildepot_id = o.id
 			AND t.gasstation_id = g.id 
 			AND t.`status` = 1
 			AND t.gasstation_id = #{gasStationId}

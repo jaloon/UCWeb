@@ -471,30 +471,42 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<Map<String, Object>> findTracksByCarNumber(String carNumber, Long beginMillis) {
-        Long carId = vehicleDao.getIdByCarNo(carNumber);
-        Date lastTtrackTime = trackDao.getLastTrackTime(carId);
-        beginMillis = Long.max(beginMillis, lastTtrackTime.getTime() - DateUtil.MINUTE_DIFF * 10);
-        String beginTime = DateUtil.formatDate(new Date(beginMillis), DateUtil.FORMAT_DATETIME);
-        List<TrackInfo> trackInfoList = trackDao.findTracksByCarIdsAndBeginTime(carId.toString(), beginTime);
+    public Map<String, Object> findTracksByCarNumber(String carNumber, Long carId, Long beginMillis) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        Integer isOnline = vehicleDao.getOnline(carId);
+        isOnline = isOnline == null ? 0 : isOnline;
+        map.put("is_online", isOnline);
         List<Map<String, Object>> tracks = new ArrayList<>();
-        trackInfoList.parallelStream().forEach(trackInfo -> {
-            Map<String, Object> trackMap = new HashMap<>();
-            trackMap.put("vehicle_id", carId);
-            trackMap.put("vehicle_number", carNumber);
-            trackMap.put("track_id", trackInfo.getId());
-            trackMap.put("is_lnglat_valid", trackInfo.getCoorValid() ? 1 : 0);
-            trackMap.put("longitude", trackInfo.getLongitude());
-            trackMap.put("latitude", trackInfo.getLatitude());
-            trackMap.put("vehicle_status", trackInfo.getCarStatus());
-            trackMap.put("vehicle_alarm_status", trackInfo.getTerminalAlarm());
-            trackMap.put("angle", trackInfo.getAngle());
-            trackMap.put("speed", trackInfo.getSpeed());
-            trackMap.put("lock_status_info", BytesUtil.bytesToHex(trackInfo.getLockStatusInfo(), false));
-            trackMap.put("track_time", trackInfo.getTrackTime());
-            tracks.add(trackMap);
-        });
-        return tracks;
+        if (beginMillis == null) {
+            Map<String, Object> trackMap = trackDao.getLastTrackForApp(carNumber, carId);
+            if (!EmptyObjectUtil.isEmptyMap(trackMap)) {
+                tracks.add(trackMap);
+            }
+        } else {
+            Date lastTtrackTime = trackDao.getLastTrackTime(carId);
+            beginMillis = Long.max(beginMillis, lastTtrackTime.getTime() - DateUtil.MINUTE_DIFF * 10);
+            String beginTime = DateUtil.formatDate(new Date(beginMillis), DateUtil.FORMAT_DATETIME);
+            List<TrackInfo> trackInfoList = trackDao.findTracksByCarIdsAndBeginTime(carId.toString(), beginTime);
+
+            trackInfoList.parallelStream().forEach(trackInfo -> {
+                Map<String, Object> trackMap = new HashMap<>();
+                trackMap.put("vehicle_id", carId);
+                trackMap.put("vehicle_number", carNumber);
+                trackMap.put("track_id", trackInfo.getId());
+                trackMap.put("is_lnglat_valid", trackInfo.getCoorValid() ? 1 : 0);
+                trackMap.put("longitude", trackInfo.getLongitude());
+                trackMap.put("latitude", trackInfo.getLatitude());
+                trackMap.put("vehicle_status", trackInfo.getCarStatus());
+                trackMap.put("vehicle_alarm_status", trackInfo.getTerminalAlarm());
+                trackMap.put("angle", trackInfo.getAngle());
+                trackMap.put("speed", trackInfo.getSpeed());
+                trackMap.put("lock_status_info", BytesUtil.bytesToHex(trackInfo.getLockStatusInfo(), false));
+                trackMap.put("track_time", trackInfo.getTrackTime());
+                tracks.add(trackMap);
+            });
+        }
+        map.put("tracks", tracks);
+        return map;
     }
 
     @Override
@@ -565,7 +577,17 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles() {
-        return terminalUpgradeDao.findUnfinishUpgradeVehicles();
+    public List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles(String carNumber) {
+        return terminalUpgradeDao.findUnfinishUpgradeVehicles(carNumber);
+    }
+
+    @Override
+    public void deleteUpgradeRecord(String ids) {
+        terminalUpgradeDao.batchDeleteUpgradeRecord(ids);
+    }
+
+    @Override
+    public Integer getUpgradeStatusById(Long upgradeRecordId) {
+       return terminalUpgradeDao.getUpgradeStatusById(upgradeRecordId);
     }
 }

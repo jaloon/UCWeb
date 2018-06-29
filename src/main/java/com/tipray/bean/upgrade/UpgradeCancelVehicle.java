@@ -29,7 +29,7 @@ public class UpgradeCancelVehicle implements Serializable {
     /**
      * 当前版本
      */
-    private String verStr;
+    // private String verStr;
     /**
      * 待升级版本
      */
@@ -37,7 +37,7 @@ public class UpgradeCancelVehicle implements Serializable {
     /**
      * 待升级版本
      */
-    private String upVerStr;
+    // private String upVerStr;
     /**
      * 升级类型
      */
@@ -75,13 +75,13 @@ public class UpgradeCancelVehicle implements Serializable {
         this.ver = ver;
     }
 
-    public String getVerStr() {
-        return verStr;
-    }
-
-    public void setVerStr(String verStr) {
-        this.verStr = verStr;
-    }
+    // public String getVerStr() {
+    //     return verStr;
+    // }
+    //
+    // public void setVerStr(String verStr) {
+    //     this.verStr = verStr;
+    // }
 
     public Integer getUpVer() {
         return upVer;
@@ -91,13 +91,13 @@ public class UpgradeCancelVehicle implements Serializable {
         this.upVer = upVer;
     }
 
-    public String getUpVerStr() {
-        return upVerStr;
-    }
-
-    public void setUpVerStr(String upVerStr) {
-        this.upVerStr = upVerStr;
-    }
+    // public String getUpVerStr() {
+    //     return upVerStr;
+    // }
+    //
+    // public void setUpVerStr(String upVerStr) {
+    //     this.upVerStr = upVerStr;
+    // }
 
     public Integer getUpType() {
         return upType;

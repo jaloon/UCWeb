@@ -425,7 +425,7 @@ public class VehicleController extends BaseAction {
      * 查询某【几】辆车某个时间点以后的轨迹信息
      *
      * @param carNumbers 车牌号，英文逗号“,”分隔
-     * @param beginTime 轨迹开始时间
+     * @param beginTime  轨迹开始时间
      * @return 轨迹信息
      */
     @RequestMapping(value = "findTracksByCarNumbers.do")
@@ -474,29 +474,23 @@ public class VehicleController extends BaseAction {
             logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
             return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
         }
-        if (StringUtil.isEmpty(beginTime)) {
-            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.BEGIN_TIME_NULL);
-            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.BEGIN_TIME_NULL);
+
+        Long carId = vehicleService.getIdByCarNo(carNumber);
+        if (carId == null) {
+            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.VEHICLE_INVALID);
+            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.VEHICLE_INVALID);
         }
-        long beginMillis;
-        try {
-            Date beginDate = new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(beginTime);
-            beginMillis = beginDate.getTime();
-            // long timeDiff = System.currentTimeMillis() - beginMillis;
-            // if (timeDiff > DateUtil.DAY_DIFF) {
-            //     logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TIME_OUT_OF_SCOPE);
-            //     return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TIME_OUT_OF_SCOPE);
-            // }
-        } catch (ParseException e) {
-            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TIME_FORMAT_INVALID);
-            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TIME_FORMAT_INVALID);
+        Long beginMillis = null;
+        if (!StringUtil.isEmpty(beginTime)) {
+            try {
+                Date beginDate = new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(beginTime);
+                beginMillis = beginDate.getTime();
+            } catch (ParseException e) {
+                logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TIME_FORMAT_INVALID);
+                return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TIME_FORMAT_INVALID);
+            }
         }
-        List<Map<String, Object>> list = vehicleService.findTracksByCarNumber(carNumber, beginMillis);
-        if (EmptyObjectUtil.isEmptyList(list)) {
-            logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.TRACK_NULL);
-            return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.TRACK_NULL);
-        }
-        return ResponseMsgUtil.success(list);
+        return ResponseMsgUtil.success(vehicleService.findTracksByCarNumber(carNumber, carId, beginMillis));
     }
 
     /**
@@ -524,11 +518,12 @@ public class VehicleController extends BaseAction {
     /**
      * 查询未完成升级的车辆信息
      *
+     * @param carNumber 车牌号（为空时查询所有车辆）
      * @return 未完成升级的车辆信息
      */
     @RequestMapping(value = "findUnfinishUpgradeVehicles.do")
     @ResponseBody
-    public List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles() {
-        return vehicleService.findUnfinishUpgradeVehicles();
+    public List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles(String carNumber) {
+        return vehicleService.findUnfinishUpgradeVehicles(carNumber);
     }
 }

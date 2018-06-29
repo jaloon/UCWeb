@@ -149,9 +149,9 @@ $(function () {
 
     $("#type").change(function () {
         if ($("#type").val() == 2) {
-            $("#match").replaceWith("<input type='text' class='editInfo' value='否' readonly><input type='hidden' id='match' value='0'>");
+            $("#match").closest("td").html("<input type='text' class='editInfo' value='否' readonly><input type='hidden' id='match' value='0'>");
         } else {
-            $("#match").replaceWith("<select class='editInfo' id='match'><option value=1>是</option><option value=0>否</option></select>");
+            $("#match").closest("td").html("<select class='editInfo' id='match'><option value=1>是</option><option value=0>否</option></select>");
         }
     });
 

@@ -2,6 +2,7 @@ package com.tipray.controller;
 
 import com.tipray.core.base.BaseAction;
 import com.tipray.util.JSONUtil;
+import com.tipray.util.NetUtil;
 import com.tipray.util.StringUtil;
 import com.tipray.websocket.AlarmWebSocketHandler;
 import com.tipray.websocket.MonitorWebSocketHandler;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -98,4 +100,13 @@ public class ExternalInterface extends BaseAction {
         }
     }
 
+    @RequestMapping(value = "mac")
+    @ResponseBody
+    public String mac(HttpServletRequest request) {
+        String ip = NetUtil.getRequestIpAddr(request);
+        System.out.println(ip);
+        String mac = NetUtil.getMACAddress(ip);
+        System.out.println(mac);
+        return mac;
+    }
 }

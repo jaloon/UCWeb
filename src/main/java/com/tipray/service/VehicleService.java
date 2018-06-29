@@ -370,10 +370,11 @@ public interface VehicleService {
      * 根据车牌号获取轨迹信息
      *
      * @param carNumber   车牌号
+     * @param carId       车辆ID
      * @param beginMillis 轨迹开始时间毫秒值
      * @return
      */
-    List<Map<String, Object>> findTracksByCarNumber(String carNumber, Long beginMillis);
+    Map<String, Object> findTracksByCarNumber(String carNumber, Long carId, Long beginMillis);
 
     /**
      * 获取已绑定车台的车辆的树形结构数据
@@ -414,15 +415,32 @@ public interface VehicleService {
 
     /**
      * 车台升级
+     *
      * @param terminalUpgradeInfo 车台升级信息
-     * @param terminalIdList 车台ID集合
+     * @param terminalIdList      车台ID集合
      */
     void terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList);
 
     /**
      * 查询未完成升级的车辆信息
      *
+     * @param carNumber 车牌号
      * @return 未完成升级的车辆信息
      */
-    List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles();
+    List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles(String carNumber);
+
+    /**
+     * 批量删除车台升级记录
+     *
+     * @param ids 车台升级记录ID，英文逗号“,”分隔
+     */
+    void deleteUpgradeRecord(String ids);
+
+    /**
+     * 根据升级记录ID获取升级状态
+     *
+     * @param upgradeRecordId 升级记录ID
+     * @return 升级状态
+     */
+    Integer getUpgradeStatusById(Long upgradeRecordId);
 }

@@ -3,24 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <title>车载终端配置</title>
-    <link rel="stylesheet" href="../../../resources/css/base.css ">
-    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
+    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
+    <style>
+        .search-zone{
+            width: 580px;
+            height: 36px;
+            margin: 10px;
+            padding: 0px 10px;
+        }
+
+        #carno{
+            height: 26px;
+            width: 200px;
+            line-height: 26px;
+            border: 1px solid #d7dbe2;
+            border-radius: 3px;
+            padding: 0 6px 0 6px;
+            color: #57647c;
+        }
+
+        #delete{
+            float: right;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .table-cont {
+            width: 600px;
+            height: 480px;
+            overflow: auto;
+            margin: 10px;
+            box-shadow: 0 0 1px 3px #e6e7e9;
+        }
+
+        .table-head {
+            width: 100%;
+            height: 36px;
+            color: #445065;
+            font-weight: 500;
+            background: #e6e7e9;
+        }
+
+        .table-body {
+            width: 100%;
+            color: #5a6779;
+            font-size: 13px;
+            overflow: auto;
+        }
+
+        tr {
+            height: 36px;
+        }
+
+        .table-cont th {
+            text-align: center;
+            vertical-align: middle;
+            height: 35px;
+        }
+
+        .table-cont td {
+            text-align: center;
+            vertical-align: middle;
+            height: 30px;
+            border-bottom: 1px solid #e6e7e9;
+        }
+
+        .car-number {
+            width: 120px;
+        }
+
+        .current-ver {
+            width: 100px;
+        }
+
+        .up-ver {
+            width: 100px;
+        }
+
+        .up-type {
+            width: 200px;
+        }
+
+        .button {
+            width: 80px;
+            height: 28px;
+            color: #ffffff;
+            border: 0;
+            border-radius: 3px;
+            cursor: pointer;
+            background: #478de4;
+        }
+
+        .button:hover {
+            background: #5ca1f7;
+        }
+    </style>
 </head>
 <body>
-<table>
-    <thead>
-    <tr>
-        <th>车牌号</th>
-        <th>当前版本</th>
-        <th>待升级版本</th>
-        <th>升级类型</th>
-        <th>操作</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div class="container">
+    <div class="search-zone">
+        <input type="text" id="carno" placeholder="请输入车牌号查询">
+        <input type="button" class="button" id="delete" value="删除">
+    </div>
+    <div class="table-cont" id="cancel_box">
+        <table width="100%">
+            <thead class="table-head">
+            <tr>
+                <th class="check-column">
+                    <input type="checkbox" id="check_all">
+                </th>
+                <th class="car-number">车牌号</th>
+                <th class="current-ver">当前版本</th>
+                <th class="up-ver">待升级版本</th>
+                <th class="up-type">升级类型</th>
+            </tr>
+            </thead>
+            <tbody class="table-body"></tbody>
+        </table>
+    </div>
+</div>
 </body>
 </html>
 <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+<script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
 <script src="../../../resources/plugins/layer/layer.js"></script>
 <script src="../../../resources/js/base.js"></script>
+<script>
+    function parseUpgradeType(type) {
+        switch (type) {
+            case 1:
+                return "App";
+            case 2:
+                return "内核+文件系统";
+            case 3:
+                return "内核+文件系统+App";
+            default:
+                return "未知";
+        }
+    }
+
+    function stringifyVer(ver) {
+        if (ver == 0) {
+            return "";
+        }
+        return ((ver >> 24) & 0xff) + '.'
+            + ((ver >> 16) & 0xff) + '.'
+            + (ver & 0xffff);
+    }
+
+    function findUnfinishUpgradeVehicles(carNumber, layerIndex) {
+        $.getJSON("../../../manage/car/findUnfinishUpgradeVehicles.do",
+            "carNumber=" + carNumber,
+            function (data, textStatus, jqXHR) {
+                if (isNull(data) || data.length == 0) {
+                    if (layerIndex != undefined && layerIndex != null) {
+                        layer.msg('当前无未完成升级车辆！', {icon: 0, time: 500}, function (index2) {
+                            layer.close(index2);
+                            parent.layer.close(layerIndex);
+                        });
+                    } else {
+                        $(".table-body").html("");
+                    }
+                    return;
+                }
+                var trHtml = "";
+                for (var i = 0; i < data.length; i++) {
+                    var file = data[i];
+                    trHtml += "<tr id='tr_" + file.id + "'>"
+                        + "<td class='check-column'><input type='checkbox' class='check-el' value='" + file.id + "'></td>"
+                        + "<td class='car-number'>" + file.carNumber + "</td>"
+                        + "<td class='current-ver'>" + stringifyVer(file.ver) + "</td>"
+                        + "<td class='up-ver'>" + stringifyVer(file.upVer) + "</td>"
+                        + "<td class='up-type'>" + parseUpgradeType(file.upType) + "</td>"
+                        + "</tr>";
+                }
+                $(".table-body").html(trHtml);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
+    }
+
+    function cancelUpgrade(ids, idArr) {
+        var loadIndex = layer.load();
+        $.post("../../../manage/remote/terminal_cancel_upgrade_request",
+            "upgrade_record_ids=" + ids + "&token=" + generateUUID(),
+            function (data) {
+                layer.close(loadIndex);
+                if (data.id > 0) {
+                    layer.msg(data.msg, {
+                        icon: 2,
+                        time: 500
+                    });
+                } else {
+                    for (var i = 0; i < idArr.length; i++) {
+                        var id = idArr[i];
+                        $("#tr_" + id).remove();
+                    }
+                    $("#check_all").attr("checked", false);
+                    layer.msg("取消升级成功！", {icon: 1});
+                }
+            },
+            "json"
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
+    }
+
+
+    $(function () {
+
+        var tableCont = document.querySelector('#cancel_box');
+
+        /**
+         * scroll handle
+         * @param {event} e scroll event
+         */
+        function scrollHandle(e) {
+            // console.log(this)
+            var scrollTop = this.scrollTop;
+            this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
+        }
+
+        tableCont.addEventListener('scroll', scrollHandle);
+
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        findUnfinishUpgradeVehicles("", index);
+
+        $("#check_all").click(function () {
+            var checkFlag = $("#check_all").attr("checked") == "checked";
+            if (checkFlag) {
+                $(".check-el").attr("checked", true);
+            } else {
+                $(".check-el").attr("checked", false);
+            }
+
+        });
+
+        $(".table-body").on("click", ".check-el", function () {
+            var checkFlag = $(this).attr("checked") == "checked";
+            if (checkFlag) {
+                var elCount = $(".check-el").length;
+                var checkCount = $(".check-el:checked").length;
+                if (elCount == checkCount) {
+                    $("#check_all").attr("checked", true);
+                }
+            } else {
+                $("#check_all").attr("checked", false);
+            }
+        });
+
+        $("#delete").click(function () {
+            var ids = "", idArr = [];
+            $(".check-el:checked").each(function() {
+                var id = $(this).val();;
+                ids += "," + id;
+                idArr.push(id);
+            });
+            if (ids.length == 0) {
+                layer.alert("请选择要取消升级的车辆！", {icon: 0});
+                return;
+            }
+            ids = ids.slice(1);
+            cancelUpgrade(ids, idArr);
+        });
+
+        $("#carno").keyup(function () {
+            findUnfinishUpgradeVehicles($("#carno").val());
+        });
+    });
+</script>

@@ -38,11 +38,11 @@ public class UdpProtocol {
     /**
      * 中心rc4密钥
      */
-    private byte[] RC4_KEY;
+    private static byte[] RC4_KEY;
     /**
      * 中心rc4秘钥版本
      */
-    private byte RC4_VER;
+    private static byte RC4_VER;
     /**
      * 随机数
      */
@@ -130,7 +130,7 @@ public class UdpProtocol {
     /**
      * 初始化RC4秘钥和版本号
      */
-    private void initRc4() {
+    private static synchronized void initRc4() {
         try {
             String url = new StringBuffer(CenterConfigConst.PLTONE_URL).append("/api/getCenterRc4.do").toString();
             String param = new StringBuffer("id=").append(CenterConfigConst.CENTER_ID).append("&ver=")

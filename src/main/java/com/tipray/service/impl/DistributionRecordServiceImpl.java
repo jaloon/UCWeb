@@ -1,20 +1,19 @@
 package com.tipray.service.impl;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.record.DistributionRecord;
-import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.DistributionRecordDao;
+import com.tipray.dao.TrackDao;
+import com.tipray.dao.VehicleDao;
 import com.tipray.service.DistributionRecordService;
 import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 配送信息记录业务层
@@ -28,6 +27,10 @@ import com.tipray.util.StringUtil;
 public class DistributionRecordServiceImpl implements DistributionRecordService {
 	@Resource
 	private DistributionRecordDao distributionRecordDao;
+	@Resource
+    private VehicleDao vehicleDao;
+	@Resource
+    private TrackDao trackDao;
 
 	@Override
 	public DistributionRecord getRecordById(Long id) {
@@ -76,7 +79,12 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 		if (gasStationId == null) {
 			return null;
 		}
-		return distributionRecordDao.findDistributionsByGasStationId(gasStationId);
+        List<Map<String, Object>> list = distributionRecordDao.findDistributionsByGasStationId(gasStationId);
+		list.forEach(map -> {
+		    map.put("is_online", vehicleDao.getOnline((Long) map.get("vehicle_id")));
+		    map.put("track", trackDao.getLastTrackForAppByMap(map));
+        });
+		return list;
 	}
 
 	@Override

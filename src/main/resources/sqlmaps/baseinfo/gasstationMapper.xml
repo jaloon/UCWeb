@@ -179,7 +179,6 @@
 			AND c.type = 5
 			AND gc.gasstation_id = #{id}
 	</select>
-	
 
 	<select id="count" parameterType="com.tipray.bean.baseinfo.GasStation" resultType="java.lang.Long">
 		select count(*) from tbl_gasstation where is_invalid=0 
@@ -218,6 +217,7 @@
                 IF( ISNULL( short_name ) || LENGTH( TRIM( short_name ) ) < 1, `name`, short_name ) `name`,
                 longitude,
                 latitude,
+                cover_radius,
                 cover_lonlatlist_region cover
             FROM
                 tbl_gasstation

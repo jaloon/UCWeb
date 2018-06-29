@@ -19,7 +19,11 @@ public enum TerminalSoftwareUpgradeErrorEnum {
 	/** 请求发起时间为空 */
 	REQUEST_TIME_NULL(5, "请求发起时间为空！"),
 	/** 时间格式不正确 */
-	TIME_FORMAT_INVALID(6, "时间格式不正确！");
+	TIME_FORMAT_INVALID(6, "时间格式不正确！"),
+	/** 车辆升级记录ID为空 */
+    UPGRADE_INFO_ID_NULL(7, "车辆升级记录ID为空!"),
+    /** 车台已升级，不可取消 */
+    HAS_UPGRADED(8, "车台已升级，不可取消！");
 
 	private int code;
 	private String msg;

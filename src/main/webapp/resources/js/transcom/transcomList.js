@@ -30,10 +30,7 @@ $(function() {
         event.stopPropagation();
     };
 
-    
-
     showList("", "", 1);
-
 
     $("#search_type").change(function() {
         var type = $("#search_type").val();

@@ -29,10 +29,7 @@ import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 油库管理业务层
@@ -535,7 +532,7 @@ public class OilDepotServiceImpl implements OilDepotService {
         }
         Long dbDepotVer = verMap.get("depot_ver").longValue();
         Long dbStationVer = verMap.get("station_ver").longValue();
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("depotVer", dbDepotVer);
         map.put("stationVer", dbStationVer);
         if (!dbDepotVer.equals(depotVer)) {

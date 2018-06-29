@@ -682,4 +682,7 @@
             vehicle_number IN ( ${_parameter} );
     </select>
 
+	<select id="getOnline" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT is_online FROM tbl_vehicle_realtime_status WHERE vehicle_id = #{carId}
+    </select>
 </mapper>

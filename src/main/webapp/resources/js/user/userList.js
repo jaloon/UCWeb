@@ -47,6 +47,7 @@ $(function() {
                         layer.close(index2);
                         $("#search_text").select();
                     });
+                    return;
                 }
             } else {
                 name = $.trim($("#search_text").val());
@@ -55,6 +56,7 @@ $(function() {
                         layer.close(index2);
                         $("#search_text").select();
                     });
+                    return;
                 }
             }
             showList(account, name, 1);

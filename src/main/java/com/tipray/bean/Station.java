@@ -17,6 +17,7 @@ public class Station implements Serializable {
     private String name;
     private float longitude;
     private float latitude;
+    private int cover_radius;
     @JsonIgnore
     private byte[] cover;
     private List<Point> cover_lonlatlist_region;
@@ -51,6 +52,14 @@ public class Station implements Serializable {
 
     public void setLatitude(float latitude) {
         this.latitude = latitude;
+    }
+
+    public int getCover_radius() {
+        return cover_radius;
+    }
+
+    public void setCover_radius(int cover_radius) {
+        this.cover_radius = cover_radius;
     }
 
     public byte[] getCover() {

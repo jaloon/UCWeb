@@ -61,7 +61,16 @@ public interface TerminalUpgradeDao {
     /**
      * 查询未完成升级的车辆信息
      *
+     * @param carNumber 车牌号
      * @return 未完成升级的车辆信息
      */
-    List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles();
+    List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles(String carNumber);
+
+    /**
+     * 根据升级记录ID获取升级状态
+     *
+     * @param upgradeRecordId 升级记录ID
+     * @return 升级状态
+     */
+    Integer getUpgradeStatusById(Long upgradeRecordId);
 }

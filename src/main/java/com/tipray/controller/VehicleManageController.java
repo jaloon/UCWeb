@@ -19,7 +19,6 @@ import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
 import com.tipray.constant.reply.*;
 import com.tipray.core.ThreadVariable;
-import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.exception.UdpException;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
@@ -84,7 +83,7 @@ public class VehicleManageController {
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
-    @PermissionAnno("paramModule")
+    // @PermissionAnno("paramModule")
     @RequestMapping(value = "asyn_terminal_config_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynTerminalConfigRequest(
@@ -984,7 +983,7 @@ public class VehicleManageController {
 
             cacheId = addCache(UdpBizId.TERMINAL_SOFTWARE_UPGRADE_REQUEST, logId, description, null);
 
-            ByteBuffer src = SendPacketBuilder.buildProtocol0x1208(terminalIdList, info);
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x1208(ver, terminalIdList, info);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
                 throw new UdpException("UDP发送数据异常！");
@@ -1002,6 +1001,88 @@ public class VehicleManageController {
             return ResponseMsgUtil.excetion(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
+        }
+    }
+
+
+    /**
+     * 车台取消升级
+     *
+     * @param token            {@link String} UUID令牌
+     * @param upgradeRecordIds {@link String} 车辆升级记录ID，英文逗号“,”分隔
+     * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
+     * @param longitude        {@link Integer} 手机定位经度
+     * @param latitude         {@link Integer} 手机定位纬度
+     * @param isLocationValid  {@link Integer} 手机定位是否有效
+     * @return {@link ResponseMsg}
+     */
+    @RequestMapping(value = "terminal_cancel_upgrade_request", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public ResponseMsg terminalCancelUpgradeRequest(
+            @RequestParam(value = "token", required = false) String token,
+            @RequestParam(value = "upgrade_record_ids", required = false) String upgradeRecordIds,
+            @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
+            @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
+            @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
+            @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
+        if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
+            return null;
+        } else {
+            session.setAttribute("token", token);
+        }
+        logger.info(
+                "车台取消升级：token={}, upgradeRecordIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, upgradeRecordIds, isApp, longitude, latitude, isLocationValid);
+        User user = ThreadVariable.getUser();
+        VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp);
+        Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
+                | LogTypeConst.TYPE_TERMINAL_CANCEL_UPGRADE | LogTypeConst.RESULT_DONE;
+        String description = new StringBuffer("车台取消升级：").append(user.getName()).append("通过")
+                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("取消车台升级。").toString();
+        Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+        if (logId == null || logId == 0L) {
+            return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
+        }
+        String result = "";
+        boolean isOk = false;
+        try {
+            if (upgradeRecordIds == null) {
+                result = "失败，车辆升级记录ID为空！";
+                logger.error("车台取消升级失败：{}", TerminalSoftwareUpgradeErrorEnum.UPGRADE_INFO_ID_NULL);
+                return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.UPGRADE_INFO_ID_NULL);
+            }
+
+            // Integer isHasUpgrade = vehicleService.getUpgradeStatusById(upgradeRecordId);
+            // if (isHasUpgrade == null) {
+            //     isOk = true;
+            //     result = "成功，已取消！";
+            //     logger.error("车台取消升级成功！");
+            //     return ResponseMsgUtil.success("已取消！");
+            // }
+            // if (isHasUpgrade == 2) {
+            //     result = "失败，车台已升级，不可取消！";
+            //     logger.error("车台取消升级失败：{}", TerminalSoftwareUpgradeErrorEnum.HAS_UPGRADED);
+            //     return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.HAS_UPGRADED);
+            // }
+            vehicleService.deleteUpgradeRecord(upgradeRecordIds);
+            isOk = true;
+            result = "成功！";
+            logger.info("车台取消升级成功！");
+            return ResponseMsgUtil.success();
+        } catch (Exception e) {
+            result = "失败，车台取消升级异常！";
+            logger.error("车台取消升级异常：e={}", e.toString());
+            logger.debug("车台取消升级异常堆栈信息", e);
+            return ResponseMsgUtil.excetion(e);
+        } finally {
+            if (!isOk) {
+                type++;
+                vehicleManageLog.setType(type);
+            }
+            vehicleManageLog.setResult(result);
+            monitorWebSocketHandler.broadcastLog(1, description, result);
+            OperateLogUtil.updateVehicleManageLog(vehicleManageLog, vehicleManageLogService, logger);
         }
     }
 

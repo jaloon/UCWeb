@@ -10,15 +10,19 @@ package com.tipray.constant.reply;
 public enum FindTracksByCarNumberErrorEnum {
 	/** 车牌号为空 */
 	CAR_NUMBER_NULL(1, "车牌号为空！"),
+    /** 车辆不存在 */
+    VEHICLE_INVALID(2, "车辆不存在！"),
 	/** 轨迹开始时间为空 */
-	BEGIN_TIME_NULL(2, "轨迹开始时间为空！"),
+	BEGIN_TIME_NULL(3, "轨迹开始时间为空！"),
 	/** 时间格式不正确 */
-	TIME_FORMAT_INVALID(3, "时间格式不正确！"),
+	TIME_FORMAT_INVALID(4, "时间格式不正确！"),
 	/** 时间超出查询范围（一天内） */
-	TIME_OUT_OF_SCOPE(4, "时间超出查询范围（一天内）！"),
+	TIME_OUT_OF_SCOPE(5, "时间超出查询范围（一天内）！"),
 	/** 时段内无所查车辆轨迹 */
-	TRACK_NULL(5, "时段内无所查车辆轨迹！");
-	
+	TRACK_NULL(6, "时段内无所查车辆轨迹！"),
+	/** 车台离线 */
+	TERMINAL_OFFLINE(7, "车台离线");
+
 	private int code;
 	private String msg;
 

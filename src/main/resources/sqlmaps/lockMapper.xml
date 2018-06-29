@@ -160,8 +160,13 @@
             AND seat = #{seat}
             AND seat_index = #{seat_index}
             AND lock_device_id = #{lock_device_id}
+            AND change_time = ( SELECT MAX( t.change_time ) FROM tbl_lock_status t WHERE t.vehicle_id = #{vehicle_id}
+             																		AND t.store_id = #{store_id}
+                                                                                    AND t.seat = #{seat}
+                                                                                    AND t.seat_index = #{seat_index}
+                                                                                    AND t.lock_device_id = #{lock_device_id} )
         ORDER BY
-            change_time DESC
+            id DESC
             LIMIT 1
     </select>
 

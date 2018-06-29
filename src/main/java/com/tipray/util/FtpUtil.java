@@ -153,10 +153,9 @@ public class FtpUtil {
         byte v1 = Byte.parseByte(verArray[0], 10);
         byte v2 = Byte.parseByte(verArray[1], 10);
         short v3 = Short.parseShort(verArray[2], 10);
-        int ver = (0xff & v1)
-                | (0xff00 & (v2 << 8))
-                | (0xff0000 & (v3 << 16))
-                | (0xff000000 & (v3 << 16));
+        int ver = ((0xff & v1) << 24)
+                | ((0xff & v2) << 16)
+                | (0xffff & v3);
         return ver;
     }
 
@@ -168,9 +167,9 @@ public class FtpUtil {
      */
     public static String stringifyVer(int ver) {
         StringBuffer strBuf = new StringBuffer();
-        strBuf.append(ver & 0xff).append('.');
-        strBuf.append((ver >> 8) & 0xff).append('.');
-        strBuf.append(((ver >> 16) & 0xff) | ((ver >> 16) & 0xff00));
+        strBuf.append((ver >> 24) & 0xff).append('.');
+        strBuf.append((ver >> 16) & 0xff).append('.');
+        strBuf.append(ver & 0xffff);
         return strBuf.toString();
     }
 

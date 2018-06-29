@@ -9,176 +9,268 @@ var focusId;
 var realtimeId;
 var focusCancelOrder;
 
-var onlineCarIds = [];
-var markerClusterer = new BMapLib.MarkerClusterer(map, {markers: null});
-var carLabelStyle = {
-    color: "red",
-    fontSize: "10px",
-    height: "16px",
-    lineHeight: "16px",
-    fontFamily: "微软雅黑"
+var point_layer, icon_layer, text_layer;
+var point_dataSet, icon_dataSet, text_dataSet;
+
+var car_pos_cache = new Map();
+var car_deg_cache = new Map();
+var car_img_cache = new Map();
+var car_text_cache = new Map();
+var car_list_cache = new Map();
+
+var point_opts = {
+    fillStyle: 'rgba(255, 50, 50, 0.6)',
+    // shadowColor: 'rgba(255, 50, 50, 1)',
+    // shadowBlur: 1,
+    // globalCompositeOperation: 'lighter',
+    methods: {
+        click: function (item) {
+            if (item != null) {
+                console.log(item);
+                layer.open({
+                    type: 2,
+                    title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                    shadeClose: true,
+                    shade: 0.6,
+                    resize: false,
+                    area: ['800px', '560px'],
+                    content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
+                    '&carId=' + item.carid + '&carNumber=' + encodeURIComponent(item.carno) +
+                    '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
+                    end: function () {
+                        ws.send(focusCancelOrder);
+                    }
+                });
+            }
+        }
+    },
+    size: 2,
+    draw: 'simple'
 };
-var carLabelOffset = new BMap.Size(-32, -18);
-var carIconY = new BMap.Icon('../../resources/images/marker/车辆图标-32-黄.png', new BMap.Size(32, 15));
-var carIconR = new BMap.Icon('../../resources/images/marker/车辆图标-32-红.png', new BMap.Size(32, 15));
-var $tbody = $("#table-cont").find("tbody");
-var offlineTd = "<td class=\"car-coordinate\">-</td>" +
-    "<td class=\"car-velocity\">-</td>" +
-    "<td class=\"car-aspect\">-</td>" +
-    "<td class=\"car-status\">-</td>";
-var trackCache = {
-    size: 0,
-    carIds: [],
-    markers: [],
-    trDoms: [],
-    indexOf: function (carId) {
-        return this.carIds.indexOf(carId);
-    },
-    putCache: function (carId, marker, trDom) {
-        if (carId == undefined || carId == null
-            || marker == undefined || marker == null
-            || trDom == undefined || trDom == null) {
-            console.warn("添加轨迹缓存，参数不全！");
-            return;
+var icon_opts = {
+    draw: 'icon',
+    methods: {
+        click: function (item) {
+            if (item != null) {
+                console.log(item);
+                layer.open({
+                    type: 2,
+                    title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                    shadeClose: true,
+                    shade: 0.6,
+                    resize: false,
+                    area: ['800px', '560px'],
+                    content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
+                    '&carId=' + item.carid + '&carNumber=' + encodeURIComponent(item.carno) +
+                    '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
+                    end: function () {
+                        ws.send(focusCancelOrder);
+                    }
+                });
+            }
         }
-        var index = this.indexOf(carId);
-        if (index < 0) {
-            this.carIds.push(carId);
-            this.markers.push(marker);
-            this.trDoms.push(trDom);
-            this.size++;
-            return;
-        }
-        this.markers.splice(index, 1, marker);
-        this.trDoms.splice(index, 1, trDom);
-    },
-    updateMaker: function (carId, marker) {
-        if (carId == undefined || carId == null
-            || marker == undefined || marker == null) {
-            console.warn("更新Marker缓存，参数不全！");
-            return;
-        }
-        var index = this.indexOf(carId);
-        if (index < 0) {
-            console.warn("更新Marker缓存，缓存不存在！")
-        }
-        this.markers.splice(index, 1, marker);
-    },
-    updateTrDom: function (carId, trDom) {
-        if (carId == undefined || carId == null
-            || trDom == undefined || trDom == null) {
-            console.warn("更新TrDom缓存，参数不全！");
-            return;
-        }
-        var index = this.indexOf(carId);
-        if (index < 0) {
-            console.warn("更新TrDom缓存，缓存不存在！")
-        }
-        this.trDoms.splice(index, 1, trDom);
-    },
-    getMarker: function (carId) {
-        if (carId == undefined || carId == null) {
-            return null;
-        }
-        var index = this.indexOf(carId);
-        if (index < 0) {
-            return null;
-        }
-        return this.markers[index];
-    },
-    getTrDom: function (carId) {
-        if (carId == undefined || carId == null) {
-            return null;
-        }
-        var index = this.indexOf(carId);
-        if (index < 0) {
-            return null;
-        }
-        return this.trDoms[index];
-    },
-    getTrDoms: function () {
-        var trDomStr = "";
-        this.trDoms.forEach(function (value) {
-            trDomStr += value;
-        });
-        return trDomStr;
+    }
+};
+var text_opts = {
+    draw: 'text',
+    fillStyle: 'red',
+    textAlign: 'center',
+    avoid: true, // 开启文本标注避让
+    textBaseline: 'middle',
+    offset: { // 文本便宜值
+        x: 0,
+        y: 0
     }
 };
 
-function initCarIcon(alarm) {
-    if (alarm == "是") {
-        return carIconR;
+var GeometryType = {
+    Point: "Point",
+    LineString: "LineString",
+    Polygon: "Polygon",
+    MultiPoint: "MultiPoint",
+    MultiLineString: "MultiLineString",
+    MultiPolygon: "MultiPolygon"
+};
+
+var alarm_car_img = new Image();
+alarm_car_img.src = '../../resources/images/marker/车辆图标-32-红.png';
+var normal_car_img = new Image();
+normal_car_img.src = '../../resources/images/marker/车辆图标-32-黄.png';
+
+/**
+ * 更新视图
+ */
+function upView() {
+    var point_data = [];
+    var icon_data = [];
+    var text_data = [];
+
+    var bounds = map.getBounds(); // 返回map可视区域，以地理坐标表示
+    var sw = bounds.getSouthWest(); // 返回矩形区域的西南角
+    var ne = bounds.getNorthEast(); // 返回矩形区域的东北角
+    var swlng = sw.lng,
+        swlat = sw.lat,
+        nelng = ne.lng,
+        nelat = ne.lat;
+
+    car_pos_cache.forEach(function (pos, carId, mapObj) {
+        if (pos[0] > swlng && pos[0] < nelng && pos[1] > swlat && pos[1] < nelat && onlineCarIds.indexOf(carId) >= 0) {
+            var geometry = {
+                type: GeometryType.Point,
+                coordinates: pos
+            };
+            var text = car_text_cache.get(carId);
+            point_data.push({
+                carid: carId,
+                carno: text,
+                geometry: geometry
+            });
+            icon_data.push({
+                carid: carId,
+                carno: text,
+                geometry: geometry,
+                deg: car_deg_cache.get(carId),
+                icon: car_img_cache.get(carId)
+            });
+            text_data.push({
+                geometry: geometry,
+                text: text
+            });
+        }
+    });
+    show(point_data, icon_data, text_data);
+}
+
+/**
+ * 展示视图
+ * @param point_data
+ * @param icon_data
+ * @param text_data
+ */
+function show(point_data, icon_data, text_data) {
+    if (point_data.length > 100) {
+        if (icon_layer != undefined) {
+            icon_layer.hide();
+        }
+        if (text_layer != undefined) {
+            text_layer.hide();
+        }
+        if (point_layer == undefined) {
+            point_dataSet = new mapv.DataSet(point_data);
+            point_layer = new mapv.baiduMapLayer(map, point_dataSet, point_opts);
+        } else {
+            point_dataSet.set(point_data);
+            point_layer.show();
+        }
+    } else {
+        if (point_layer != undefined) {
+            point_layer.hide();
+        }
+
+        if (icon_layer == undefined) {
+            icon_dataSet = new mapv.DataSet(icon_data);
+            icon_layer = new mapv.baiduMapLayer(map, icon_dataSet, icon_opts);
+        } else {
+            icon_dataSet.set(icon_data);
+            icon_layer.show();
+        }
+
+        if (text_layer == undefined) {
+            text_dataSet = new mapv.DataSet(text_data);
+            text_layer = new mapv.baiduMapLayer(map, text_dataSet, text_opts);
+        } else {
+            text_dataSet.set(text_data);
+            text_layer.show();
+        }
     }
-    return carIconY;
+}
+
+var onlineCarIds = [];
+var $tbody = $("#table-cont").find("tbody");
+
+function getCarIcon(alarm) {
+    if (alarm == "是") {
+        return alarm_car_img;
+    }
+    return normal_car_img;
 }
 
 function flushTrack(tracks) {
+    var point_data = [];
+    var icon_data = [];
+    var text_data = [];
+    var bounds = map.getBounds(); // 返回map可视区域，以地理坐标表示
+    var sw = bounds.getSouthWest(); // 返回矩形区域的西南角
+    var ne = bounds.getNorthEast(); // 返回矩形区域的东北角
+    var swlng = sw.lng,
+        swlat = sw.lat,
+        nelng = ne.lng,
+        nelat = ne.lat;
+
     tracks.forEach(function (track) {
         var carId = track.carId;
-        if (onlineCarIds.indexOf(carId) < 0) {
-            return;
+        var lng = track.longitude;
+        var lat = track.latitude;
+        var pos = [lng, lat];
+        var deg = 360 - track.angle;
+        var img = getCarIcon(track.alarm);
+        var text = track.carNumber;
+        car_pos_cache.set(carId, pos);
+        car_deg_cache.set(carId, deg);
+        car_img_cache.set(carId, img);
+        car_text_cache.set(carId, text);
+
+        if (onlineCarIds.indexOf(carId) >= 0) {
+            var carTr = "<tr id='car_" + carId + "'>" +
+                "<td class=\"car-num\">" + text + "</td>" +
+                "<td class=\"car-company\">" + track.carCom + "</td>" +
+                "<td class=\"car-coordinate\">(" + lng + ", " + lat + ")</td>" +
+                "<td class=\"car-velocity\">" + track.velocity + "</td>" +
+                "<td class=\"car-aspect\">" + angle2aspect(track.angle) + "</td>" +
+                "<td class=\"car-status\">" + track.carStatus + "</td>" +
+                "<td class=\"car-alarm\">" + track.alarm + "</td>" +
+                "<td class=\"car-online\">在线</td>" +
+                "</tr>";
+            car_list_cache.set(carId, carTr);
+            if (lng > swlng && lng < nelng && lat > swlat && lat < nelat) {
+                var geometry = {
+                    type: GeometryType.Point,
+                    coordinates: pos
+                };
+                point_data.push({
+                    carid: carId,
+                    carno: text,
+                    geometry: geometry
+                });
+                icon_data.push({
+                    carid: carId,
+                    carno: text,
+                    geometry: geometry,
+                    deg: deg,
+                    icon: img
+                });
+                text_data.push({
+                    geometry: geometry,
+                    text: text
+                });
+
+            }
         }
-        var point = new BMap.Point(track.longitude, track.latitude);
-        // console.log("point: (" + track.longitude + "," + track.latitude + ")")
-        var carLabel = new BMap.Label(track.carNumber + ", " + track.carStatus, {
-            position: point,
-            offset: carLabelOffset
-        });
-        carLabel.setStyle(carLabelStyle);
-        var carMarker = new BMap.Marker(point, {
-            icon: initCarIcon(track.alarm),
-            rotation: -track.angle
-        });
-        carMarker.setLabel(carLabel);
-        carMarker.addEventListener("click", function (e) {
-            layer.open({
-                type: 2,
-                title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                shadeClose: true,
-                shade: 0.6,
-                resize: false,
-                area: ['800px', '560px'],
-                content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
-                '&carId=' + carId + '&carNumber=' + encodeURIComponent(track.carNumber) +
-                '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
-                end: function () {
-                    ws.send(focusCancelOrder);
-                }
-            });
-        });
-        var carTr = "<tr id='car_" + carId + "'>" +
-            "<td class=\"car-num\">" + track.carNumber + "</td>" +
-            "<td class=\"car-company\">" + track.carCom + "</td>" +
-            "<td class=\"car-coordinate\">(" + track.longitude + ", " + track.latitude + ")</td>" +
-            "<td class=\"car-velocity\">" + track.velocity + "</td>" +
-            "<td class=\"car-aspect\">" + angle2aspect(track.angle) + "</td>" +
-            "<td class=\"car-status\">" + track.carStatus + "</td>" +
-            "<td class=\"car-alarm\">" + track.alarm + "</td>" +
-            "<td class=\"car-online\">在线</td>" +
-            "</tr>";
-        trackCache.putCache(carId, carMarker, carTr);
     });
-    markerClusterer.clearMarkers();
-    markerClusterer.addMarkers(trackCache.markers);
-    $tbody.html(trackCache.getTrDoms());
+    show(point_data, icon_data, text_data);
+    var trDomStr = "";
+    car_list_cache.forEach(function (carTr, carId, mapObj) {
+        trDomStr += carTr;
+    });
+    $tbody.html(trDomStr);
 }
 
 function dealOnlineCarsCache(onlineCars) {
     onlineCars.forEach(function (carId) {
-        var onlineIndex = onlineCarIds.indexOf(carId);
-        if (onlineIndex == -1) {
+        if (onlineCarIds.indexOf(carId) < 0) {
             onlineCarIds.push(carId);
         }
-        var index = trackCache.indexOf(carId);
-        if (index > -1) {
-            var trDom = trackCache.trDoms[index];
-            if (trDom.index("离线") > -1) {
-                trDom = trDom.replace("离线", "在线");
-                trackCache.updateTrDom(carId, trDom);
-                $("#car_" + carId).children().last().html("在线");
-            }
-        }
-    })
+    });
 }
 
 function flushOnline(onlineInfo) {
@@ -193,18 +285,11 @@ function flushOnline(onlineInfo) {
             task: '',
             result: carNo + '离线'
         });
-        var index = trackCache.indexOf(carId);
-        if (index > -1) {
-            markerClusterer.removeMarker(trackCache.markers[index]);
-            var trDom = trackCache.trDoms[index];
-            var startIndex = trDom.indexOf("<td class=\"car-coordinate\">"),
-                endIndex = trDom.indexOf("<td class=\"car-alarm\">");
-            trDom = trDom.replace(trDom.slice(startIndex, endIndex), offlineTd);
-            trDom = trDom.replace("在线", "离线");
-            trackCache.updateTrDom(trDom);
-            $("#car_" + carId).replaceWith(trDom);
-            // $tbody.html(trackCache.getTrDoms());
+        if (car_list_cache.get(carId) != undefined) {
+            car_list_cache.delete(carId);
+            $("#car_" + carId).remove();
         }
+        upView();
         return;
     }
     if (online == 1) { // 在线
@@ -215,15 +300,6 @@ function flushOnline(onlineInfo) {
                 task: '',
                 result: carNo + '上线'
             });
-        }
-        var index = trackCache.indexOf(carId);
-        if (index > -1) {
-            var trDom = trackCache.trDoms[index];
-            if (trDom.indexOf("离线") > -1) {
-                trDom = trDom.replace("离线", "在线");
-                trackCache.updateTrDom(trDom);
-                $("#car_" + carId).children().last().html("在线");
-            }
         }
     }
 }
@@ -352,8 +428,8 @@ $(function () {
     function createWebSocket() {
         if ('WebSocket' in window) {
             ws = new ReconnectingWebSocket("ws://" + wsUrl + "/track");
-        // } else if ('MozWebSocket' in window) {
-        //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
+            // } else if ('MozWebSocket' in window) {
+            //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
         } else {
             // ws = new SockJS("http://" + wsUrl + "/sockjs/track");
             layer.alert("您的浏览器不支持websocket协议，建议使用新版谷歌、火狐等浏览器，请勿使用IE10以下浏览器，360浏览器请使用极速模式，不要使用兼容模式！");
@@ -467,6 +543,9 @@ $(function () {
             $(".map").height($(window).height() - 88);
         }
     });
+
+    map.addEventListener("zoomend", upView); //地图缩放事件
+    map.addEventListener("moveend", upView); //地图移动事件
 
     /** 设备绑定 */
     // 车载终端绑定

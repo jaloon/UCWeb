@@ -62,11 +62,19 @@ public class CarTest {
     private GasStationDao gasStationDao;
 
     @Test
+    public void findlocksByCarNo() throws Exception{
+        List<Map<String, Object>> list =
+        carService.findlocksByCarNo("闽A77220");
+        System.out.println(JSONUtil.stringify(list));
+    }
+
+    @Test
     public void findTracksByCarNumber() throws Exception {
         String carNo = "闽A77220";
+        Long carId = 9L;
         String beginTime = "2018-06-19 18:00:00";
         long beginMillis = new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(beginTime).getTime();
-        List<Map<String, Object>> tracks = carService.findTracksByCarNumber(carNo,beginMillis);
+        Map<String, Object> tracks = carService.findTracksByCarNumber(carNo,carId,beginMillis);
         System.out.println(tracks);
     }
 

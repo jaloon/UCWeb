@@ -100,10 +100,28 @@ public interface TrackDao {
 
     /**
      * 查询车辆的最新轨迹时间
+     *
      * @param carId {@link Long} 车辆ID
      * @return 最新轨迹时间
      */
     Date getLastTrackTime(Long carId);
+
+    /**
+     * 查询车辆的最新轨迹
+     *
+     * @param map {@link Map}  vehicle_id 车辆ID, vehicle_number 车牌号
+     * @return 最新轨迹
+     */
+    Map<String, Object> getLastTrackForAppByMap(Map<String, Object> map);
+
+    /**
+     * 查询车辆的最新轨迹
+     *
+     * @param carNumber {@link String} 车牌号
+     * @param carId     {@link Long} 车辆ID
+     * @return 最新轨迹
+     */
+    Map<String, Object> getLastTrackForApp(@Param("carNumber") String carNumber, @Param("carId") Long carId);
 
     void updateTracks(List<UpdateTrack> list);
 }

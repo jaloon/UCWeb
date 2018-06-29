@@ -37,12 +37,13 @@ $(function() {
     showList("", 1);
 
     $("#search_btn").click(function() {
-        name = $.trim($("#search_text").val());
+        var name = $.trim($("#search_text").val());
         if (isNull(name)) {
             layer.alert('请输入要查询的角色名称！', { icon: 6 }, function(index2) {
                 layer.close(index2);
                 $("#search_text").select();
             });
+            return;
         }
         showList(name, 1);
     });

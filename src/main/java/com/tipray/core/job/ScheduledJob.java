@@ -6,6 +6,7 @@ import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.service.VehicleService;
 import com.tipray.websocket.MonitorWebSocketHandler;
+import com.tipray.websocket.UpdateTrack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,7 @@ public class ScheduledJob {
      * 最新车辆轨迹查询
      */
     public void executeLastTtracksQuery() {
-        // trackDao.updateTracks(UpdateTrack.random());
+        trackDao.updateTracks(UpdateTrack.random());
         List<LastTrack> lastTracks = vehicleService.findLastTracks();
         if (lastTracks == null) {
             return;

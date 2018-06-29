@@ -233,58 +233,64 @@ public class SendPacketBuilder {
     /**
      * 车台软件升级下发
      *
+     * @param ver         {@link int} 升级版本
      * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
      * @param upgradeInfo {@link byte[]} 车台软件升级信息流
      * @return {@link ByteBuffer} 待发送数据
      */
-    public static ByteBuffer buildProtocol0x1208(String terminalIds, byte[] upgradeInfo) {
-        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeInfo);
+    public static ByteBuffer buildProtocol0x1208(int ver, String terminalIds, byte[] upgradeInfo) {
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(ver, terminalIds, upgradeInfo);
         return buildProtocol0x1208(dataBuffer);
     }
 
     /**
      * 车台软件升级下发
      *
+     * @param ver         {@link int} 升级版本
      * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
      * @param upgradeType {@link byte} 升级类型
      * @param ftpPath     {@link String} ftp更新路径，UTF-8编码
      * @param files       {@link TerminalUpgradeFile} 升级文件列表
      * @return {@link ByteBuffer} 待发送数据
      */
-    public static ByteBuffer buildProtocol0x1208(String terminalIds,
+    public static ByteBuffer buildProtocol0x1208(int ver,
+                                                 String terminalIds,
                                                  byte upgradeType,
                                                  String ftpPath,
                                                  List<TerminalUpgradeFile> files) {
-        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeType, ftpPath, files);
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(ver, terminalIds, upgradeType, ftpPath, files);
         return buildProtocol0x1208(dataBuffer);
     }
 
     /**
      * 车台软件升级下发
      *
+     * @param ver            {@link int} 升级版本
      * @param terminalIdList {@link Integer} 车台设备ID集合
      * @param upgradeInfo    {@link byte[]} 车台软件升级信息流
      * @return {@link ByteBuffer} 待发送数据
      */
-    public static ByteBuffer buildProtocol0x1208(List<Integer> terminalIdList, byte[] upgradeInfo) {
-        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIdList, upgradeInfo);
+    public static ByteBuffer buildProtocol0x1208(int ver, List<Integer> terminalIdList, byte[] upgradeInfo) {
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(ver, terminalIdList, upgradeInfo);
         return buildProtocol0x1208(dataBuffer);
     }
 
     /**
      * 车台软件升级下发
      *
+     * @param ver            {@link int} 升级版本
      * @param terminalIdList {@link Integer} 车台设备ID集合
      * @param upgradeType    {@link byte} 升级类型
      * @param ftpPath        {@link String} ftp更新路径，UTF-8编码
      * @param files          {@link TerminalUpgradeFile} 升级文件列表
      * @return {@link ByteBuffer} 待发送数据
      */
-    public static ByteBuffer buildProtocol0x1208(List<Integer> terminalIdList,
+    public static ByteBuffer buildProtocol0x1208(int ver,
+                                                 List<Integer> terminalIdList,
                                                  byte upgradeType,
                                                  String ftpPath,
                                                  List<TerminalUpgradeFile> files) {
-        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(terminalIdList, upgradeType, ftpPath, files);
+        ByteBuffer dataBuffer = buildDataBufForTerminalSoftwareUpgrade(ver, terminalIdList, upgradeType, ftpPath, files);
         return buildProtocol0x1208(dataBuffer);
     }
 
@@ -721,34 +727,39 @@ public class SendPacketBuilder {
     /**
      * 构建车台软件升级下发业务数据体
      *
+     * @param ver         {@link int} 升级版本
      * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
      * @param upgradeType {@link byte} 升级类型
      * @param ftpPath     {@link String} ftp更新路径，UTF-8编码
      * @param files       {@link TerminalUpgradeFile} 升级文件列表
      * @return {@link ByteBuffer} 数据体
      */
-    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(String terminalIds,
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(int ver,
+                                                                    String terminalIds,
                                                                     byte upgradeType,
                                                                     String ftpPath,
                                                                     List<TerminalUpgradeFile> files) {
         byte[] upgradeInfo = buildTerminalSoftwareUpgradeInfo(upgradeType, ftpPath, files);
-        return buildDataBufForTerminalSoftwareUpgrade(terminalIds, upgradeInfo);
+        return buildDataBufForTerminalSoftwareUpgrade(ver, terminalIds, upgradeInfo);
     }
 
     /**
      * 构建车台软件升级下发业务数据体
      *
+     * @param ver         {@link int} 升级版本
      * @param terminalIds {@link String} 车台设备ID，英文逗号“,”分隔
      * @param upgradeInfo {@link byte[]} 车台软件升级信息流
      * @return {@link ByteBuffer} 数据体
      */
-    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(String terminalIds, byte[] upgradeInfo) {
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(int ver, String terminalIds, byte[] upgradeInfo) {
         String[] terminalIdStrs = terminalIds.split(",");
         int terminalNum = terminalIdStrs.length;
         // 缓冲区容量
-        int capacity = 1 + 4 * terminalNum + upgradeInfo.length;
+        int capacity = 5 + 4 * terminalNum + upgradeInfo.length;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加版本号，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(ver));
         // 添加设备数量，1个字节
         dataBuffer.put((byte) terminalNum);
         for (String terminalId : terminalIdStrs) {
@@ -763,33 +774,40 @@ public class SendPacketBuilder {
     /**
      * 构建车台软件升级下发业务数据体
      *
+     * @param ver            {@link int} 升级版本
      * @param terminalIdList {@link Integer} 车台设备ID集合
      * @param upgradeType    {@link byte} 升级类型
      * @param ftpPath        {@link String} ftp更新路径，UTF-8编码
      * @param files          {@link TerminalUpgradeFile} 升级文件列表
      * @return {@link ByteBuffer} 数据体
      */
-    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(List<Integer> terminalIdList,
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(int ver,
+                                                                    List<Integer> terminalIdList,
                                                                     byte upgradeType,
                                                                     String ftpPath,
                                                                     List<TerminalUpgradeFile> files) {
         byte[] upgradeInfo = buildTerminalSoftwareUpgradeInfo(upgradeType, ftpPath, files);
-        return buildDataBufForTerminalSoftwareUpgrade(terminalIdList, upgradeInfo);
+        return buildDataBufForTerminalSoftwareUpgrade(ver, terminalIdList, upgradeInfo);
     }
 
     /**
      * 构建车台软件升级下发业务数据体
      *
+     * @param ver            {@link int} 升级版本
      * @param terminalIdList {@link Integer} 车台设备ID集合
      * @param upgradeInfo    {@link byte[]} 车台软件升级信息流
      * @return {@link ByteBuffer} 数据体
      */
-    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(List<Integer> terminalIdList, byte[] upgradeInfo) {
+    public static ByteBuffer buildDataBufForTerminalSoftwareUpgrade(int ver,
+                                                                    List<Integer> terminalIdList,
+                                                                    byte[] upgradeInfo) {
         int terminalNum = terminalIdList.size();
         // 缓冲区容量
-        int capacity = 1 + 4 * terminalNum + upgradeInfo.length;
+        int capacity = 5 + 4 * terminalNum + upgradeInfo.length;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加版本号，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(ver));
         // 添加设备数量，1个字节
         dataBuffer.put((byte) terminalNum);
         for (Integer terminalId : terminalIdList) {
