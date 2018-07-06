@@ -28,7 +28,7 @@
 		fn_type2name ( 'alarmStatus', a.`status` )		  alarm_status,
 		fn_get_station ( a.station_type, a.station_id )	  station,
 		a.vehicle_track_id								  track_id,
-        DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%I:%S' )  alarm_time
+        DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' )  alarm_time
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
@@ -99,7 +99,7 @@
 		<if test="entity.carNumber != null and entity.carNumber != ''">
 			and c.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
 		</if>
-		order by a.id asc  
+		order by a.id desc
 		limit #{page.startRow}, #{page.rows}
 	</select>
 
@@ -185,7 +185,7 @@
 			a.station_type,
 			a.station_id,
 			fn_get_alarm_station ( a.station_type, a.station_id ) station_name,
-			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%I:%S' ) alarm_time,
+			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' ) alarm_time,
 			a.vehicle_track_id
 		FROM
 			tbl_alarm a,

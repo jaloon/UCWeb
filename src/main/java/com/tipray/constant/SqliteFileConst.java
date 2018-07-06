@@ -21,6 +21,8 @@ public class SqliteFileConst {
 	public static final String IN_OUT_DEV = "in_out_oildepot_dev_info";
 	/** 油库 */
 	public static final String OIL_DEPOT = "oildepot_info";
+	/** 加油站（不作为公共配置） */
+	public static final String GAS_STATION = "gasstation_info";
 
 	/** sqlite油库数据库文件 */
 	public static final File OIL_DEPOT_DB_FILE = new File(CenterConfigConst.SQLITE_FILE_PATH, OIL_DEPOT + ".db");

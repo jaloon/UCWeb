@@ -99,7 +99,7 @@
 		<if test="entity.carNumber != null and entity.carNumber != ''">
 			AND v.vehicle_number LIKE CONCAT('%',#{entity.carNumber},'%')
 		</if>
-		ORDER BY l.id ASC
+		ORDER BY l.id DESC
 		LIMIT #{page.startRow}, #{page.rows}
 	</select>
 </mapper>

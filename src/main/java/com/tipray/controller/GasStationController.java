@@ -139,13 +139,6 @@ public class GasStationController extends BaseAction {
         }
     }
 
-    @RequestMapping(value = "findUnusedCard.do")
-    @ResponseBody
-    public List<Long> findUnusedCard(Integer cardType, Long gasStationId) {
-        logger.info("find unused card, cardType={}, gasStationId={}", cardType, gasStationId);
-        return cardService.findUnusedCard(cardType, null, gasStationId);
-    }
-
     @RequestMapping(value = "findUnusedHandset.do")
     @ResponseBody
     public List<Integer> findUnusedHandset() {

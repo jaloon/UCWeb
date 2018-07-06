@@ -91,6 +91,9 @@ public class VehicleAlarmUtil {
                 if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
                     alarm.append("进入应急、");
                 }
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_5_UNUSUAL_MOVE) > 0) {
+                    alarm.append("异常移动报警、");
+                }
                 if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
                     alarm.append("无、");
                 }
@@ -131,6 +134,9 @@ public class VehicleAlarmUtil {
                 if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
                     alarm.append("进入应急、");
                 }
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_5_UNUSUAL_MOVE) > 0) {
+                    alarm.append("异常移动报警、");
+                }
                 if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
                     alarm.append("无、");
                 }
@@ -163,6 +169,9 @@ public class VehicleAlarmUtil {
         }
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
             alarm.append("、进入应急");
+        }
+        if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_5_UNUSUAL_MOVE) > 0) {
+            alarm.append("异常移动报警、");
         }
         if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
             alarm.append("、无");

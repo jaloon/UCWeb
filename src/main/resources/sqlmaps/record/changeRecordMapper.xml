@@ -102,7 +102,7 @@
 		<if test="entity.carNumber != null and entity.carNumber != ''">
 			and c.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
 		</if>
-		order by t.id asc  
+		order by t.id desc
 		limit #{page.startRow}, #{page.rows}
 	</select>
 	
@@ -112,7 +112,7 @@
 		values(#{userId},#{carId},#{transportId},#{changedTransportId},ifnull(#{isApp},0),ifnull(#{isLocationValid},0),ifnull(#{longitude},0),ifnull(#{latitude},0))
 	</insert>
 	
-	<insert id="addByChangedDistribution" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
+	<insert id="addByChangedDistribution" useGeneratedKeys="true" keyProperty="changeId" parameterType="java.util.Map">
 		insert into
 		tbl_remote_change_gasstation(user_id,vehicle_id,transport_id,changed_transport_id)
 		values(#{userId},#{carId}, #{transportId},#{changedTransportId})

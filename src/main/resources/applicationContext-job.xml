@@ -19,6 +19,8 @@
 
     <task:scheduled-tasks scheduler="scheduler">
         <!--<task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/>-->
+        <!--定时更新RC4秘钥信息任务，每隔5分钟执行一次-->
+        <task:scheduled ref="scheduledJob" method="executeUpdateRC4Key" cron="0 */5 * * * ?"/>
         <!--链路维护心跳任务，每隔2分钟执行一次-->
         <task:scheduled ref="scheduledJob" method="executeUdpHeartbeat" cron="0 */2 * * * ?"/>
         <!--<task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" />-->

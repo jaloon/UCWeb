@@ -11,6 +11,10 @@ import java.io.Serializable;
 public class ChangeInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
+     * 换站ID
+     */
+    private Long id;
+    /**
      * 操作员ID
      */
     private Long userId;
@@ -70,6 +74,14 @@ public class ChangeInfo implements Serializable {
      * 配送状态
      */
     private Integer transportStatus;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getUserId() {
         return userId;
@@ -194,6 +206,9 @@ public class ChangeInfo implements Serializable {
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
+        if (id != null) {
+            sb.append(", id=").append(id);
+        }
         if (userId != null) {
             sb.append(", userId=").append(userId);
         }

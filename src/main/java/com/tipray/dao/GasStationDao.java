@@ -88,6 +88,15 @@ public interface GasStationDao extends BaseDao<GasStation> {
     Map<String, Object> getStationForChangeById(long id);
 
 	/**
+	 * 根据加油站官方编号查询换站相关加油站信息
+	 *
+	 * @param officialId
+	 *            加油站官方编号
+	 * @return 加油站经纬度、施解封半径、占地范围、手持机设备ID
+	 */
+    Map<String, Object> getStationForChangeByOfficialId(String officialId);
+
+	/**
 	 * 根据加油站ID查询该加油站持有的普通卡
 	 * 
 	 * @param id

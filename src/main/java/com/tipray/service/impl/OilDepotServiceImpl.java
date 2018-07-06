@@ -3,6 +3,7 @@ package com.tipray.service.impl;
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.Station;
+import com.tipray.bean.VehicleParamVer;
 import com.tipray.bean.baseinfo.Card;
 import com.tipray.bean.baseinfo.InOutReader;
 import com.tipray.bean.baseinfo.OilDepot;
@@ -471,7 +472,15 @@ public class OilDepotServiceImpl implements OilDepotService {
         jdbcUtil.setLong(1, ver);
         jdbcUtil.executeUpdate();
         jdbcUtil.commit();
-        vehicleParamVerDao.updateVerByParam(param, ver);
+        VehicleParamVer vehicleParamVer = vehicleParamVerDao.getByParam(param);
+        if (vehicleParamVer == null) {
+            vehicleParamVer = new VehicleParamVer();
+            vehicleParamVer.setParam(param);
+            vehicleParamVer.setVer(ver);
+            vehicleParamVerDao.add(vehicleParamVer);
+        } else {
+            vehicleParamVerDao.updateVerByParam(param, ver);
+        }
     }
 
     /**

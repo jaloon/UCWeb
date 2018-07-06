@@ -144,13 +144,13 @@
 				and u.name like CONCAT('%',#{entity.user.name},'%')
 			</if>
 		</if>
-		order by vl.id asc  
+		order by vl.id DESC
 		limit #{page.startRow}, #{page.rows}
 	</select>
 	
 	<select id="findUdpResult" parameterType="java.util.Map" resultType="java.util.LinkedHashMap">
 		SELECT
-			<!-- DATE_FORMAT( request_time, '%Y-%m-%d %H:%I:%S' )							requestTime, -->
+			<!-- DATE_FORMAT( request_time, '%Y-%m-%d %H:%i:%s' )							requestTime, -->
 			#{token} token,
 			description,
 			result,

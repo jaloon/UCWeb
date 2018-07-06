@@ -4,14 +4,19 @@ import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.record.DistributionRecord;
 import com.tipray.dao.DistributionRecordDao;
+import com.tipray.dao.GasStationDao;
 import com.tipray.dao.TrackDao;
 import com.tipray.dao.VehicleDao;
 import com.tipray.service.DistributionRecordService;
+import com.tipray.util.BytesConverterByLittleEndian;
+import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +34,8 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 	private DistributionRecordDao distributionRecordDao;
 	@Resource
     private VehicleDao vehicleDao;
+	@Resource
+    private GasStationDao gasStationDao;
 	@Resource
     private TrackDao trackDao;
 
@@ -65,13 +72,106 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 	}
 
 	@Override
-	public void addDistributionRecord(Map<String, Object> distributionMap) {
+	public ByteBuffer addDistributionRecord(Map<String, Object> distributionMap) {
 		// 车辆ID
 		Long carId = (Long) distributionMap.get("carId");
 		// 仓号
 		Integer storeId = Integer.parseInt((String) distributionMap.get("binNum"), 10);
 		distributionRecordDao.checkDistribute(carId, storeId);
 		distributionRecordDao.addByDistributionMap(distributionMap);
+		// 配送ID
+        Long transportId = (Long) distributionMap.get("id");
+        // 获取加油站相关信息
+        Map<String, Object> stationMap = gasStationDao.getStationForChangeByOfficialId((String) distributionMap.get("deptId"));
+        if (EmptyObjectUtil.isEmptyMap(stationMap)) {
+            throw new IllegalArgumentException("加油站不存在！");
+        }
+        // 加油站Id
+        long stationId = (long) stationMap.get("id");
+        // 加油站名称（简称）
+        String stationName = (String) stationMap.get("name");
+        // 加油站经度
+        float longitude = (float) stationMap.get("longitude");
+        // 加油站纬度
+        float latitude = (float) stationMap.get("latitude");
+        // 加油站施解封半径
+        byte radius = ((Integer) stationMap.get("radius")).byteValue();
+        // 加油站占地范围
+        byte[] cover = (byte[]) stationMap.get("cover");
+        // 加油站手持机设备ID
+        Integer handset = (Integer) stationMap.get("handset");
+        // 加油站手持机版本
+        Integer handver = (Integer) stationMap.get("handver");
+        // 获取加油站普通卡信息
+        List<Long> cardIds = gasStationDao.findOrdinaryCardById(stationId);
+
+        byte[] tranportIdDword = BytesConverterByLittleEndian.getBytes(transportId.intValue());
+        byte[] stationNameBuf = stationName.getBytes(StandardCharsets.UTF_8);
+        int stationNameBufLen = stationNameBuf.length;
+        byte[] userNameBuf = "物流配送接口".getBytes(StandardCharsets.UTF_8);
+        int userNameBufLen = userNameBuf.length;
+        int coverCoodrNum = 0, handsetNum = 0, cardNum = 0;
+        // 缓冲区容量
+        int capacity = 28 + stationNameBufLen + userNameBufLen;
+        if (!EmptyObjectUtil.isEmptyArray(cover)) {
+            coverCoodrNum = cover.length / 8;
+            capacity += cover.length;
+        }
+        if (handset != null && handset != 0) {
+            handsetNum = 1;
+            capacity += 8;
+        }
+        if (!EmptyObjectUtil.isEmptyList(cardIds)) {
+            cardNum = cardIds.size();
+            capacity += cardNum * 8;
+        }
+        // 构建协议数据体
+        ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加换站类型，1个字节
+        dataBuffer.put((byte) 2);
+        // 添加仓号，1个字节
+        dataBuffer.put(storeId.byteValue());
+        // 添加原配送ID，4个字节
+        dataBuffer.put(tranportIdDword);
+        // 添加新配送ID，4个字节
+        dataBuffer.put(tranportIdDword);
+        // 添加新加油站ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes((int) stationId));
+        // 添加新加油站经度，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(longitude));
+        // 添加新加油站纬度，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(latitude));
+        // 添加允许开关锁坐标半径（米），1个字节
+        dataBuffer.put(radius);
+        // 添加加油站占地范围坐标点数目，1个字节
+        dataBuffer.put((byte) coverCoodrNum);
+        if (coverCoodrNum > 0) {
+            // 添加加油站占地范围
+            dataBuffer.put(cover);
+        }
+        // 添加手持机数目，1个字节
+        dataBuffer.put((byte) handsetNum);
+        if (handsetNum > 0) {
+            // 添加手持机设备ID，4个字节
+            dataBuffer.put(BytesConverterByLittleEndian.getBytes(handset));
+            // 添加手持机版本，4个字节
+            dataBuffer.put(BytesConverterByLittleEndian.getBytes(handver));
+        }
+        // 添加普通卡数目，1个字节
+        dataBuffer.put((byte) cardNum);
+        if (cardNum > 0) {
+            // 添加普通卡ID，每张卡8个字节
+            cardIds.parallelStream().forEach(cardId -> dataBuffer.put(BytesConverterByLittleEndian.getBytes(cardId)));
+        }
+        // 添加加油站名称长度，1个字节
+        dataBuffer.put((byte) stationNameBufLen);
+        // 添加加油站名称，UTF-8编码
+        dataBuffer.put(stationNameBuf);
+        // 添加姓名长度，1个字节
+        dataBuffer.put((byte) userNameBufLen);
+        // 添加操作员姓名，UTF-8编码
+        dataBuffer.put(userNameBuf);
+        return dataBuffer;
 	}
 
 	@Override

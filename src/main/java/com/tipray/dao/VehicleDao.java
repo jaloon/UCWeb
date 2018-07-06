@@ -102,6 +102,13 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     Long getIdByCarNo(String carNo);
 
     /**
+     * 根据车牌号获取仓数
+     * @param carNo 车牌号
+     * @return 仓数
+     */
+    Integer getStoreNumByCarNo(String carNo);
+
+    /**
      * 根据车载终端ID获取车辆信息
      *
      * @param terminalId {@link Integer} 车载终端ID
@@ -236,6 +243,13 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      * @param map 远程操作信息
      */
     void addRemoteControlRecord(Map<String, Object> map);
+
+    /**
+     * 添加远程操作记录
+     *
+     * @param map 远程状态变更信息
+     */
+    void addRemoteStatusAlterRecord(Map<String, Object> map);
 
     /**
      * 根据车辆ID和远程操作类型获取远程操作ID

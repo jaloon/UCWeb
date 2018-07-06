@@ -19,6 +19,7 @@ import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
 import com.tipray.constant.reply.*;
 import com.tipray.core.ThreadVariable;
+import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.exception.UdpException;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
@@ -83,7 +84,7 @@ public class VehicleManageController {
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
-    // @PermissionAnno("paramModule")
+    @PermissionAnno("gpsConfig")
     @RequestMapping(value = "asyn_terminal_config_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynTerminalConfigRequest(
@@ -200,6 +201,7 @@ public class VehicleManageController {
      * @return {@link ResponseMsg}
      * @see TerminalConfigBitMarkConst
      */
+    @PermissionAnno("funcEnable")
     @RequestMapping(value = "asyn_terminal_enable_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynTerminalEnableRequest(
@@ -276,6 +278,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("bindTerminal")
     @RequestMapping(value = "asyn_vehicle_bind_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynVehicleBindRequest(
@@ -400,6 +403,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("bindLock")
     @RequestMapping(value = "asyn_lock_listen_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynLockListenRequest(
@@ -496,6 +500,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("bindLock")
     @RequestMapping(value = "asyn_lock_clear_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynLockClearRequest(
@@ -582,6 +587,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("bindLock")
     @RequestMapping(value = "asyn_lock_trigger_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynLockTriggerRequest(
@@ -680,6 +686,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("bindLock")
     @RequestMapping(value = "asyn_lock_bind_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynLockBindRequest(
@@ -831,6 +838,7 @@ public class VehicleManageController {
      * @param matchVer    {@link Integer} 升级是否匹配版本（0 否， 1 是）
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("softUpgrade")
     @RequestMapping(value = "terminal_upgrade_file_info", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg terminalUpgradeFileInfo(
@@ -934,6 +942,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("softUpgrade")
     @RequestMapping(value = "asyn_terminal_upgrade_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynTerminalUpgradeRequest(
@@ -1016,6 +1025,7 @@ public class VehicleManageController {
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("softUpgrade")
     @RequestMapping(value = "terminal_cancel_upgrade_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg terminalCancelUpgradeRequest(
@@ -1098,6 +1108,7 @@ public class VehicleManageController {
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("changeStation")
     @RequestMapping(value = "asyn_change_station_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynChangeStationRequest(
@@ -1226,6 +1237,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("eliminateAlarm")
     @RequestMapping(value = "asyn_alarm_eliminate_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynAlarmEliminateRequest(
@@ -1383,29 +1395,30 @@ public class VehicleManageController {
     }
 
     /**
-     * 远程控制
+     * 远程车辆进出
      *
      * @param token           {@link String} UUID令牌
-     * @param controlType     {@link Integer} 远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5 进入应急 | 6 取消应急 | 7：状态强制变更 | 8：待进油区 | 9 进油区 | 10 出油区）
+     * @param controlType     {@link Byte} 远程操作类型（1：进油库 | 2：出油库 | 3：进加油站 | 4：出加油站 | 5 进入应急 | 6 取消应急 | 7：状态强制变更 | 8：待进油区 | 9 进油区 | 10 出油区）
      * @param carNumber       {@link String} 车牌号
-     * @param stationType     {@link Integer} 站点类型（1：在油库 | 2：在加油站）
+     * @param stationType     {@link Byte} 站点类型（1：在油库 | 2：在加油站）
      * @param stationId       {@link Integer} 站点ID
-     * @param status          {@link Integer} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区）
+     * @param lockIds         {@link String} 车辆状态要求变更为【应急】时有效。锁设备ID列表，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
      * @param longitude       {@link Integer} 手机定位经度
      * @param latitude        {@link Integer} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
-    @RequestMapping(value = "asyn_remote_control_request", method = {RequestMethod.POST, RequestMethod.GET})
+    @PermissionAnno("remoteModule")
+    @RequestMapping(value = "asyn_remote_inout_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
-    public ResponseMsg asynRemoteControlRequest(
+    public ResponseMsg asynRemoteInOutRequest(
             @RequestParam(value = "token", required = false) String token,
-            @RequestParam(value = "control_type", required = false) Integer controlType,
+            @RequestParam(value = "control_type", required = false) Byte controlType,
             @RequestParam(value = "car_number", required = false) String carNumber,
-            @RequestParam(value = "station_type", required = false) Integer stationType,
+            @RequestParam(value = "station_type", required = false) Byte stationType,
             @RequestParam(value = "station_id", required = false) Integer stationId,
-            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "lock_ids", required = false) String lockIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
@@ -1417,16 +1430,15 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车辆远程控制：token={}, controlType={}, carNumber={}, stationId={}, status={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
-                token, controlType, carNumber, stationId, isApp, status, longitude, latitude, isLocationValid);
+                "远程车辆进出：token={}, controlType={}, carNumber={}, stationType={}, stationId={}, lockIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, controlType, carNumber, stationType, stationId, lockIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_REMOTE | LogTypeConst.TYPE_REMOTE_CONTROL
                 | LogTypeConst.RESULT_DONE;
         String description = new StringBuffer("远程控制：").append(user.getName()).append("通过")
-                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("远程控制车辆").append(carNumber)
-                .append(getRemoteControlType(controlType))
-                .append(controlType == null ? "" : controlType == 7 ? getCarStatus(status) : stationId.toString()).toString();
+                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("远程控制车辆进出").append(carNumber)
+                .append(getRemoteControlType(controlType)).append(controlType == null ? "" : stationId.toString()).toString();
         Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
         if (logId == null || logId == 0L) {
             return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
@@ -1437,108 +1449,154 @@ public class VehicleManageController {
         try {
             if (controlType == null) {
                 result = "失败，远程操作类型为空！";
-                logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CONTROL_TYPE_NULL);
+                logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.CONTROL_TYPE_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CONTROL_TYPE_NULL);
             }
-            if (controlType < 1 || controlType > 10) {
+            if (controlType < 1 || controlType > 10 || controlType == 7) {
                 result = "失败，远程操作类型无效！";
-                logger.error("车辆远程控制失败：远程操作类型【{}】无效！", controlType);
+                logger.error("远程车辆进出失败：远程操作类型【{}】无效！", controlType);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CONTROL_TYPE_INVALID);
             }
+            if (stationType == null) {
+                result = "失败，站点类型为空！";
+                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_NULL);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_NULL);
+            }
             switch (controlType) {
-                case RemoteControlConst.REMOTE_INTO_DEPOT:
+                case RemoteControlConst.REMOTE_TYPE_1_INTO_DEPOT:
                     type |= LogTypeConst.TYPE_IN_OIL_DEPOT;
-                    stationType = 1;
+                    if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_QUIT_DEPOT:
+                case RemoteControlConst.REMOTE_TYPE_2_QUIT_DEPOT:
                     type |= LogTypeConst.TYPE_OUT_OIL_DEPOT;
-                    stationType = 1;
+                    if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_INTO_STATION:
+                case RemoteControlConst.REMOTE_TYPE_3_INTO_STATION:
                     type |= LogTypeConst.TYPE_IN_GAS_STATION;
-                    stationType = 2;
+                    if (stationType != RemoteControlConst.STATION_TYPE_2_STATION) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_QUIT_STATION:
+                case RemoteControlConst.REMOTE_TYPE_4_QUIT_STATION:
                     type |= LogTypeConst.TYPE_OUT_GAS_STATION;
-                    stationType = 2;
+                    if (stationType != RemoteControlConst.STATION_TYPE_2_STATION) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_INTO_URGENT:
+                case RemoteControlConst.REMOTE_TYPE_5_INTO_URGENT:
                     type |= LogTypeConst.TYPE_IN_URGENT;
-                    stationType = 0;
+                    if (stationType < RemoteControlConst.STATION_TYPE_1_DEPOT
+                            || stationType > RemoteControlConst.STATION_TYPE_2_STATION) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_QUIT_URGENT:
+                case RemoteControlConst.REMOTE_TYPE_6_QUIT_URGENT:
                     type |= LogTypeConst.TYPE_OUT_URGENT;
-                    stationType = 0;
+                    if (stationType < RemoteControlConst.STATION_TYPE_1_DEPOT
+                            || stationType > RemoteControlConst.STATION_TYPE_2_STATION) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_ALTER_STATUS:
-                    type |= LogTypeConst.TYPE_CAR_STATUS_ALTER;
-                    break;
-                case RemoteControlConst.REMOTE_WAIT_OILDOM:
+                case RemoteControlConst.REMOTE_TYPE_8_WAIT_OILDOM:
                     type |= LogTypeConst.TYPE_WAIT_OILDOM;
-                    stationType = 1;
+                    if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_INTO_OILDOM:
+                case RemoteControlConst.REMOTE_TYPE_9_INTO_OILDOM:
                     type |= LogTypeConst.TYPE_BARRIER_IN;
-                    stationType = 1;
+                    if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
-                case RemoteControlConst.REMOTE_QUIT_OILDOM:
+                case RemoteControlConst.REMOTE_TYPE_10_QUIT_OILDOM:
                     type |= LogTypeConst.TYPE_BARRIER_OUT;
-                    stationType = 1;
+                    if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
+                        result = "失败，站点类型无效！";
+                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                    }
                     break;
                 default:
                     break;
             }
             if (StringUtil.isEmpty(carNumber)) {
                 result = "失败，车牌号为空！";
-                logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CARNUMBER_NULL);
+                logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.CARNUMBER_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.CARNUMBER_NULL);
             }
             if (stationId == null) {
                 result = "失败，站点ID为空！";
-                logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.STATION_ID_NULL);
+                logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_ID_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_ID_NULL);
             }
-            if (controlType == 7) {
-                if (stationType == null) {
-                    result = "失败，站点类型为空！";
-                    logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.STATION_TYPE_NULL);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_NULL);
-                }
-                if (stationType < 1 || stationType > 2) {
-                    result = "失败，站点类型无效！";
-                    logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
-                }
-                if (status == null) {
-                    result = "失败，车辆状态为空！";
-                    logger.error("车辆远程控制失败：{}", RemoteControlErrorEnum.CAR_STATUS_NULL);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_NULL);
-                }
-                if (status < 1 || status > 7) {
-                    result = "失败，车辆状态无效！";
-                    logger.error("车辆远程控制失败：车辆状态【{}】无效！", status);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_INVALID);
-                }
+            if (stationId == 0) {
+                result = "失败，站点ID为0！";
+                logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_ID_ZERO);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_ID_ZERO);
             }
-
             Vehicle vehicle = vehicleService.getByCarNo(carNumber);
             if (vehicle == null) {
                 result = "失败，车辆不存在！";
-                logger.error("车辆远程控制失败：车辆{}不存在！", carNumber);
+                logger.error("远程车辆进出失败：车辆{}不存在！", carNumber);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.VEHICLE_INVALID);
             }
             if (vehicle.getVehicleDevice() == null) {
                 result = "失败，车辆未绑定车台！";
-                logger.error("车辆远程控制失败：车辆{}未绑定车载终端！", carNumber);
+                logger.error("远程车辆进出失败：车辆{}未绑定车载终端！", carNumber);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.VEHICLE_UNBINDED);
             }
             int terminalId = vehicle.getVehicleDevice().getDeviceId();
+
+            int lockNum = 0;
+            byte[] lockIdBuf = null;
+            if (controlType == RemoteControlConst.REMOTE_TYPE_5_INTO_URGENT) {
+                if (lockIds == null) {
+                    result = "失败，锁设备ID列表为空！";
+                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.LOCK_IDS_NULL);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.LOCK_IDS_NULL);
+                }
+                if (!lockIds.trim().isEmpty()) {
+                    String[] lockArr = lockIds.split(",");
+                    lockNum = lockArr.length;
+                    lockIdBuf = new byte[lockNum * 4];
+                    for (int i = 0; i < lockNum; i++) {
+                        int lockId = Integer.parseInt(lockArr[i], 10);
+                        lockIdBuf[i * 4] = (byte) (lockId & 0xff);
+                        lockIdBuf[i * 4 + 1] = (byte) ((lockId >> 8) & 0xff);
+                        lockIdBuf[i * 4 + 2] = (byte) ((lockId >> 16) & 0xff);
+                        lockIdBuf[i * 4 + 3] = (byte) ((lockId >> 24) & 0xff);
+                    }
+                }
+            }
+
             Map<String, Object> map = new HashMap<>(16);
             map.put("userId", user.getId());
             map.put("carId", vehicle.getId());
             map.put("type", controlType);
             map.put("stationType", stationType);
             map.put("stationId", stationId);
+            map.put("lockIds", lockIdBuf);
             map.put("isApp", isApp);
             map.put("longitude", longitude);
             map.put("latitude", latitude);
@@ -1546,59 +1604,237 @@ public class VehicleManageController {
 
             String userName = user.getName();
 
-            if (controlType != 7) { // 远程车辆进出
-                int readerId = 0;
-                if (controlType > 8) { // 进出油区
-                    List<Integer> readerIds = inOutReaderService.findBarrierReaderIdByDepotId(stationId, controlType == 5 ? 1 : 2);
-                    if (EmptyObjectUtil.isEmptyList(readerIds)) {
-                        result = "失败，油库未指定道闸转发读卡器！";
-                        logger.error("车辆远程控制失败：油库【{}】未指定道闸转发读卡器！", stationId);
-                        return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_NULL);
-                    }
-                    if (readerIds.size() > 1) {
-                        result = "失败，油库道闸转发读卡器太多！";
-                        logger.error("车辆远程控制失败：油库【{}】道闸转发读卡器太多！", stationId);
-                        return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_TOO_MUCH);
-                    }
-                    readerId = readerIds.get(0);
+            int readerId = 0;
+            if (controlType > 8) { // 进出油区
+                Integer barrierType = controlType == RemoteControlConst.REMOTE_TYPE_9_INTO_OILDOM ? 1 : 2;
+                List<Integer> readerIds = inOutReaderService.findBarrierReaderIdByDepotId(stationId, barrierType);
+                if (EmptyObjectUtil.isEmptyList(readerIds)) {
+                    result = "失败，油库未指定道闸转发读卡器！";
+                    logger.error("远程车辆进出失败：油库【{}】未指定道闸转发读卡器！", stationId);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_NULL);
                 }
-                // 添加远程操作记录
-                Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
-                params.put("remoteControlId", remoteControlId);
-                cacheId = addCache(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST, logId, description, params);
-
-                ByteBuffer src = SendPacketBuilder.buildProtocol0x1403(terminalId, remoteControlId, readerId,
-                        controlType.byteValue(), stationId, userName);
-                boolean isSend = udpServer.send(src);
-                if (!isSend) {
-                    throw new UdpException("UDP发送数据异常！");
+                if (readerIds.size() > 1) {
+                    result = "失败，油库道闸转发读卡器太多！";
+                    logger.error("远程车辆进出失败：油库【{}】道闸转发读卡器太多！", stationId);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_TOO_MUCH);
                 }
-                addTimeoutTask(src, cacheId);
-                vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST);
-            } else { // 远程状态变更
-                // 添加远程操作记录
-                Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
-
-                params.put("remoteControlId", remoteControlId);
-
-                cacheId = addCache(UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST, logId, description, params);
-
-                ByteBuffer src = SendPacketBuilder.buildProtocol0x1404(terminalId, remoteControlId, status.byteValue(),
-                        stationType.byteValue(), stationId == null ? 0 : stationId, userName);
-                boolean isSend = udpServer.send(src);
-                if (!isSend) {
-                    throw new UdpException("UDP发送数据异常！");
-                }
-                addTimeoutTask(src, cacheId);
-                vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST);
+                readerId = readerIds.get(0);
             }
-            logger.info("车辆远程控制指令发送成功！");
+            // 添加远程操作记录
+            Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
+            params.put("remoteControlId", remoteControlId);
+            cacheId = addCache(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST, logId, description, params);
+
+            ByteBuffer dataBuffer;
+            if (lockNum > 0) {
+                dataBuffer = SendPacketBuilder.buildDataBufForCarInOutUrgent(remoteControlId,
+                        readerId, controlType, stationType, stationId, (byte) lockNum, lockIdBuf, userName);
+            } else {
+                dataBuffer = SendPacketBuilder.buildDataBufForCarInOut(remoteControlId,
+                        readerId, controlType, stationType, stationId, userName);
+            }
+
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x1403(terminalId, dataBuffer);
+            boolean isSend = udpServer.send(src);
+            if (!isSend) {
+                throw new UdpException("UDP发送数据异常！");
+            }
+            addTimeoutTask(src, cacheId);
+            vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST);
+            logger.info("远程车辆进出指令发送成功！");
             return ResponseMsgUtil.success();
         } catch (Exception e) {
             removeCache(cacheId, params);
-            result = "失败，发送车辆远程控制请求异常！";
-            logger.error("车辆远程控制异常：e={}", e.toString());
-            logger.debug("车辆远程控制异常堆栈信息：", e);
+            result = "失败，发送远程车辆进出请求异常！";
+            logger.error("远程车辆进出异常：e={}", e.toString());
+            logger.debug("远程车辆进出异常堆栈信息：", e);
+            return ResponseMsgUtil.excetion(e);
+        } finally {
+            broadcastAndUpdateLog(vehicleManageLog, type, description, result);
+        }
+    }
+
+    /**
+     * 远程车辆状态强制变更
+     *
+     * @param token           {@link String} UUID令牌
+     * @param carNumber       {@link String} 车牌号
+     * @param stationType     {@link Byte} 站点类型（1：在油库 | 2：在加油站）
+     * @param stationId       {@link Integer} 站点ID
+     * @param status          {@link Byte} 车辆状态（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区）
+     * @param storeIds        {@link Short} 无符号单字节。车辆状态要求变更为【在加油站】时有效。其它状态时为0。<br>
+     *                        按位标识；每个位代表一个仓位。位序从低位开始对应到每个仓位。
+     * @param lockIds         {@link String} 车辆状态要求变更为【应急】时有效。锁设备ID列表，英文逗号“,”分隔
+     * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
+     * @param longitude       {@link Integer} 手机定位经度
+     * @param latitude        {@link Integer} 手机定位纬度
+     * @param isLocationValid {@link Integer} 手机定位是否有效
+     * @return {@link ResponseMsg}
+     */
+    @PermissionAnno("alterStatus")
+    @RequestMapping(value = "asyn_status_alter_request", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public ResponseMsg asynStatusAlterRequest(
+            @RequestParam(value = "token", required = false) String token,
+            @RequestParam(value = "car_number", required = false) String carNumber,
+            @RequestParam(value = "station_type", required = false) Byte stationType,
+            @RequestParam(value = "station_id", required = false) Integer stationId,
+            @RequestParam(value = "status", required = false) Byte status,
+            @RequestParam(value = "store_ids", required = false) Short storeIds,
+            @RequestParam(value = "lock_ids", required = false) String lockIds,
+            @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
+            @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
+            @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
+            @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
+        if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
+            return null;
+        } else {
+            session.setAttribute("token", token);
+        }
+        logger.info(
+                "远程车辆状态强制变更：token={}, carNumber={}, stationType={}, stationId={}, status={}, storeIds={}, lockIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, stationType, stationId, status, storeIds, lockIds, isApp, longitude, latitude, isLocationValid);
+        User user = ThreadVariable.getUser();
+        VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp);
+        Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_REMOTE | LogTypeConst.TYPE_CAR_STATUS_ALTER
+                | LogTypeConst.RESULT_DONE;
+        String description = new StringBuffer("远程控制：").append(user.getName()).append("通过")
+                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("远程强制变更车辆").append(carNumber)
+                .append("的状态为").append(getCarStatus(status)).toString();
+        Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+        if (logId == null || logId == 0L) {
+            return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
+        }
+        String result = "";
+        int cacheId = 0;
+        Map<String, Object> params = new HashMap<>();
+        try {
+            if (StringUtil.isEmpty(carNumber)) {
+                result = "失败，车牌号为空！";
+                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.CARNUMBER_NULL);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.CARNUMBER_NULL);
+            }
+            if (stationId == null) {
+                result = "失败，站点ID为空！";
+                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_ID_NULL);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_ID_NULL);
+            }
+            if (stationType == null) {
+                result = "失败，站点类型为空！";
+                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_NULL);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_NULL);
+            }
+            if (stationType < RemoteControlConst.STATION_TYPE_1_DEPOT
+                    || stationType > RemoteControlConst.STATION_TYPE_2_STATION) {
+                result = "失败，站点类型无效！";
+                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
+            }
+            if (status == null) {
+                result = "失败，车辆状态为空！";
+                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.CAR_STATUS_NULL);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_NULL);
+            }
+            if (status < RemoteControlConst.VEHICLE_STATUS_1_IN_DEPOT
+                    || status > RemoteControlConst.VEHICLE_STATUS_7_IN_OILDOM) {
+                result = "失败，车辆状态无效！";
+                logger.error("远程车辆状态强制变更失败：车辆状态【{}】无效！", status);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.CAR_STATUS_INVALID);
+            }
+            if (status == RemoteControlConst.VEHICLE_STATUS_3_IN_STATION) {
+                if (storeIds == null) {
+                    result = "失败，仓号列表为空 ！";
+                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STORE_IDS_NULL);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.STORE_IDS_NULL);
+                }
+                if (storeIds < 1 && storeIds > 255) {
+                    result = "失败，仓号列表数值越界！";
+                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STORE_IDS_BEYOND_SCOPE);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.STORE_IDS_BEYOND_SCOPE);
+                }
+            } else {
+                storeIds = 0;
+            }
+            int lockNum = 0;
+            byte[] lockIdBuf = null;
+            if (status == RemoteControlConst.VEHICLE_STATUS_5_URGENT) {
+                if (lockIds == null) {
+                    result = "失败，锁设备ID列表为空！";
+                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.LOCK_IDS_NULL);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.LOCK_IDS_NULL);
+                }
+                if (!lockIds.trim().isEmpty()) {
+                    String[] lockArr = lockIds.split(",");
+                    lockNum = lockArr.length;
+                    lockIdBuf = new byte[lockNum * 4];
+                    for (int i = 0; i < lockNum; i++) {
+                        int lockId = Integer.parseInt(lockArr[i], 10);
+                        lockIdBuf[i * 4] = (byte) (lockId & 0xff);
+                        lockIdBuf[i * 4 + 1] = (byte) ((lockId >> 8) & 0xff);
+                        lockIdBuf[i * 4 + 2] = (byte) ((lockId >> 16) & 0xff);
+                        lockIdBuf[i * 4 + 3] = (byte) ((lockId >> 24) & 0xff);
+                    }
+                }
+            }
+
+            Vehicle vehicle = vehicleService.getByCarNo(carNumber);
+            if (vehicle == null) {
+                result = "失败，车辆不存在！";
+                logger.error("远程车辆状态强制变更失败：车辆{}不存在！", carNumber);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.VEHICLE_INVALID);
+            }
+            if (vehicle.getVehicleDevice() == null) {
+                result = "失败，车辆未绑定车台！";
+                logger.error("远程车辆状态强制变更失败：车辆{}未绑定车载终端！", carNumber);
+                return ResponseMsgUtil.error(RemoteControlErrorEnum.VEHICLE_UNBINDED);
+            }
+            int terminalId = vehicle.getVehicleDevice().getDeviceId();
+            Map<String, Object> map = new HashMap<>(16);
+            map.put("userId", user.getId());
+            map.put("carId", vehicle.getId());
+            map.put("type", RemoteControlConst.REMOTE_TYPE_7_ALTER_STATUS);
+            map.put("stationType", stationType);
+            map.put("stationId", stationId);
+            map.put("storeIds", storeIds);
+            map.put("lockIds", lockIdBuf);
+            map.put("isApp", isApp);
+            map.put("longitude", longitude);
+            map.put("latitude", latitude);
+            map.put("isLocationValid", isLocationValid);
+
+            String userName = user.getName();
+
+            // 添加远程操作记录
+            Integer remoteControlId = vehicleService.addRemoteStatusAlterRecord(map);
+
+            params.put("remoteControlId", remoteControlId);
+
+            cacheId = addCache(UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST, logId, description, params);
+
+            ByteBuffer dataBuffer;
+            if (lockNum > 0) {
+                dataBuffer = SendPacketBuilder.buildDataBufForCarStatusUrgent(remoteControlId,
+                        stationType, stationId, (byte) lockNum, lockIdBuf, userName);
+            } else {
+                dataBuffer = SendPacketBuilder.buildDataBufForCarStatusAlter(remoteControlId,
+                        status, stationType, stationId, storeIds.byteValue(), userName);
+            }
+
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x1404(terminalId, dataBuffer);
+            boolean isSend = udpServer.send(src);
+            if (!isSend) {
+                throw new UdpException("UDP发送数据异常！");
+            }
+            addTimeoutTask(src, cacheId);
+            vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST);
+            logger.info("远程车辆状态强制变更指令发送成功！");
+            return ResponseMsgUtil.success();
+        } catch (Exception e) {
+            removeCache(cacheId, params);
+            result = "失败，发送远程车辆状态强制变更请求异常！";
+            logger.error("远程车辆状态强制变更异常：e={}", e.toString());
+            logger.debug("远程车辆状态强制变更异常堆栈信息：", e);
             return ResponseMsgUtil.excetion(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
@@ -1617,6 +1853,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("unlockReset")
     @RequestMapping(value = "asyn_lock_reset_request", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg asynLockResetRequest(
@@ -1736,7 +1973,7 @@ public class VehicleManageController {
     @RequestMapping(value = "asyn_vehicle_manage_response", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public Map<String, Object> asynVehicleManageResponse(
-            @RequestParam(value = "udp_id", required = false) Short udpBizId,
+            @RequestParam(value = "udp_id", required = false) Integer udpBizId,
             @RequestParam(value = "token", required = false) String token,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp) throws IOException {
         logger.info("获取用户车辆管理指令回复：udpBizId={}, token={}, isApp={}", udpBizId, token, isApp);
@@ -1744,7 +1981,7 @@ public class VehicleManageController {
             logger.warn("UDP业务ID为空！");
             return null;
         }
-        if (Arrays.binarySearch(UdpBizId.REQUEST_BIZ_IDS, udpBizId) < 0) {
+        if (Arrays.binarySearch(UdpBizId.REQUEST_BIZ_IDS, udpBizId.shortValue()) < 0) {
             logger.warn("UDP业务ID【{}】越界！", udpBizId);
             return null;
         }
@@ -1878,10 +2115,10 @@ public class VehicleManageController {
     /**
      * 获取远程操作类型
      *
-     * @param controlType {@link Integer} 远程操作类型值
+     * @param controlType {@link Byte} 远程操作类型值
      * @return {@link String} 远程操作类型名称
      */
-    private String getRemoteControlType(Integer controlType) {
+    private String getRemoteControlType(Byte controlType) {
         if (controlType == null) {
             return "未知远程操作类型";
         }
@@ -1914,10 +2151,10 @@ public class VehicleManageController {
     /**
      * 获取车辆状态
      *
-     * @param carStatus {@link Integer} 车辆状态值（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区)
+     * @param carStatus {@link Byte} 车辆状态值（0：未知 | 1：在油库 | 2：在途中 | 3：在加油站 | 4：返程中 | 5：应急 | 6: 待入油区 | 7：在油区)
      * @return {@link String} 车辆状态名称
      */
-    private String getCarStatus(Integer carStatus) {
+    private String getCarStatus(Byte carStatus) {
         switch (carStatus) {
             case 1:
                 return "在油库";

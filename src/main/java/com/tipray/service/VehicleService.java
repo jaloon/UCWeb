@@ -72,6 +72,13 @@ public interface VehicleService {
     Long getIdByCarNo(String carNo);
 
     /**
+     * 根据车牌号获取仓数
+     * @param carNo 车牌号
+     * @return 仓数
+     */
+    Integer getStoreNumByCarNo(String carNo);
+
+    /**
      * 根据车载终端ID获取车辆信息
      *
      * @param terminalId 车载终端ID
@@ -290,6 +297,15 @@ public interface VehicleService {
      * @throws ServiceException
      */
     Integer addRemoteControlRecord(Map<String, Object> map) throws ServiceException;
+
+    /**
+     * 添加远程操作记录
+     *
+     * @param map
+     * @return 远程操作ID
+     * @throws ServiceException
+     */
+    Integer addRemoteStatusAlterRecord(Map<String, Object> map) throws ServiceException;
 
     /**
      * 更新远程操作状态

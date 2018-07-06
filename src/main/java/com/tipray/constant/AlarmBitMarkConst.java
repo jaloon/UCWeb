@@ -99,8 +99,8 @@ public class AlarmBitMarkConst {
 	public static final byte LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK = 1 << 2;
 	/** 锁报警信息位4：进入应急 */
 	public static final byte LOCK_ALARM_BIT_4_ENTER_URGENT = 1 << 3;
-	/** 锁报警信息位5：保留 */
-	public static final byte LOCK_ALARM_BIT_5_RESERVED = 1 << 4;
+	/** 锁报警信息位5：异常移动 */
+	public static final byte LOCK_ALARM_BIT_5_UNUSUAL_MOVE = 1 << 4;
 	/** 锁报警信息位6：保留 */
 	public static final byte LOCK_ALARM_BIT_6_RESERVED = 1 << 5;
 	/** 锁报警信息位7：是否可用 */
@@ -109,7 +109,7 @@ public class AlarmBitMarkConst {
 	public static final byte LOCK_ALARM_BIT_8_ON_OFF = (byte) (1 << 7);
 	/** 有效的锁报警位 */
 	public static final byte VALID_LOCK_ALARM_BITS = LOCK_ALARM_BIT_1_COMM_ANOMALY | LOCK_ALARM_BIT_2_LOW_BATTERY
-            | LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK | LOCK_ALARM_BIT_4_ENTER_URGENT;
+            | LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK | LOCK_ALARM_BIT_4_ENTER_URGENT | LOCK_ALARM_BIT_5_UNUSUAL_MOVE;
 
 	private AlarmBitMarkConst() {}
 }

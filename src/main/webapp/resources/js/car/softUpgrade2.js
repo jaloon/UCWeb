@@ -18,7 +18,7 @@ function openFileLayer(title) {
         area: ['500px', height],
         content: $('.file'),
         end: function () {
-            console.log('close layer')
+            console.log('close file layer')
         }
     });
 }

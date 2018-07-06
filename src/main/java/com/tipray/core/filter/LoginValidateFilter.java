@@ -35,13 +35,11 @@ public class LoginValidateFilter implements Filter {
             HttpServletRequest request = (HttpServletRequest) servletRequest;
             HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-            // 令牌检查
-            // HttpSession session = request.getSession();
-            // String token = (String) request.getParameter("token");
-            // if (!UUIDUtil.verifyUUIDToken(token, session)) {
-            //     return;
-            // } else {
-            //     session.setAttribute("token", token);
+            // Enumeration<String> enumeration = request.getHeaderNames();
+            // while (enumeration.hasMoreElements()) {
+            //     String name = enumeration.nextElement();
+            //     String header = request.getHeader(name);
+            //     log.info("{} ==> {}", name, header);
             // }
 
             // 路径白名单检查
@@ -77,7 +75,7 @@ public class LoginValidateFilter implements Filter {
                 }
 
                 String path = request.getContextPath();
-                String requestUrl = HttpRequestUtil.getRequestUrl(request);
+                String requestUrl =  HttpRequestUtil.getRequestUrl(request);
                 encodeUrl(requestUrl);
 
                 String location = new StringBuffer(path).append("/login.jsp?requestUrl=").append(requestUrl)

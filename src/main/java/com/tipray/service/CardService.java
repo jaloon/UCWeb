@@ -1,12 +1,12 @@
 package com.tipray.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Card;
 import com.tipray.core.exception.ServiceException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * CardService
@@ -107,9 +107,7 @@ public interface CardService {
 	 * 根据卡类型查询未使用的卡
 	 * 
 	 * @param cardType
-	 * @param oilDepotId
-	 * @param gasStationId
 	 * @return
 	 */
-    List<Long> findUnusedCard(Integer cardType, Long oilDepotId, Long gasStationId);
+    List<Long> findUnusedCard(Integer cardType);
 }

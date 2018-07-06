@@ -11,9 +11,9 @@
 		d.center_id centerId,
 		d.model model,
 		d.produce_time produceTime,
-		date_format(d.produce_time,'%Y-%m-%d %h:%i:%s') produce,
+		date_format(d.produce_time,'%Y-%m-%d %H:%i:%s') produce,
 		d.delivery_time deliveryTime,
-		date_format(d.delivery_time,'%Y-%m-%d %h:%i:%s') delivery,
+		date_format(d.delivery_time,'%Y-%m-%d %H:%i:%s') delivery,
 		d.remark remark,
 		d.gmt_create createDate,
 		d.gmt_modified modifyDate

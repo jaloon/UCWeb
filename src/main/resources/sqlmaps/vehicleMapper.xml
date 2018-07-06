@@ -369,6 +369,10 @@
         SELECT id FROM tbl_vehicle WHERE vehicle_number = #{carNo}
     </select>
 
+    <select id="getStoreNumByCarNo" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT store_num FROM tbl_vehicle WHERE vehicle_number = #{carNo}
+    </select>
+
 	<select id="findCarNumbersByTerminalIds" parameterType="java.lang.String" resultType="java.lang.String">
         SELECT vehicle_number FROM tbl_vehicle WHERE vehicle_device_id IN (${_parameter})
     </select>
@@ -413,13 +417,32 @@
 	
 	<insert id="addRemoteControlRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO 
-			tbl_remote_control(user_id, vehicle_id, `type`, station_type, station_id, is_app, is_lnglat_valid, longitude, latitude)
+			tbl_remote_control(user_id, vehicle_id, `type`, station_type, station_id, lock_device_id_list, is_app, is_lnglat_valid, longitude, latitude)
 		VALUES(
 			#{userId},
 			#{carId}, 
 			#{type}, 
 			IFNULL(#{stationType}, 0),
 			IFNULL(#{stationId}, 0),
+			#{lockIds},
+		  	IFNULL(#{isApp}, 0),
+		  	IFNULL(#{isLocationValid}, 0),
+		  	IFNULL(#{longitude}, 0),
+		  	IFNULL(#{latitude}, 0)
+		  )
+	</insert>
+
+	<insert id="addRemoteStatusAlterRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO
+			tbl_remote_control(user_id, vehicle_id, `type`, station_type, station_id, store_id_list, lock_device_id_list, is_app, is_lnglat_valid, longitude, latitude)
+		VALUES(
+			#{userId},
+			#{carId},
+			#{type},
+			IFNULL(#{stationType}, 0),
+			IFNULL(#{stationId}, 0),
+			IFNULL(#{storeIds}, 0),
+			#{lockIds},
 		  	IFNULL(#{isApp}, 0),
 		  	IFNULL(#{isLocationValid}, 0),
 		  	IFNULL(#{longitude}, 0),
@@ -498,7 +521,7 @@
 			t.angle,
 			t.speed,
 			HEX(t.lock_status_info) lock_status_info,
-			DATE_FORMAT(t.track_time,'%Y-%m-%d %H:%I:%S') track_time
+			DATE_FORMAT(t.track_time,'%Y-%m-%d %H:%i:%s') track_time
 		FROM
 			tbl_vehicle_track t,
 			tbl_vehicle v 

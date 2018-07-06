@@ -2,6 +2,7 @@ package com.tipray.service.impl;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.VehicleParamVer;
 import com.tipray.bean.baseinfo.Card;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.OilDepot;
@@ -155,12 +156,8 @@ public class CardServiceImpl implements CardService {
 	}
 
 	@Override
-	public List<Long> findUnusedCard(Integer cardType, Long oilDepotId, Long gasStationId) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("cardType", cardType);
-		map.put("oilDepotId", oilDepotId);
-		map.put("gasStationId", gasStationId);
-		return cardDao.findUnusedCards(map);
+	public List<Long> findUnusedCard(Integer cardType) {
+		return cardDao.findUnusedCards(cardType);
 	}
 
 	/**
@@ -281,7 +278,15 @@ public class CardServiceImpl implements CardService {
 		jdbcUtil.setLong(1, ver);
 		jdbcUtil.executeUpdate();
 		jdbcUtil.commit();
-		vehicleParamVerDao.updateVerByParam(param, ver);
+        VehicleParamVer vehicleParamVer = vehicleParamVerDao.getByParam(param);
+        if (vehicleParamVer == null) {
+            vehicleParamVer = new VehicleParamVer();
+            vehicleParamVer.setParam(param);
+            vehicleParamVer.setVer(ver);
+            vehicleParamVerDao.add(vehicleParamVer);
+        } else {
+            vehicleParamVerDao.updateVerByParam(param, ver);
+        }
 	}
 
 	/**

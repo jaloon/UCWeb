@@ -18,6 +18,46 @@
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/plugins/SelectBox.min.js"></script>
     <script src="../../resources/js/base.js"></script>
+    <c:if test="${mode==5|| mode == 7}">
+        <style>
+            <c:if test="${mode == 7}">
+            .store-ids-item {
+                height: 18px;
+                width: 18px;
+                margin: 9px 0px;
+            }
+
+            .store-ids-text {
+                margin: 10px 15px 10px 5px;
+                position: relative;
+                bottom: 4px;
+            }
+            </c:if>
+            .check-table {
+                font-size: 14px;
+                color: #445065;
+                text-align: center;
+            }
+
+            .check-table tr {
+                height: 30px;
+            }
+
+            .check-table tr td:first-child {
+                width: 40px;
+            }
+
+            .check-table tr td:nth-child(2) {
+                text-align: left;
+                padding-left: 10px;
+            }
+
+            .lock-check {
+                height: 16px;
+                width: 16px;
+            }
+        </style>
+    </c:if>
 </head>
 
 <body>
@@ -71,6 +111,7 @@
                     <tr>
                         <td>油库名称</td>
                         <td>
+                            <input type="hidden" id="stationType" value="1">
                             <select class="editInfo" id="stationId">
                                 <c:forEach var="station" items="${depots}" varStatus="varStatus">
                                     <option value="${station.id}">${station.name}</option>
@@ -83,6 +124,7 @@
                     <tr>
                         <td>加油站名称</td>
                         <td>
+                            <input type="hidden" id="stationType" value="2">
                             <select class="editInfo" id="stationId">
                                 <c:forEach var="station" items="${stations}" varStatus="varStatus">
                                     <option value="${station.id}">${station.name}</option>
@@ -92,7 +134,29 @@
                     </tr>
                 </c:if>
                 <c:if test="${mode==5 || mode==6}">
-                    <input type="hidden" id="stationId" value="0">
+                    <tr>
+                        <td>站点类型</td>
+                        <td>
+                            <select class="editInfo" id="stationType">
+                                <option value="1">油库</option>
+                                <option value="2">加油站</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>站点名称</td>
+                        <td>
+                            <select class="editInfo" id="stationId"></select>
+                        </td>
+                    </tr>
+                    <c:if test="${mode==5}">
+                    <tr id="lock_tr">
+                        <td>锁列表</td>
+                        <td>
+                            <input type="text" class="editInfo" id="lockIds" readonly>
+                        </td>
+                    </tr>
+                    </c:if>
                 </c:if>
                 <c:if test="${mode==7}">
                     <tr>
@@ -113,7 +177,6 @@
                         <td>站点类型</td>
                         <td>
                             <select class="editInfo" id="stationType">
-                                <option value="0">未知</option>
                                 <option value="1">油库</option>
                                 <option value="2">加油站</option>
                             </select>
@@ -122,9 +185,22 @@
                     <tr>
                         <td>站点名称</td>
                         <td>
-                            <select class="editInfo" id="stationId">
-                                <option value=0>未知</option>
-                            </select>
+                            <select class="editInfo" id="stationId"></select>
+                        </td>
+                    </tr>
+                    <tr id="store_tr" style="display: none;">
+                        <td>仓号列表</td>
+                        <td>
+                            <c:forEach var="storeId" begin="1" end="${storeNum}" step="1">
+                                <input type="checkbox" class="store-ids-item" value="${storeId}">
+                                <span class="store-ids-text">${storeId}</span>
+                            </c:forEach>
+                        </td>
+                    </tr>
+                    <tr id="lock_tr" style="display: none;">
+                        <td>锁列表</td>
+                        <td>
+                            <input type="text" class="editInfo" id="lockIds" readonly>
                         </td>
                     </tr>
                 </c:if>
@@ -137,12 +213,130 @@
         <input type="button" id="confirm" value="确认">
     </div>
 </div>
+<div id="lock_box" style="display: none;">
+    <table class="check-table"></table>
+</div>
 </body>
 
 </html>
 <script>
     $(function () {
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
+        <c:if test="${mode==5 || mode==6}">
+        var depotHtml = "", stationHtml = "";
+        $.getJSON("../../manage/oildepot/getAllOilDepotsAndGasStations.do",
+            function (data, textStatus, jqXHR) {
+                var depots = data.depots,
+                    stations = data.stations;
+                if (depots != undefined && depots != null && depots.length > 0) {
+                    for (var i = 0; i < depots.length; i++) {
+                        depotHtml += "<option value=" + depots[i].id + ">" + depots[i].name + "</option>"
+                    }
+                } else {
+                    depotHtml = "<option value=0>未知</option>";
+                }
+                if (stations != undefined && stations != null && stations.length > 0) {
+                    for (var i = 0; i < stations.length; i++) {
+                        stationHtml += "<option value=" + stations[i].id + ">" + stations[i].name + "</option>"
+                    }
+                } else {
+                    stationHtml = "<option value=0>未知</option>";
+                }
+                $("#stationId").html(depotHtml);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
+        $("#stationType").change(function () {
+            if ($("#stationType").val() == 0) {
+                $("#stationId").html("<option value=0>未知</option>");
+            } else if ($("#stationType").val() == 1) {
+                $("#stationId").html(depotHtml);
+            } else {
+                $("#stationId").html(stationHtml);
+            }
+        });
+        <c:if test="${mode==5}">
+        function parseLock(lock) {
+            return  "仓" + lock.store_id + "-" + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index;
+        }
+
+        var lock_html = "";
+        var lockNum = 0;
+        $.getJSON("../../manage/car/findlocksByCarNo.do?carNumber=${carStatus.carNumber}",
+            function (data, textStatus, jqXHR) {
+                var len = data.length;
+                if (len == 0) {
+                    layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
+                        icon: 2,
+                        time: 500
+                    }, function () {
+                        parent.layer.close(index);
+                    });
+                }
+                for (var i = 0; i < len; i++) {
+                    var lock = data[i];
+                    if (lock.is_has_bind == 1 && lock.bind_status == 2 /*&& lock.is_allowed_open == 2*/) {
+                        lock_html += "<tr><td><input type='checkbox' class='lock-check' value='"
+                            + lock.lock_device_id + "'></td><td>" + parseLock(lock) + "</td></tr>";
+                        lockNum++;
+                    }
+                }
+                if (lock_html.length == 0) {
+                    layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
+                        icon: 2,
+                        time: 500
+                    }, function () {
+                        parent.layer.close(index);
+                    });
+                }
+                $(".check-table").html(lock_html);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
+            }
+        });
+        var lockSelectedNum = 0;
+        $("#lock_tr").click(function () {
+            layer.open({
+                type: 1,
+                title: ['选择锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                // area: ['500px', '500px'],
+                content: $('#lock_box'),
+                end: function () {
+                    lockSelectedNum = 0;
+                    var lockids = "";
+                    $(".lock-check:checked").each(function () {
+                        lockids += "," + $(this).val();
+                        lockSelectedNum++;
+                    });
+                    if (lockids.length > 0) {
+                        $("#lockIds").val(lockids.slice(1));
+                    } else {
+                        $("#lockIds").val("");
+                    }
+                }
+            });
+        });
+        </c:if>
+        </c:if>
+
         <c:if test="${mode==7}">
+        var lock_html = "";
         //  $("#select_id option[value='3']").remove(); //删除值为3的option
         $("#changeStatus option[value=${carStatus.status}]").remove();
         var depotHtml = "", stationHtml = "";
@@ -164,7 +358,7 @@
                 } else {
                     stationHtml = "<option value=0>未知</option>";
                 }
-                $("#stationId").append(depotHtml);
+                $("#stationId").html(depotHtml);
             }
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
             if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
@@ -177,17 +371,108 @@
             }
         });
         $("#stationType").change(function () {
-            $("#stationId").empty();
             if ($("#stationType").val() == 0) {
-                $("#stationId").append("<option value=0>未知</option>");
+                $("#stationId").html("<option value=0>未知</option>");
             } else if ($("#stationType").val() == 1) {
-                $("#stationId").append(depotHtml);
+                $("#stationId").html(depotHtml);
             } else {
-                $("#stationId").append(stationHtml);
+                $("#stationId").html(stationHtml);
             }
         });
+
+        function parseLock(lock) {
+            return  "仓" + lock.store_id + "-" + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index;
+        }
+
+        var lockNum = 0;
+        $("#changeStatus").change(function () {
+            var status = $("#changeStatus").val();
+            if (status == 1 || status > 5) {
+                $("#stationType").val(1);
+                $("#stationId").html(depotHtml);
+            } else if (status == 3) { // 3 在加油站
+                $("#lock_tr").hide();
+                $("#store_tr").show();
+                $("#stationType").val(2);
+                $("#stationId").html(stationHtml);
+            } else if (status == 5) { // 5 应急
+                $("#store_tr").hide();
+                $("#lock_tr").show();
+                if (lock_html.length == 0) {
+                    $.getJSON("../../manage/car/findlocksByCarNo.do?carNumber=${carStatus.carNumber}",
+                        function (data, textStatus, jqXHR) {
+                            var len = data.length;
+                            if (len == 0) {
+                                layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
+                                    icon: 2,
+                                    time: 500
+                                }, function () {
+                                    parent.layer.close(index);
+                                });
+                            }
+                            lockNum = 0;
+                            for (var i = 0; i < len; i++) {
+                                var lock = data[i];
+                                if (lock.is_has_bind == 1 && lock.bind_status == 2 /*&& lock.is_allowed_open == 2*/) {
+                                    lock_html += "<tr><td><input type='checkbox' class='lock-check' value='"
+                                        + lock.lock_device_id + "'></td><td>" + parseLock(lock) + "</td></tr>";
+                                    lockNum++;
+                                }
+                            }
+                            if (lock_html.length == 0) {
+                                layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
+                                    icon: 2,
+                                    time: 500
+                                }, function () {
+                                    parent.layer.close(index);
+                                });
+                            }
+                            $(".check-table").html(lock_html);
+                        }
+                    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                            layer.confirm('登录失效，是否刷新页面重新登录？', {
+                                icon: 0,
+                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                            }, function () {
+                                location.reload(true);
+                            });
+                        }
+                    });
+                } else {
+                    $(".check-table").html(lock_html);
+                }
+            } else {
+                $("#store_tr").hide();
+                $("#lock_tr").hide();
+            }
+        });
+
+        var lockSelectedNum = 0;
+        $("#lock_tr").click(function () {
+            layer.open({
+                type: 1,
+                title: ['选择锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                // area: ['500px', '500px'],
+                content: $('#lock_box'),
+                end: function () {
+                    lockSelectedNum = 0;
+                    var lockids = "";
+                    $(".lock-check:checked").each(function () {
+                        lockids += "," + $(this).val();
+                        lockSelectedNum++;
+                    });
+                    if (lockids.length > 0) {
+                        $("#lockIds").val(lockids.slice(1));
+                    } else {
+                        $("#lockIds").val("");
+                    }
+                }
+            });
+        });
+
         </c:if>
-        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+
         $("#cancel").click(function () {
             parent.layer.close(index);
         });
@@ -210,17 +495,59 @@
             });
             </c:if>
             <c:if test="${carStatus.online==1}">
-            var stationId = $("#stationId").val();
-            var status = $("#changeStatus").val();
-            <c:if test="${mode==7}">
             var stationType = $("#stationType").val();
+            var stationId = $("#stationId").val();
+
+            <c:if test="${mode==7}">
+            var status = $("#changeStatus").val();
+            var storeIds = 0;
+            if (status == 3) {
+                $(".store-ids-item:checked").each(function () {
+                    storeIds |= 1 << ($(this).val() - 1);
+                });
+                if (storeIds == 0) {
+                    layer.alert('状态变更为在加油站时至少要选择一个仓！', {icon: 2}, function (index2) {
+                        layer.close(index2);
+                        $(".store-ids-item")[0].select();
+                    });
+                    return;
+                }
+            }
+            var lockIds = $("#lockIds").val();
+            if (status == 5 && lockSelectedNum == 0) {
+                layer.alert('状态变更为应急时至少要选择一把锁！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#lock_tr").click();
+                });
+                return;
+            }
+            if (lockNum == lockSelectedNum) {
+                lockIds = "";
+            }
+            var url = "../../manage/remote/asyn_status_alter_request";
+            var param = encodeURI("car_number=${carStatus.carNumber}&station_type=" + stationType
+                + "&station_id=" + stationId + "&status=" + status + "&store_ids=" + storeIds
+                + "&lock_ids=" + lockIds + "&token=" + generateUUID());
             </c:if>
             <c:if test="${mode!=7}">
-            var stationType = 0;
+            var lockIds = $("#lockIds").val();
+            <c:if test="${mode==5}">
+            if (lockSelectedNum == 0) {
+                layer.alert('应急操作时至少要选择一把锁！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#lock_tr").click();
+                });
+                return;
+            }
+            if (lockNum == lockSelectedNum) {
+                lockIds = "";
+            }
             </c:if>
-            $.post("../../manage/remote/asyn_remote_control_request",
-                encodeURI("control_type=${mode}&car_number=${carStatus.carNumber}&station_id=" + stationId +
-                    "&token=" + generateUUID() + "&status=" + status + "&station_type=" + stationType),
+            var url = "../../manage/remote/asyn_remote_inout_request";
+            var param = encodeURI("control_type=${mode}&car_number=${carStatus.carNumber}&station_type=" + stationType
+                + "&station_id=" + stationId + "&lock_ids=" + lockIds + "&token=" + generateUUID());
+            </c:if>
+            $.post(url, param,
                 function (data) {
                     if (data.id > 0) {
                         layer.msg(data.msg, {

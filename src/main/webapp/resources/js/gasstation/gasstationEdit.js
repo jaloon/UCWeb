@@ -1,3 +1,4 @@
+var invalid = false;
 function deleteTr(obj) {
     $(obj).closest('tr').remove();
     var serialNo = 0;
@@ -5,41 +6,54 @@ function deleteTr(obj) {
         serialNo += 1;
         $(this).text(serialNo);
     });
+    if (invalid) {
+        invalid = false;
+    }
 }
 
-function confirmTr(obj, cardType, cardId) {
+function confirmTr(obj) {
+    if (invalid) {
+        deleteTr(obj);
+        return;
+    }
     var tr = $(obj).closest('tr');
-    var type = tr.children().eq(1);
-    type.empty();
+    var trChildren = tr.children();
+    var type = trChildren.eq(1);
+    var cardType = type.children().first().find('option:selected').text();
     type.html(cardType);
     var id = tr.children().eq(2);
-    id.empty();
+    var cardId = id.children().first().val();
     id.html(cardId);
+    id.addClass("cardIds");
     var oper = tr.children().last();
-    oper.empty();
     oper.html("<img alt=\"删除\" title=\"删除\" src=\"../../resources/images/operate/delete.png\" onclick=\"deleteTr(this)\">");
 }
 
 function changeCardId(obj) {
-    var gasstationId = $("#id").val();
     var type = obj.value;
-    var td = $(obj).closest('tr').children().eq(2);
+    var tr = $(obj).closest('tr');
+    var td = tr.children().eq(2);
     td.empty();
     td.html(getCardId(type));
 }
 
 function getCardId(cardType) {
-    var gasStationId = $("#id").val();
-    var tdHtml = "<select id=\"cardId\">";
+    var tdHtml = "<select>";
     $.ajax({
         type: "get",
         async: false, //不异步，先执行完ajax，再干别的
-        url: "../../manage/gasstation/findUnusedCard.do",
-        data: encodeURI("cardType=" + cardType + "&gasStationId=" + gasStationId),
+        url: "../../manage/card/findUnusedCard.do",
+        data: encodeURI("cardType=" + cardType),
         dataType: "json",
-        success: function(response) {
-            var cardIds = eval(response);
+        success: function(cardIds) {
             var len = cardIds.length;
+            if (len == 0) {
+                tdHtml = "无可配置的卡！"
+                layer.alert(tdHtml, { icon: 0 });
+                invalid = true;
+                return;
+            }
+            var validCount = 0;
             for (var i = 0; i < len; i++) {
                 cardId = cardIds[i];
                 var flag = true;
@@ -51,8 +65,15 @@ function getCardId(cardType) {
                     }
                 });
                 if (flag) {
+                    validCount++;
                     tdHtml += "<option value=" + cardId + ">" + cardId + "</option>";
                 }
+            }
+            if (validCount == 0) {
+                tdHtml = "无可配置的卡！"
+                layer.alert(tdHtml, { icon: 0 });
+                invalid = true;
+                return;
             }
             tdHtml += "</select>";
         },
@@ -72,9 +93,17 @@ function getCardId(cardType) {
 
 function addTr() {
     var index = $("#card_info").find("tr").length - 1;
+    var preTr = $("#card_info").children().eq(0).children().eq(index - 1);
+    if (invalid) {
+        index--;
+    }
+    var preTrLastChildren = preTr.children().last();
+    if (preTrLastChildren.children().length > 1) {
+        confirmTr(preTrLastChildren);
+    }
     var emergencyCards = getCardId(1);
     var trHtml = "<tr><td class=\"serialNo\">" + index + "</td>" +
-        "<td><select id=\"cardType\" onchange=\"changeCardId(this)\">" +
+        "<td><select onchange=\"changeCardId(this)\">" +
         "<option value=1>应急卡</option>" +
         // "<option value=2>入库卡</option>" +
         // "<option value=3>出库卡</option>" +
@@ -82,9 +111,9 @@ function addTr() {
         "<option value=5>普通卡</option>" +
         // "<option value=6>管理卡</option>" +
         "</select></td>" +
-        "<td class=\"cardIds\">" + emergencyCards + "</td><td>" +
+        "<td>" + emergencyCards + "</td><td>" +
         "<img alt=\"取消\" title=\"取消\" src=\"../../resources/images/operate/cancel.png\" onclick=\"deleteTr(this)\">&emsp;" +
-        "<img alt=\"确认\" title=\"确认\" src=\"../../resources/images/operate/confirm.png\" onclick=\"confirmTr(this,$('#cardType').find('option:selected').text(),$('#cardId').val())\">" +
+        "<img alt=\"确认\" title=\"确认\" src=\"../../resources/images/operate/confirm.png\" onclick=\"confirmTr(this)\">" +
         "</td></tr>";
     ////table#card_info的倒数第二行
     $("#card_info tr:eq(-2)").after(trHtml);
@@ -276,27 +305,27 @@ $(function() {
             return;
         }
 
-        $.post(url, encodeURI(param),
-            function(data) {
-                if ("error" == data.msg) {
-                    layer.msg(error_zh_text, { icon: 2, time: 500 });
-                } else {
-                    layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
-                        parent.layer.close(index);
-                    });
-                }
-            },
-            "json"
-        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
-                    location.reload(true);
-                });
-            }
-        });
+        // $.post(url, encodeURI(param),
+        //     function(data) {
+        //         if ("error" == data.msg) {
+        //             layer.msg(error_zh_text, { icon: 2, time: 500 });
+        //         } else {
+        //             layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
+        //                 parent.layer.close(index);
+        //             });
+        //         }
+        //     },
+        //     "json"
+        // ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        //     if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+        //         layer.confirm('登录失效，是否刷新页面重新登录？', {
+        //             icon: 0,
+        //             title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+        //         }, function() {
+        //             location.reload(true);
+        //         });
+        //     }
+        // });
 
     });
 });

@@ -102,8 +102,8 @@ function getCardId(cardType) {
     $.ajax({
         type: "get",
         async: false, //不异步，先执行完ajax，再干别的
-        url: "../../manage/oildepot/findUnusedCard.do",
-        data: encodeURI("cardType=" + cardType + "&oilDepotId=" + oilDepotId),
+        url: "../../manage/card/findUnusedCard.do",
+        data: encodeURI("cardType=" + cardType),
         dataType: "json",
         success: function(response) {
             var cardIds = eval(response);

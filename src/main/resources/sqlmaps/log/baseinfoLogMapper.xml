@@ -101,7 +101,7 @@
 				and u.name like CONCAT('%',#{entity.user.name},'%')
 			</if>
 		</if>
-		order by ol.id asc  
+		order by ol.id DESC
 		limit #{page.startRow}, #{page.rows}
 	</select>
 </mapper>

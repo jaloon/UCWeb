@@ -3,6 +3,7 @@ package com.tipray.net;
 import com.tipray.bean.upgrade.TerminalUpgradeFile;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.cache.SerialNumberCache;
+import com.tipray.constant.RemoteControlConst;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.util.ArraysUtil;
 import com.tipray.util.BytesConverterByLittleEndian;
@@ -487,37 +488,6 @@ public class SendPacketBuilder {
     }
 
     /**
-     * 远程车辆进出请求
-     *
-     * @param terminalId  {@link int} 车载终端设备ID
-     * @param remoteId    {@link int} 远程控制ID
-     * @param readerId    {@link int} 可支持（道闸）转发的读卡器ID
-     * @param controlType {@link byte} 操作类型<br>
-     *                    0 未知<br>
-     *                    1 入库<br>
-     *                    2 出库<br>
-     *                    3 入加油站<br>
-     *                    4 出加油站<br>
-     *                    5 进入应急<br>
-     *                    6 取消应急<br>
-     *                    8 待进油区<br>
-     *                    9 进油区<br>
-     *                    10 出油区<br>
-     * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
-     * @param userName    {@link String} 操作员姓名，UTF-8编码
-     * @return {@link ByteBuffer} 待发送数据
-     */
-    public static ByteBuffer buildProtocol0x1403(int terminalId,
-                                                 int remoteId,
-                                                 int readerId,
-                                                 byte controlType,
-                                                 int stationId,
-                                                 String userName) {
-        ByteBuffer dataBuffer = buildDataBufForCarInOut(remoteId, readerId, controlType, stationId, userName);
-        return buildProtocol0x1403(terminalId, dataBuffer);
-    }
-
-    /**
      * 远程车辆状态强制变更
      *
      * @param terminalId {@link int} 车载终端设备ID
@@ -529,33 +499,6 @@ public class SendPacketBuilder {
         return buildSendPacket(terminalId, UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST, dataBuffer);
     }
 
-    /**
-     * 远程车辆状态强制变更
-     *
-     * @param terminalId      {@link int} 车载终端设备ID
-     * @param remoteControlId {@link int} 远程控制ID
-     * @param carStatus       {@link byte} 车辆状态<br>
-     *                        1 在油库<br>
-     *                        2 在途<br>
-     *                        3 在加油站<br>
-     *                        4 返程<br>
-     *                        5 应急<br>
-     *                        6 待进油区<br>
-     *                        7 在油区<br>
-     * @param stationType     {@link Integer} 站点类型（1：在油库 | 2：在加油站）
-     * @param stationId       {@link int} 站点ID（加油站ID、油库ID）
-     * @param userName        {@link String} 操作员姓名，UTF-8编码
-     * @return {@link ByteBuffer} 待发送数据
-     */
-    public static ByteBuffer buildProtocol0x1404(int terminalId,
-                                                 int remoteControlId,
-                                                 byte carStatus,
-                                                 byte stationType,
-                                                 int stationId,
-                                                 String userName) {
-        ByteBuffer dataBuffer = buildDataBufForCarStatusAlter(remoteControlId, carStatus, stationType, stationId, userName);
-        return buildProtocol0x1404(terminalId, dataBuffer);
-    }
 
     /**
      * 远程开锁重置
@@ -981,7 +924,7 @@ public class SendPacketBuilder {
     }
 
     /**
-     * 构建远程车辆进出请求业务数据体
+     * 构建远程车辆进出请求业务数据体（非应急）
      *
      * @param remoteId    {@link int} 远程控制ID
      * @param readerId    {@link int} 可支持（道闸）转发的读卡器ID
@@ -996,6 +939,7 @@ public class SendPacketBuilder {
      *                    8 待进油区<br>
      *                    9 进油区<br>
      *                    10 出油区<br>
+     * @param stationType {@link byte} 站点类型（1：在油库 | 2：在加油站）
      * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
      * @param userName    {@link String} 操作员姓名，UTF-8编码
      * @return {@link ByteBuffer} 数据体
@@ -1003,12 +947,13 @@ public class SendPacketBuilder {
     public static ByteBuffer buildDataBufForCarInOut(int remoteId,
                                                      int readerId,
                                                      byte controlType,
+                                                     byte stationType,
                                                      int stationId,
                                                      String userName) {
         byte[] userNameBuf = userName.getBytes(StandardCharsets.UTF_8);
         int userNameBufLen = userNameBuf.length;
         // 缓冲区容量
-        int capacity = 14 + userNameBufLen;
+        int capacity = 16 + userNameBufLen;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
         // 添加远程控制ID，4个字节
@@ -1017,8 +962,12 @@ public class SendPacketBuilder {
         dataBuffer.put(BytesConverterByLittleEndian.getBytes(readerId));
         // 添加操作类型，1个字节
         dataBuffer.put(controlType);
+        // 添加站点类型，1个字节
+        dataBuffer.put(stationType);
         // 添加站点ID，4个字节
         dataBuffer.put(BytesConverterByLittleEndian.getBytes(stationId));
+        // 添加锁数量，1个字节
+        dataBuffer.put((byte) 0);
         // 添加姓名长度，1个字节
         dataBuffer.put((byte) userNameBufLen);
         // 添加操作员姓名，UTF-8编码
@@ -1027,7 +976,65 @@ public class SendPacketBuilder {
     }
 
     /**
-     * 构建远程车辆状态强制变更业务数据体
+     * 构建远程车辆进出请求业务数据体（应急）
+     *
+     * @param remoteId    {@link int} 远程控制ID
+     * @param readerId    {@link int} 可支持（道闸）转发的读卡器ID
+     * @param controlType {@link byte} 操作类型<br>
+     *                    0 未知<br>
+     *                    1 入库<br>
+     *                    2 出库<br>
+     *                    3 入加油站<br>
+     *                    4 出加油站<br>
+     *                    5 进入应急<br>
+     *                    6 取消应急<br>
+     *                    8 待进油区<br>
+     *                    9 进油区<br>
+     *                    10 出油区<br>
+     * @param stationType {@link byte} 站点类型（1：在油库 | 2：在加油站）
+     * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
+     * @param lockNum     {@link byte} 锁数量
+     * @param lockIds     {@link byte[]} 锁设备ID列表
+     * @param userName    {@link String} 操作员姓名，UTF-8编码
+     * @return {@link ByteBuffer} 数据体
+     */
+    public static ByteBuffer buildDataBufForCarInOutUrgent(int remoteId,
+                                                           int readerId,
+                                                           byte controlType,
+                                                           byte stationType,
+                                                           int stationId,
+                                                           byte lockNum,
+                                                           byte[] lockIds,
+                                                           String userName) {
+        byte[] userNameBuf = userName.getBytes(StandardCharsets.UTF_8);
+        int userNameBufLen = userNameBuf.length;
+        // 缓冲区容量
+        int capacity = 16 + lockIds.length + userNameBufLen;
+        // 构建协议数据体
+        ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加远程控制ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(remoteId));
+        // 添加读卡器ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(readerId));
+        // 添加操作类型，1个字节
+        dataBuffer.put(controlType);
+        // 添加站点类型，1个字节
+        dataBuffer.put(stationType);
+        // 添加站点ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(stationId));
+        // 添加锁数量，1个字节
+        dataBuffer.put(lockNum);
+        // 添加锁设备ID列表
+        dataBuffer.put(lockIds);
+        // 添加姓名长度，1个字节
+        dataBuffer.put((byte) userNameBufLen);
+        // 添加操作员姓名，UTF-8编码
+        dataBuffer.put(userNameBuf);
+        return dataBuffer;
+    }
+
+    /**
+     * 构建远程车辆状态强制变更业务数据体（非应急）
      *
      * @param remoteId    {@link int} 远程控制ID
      * @param carStatus   {@link byte} 车辆状态<br>
@@ -1038,8 +1045,9 @@ public class SendPacketBuilder {
      *                    5 应急<br>
      *                    6 待进油区<br>
      *                    7 在油区<br>
-     * @param stationType {@link Integer} 站点类型（1：在油库 | 2：在加油站）
+     * @param stationType {@link byte} 站点类型（1：在油库 | 2：在加油站）
      * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
+     * @param storeIds    {@link byte} 仓号列表。车辆状态要求变更为【在加油站】时有效，其它状态时为0
      * @param userName    {@link String} 操作员姓名，UTF-8编码
      * @return {@link ByteBuffer} 数据体
      */
@@ -1047,11 +1055,12 @@ public class SendPacketBuilder {
                                                            byte carStatus,
                                                            byte stationType,
                                                            int stationId,
+                                                           byte storeIds,
                                                            String userName) {
         byte[] userNameBuf = userName.getBytes(StandardCharsets.UTF_8);
         int userNameBufLen = userNameBuf.length;
         // 缓冲区容量
-        int capacity = 11 + userNameBufLen;
+        int capacity = 13 + userNameBufLen;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
         // 远程控制ID，4个字节
@@ -1062,6 +1071,54 @@ public class SendPacketBuilder {
         dataBuffer.put(stationType);
         // 添加站点ID，4个字节
         dataBuffer.put(BytesConverterByLittleEndian.getBytes(stationId));
+        // 添加仓号列表，1个字节
+        dataBuffer.put(storeIds);
+        // 添加锁数量，1个字节
+        dataBuffer.put((byte) 0);
+        // 添加姓名长度，1个字节
+        dataBuffer.put((byte) userNameBufLen);
+        // 添加操作员姓名，UTF-8编码
+        dataBuffer.put(userNameBuf);
+        return dataBuffer;
+    }
+
+    /**
+     * 构建远程车辆状态强制变更业务数据体（应急）
+     *
+     * @param remoteId    {@link int} 远程控制ID
+     * @param stationType {@link byte} 站点类型（1：在油库 | 2：在加油站）
+     * @param stationId   {@link int} 站点ID（加油站ID、油库ID）
+     * @param lockNum     {@link byte} 锁数量
+     * @param lockIds     {@link byte[]} 锁设备ID列表
+     * @param userName    {@link String} 操作员姓名，UTF-8编码
+     * @return {@link ByteBuffer} 数据体
+     */
+    public static ByteBuffer buildDataBufForCarStatusUrgent(int remoteId,
+                                                            byte stationType,
+                                                            int stationId,
+                                                            byte lockNum,
+                                                            byte[] lockIds,
+                                                            String userName) {
+        byte[] userNameBuf = userName.getBytes(StandardCharsets.UTF_8);
+        int userNameBufLen = userNameBuf.length;
+        // 缓冲区容量
+        int capacity = 13 + lockIds.length + userNameBufLen;
+        // 构建协议数据体
+        ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 远程控制ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(remoteId));
+        // 添加车辆状态，1个字节
+        dataBuffer.put(RemoteControlConst.VEHICLE_STATUS_5_URGENT);
+        // 添加站点类型，1个字节
+        dataBuffer.put(stationType);
+        // 添加站点ID，4个字节
+        dataBuffer.put(BytesConverterByLittleEndian.getBytes(stationId));
+        // 添加仓号列表，1个字节
+        dataBuffer.put((byte) 0);
+        // 添加锁数量，1个字节
+        dataBuffer.put(lockNum);
+        // 添加锁设备ID列表
+        dataBuffer.put(lockIds);
         // 添加姓名长度，1个字节
         dataBuffer.put((byte) userNameBufLen);
         // 添加操作员姓名，UTF-8编码

@@ -45,9 +45,12 @@ public class UdpReceiveResultHandler {
     public static void handleReplyForRemoteControl(short bizId, int cacheId, ResponseMsg msg) {
         synchronized (AsynUdpCommCache.class) {
             Map<String, Object> params = AsynUdpCommCache.getParamCache(cacheId);
-            String result = buildLogResultByResponseMsg(bizId, msg);
             boolean isOk = msg.getId() == 0;
-            MONITOR_WEB_SOCKET_HANDLER.dealUdpReply(bizId, cacheId, AsynUdpCommCache.getTaskCache(cacheId), isOk, result);
+            String task = AsynUdpCommCache.getTaskCache(cacheId);
+            String result = buildLogResultByResponseMsg(bizId, msg);
+            if (task != null) {
+                MONITOR_WEB_SOCKET_HANDLER.dealUdpReply(bizId, cacheId, task, isOk, result);
+            }
             try {
                 switch (bizId) {
                     // case UdpBizId.CAR_BIND_RESPONSE:
@@ -58,13 +61,15 @@ public class UdpReceiveResultHandler {
                     //     }
                     //     break;
                     case UdpBizId.REMOTE_CHANGE_STATION_RESPONSE:
-                        Long changeId = (Long) params.get("changeId");
-                        Long transportId = (Long) params.get("transportId");
-                        Long changedTransportId = (Long) params.get("changedTransportId");
-                        if (isOk) {
-                            CHANGE_SERVICE.updateChangeAndTransportStatusForDone(changeId, transportId, changedTransportId);
-                        } else {
-                            CHANGE_SERVICE.updateChangeStatus(changeId, RemoteControlConst.REMOTE_PROGRESS_FAIL);
+                        if (params != null) {
+                            Long changeId = (Long) params.get("changeId");
+                            Long transportId = (Long) params.get("transportId");
+                            Long changedTransportId = (Long) params.get("changedTransportId");
+                            if (isOk) {
+                                CHANGE_SERVICE.updateChangeAndTransportStatusForDone(changeId, transportId, changedTransportId);
+                            } else {
+                                CHANGE_SERVICE.updateChangeStatus(changeId, RemoteControlConst.REMOTE_PROGRESS_FAIL);
+                            }
                         }
                         break;
                     case UdpBizId.REMOTE_ALARM_ELIMINATE_RESPONSE:

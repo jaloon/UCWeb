@@ -15,6 +15,10 @@ public class Handset extends BaseBean {
      */
     private Integer deviceId;
     /**
+     * 手持机版本
+     */
+    private Integer ver;
+    /**
      * 所属加油站
      */
     private GasStation gasStation;
@@ -37,6 +41,14 @@ public class Handset extends BaseBean {
 
     public void setDeviceId(Integer deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public Integer getVer() {
+        return ver;
+    }
+
+    public void setVer(Integer ver) {
+        this.ver = ver;
     }
 
     public GasStation getGasStation() {
@@ -79,6 +91,9 @@ public class Handset extends BaseBean {
         }
         if (deviceId != null) {
             sb.append(", deviceId=").append(deviceId);
+        }
+        if (ver != null) {
+            sb.append(", ver=").append(ver);
         }
         if (gasStation != null) {
             sb.append(", gasStation=").append(gasStation);

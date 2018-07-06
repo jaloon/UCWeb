@@ -1,10 +1,11 @@
 package com.tipray.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.record.DistributionRecord;
 import com.tipray.core.exception.ServiceException;
+
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
 /**
  * DistributionRecordService
@@ -19,9 +20,10 @@ public interface DistributionRecordService extends RecordService<DistributionRec
 	 * 
 	 * @param distributionMap
 	 *            物流配送接口信息
+	 * @return 配送单新增业务数据体
 	 * @throws ServiceException
 	 */
-    void addDistributionRecord(Map<String, Object> distributionMap) throws ServiceException;
+	ByteBuffer addDistributionRecord(Map<String, Object> distributionMap) throws ServiceException;
 
 	/**
 	 * 根据配送单号统计配送记录数量

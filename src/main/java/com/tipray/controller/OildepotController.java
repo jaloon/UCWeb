@@ -145,13 +145,6 @@ public class OildepotController extends BaseAction {
         }
     }
 
-    @RequestMapping(value = "findUnusedCard.do")
-    @ResponseBody
-    public List<Long> findUnusedCard(Integer cardType, Long oilDepotId) {
-        logger.info("find unused card, cardType={}, oilDepotId={}", cardType, oilDepotId);
-        return cardService.findUnusedCard(cardType, oilDepotId, null);
-    }
-
     @RequestMapping(value = "findUnusedReaders.do")
     @ResponseBody
     public List<InOutReader> findUnusedReaders() {

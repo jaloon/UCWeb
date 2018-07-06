@@ -167,7 +167,38 @@
 			g.id = #{id}
 		]]>
 	</select>
-	
+
+	<select id="getStationForChangeByOfficialId" parameterType="java.lang.String" resultMap="changeStationMap">
+		<![CDATA[
+		SELECT
+		    g.id,
+			IF(ISNULL(g.short_name) || LENGTH(TRIM(g.short_name)) < 1, g.`name`, g.short_name) `name`,
+			g.longitude,
+			g.latitude,
+			g.cover_radius,
+			g.cover_lonlatlist_region,
+			t.handset_device_id,
+			t.device_version
+		FROM
+			tbl_gasstation g
+			LEFT JOIN
+				(
+					SELECT
+						h.handset_device_id,
+						h.gasstation_id,
+						d.device_version
+					FROM
+						tbl_handset h,
+						tbl_device d
+					WHERE
+						h.handset_device_id = d.device_id
+				) t
+			ON g.id = t.gasstation_id
+		WHERE
+			g.official_id = #{officialId}
+		]]>
+	</select>
+
 	<select id="findOrdinaryCardById" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT
 			gc.card_id

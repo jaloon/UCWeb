@@ -22,7 +22,11 @@
         .handset-id {
             width: 160px;
         }
-        
+
+        .handset-ver {
+            width: 160px;
+        }
+
         .handset-gasstation {
             width: 200px;
         }
@@ -111,7 +115,8 @@
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var handset = handsets[i];
 	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + handset.id + ")\">" +
-	                        "<td class=\"handset-id\">" + handset.deviceId + "</td>";
+	                        "<td class=\"handset-id\">" + handset.deviceId + "</td>" +
+	                        "<td class=\"handset-ver\">" + stringifyVer(handset.ver) + "</td>";
                         if (handset.gasStation.name == undefined) {
                         	tableData += "<td class=\"handset-gasstation\"></td>";
                         } else {
@@ -169,6 +174,7 @@
                     <thead class="table-head">
                         <tr>
                             <th class="handset-id">手持机ID</th>
+                            <th class="handset-ver">版本</th>
                             <th class="handset-gasstation">加油站</th>
                             <th class="handset-director">负责人</th>
                             <th class="handset-phone">联系电话</th>

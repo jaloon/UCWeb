@@ -7,6 +7,7 @@ import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.upgrade.UpgradeCancelVehicle;
 import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.constant.LogTypeConst;
+import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.reply.FindTracksByCarNumberErrorEnum;
 import com.tipray.constant.reply.PermissionErrorEnum;
 import com.tipray.core.ThreadVariable;
@@ -289,12 +290,20 @@ public class VehicleController extends BaseAction {
             carStatus.setStatusName("未知");
         }
         modelMap.put("carStatus", carStatus);
-        if (mode == 1 || mode == 2 || mode == 8 || mode == 9 || mode == 10) {
+        if (mode == RemoteControlConst.REMOTE_TYPE_1_INTO_DEPOT
+                || mode == RemoteControlConst.REMOTE_TYPE_2_QUIT_DEPOT
+                || mode == RemoteControlConst.REMOTE_TYPE_8_WAIT_OILDOM
+                || mode == RemoteControlConst.REMOTE_TYPE_9_INTO_OILDOM
+                || mode == RemoteControlConst.REMOTE_TYPE_10_QUIT_OILDOM) {
             List<Map<String, Object>> depots = oilDepotService.getIdAndNameOfAllOilDepots();
             modelMap.put("depots", depots);
-        } else if (mode == 3 || mode == 4) {
+        } else if (mode == RemoteControlConst.REMOTE_TYPE_3_INTO_STATION
+                || mode == RemoteControlConst.REMOTE_TYPE_4_QUIT_STATION) {
             List<Map<String, Object>> stations = gasStationService.getIdAndNameOfAllGasStations();
             modelMap.put("stations", stations);
+        } else if (mode == RemoteControlConst.REMOTE_TYPE_7_ALTER_STATUS) {
+            Integer storeNum = vehicleService.getStoreNumByCarNo(carNumber);
+            modelMap.put("storeNum", storeNum);
         }
         return "normal/car/remote/carRemote.jsp";
     }

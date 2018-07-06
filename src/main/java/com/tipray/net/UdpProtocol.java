@@ -1,10 +1,11 @@
 package com.tipray.net;
 
+import com.tipray.bean.RC4Key;
 import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
+import com.tipray.cache.RC4KeyCache;
 import com.tipray.cache.VehicleCompanyRelationCache;
 import com.tipray.constant.AlarmBitMarkConst;
-import com.tipray.constant.CenterConfigConst;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.mq.MyQueueElement;
 import com.tipray.net.constant.UdpBizId;
@@ -38,11 +39,11 @@ public class UdpProtocol {
     /**
      * 中心rc4密钥
      */
-    private static byte[] RC4_KEY;
+    private byte[] key;
     /**
      * 中心rc4秘钥版本
      */
-    private static byte RC4_VER;
+    private byte keyVer;
     /**
      * 随机数
      */
@@ -88,7 +89,7 @@ public class UdpProtocol {
      * UdpProtocol无参构造方法
      */
     public UdpProtocol() {
-        initRc4();
+        setRc4();
         initRandom();
     }
 
@@ -101,7 +102,7 @@ public class UdpProtocol {
      * @param data          {@link ByteBuffer} 数据体
      */
     public UdpProtocol(int remoteAddress, short bizId, short serialNo, ByteBuffer data) {
-        initRc4();
+        setRc4();
         initRandom();
         this.remoteAddress = remoteAddress;
         this.bizId = bizId;
@@ -119,7 +120,7 @@ public class UdpProtocol {
      * @param data          {@link ByteBuffer} 数据体
      */
     public UdpProtocol(byte random, int remoteAddress, short bizId, short serialNo, ByteBuffer data) {
-        initRc4();
+        setRc4();
         this.random = random;
         this.remoteAddress = remoteAddress;
         this.bizId = bizId;
@@ -128,28 +129,12 @@ public class UdpProtocol {
     }
 
     /**
-     * 初始化RC4秘钥和版本号
+     * 设置RC4秘钥和版本号
      */
-    private static synchronized void initRc4() {
-        try {
-            String url = new StringBuffer(CenterConfigConst.PLTONE_URL).append("/api/getCenterRc4.do").toString();
-            String param = new StringBuffer("id=").append(CenterConfigConst.CENTER_ID).append("&ver=")
-                    .append(CenterConfigConst.CENTER_VER).toString();
-            String msgJson = HttpRequestUtil.sendGet(url, param);
-            ResponseMsg responseMsg = JSONUtil.parseToObject(msgJson, ResponseMsg.class);
-            if (responseMsg.getId() > 0) {
-                throw new IllegalArgumentException(responseMsg.getMsg() + param);
-            }
-            String rc4Hex = (String) responseMsg.getMsg();
-            byte[] encryptedData = BytesUtil.hexStringToBytes(rc4Hex);
-            byte[] key = RC4Util.getKeyByDeviceId(CenterConfigConst.CENTER_ID);
-            byte[] decryptedData = RC4Util.rc4(encryptedData, key);
-            RC4_KEY = Arrays.copyOf(decryptedData, decryptedData.length - 1);
-            RC4_VER = decryptedData[decryptedData.length - 1];
-        } catch (Exception e) {
-            logger.error("获取RC4密钥异常：\n{}", e.toString());
-            throw new IllegalArgumentException("获取RC4密钥失败");
-        }
+    private void setRc4() {
+        RC4Key rc4Key = RC4KeyCache.getRC4Key();
+        key = rc4Key.getKey();
+        keyVer = rc4Key.getVer();
     }
 
     /**
@@ -162,12 +147,12 @@ public class UdpProtocol {
         this.random = random[0];
     }
 
-    public byte[] getRc4Key() {
-        return RC4_KEY;
+    public byte[] getKey() {
+        return key;
     }
 
-    public byte getRc4Ver() {
-        return RC4_VER;
+    public byte getKeyVer() {
+        return keyVer;
     }
 
     public byte getRandom() {
@@ -222,7 +207,7 @@ public class UdpProtocol {
      * 处理请求业务
      *
      * @return RC4加密并添加CRC校验的请求数据字节数组
-     * @throws IllegalArgumentException if <code>RC4_KEY</code> is null.
+     * @throws IllegalArgumentException if <code>key</code> is null.
      */
     public byte[] dealProtocolOfRequest() {
         return dealProtocolOfRequestToByteBuffer().array();
@@ -232,10 +217,10 @@ public class UdpProtocol {
      * 处理请求业务
      *
      * @return {@link ByteBuffer}
-     * @throws IllegalArgumentException if <code>RC4_KEY</code> is null.
+     * @throws IllegalArgumentException if <code>key</code> is null.
      */
     public ByteBuffer dealProtocolOfRequestToByteBuffer() {
-        if (RC4_KEY == null) {
+        if (key == null) {
             throw new IllegalArgumentException("获取RC4密钥失败");
         }
         // 业务体打包
@@ -271,7 +256,7 @@ public class UdpProtocol {
         }
 
         // 对业务体RC4加密
-        byte[] encryptBizBuf = RC4Util.rc4(bizBuffer.array(), RC4_KEY);
+        byte[] encryptBizBuf = RC4Util.rc4(bizBuffer.array(), key);
 
         // 数据报打包
         // 数据包容量比业务体多2个字节
@@ -279,7 +264,7 @@ public class UdpProtocol {
         // 数据包
         ByteBuffer buffer = ByteBuffer.allocate(capacity);
         // 添加密钥版本
-        buffer.put(RC4_VER);
+        buffer.put(keyVer);
         // 添加加密业务体
         buffer.put(encryptBizBuf);
         // 密钥版本号和加密数据通过 CRC校验算法得出CRC校验码
@@ -318,19 +303,16 @@ public class UdpProtocol {
 
         // 密钥版本检查
         byte rc4Ver = receiveBuf[0];
-        if (rc4Ver != this.RC4_VER) {
-            initRc4();
-            if (rc4Ver != this.RC4_VER) {
-                logger.error("密钥版本：{}，不符！", rc4Ver);
-                return false;
-            }
+        if (rc4Ver != this.keyVer) {
+            logger.error("密钥版本：{}，不符！", rc4Ver);
+            return false;
         }
 
         // RC4解密
         // 获取加密业务体
         byte[] encryptBuf = Arrays.copyOfRange(receiveBuf, 1, receiveBuf.length - 1);
         // 获取解密业务体
-        byte[] decryptBuf = RC4Util.rc4(encryptBuf, RC4_KEY);
+        byte[] decryptBuf = RC4Util.rc4(encryptBuf, key);
 
         int index = 1;
         // 协议号
@@ -429,19 +411,16 @@ public class UdpProtocol {
 
         // 密钥版本检查
         byte rc4Ver = receiveBuf[0];
-        if (rc4Ver != this.RC4_VER) {
-            initRc4();
-            if (rc4Ver != this.RC4_VER) {
-                logger.error("密钥版本：{}，不符！", rc4Ver);
-                return ResponseMsgUtil.error(UdpProtocolParseResultEnum.RC4_VER_INCONSISTENT);
-            }
+        if (rc4Ver != this.keyVer) {
+            logger.error("密钥版本：{}，不符！", rc4Ver);
+            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.RC4_VER_INCONSISTENT);
         }
 
         // RC4解密
         // 获取加密业务体
         byte[] encryptBuf = Arrays.copyOfRange(receiveBuf, 1, receiveBuf.length - 1);
         // 获取解密业务体
-        byte[] decryptBuf = RC4Util.rc4(encryptBuf, RC4_KEY);
+        byte[] decryptBuf = RC4Util.rc4(encryptBuf, key);
 
         int index = 1;
         // 协议号
@@ -573,19 +552,16 @@ public class UdpProtocol {
 
         // 密钥版本检查
         byte rc4Ver = receiveBuf[0];
-        if (rc4Ver != this.RC4_VER) {
-            initRc4();
-            if (rc4Ver != this.RC4_VER) {
-                logger.error("密钥版本：{}，不符！", rc4Ver);
-                return;
-            }
+        if (rc4Ver != this.keyVer) {
+            logger.error("密钥版本：{}，不符！", rc4Ver);
+            return;
         }
 
         // RC4解密
         // 获取加密部分数据（随机数和业务体，去除第1个字节密钥版本号和最后一个字节CRC校验码）
         byte[] encryptBuf = Arrays.copyOfRange(receiveBuf, 1, receiveBuf.length - 1);
         // 解密（随机数和业务体）
-        byte[] decryptBuf = RC4Util.rc4(encryptBuf, RC4_KEY);
+        byte[] decryptBuf = RC4Util.rc4(encryptBuf, key);
         // 业务体（去除第1个字节随机数）
         byte[] receiveBizBuf = Arrays.copyOfRange(decryptBuf, 1, decryptBuf.length);
 

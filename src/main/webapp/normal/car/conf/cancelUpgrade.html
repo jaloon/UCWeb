@@ -144,15 +144,6 @@
         }
     }
 
-    function stringifyVer(ver) {
-        if (ver == 0) {
-            return "";
-        }
-        return ((ver >> 24) & 0xff) + '.'
-            + ((ver >> 16) & 0xff) + '.'
-            + (ver & 0xffff);
-    }
-
     function findUnfinishUpgradeVehicles(carNumber, layerIndex) {
         $.getJSON("../../../manage/car/findUnfinishUpgradeVehicles.do",
             "carNumber=" + carNumber,

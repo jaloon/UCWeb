@@ -63,7 +63,7 @@
 		<if test="entity.carNumber != null and entity.carNumber != ''">
 			and c.vehicle_number like CONCAT('%',#{entity.carNumber},'%')
 		</if>
-		order by t.id asc  
+		order by t.id desc
 		limit #{page.startRow}, #{page.rows}
 	</select>
 	
@@ -150,7 +150,7 @@
 			t.gasstation_id,
 			IF(ISNULL(g.short_name) || LENGTH(TRIM(g.short_name)) < 1, g.`name`, g.short_name) gasstation_name,
 			t.`status` transport_status,
-			DATE_FORMAT( t.issue_time, '%Y-%m-%d %H:%I:%S' ) issue_time
+			DATE_FORMAT( t.issue_time, '%Y-%m-%d %H:%i:%s' ) issue_time
 		]]>
 	</sql>
 	

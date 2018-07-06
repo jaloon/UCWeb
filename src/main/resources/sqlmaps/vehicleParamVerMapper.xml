@@ -8,14 +8,14 @@
         <result column="version" property="ver" />
     </resultMap>
 	<sql id="select_colums">
-		p.*
+		*
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
 		from 
-			tbl_vehicle_common_param_version p
+			tbl_vehicle_common_param_version
 	</select>
 
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.VehicleParamVer">

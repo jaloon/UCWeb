@@ -64,7 +64,7 @@ public class NetUtil {
         String ua = request.getHeader("User-Agent").toLowerCase();
         for (String mua : mobileAgents) {
             if (ua.indexOf(mua) > -1) {
-                return true;//手机端
+                return true;//手机端|
             }
         }
         return false;//PC端

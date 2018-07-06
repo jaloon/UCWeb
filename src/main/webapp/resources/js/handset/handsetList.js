@@ -5,11 +5,12 @@ $(function() {
         var title = "添加手持机";
         var h = "343px";
         if ("edit" == mode) {
+            var h = "380px";
             title = "修改手持机信息";
         }
         if ("view" == mode) {
             title = "查看手持机信息";
-            h = "290px";
+            h = "320px";
         }
         layer.open({
             type: 2,

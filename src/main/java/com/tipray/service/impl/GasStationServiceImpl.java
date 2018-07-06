@@ -2,8 +2,10 @@ package com.tipray.service.impl;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.VehicleParamVer;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.Handset;
+import com.tipray.constant.SqliteFileConst;
 import com.tipray.dao.GasStationDao;
 import com.tipray.dao.HandsetDao;
 import com.tipray.dao.VehicleParamVerDao;
@@ -40,7 +42,7 @@ public class GasStationServiceImpl implements GasStationService {
 	public void addGasStations(List<GasStation> gasStations) {
 		gasStations.parallelStream().forEach(station -> setCover(station));
 		gasStationDao.addGasStations(gasStations);
-		vehicleParamVerDao.updateVerByParam("gasstation_info", System.currentTimeMillis());
+        setVer(SqliteFileConst.GAS_STATION);
 	}
 	
 	@Override
@@ -48,7 +50,7 @@ public class GasStationServiceImpl implements GasStationService {
 		if (gasStation != null) {
 			setCover(gasStation);
 			gasStationDao.add(gasStation);
-			vehicleParamVerDao.updateVerByParam("gasstation_info", System.currentTimeMillis());
+            setVer(SqliteFileConst.GAS_STATION);
 		}
 		return gasStation;
 	}
@@ -68,7 +70,7 @@ public class GasStationServiceImpl implements GasStationService {
 				String[] cardIdStrArray = cardIds.split(",");
 				List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 				for (String string : cardIdStrArray) {
-					Integer cardId = Integer.valueOf(string);
+					Long cardId = Long.parseLong(string, 10);
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("id", id);
 					map.put("cardId", cardId);
@@ -76,7 +78,7 @@ public class GasStationServiceImpl implements GasStationService {
 				}
 				gasStationDao.addGasStationCardsByIdAndCardIds(list);
 			}
-			vehicleParamVerDao.updateVerByParam("gasstation_info", System.currentTimeMillis());
+            setVer(SqliteFileConst.GAS_STATION);
 		}
 		return gasStation;
 	}
@@ -84,7 +86,7 @@ public class GasStationServiceImpl implements GasStationService {
 	@Override
 	public void deleteGasStationById(Long id) {
 		gasStationDao.delete(id);
-		vehicleParamVerDao.updateVerByParam("gasstation_info", System.currentTimeMillis());
+        setVer(SqliteFileConst.GAS_STATION);
 	}
 
 	@Override
@@ -148,6 +150,18 @@ public class GasStationServiceImpl implements GasStationService {
 		byte[] cover = CoverRegionUtil.regionToCover(region);
 		gasStation.setCover(cover);
 	}
+
+	private void setVer(String param){
+        VehicleParamVer vehicleParamVer = vehicleParamVerDao.getByParam(param);
+        if (vehicleParamVer == null) {
+            vehicleParamVer = new VehicleParamVer();
+            vehicleParamVer.setParam(param);
+            vehicleParamVer.setVer(System.currentTimeMillis());
+            vehicleParamVerDao.add(vehicleParamVer);
+        } else {
+            vehicleParamVerDao.updateVerByParam(param, System.currentTimeMillis());
+        }
+    }
 
 	@Override
 	public List<Map<String, Object>> getIdAndNameOfAllGasStations() {

@@ -1,12 +1,12 @@
 package com.tipray.core.job;
 
 import com.tipray.bean.track.LastTrack;
+import com.tipray.cache.RC4KeyCache;
 import com.tipray.dao.TrackDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.service.VehicleService;
 import com.tipray.websocket.MonitorWebSocketHandler;
-import com.tipray.websocket.UpdateTrack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,6 +33,13 @@ public class ScheduledJob {
     private MonitorWebSocketHandler monitorWebSocketHandler = new MonitorWebSocketHandler();
 
     /**
+     * 定时更新RC4秘钥信息任务
+     */
+    public void executeUpdateRC4Key() {
+        RC4KeyCache.initRc4();
+    }
+
+    /**
      * UDP链路维护心跳任务
      */
     public void executeUdpHeartbeat() {
@@ -55,7 +62,7 @@ public class ScheduledJob {
      * 最新车辆轨迹查询
      */
     public void executeLastTtracksQuery() {
-        trackDao.updateTracks(UpdateTrack.random());
+        // trackDao.updateTracks(UpdateTrack.random());
         List<LastTrack> lastTracks = vehicleService.findLastTracks();
         if (lastTracks == null) {
             return;

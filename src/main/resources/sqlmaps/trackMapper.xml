@@ -119,7 +119,7 @@
             t1.lock_status_info,
             t1.track_time
         FROM
-            tbl_vehicle_test_track t1,
+            tbl_vehicle_newest_track t1,
             (
             SELECT
                 s.vehicle_id,
@@ -137,7 +137,7 @@
             ) t2
         WHERE
             t1.vehicle_id = t2.vehicle_id
-            AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_test_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
+            AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
         ]]>
     </select>
 

@@ -1,13 +1,12 @@
 package com.tipray.dao;
 
-import java.math.BigInteger;
-import java.util.Map;
-
-import org.apache.ibatis.annotations.Param;
-
 import com.tipray.bean.VehicleParamVer;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+import org.apache.ibatis.annotations.Param;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * VehicleParamVerDao

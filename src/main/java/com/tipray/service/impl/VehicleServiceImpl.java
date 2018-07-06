@@ -126,6 +126,11 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
+    public Integer getStoreNumByCarNo(String carNo) {
+        return vehicleDao.getStoreNumByCarNo(carNo);
+    }
+
+    @Override
     public Vehicle getCarByTerminalId(Integer terminalId) {
         return vehicleDao.getCarByTerminalId(terminalId);
     }
@@ -371,6 +376,13 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Integer addRemoteControlRecord(Map<String, Object> map) {
         vehicleDao.addRemoteControlRecord(map);
+        Integer remoteControlId = ((Long) map.get("id")).intValue();
+        return remoteControlId;
+    }
+
+    @Override
+    public Integer addRemoteStatusAlterRecord(Map<String, Object> map) {
+        vehicleDao.addRemoteStatusAlterRecord(map);
         Integer remoteControlId = ((Long) map.get("id")).intValue();
         return remoteControlId;
     }

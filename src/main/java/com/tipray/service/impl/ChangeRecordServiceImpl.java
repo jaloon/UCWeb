@@ -102,26 +102,32 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         distributionRecordDao.updateStatusToChanged(transportId);
         // 根据变更的物流配送信息添加配送记录
         distributionRecordDao.addByDistributionMap(distributionMap);
-        // 获取配送信息变更后的配送信息
-        Map<String, Long> changedDistribution = distributionRecordDao.getRecentDistributionByInvoice(invoice);
         // 新配送ID
-        long changedTransportId = changedDistribution.get("id");
+        Long changedTransportId = (Long) distributionMap.get("id");
+        // 获取加油站相关信息
+        Map<String, Object> stationMap = gasStationDao.getStationForChangeByOfficialId((String) distributionMap.get("deptId"));
+        if (EmptyObjectUtil.isEmptyMap(stationMap)) {
+            throw new IllegalArgumentException("加油站不存在！");
+        }
         // 新加油站ID
-        long changedGasstationId = changedDistribution.get("gasstation_id");
+        long changedGasstationId = (long) stationMap.get("id");
         distributionMap.put("transportId", transportId);
         distributionMap.put("changedTransportId", changedTransportId);
         distributionMap.put("userId", Integer.MAX_VALUE);
         // 根据变更的物流配送信息添加换站记录
         changeRecordDao.addByChangedDistribution(distributionMap);
         // 获取换站ID
-        long changeId = changeRecordDao.getChangeIdByTransportIdAndChangedTransportId(transportId, changedTransportId);
+        // long changeId = changeRecordDao.getChangeIdByTransportIdAndChangedTransportId(transportId, changedTransportId);
+        long changeId = (Long) distributionMap.get("changeId");
         // 更新换站前配送记录的触发信息
         distributionRecordDao.updateTriggerInfo(transportId, changeId);
 
         String userName = "物流配送接口";
-        ByteBuffer udpDataBuf = buildUdpDataBuf(userName, transportId, changedTransportId, changedGasstationId);
+        ByteBuffer udpDataBuf = buildUdpDataBuf(userName, transportId, changedTransportId, changedGasstationId, stationMap);
         Map<String, Object> map = new HashMap<>();
         map.put("changeId", changeId);
+        map.put("transportId", transportId);
+        map.put("changedTransportId", changedTransportId);
         map.put("dataBuffer", udpDataBuf);
         return map;
     }
@@ -149,10 +155,16 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         // 根据换站信息添加换站记录
         changeRecordDao.addByChangeInfo(changeInfo);
         // 获取换站ID
-        long changeId = changeRecordDao.getChangeIdByTransportIdAndChangedTransportId(transportId, changedTransportId);
+        // long changeId = changeRecordDao.getChangeIdByTransportIdAndChangedTransportId(transportId, changedTransportId);
+        long changeId = changeInfo.getId();
         // 更新换站前配送记录的触发信息
         distributionRecordDao.updateTriggerInfo(transportId, changeId);
-        ByteBuffer udpDataBuf = buildUdpDataBuf(userName, transportId, changedTransportId, changedGasstationId);
+        // 获取新加油站相关信息
+        Map<String, Object> stationMap = gasStationDao.getStationForChangeById(changedGasstationId);
+        if (EmptyObjectUtil.isEmptyMap(stationMap)) {
+            throw new IllegalArgumentException("新加油站不存在！");
+        }
+        ByteBuffer udpDataBuf = buildUdpDataBuf(userName, transportId, changedTransportId, changedGasstationId, stationMap);
         Map<String, Object> map = new HashMap<>();
         map.put("changeId", changeId);
         map.put("changedTransportId", changedTransportId);
@@ -185,12 +197,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
      * @return {@link ByteBuffer} UDP协议数据体
      */
     private ByteBuffer buildUdpDataBuf(String userName, long transportId, long changedTransportId,
-                                       long changedStationId) {
-        // 获取新加油站相关信息
-        Map<String, Object> stationMap = gasStationDao.getStationForChangeById(changedStationId);
-        if (EmptyObjectUtil.isEmptyMap(stationMap)) {
-            throw new IllegalArgumentException("新加油站不存在！");
-        }
+                                       long changedStationId, Map<String, Object> stationMap) {
         // 新加油站名称（简称）
         String stationName = (String) stationMap.get("name");
         // 新加油站经度
@@ -213,7 +220,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         int userNameBufLen = userNameBuf.length;
         int coverCoodrNum = 0, handsetNum = 0, cardNum = 0;
         // 缓冲区容量
-        int capacity = 26 + stationNameBufLen + userNameBufLen;
+        int capacity = 28 + stationNameBufLen + userNameBufLen;
         if (!EmptyObjectUtil.isEmptyArray(cover)) {
             coverCoodrNum = cover.length / 8;
             capacity += cover.length;
@@ -228,6 +235,10 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         }
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
+        // 添加换站类型，1个字节
+        dataBuffer.put((byte) 1);
+        // 添加仓号，1个字节
+        dataBuffer.put((byte) 0);
         // 添加原配送ID，4个字节
         dataBuffer.put(BytesConverterByLittleEndian.getBytes((int) transportId));
         // 添加新配送ID，4个字节

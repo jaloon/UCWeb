@@ -32,6 +32,6 @@ public class CardTest {
 
 	@Test
 	public void findUnusedCards() {
-		cardService.findUnusedCard(1, 1L, null);
+		cardService.findUnusedCard(1);
 	}
 }

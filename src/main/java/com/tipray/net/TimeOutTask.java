@@ -1,15 +1,15 @@
 package com.tipray.net;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.util.ResponseMsgUtil;
 import com.tipray.util.SpringBeanUtil;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 超时任务
@@ -69,14 +69,14 @@ public class TimeOutTask {
                     // 已经收到UDP应答，移除缓存
 					AsynUdpCommCache.removeResultCache(cacheId);
 					AsynUdpCommCache.removeTaskCache(cacheId);
+					// 关闭定时任务
+					service.shutdown();
                 } else {
                     // 未收到应答
                     ResponseMsg msg = ResponseMsgUtil.error(ErrorTagConst.UDP_COMMUNICATION_ERROR_TAG, 180, "UDP应答超时！");
                     short bizId = (short) (cacheId >>> 16 ^ 128);
                     UdpReceiveResultHandler.handleReplyForRemoteControl(bizId, cacheId, msg);
                 }
-                // 关闭定时任务
-                service.shutdown();
 			}
 		};
 		// 参数：1、任务体 2、首次执行的延时时间 3、任务执行间隔 4、间隔时间单位

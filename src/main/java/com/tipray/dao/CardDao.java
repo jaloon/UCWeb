@@ -5,7 +5,6 @@ import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * CardDao
@@ -56,12 +55,11 @@ public interface CardDao extends BaseDao<Card> {
     Card getByCardId(Long cardId);
 
 	/**
-	 * 根据卡类型、油库ID、加油站ID查询未使用的卡
-	 * 
-	 * @param map 查询条件
-	 * @return 未使用的卡集合
+	 * 根据卡类型查询未使用的卡
+	 * @param cardType 卡类型
+	 * @return 未使用的卡
 	 */
-    List<Long> findUnusedCards(Map<String, Object> map);
+    List<Long> findUnusedCards(Integer cardType);
 
 	/**
 	 * 根据卡ID删除与油库相关信息

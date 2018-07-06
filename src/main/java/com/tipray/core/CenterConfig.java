@@ -120,7 +120,7 @@ public class CenterConfig {
 		return ftpUploadPath;
 	}
 
-	public static Integer getUdpLocalPort() {
+    protected static Integer getUdpLocalPort() {
 		return udpLocalPort;
 	}
 
@@ -156,7 +156,7 @@ public class CenterConfig {
 		return excelFilePath;
 	}
 
-    public static String getUpgradeFilePath() {
+    protected static String getUpgradeFilePath() {
         return upgradeFilePath;
     }
 

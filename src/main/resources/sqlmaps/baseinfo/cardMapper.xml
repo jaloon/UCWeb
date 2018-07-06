@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tipray.dao.CardDao">
-	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Card" >
-        <id column="id" property="id" />
-        <result column="card_id" property="cardId" />
-        <result column="type" property="type" />
-        <result column="director" property="director" />
-        <result column="phone" property="phone" />
-        <result column="identity_card" property="identityCard" />
-        <result column="remark" property="remark" />
-        <result column="gmt_create" property="createDate" />
-        <result column="gmt_modified" property="modifyDate" />
+    <resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Card">
+        <id column="id" property="id"/>
+        <result column="card_id" property="cardId"/>
+        <result column="type" property="type"/>
+        <result column="director" property="director"/>
+        <result column="phone" property="phone"/>
+        <result column="identity_card" property="identityCard"/>
+        <result column="remark" property="remark"/>
+        <result column="gmt_create" property="createDate"/>
+        <result column="gmt_modified" property="modifyDate"/>
     </resultMap>
-	<sql id="select_colums">
+    <sql id="select_colums">
 		c.*,fn_type2name("cardType",type) typeName
 	</sql>
-	
-	<select id="findAll" resultMap="fullResultMap">
-		select
-		<include refid="select_colums"></include>
-		from tbl_card c
-		where c.is_invalid=0
-	</select>
-	
-	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Card">
+
+    <select id="findAll" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c
+        where c.is_invalid=0
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Card">
 		insert into
 		tbl_card(card_id,type,director,phone,identity_card,remark)
 		values(#{cardId},#{type},#{director},#{phone},#{identityCard},ifnull(#{remark},''))
 	</insert>
-	
-	<update id="update" parameterType="com.tipray.bean.baseinfo.Card">
+
+    <update id="update" parameterType="com.tipray.bean.baseinfo.Card">
 		update tbl_card set
 		card_id=#{cardId},
 		type=#{type},
@@ -40,67 +40,63 @@
 		remark=ifnull(#{remark},'')
 		where id=#{id}
 	</update>
-	
-	<delete id="delete" parameterType="java.lang.Long">
+
+    <delete id="delete" parameterType="java.lang.Long">
 		update tbl_card set 
 		is_invalid=1 
 		where id=#{id}
 	</delete>
-	
-	<delete id="deleteOilDepotCardByCardId" parameterType="java.lang.Long">
+
+    <delete id="deleteOilDepotCardByCardId" parameterType="java.lang.Long">
 		delete from tbl_oildepot_card where card_id = #{cardId}
 	</delete>
-	
-	<delete id="deleteGasStationCardByCardId" parameterType="java.lang.Long">
+
+    <delete id="deleteGasStationCardByCardId" parameterType="java.lang.Long">
 		delete from tbl_gasstation_card where card_id = #{cardId}
 	</delete>
 
-	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_card c
-		where c.is_invalid=0 and c.id=#{id}
-	</select>
-	<select id="getByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_card c
-		where c.is_invalid=0 and c.card_id=#{cardId}
-	</select>
-	
-	<select id="findUnusedCards" parameterType="java.util.Map" resultType="java.lang.Long">
-		select c.card_id  
-		from tbl_card c
-		where c.is_invalid=0 
-		<if test="cardType != null">
-			and c.type=#{cardType,jdbcType=TINYINT}
-			<if test="cardType == 1">
-				<if test="oilDepotId != null">
-					and c.card_id not in (select co.card_id from tbl_oildepot_card co where co.oildepot_id=#{oilDepotId})
-				</if>
-				<if test="gasStationId != null">
-				and c.card_id not in (select cg.card_id from tbl_gasstation_card cg where cg.gasstation_id=#{gasStationId})
-				</if>
-			</if>
-			<if test="cardType != 1 and cardType != 6">
-				and c.card_id not in (select co.card_id from tbl_oildepot_card co)
-				and c.card_id not in (select cg.card_id from tbl_gasstation_card cg)
-			</if>
-		</if>
-	</select>
-	
-	<select id="findByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_card c, tbl_oildepot_card co
-		where c.is_invalid=0 and c.card_id = co.card_id and co.oildepot_id=#{oilDepotId}
-	</select>
+    <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c
+        where c.is_invalid=0 and c.id=#{id}
+    </select>
+    <select id="getByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c
+        where c.is_invalid=0 and c.card_id=#{cardId}
+    </select>
 
-	<select id="findInOutCardsByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_card c, tbl_oildepot_card co
-		where c.is_invalid=0 and c.card_id = co.card_id and c.type in (2,3,4)
-		and co.oildepot_id=#{oilDepotId}
-	</select>
+    <select id="findUnusedCards" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        select c.card_id
+        from tbl_card c
+        where c.is_invalid=0
+        <if test="cardType != null">
+            and c.type=#{cardType,jdbcType=TINYINT}
+            <if test="cardType != 6">
+                and c.card_id not in (select co.card_id from tbl_oildepot_card co)
+                and c.card_id not in (select cg.card_id from tbl_gasstation_card cg)
+            </if>
+        </if>
+    </select>
 
-	<select id="findInOutCardIdsByOilDepotId" parameterType="java.lang.Long" resultType="java.lang.Long">
+    <select id="findByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c, tbl_oildepot_card co
+        where c.is_invalid=0 and c.card_id = co.card_id and co.oildepot_id=#{oilDepotId}
+    </select>
+
+    <select id="findInOutCardsByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c, tbl_oildepot_card co
+        where c.is_invalid=0 and c.card_id = co.card_id and c.type in (2,3,4)
+        and co.oildepot_id=#{oilDepotId}
+    </select>
+
+    <select id="findInOutCardIdsByOilDepotId" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT
             co.card_id
         FROM
@@ -113,28 +109,30 @@
             AND co.oildepot_id = #{oilDepotId}
 	</select>
 
-	<select id="findByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_card c, tbl_gasstation_card cg
-		where c.is_invalid=0 and c.card_id = cg.card_id and cg.gasstation_id=#{gasStationId}
-	</select>
+    <select id="findByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c, tbl_gasstation_card cg
+        where c.is_invalid=0 and c.card_id = cg.card_id and cg.gasstation_id=#{gasStationId}
+    </select>
 
-	<select id="count" parameterType="com.tipray.bean.baseinfo.Card" resultType="java.lang.Long">
-		select count(*) from tbl_card where is_invalid=0 
-		<if test="type != null and type != -2">
-			and type = #{type}
-		</if>
-	</select>
-	
-	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_card c
-		where c.is_invalid=0 
-		<if test="entity.type != null and entity.type != -2">
-			and type = #{entity.type}
-		</if>
-		order by c.id asc  
-		limit #{page.startRow}, #{page.rows}
-	</select>
-	
+    <select id="count" parameterType="com.tipray.bean.baseinfo.Card" resultType="java.lang.Long">
+        select count(*) from tbl_card where is_invalid=0
+        <if test="type != null and type != -2">
+            and type = #{type}
+        </if>
+    </select>
+
+    <select id="findByPage" resultMap="fullResultMap">
+        select
+        <include refid="select_colums"></include>
+        from tbl_card c
+        where c.is_invalid=0
+        <if test="entity.type != null and entity.type != -2">
+            and type = #{entity.type}
+        </if>
+        order by c.id asc
+        limit #{page.startRow}, #{page.rows}
+    </select>
+
 </mapper>

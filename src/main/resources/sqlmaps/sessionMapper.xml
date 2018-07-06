@@ -11,6 +11,7 @@
         <result column="operate_time" property="operateDate"  />
         <result column="user_id" property="user.id"  />
         <result column="user_role" property="user.role.id"  />
+        <result column="user_app_role" property="user.appRole.id"  />
         <result column="user_com" property="user.comId"  />
         <result column="user_name" property="user.name"  />
         <result column="user_account" property="user.account"  />
@@ -26,7 +27,8 @@
     	u.name user_name,
     	u.account user_account,
     	u.trans_company_id user_com,
-    	u.role_id user_role
+    	u.role_id user_role,
+    	u.app_role_id user_app_role
     </sql>
     
     <select id="getByUser" resultMap="BaseResultMap" parameterType="com.tipray.bean.Session" >

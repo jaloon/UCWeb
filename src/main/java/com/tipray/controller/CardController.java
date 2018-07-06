@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -143,4 +144,10 @@ public class CardController extends BaseAction {
         return gridPage;
     }
 
+    @RequestMapping(value = "findUnusedCard.do")
+    @ResponseBody
+    public List<Long> findUnusedCard(Integer cardType) {
+        logger.info("find unused card, cardType={}", cardType);
+        return cardService.findUnusedCard(cardType);
+    }
 }

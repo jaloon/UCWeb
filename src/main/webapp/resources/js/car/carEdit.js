@@ -108,7 +108,6 @@ $(function() {
 
     addTr = function() {
         var index = $("#driver_info").find("tr").length - 1;
-        var cc = $("#driver_info").children();
         var preTr = $("#driver_info").children().eq(0).children().eq(index - 1);
         if (preTr.children().eq(2).children().length > 0) {
             confirmTr(preTr.children().last());

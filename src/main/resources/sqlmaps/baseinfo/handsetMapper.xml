@@ -5,6 +5,7 @@
 	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Handset" >
         <id column="id" property="id" />
         <result column="handset_device_id" property="deviceId" />
+        <result column="handset_device_ver" property="ver" />
         <result column="gasstation_id" property="gasStation.id" />
         <result column="gasstation_name" property="gasStation.name" />
         <result column="director" property="director" />
@@ -15,15 +16,21 @@
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
 	<sql id="select_colums">
-		h.*,g.name gasstation_name
+		h.*,
+        d.device_version handset_device_ver,
+        g.`name` gasstation_name
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
-		select
-		<include refid="select_colums"></include>
-		from tbl_handset h left join tbl_gasstation g
-		on h.gasstation_id=g.id
-		where h.is_invalid=0
+		SELECT
+            <include refid="select_colums"></include>
+        FROM
+            tbl_handset h
+            LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
+            tbl_device d
+        WHERE
+            h.is_invalid = 0
+            AND h.handset_device_id = d.device_id
 	</select>
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Handset">
@@ -34,45 +41,68 @@
 	
 	<update id="update" parameterType="com.tipray.bean.baseinfo.Handset">
 		update tbl_handset set
-		handset_device_id=#{deviceId},
-		gasstation_id=ifnull(#{gasStation.id},0),
-		director=#{director},
-		phone=#{phone},
-		identity_card=#{identityCard},
-		remark=ifnull(#{remark},'')
+            handset_device_id = #{deviceId},
+            gasstation_id     = ifnull(#{gasStation.id}, 0),
+            director          = #{director},
+            phone             = #{phone},
+            identity_card     = #{identityCard},
+            remark            = ifnull(#{remark},'')
 		where id=#{id}
 	</update>
 	
 	<update id="resetGasStationOfHandsetByGasStationId" parameterType="java.lang.Long">
 		update tbl_handset set
-		gasstation_id=0
-		where gasstation_id=#{gasStationId}
+		  gasstation_id = 0
+		where gasstation_id = #{gasStationId}
 	</update>
 	
 	<delete id="delete" parameterType="java.lang.Long">
 		update tbl_handset set 
-		is_invalid=1 
-		where id=#{id}
+            is_invalid = 1
+		where id = #{id}
 	</delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_handset h left join tbl_gasstation g
-		on h.gasstation_id=g.id
-		where h.is_invalid=0 and h.id=#{id}
+        SELECT
+            <include refid="select_colums"></include>
+        FROM
+            tbl_handset h
+            LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
+            tbl_device d
+        WHERE
+            h.is_invalid = 0
+            AND h.handset_device_id = d.device_id
+            AND h.id = #{id}
 	</select>
-	
+
+    <select id="getIdByDeviceId" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        select id from tbl_handset where handset_device_id=#{deviceId}
+    </select>
+
 	<select id="getByDeviceId" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_handset h left join tbl_gasstation g
-		on h.gasstation_id=g.id
-		where h.is_invalid=0 and h.handset_device_id=#{deviceId}
+        SELECT
+            <include refid="select_colums"></include>
+        FROM
+            tbl_handset h
+            LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
+            tbl_device d
+        WHERE
+            h.is_invalid = 0
+            AND h.handset_device_id = d.device_id
+            AND h.handset_device_id = #{deviceId}
 	</select>
 	
 	<select id="getByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_handset h,tbl_gasstation g
-		where h.gasstation_id=g.id and h.is_invalid=0 and h.gasstation_id=#{gasStationId}
+        SELECT <include refid="select_colums"></include>
+        FROM
+            tbl_handset h,
+            tbl_gasstation g,
+            tbl_device d
+        WHERE
+            h.gasstation_id = g.id
+            AND h.is_invalid = 0
+            AND h.handset_device_id = d.device_id
+            AND h.gasstation_id = #{gasStationId}
 	</select>
 	
 	<select id="findUnaddHandset" resultType="java.lang.Integer">
@@ -97,12 +127,17 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
-		from tbl_handset h left join tbl_gasstation g
-		on h.gasstation_id=g.id
-		where h.is_invalid=0
+        SELECT
+            <include refid="select_colums"></include>
+        FROM
+            tbl_handset h
+            LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
+            tbl_device d
+        WHERE
+            h.is_invalid = 0
+            AND h.handset_device_id = d.device_id
 		<if test="entity.gasStation != null and entity.gasStation.id != null and entity.gasStation.id != -2">
-			and h.gasstation_id = #{entity.gasStation.id}
+            AND h.gasstation_id = #{entity.gasStation.id}
 		</if>
 		order by h.id asc  
 		limit #{page.startRow}, #{page.rows}

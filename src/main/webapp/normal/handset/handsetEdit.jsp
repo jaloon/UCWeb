@@ -21,13 +21,14 @@
     <script type="text/javascript">
         $(function() {
         	<c:if test="${mode!='add'}">
-                if ("edit" == "${mode}") {
+                $("#ver").val(stringifyVer(${handset.ver}));
+                <c:if test="${mode=='edit'}">
                     $("#gasstation").click(function(){
                         layer.msg('请前往加油站管理修改', { icon: 6, time: 1500 }); 
                     });
-                }
+                </c:if>
             </c:if>
-            <c:if test="${mode=='add'}"> 
+            <c:if test="${mode=='add'}">
                 $("#hid").css({
                     width: '398px',
                     height: '28px'
@@ -86,7 +87,13 @@
                 <tr>
                     <td>手持机ID:</td>
                     <td>
-                        <input type="text" class="editInfo" id="hid" value="${handset.deviceId}" readonly>
+                        <input type="text" class="editInfo" value="${handset.deviceId}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>版本号:</td>
+                    <td>
+                        <input type="text" class="editInfo" id="ver" value="${handset.ver}" readonly>
                     </td>
                 </tr>
                 <tr>
@@ -98,19 +105,19 @@
                 <tr>
                     <td>负责人:</td>
                     <td>
-                        <input type="text" class="editInfo" id="director" value="${handset.director}" readonly>
+                        <input type="text" class="editInfo" value="${handset.director}" readonly>
                     </td>
                 </tr>
                 <tr>
                     <td>联系电话:</td>
                     <td>
-                        <input type="text" class="editInfo" id="phone" value="${handset.phone}" readonly>
+                        <input type="text" class="editInfo" value="${handset.phone}" readonly>
                     </td>
                 </tr>
                 <tr>
                     <td>身份证号:</td>
                     <td>
-                        <input type="tel" class="editInfo" id="identity" value="${handset.identityCard}" readonly>
+                        <input type="tel" class="editInfo" value="${handset.identityCard}" readonly>
                     </td>
                 </tr>
                 <tr>
@@ -180,9 +187,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>版本号:</td>
+                    <td>
+                        <input type="text" class="editInfo" id="ver" value="${handset.ver}" readonly>
+                    </td>
+                </tr>
+                <tr>
                     <td>加油站:</td>
                     <td>
-                        <input type="text" class="editInfo" id="gasstation" value="${handset.gasStation.name}" readonly>
+                        <input type="hidden" id="gasstation" value="${handset.gasStation.id}">
+                        <input type="text" class="editInfo" value="${handset.gasStation.name}" readonly>
                     </td>
                 </tr>
                 <tr>
