@@ -8,13 +8,13 @@
     <title>车载终端配置</title>
     <link rel="stylesheet" href="../../../resources/css/base.css ">
     <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
-    <link rel="stylesheet" href="../../../resources/plugins/jRange/jquery.range.css">
+    <!--<link rel="stylesheet" href="../../../resources/plugins/jRange/jquery.range.css">-->
     <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../../resources/plugins/layer/layer.js"></script>
-    <script src="../../../resources/plugins/jRange/jquery.range-min.js"></script>
-    <script src="../../../resources/plugins/verify.js"></script>
+    <!--<script src="../../../resources/plugins/jRange/jquery.range-min.js"></script>-->
+    <!--<script src="../../../resources/plugins/verify.js"></script>-->
     <script src="../../../resources/js/base.js"></script>
 </head>
 
@@ -47,19 +47,22 @@
                 <tr>
                     <td>轨迹采集间隔（秒）</td>
                     <td>
-                        <input type="hidden" id="scan_interval" value="5"/>
+                        <!--<input type="hidden" id="scan_interval" value="5"/>-->
+                        <input type="number" class="editInfo" id="scan_interval" min="0" max="255" placeholder="数值范围：0 ~ 255">
                     </td>
                 </tr>
                 <tr>
                     <td>轨迹上报间隔（秒）</td>
                     <td>
-                        <input type="hidden" id="upload_interval" value="30"/>
+                        <!--<input type="hidden" id="upload_interval" value="30"/>-->
+                        <input type="number" class="editInfo" id="upload_interval" min="0" max="255" placeholder="数值范围：0 ~ 255">
                     </td>
                 </tr>
                 <tr>
                     <td>轨迹生成距离间隔（米）</td>
                     <td>
-                        <input type="hidden" id="generate_distance" value="10"/>
+                        <!--<input type="hidden" id="generate_distance" value="10"/>-->
+                        <input type="number" class="editInfo" id="generate_distance" min="0" max="255" placeholder="数值范围：0 ~ 255">
                     </td>
                 </tr>
             </table>
@@ -86,7 +89,7 @@
         });
         $('input.editInfo').width(302);
 
-        $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+        $.getJSON("../../../manage/car/selectCars.do", "scope=1",
             function (data, textStatus, jqXHR) {
                 var selectObj = $('#carno');
                 selectObj.append(data.com);
@@ -125,52 +128,139 @@
             }
         });
 
-        $('#scan_interval').jRange({
-            from: 0,
-            to: 255,
-            step: 1,
-            scale: [0, 60, 120, 180, 255],
-            format: '%s',
-            width: 316,
-            snap: true,
-            showLabels: true,
-            showScale: true
-        });
+        // $('#scan_interval').jRange({
+        //     from: 0,
+        //     to: 255,
+        //     step: 1,
+        //     scale: [0, 60, 120, 180, 255],
+        //     format: '%s',
+        //     width: 316,
+        //     snap: true,
+        //     showLabels: true,
+        //     showScale: true
+        // });
+        //
+        // $('#upload_interval').jRange({
+        //     from: 0,
+        //     to: 255,
+        //     step: 1,
+        //     scale: [0, 60, 120, 180, 255],
+        //     format: '%s',
+        //     width: 316,
+        //     snap: true,
+        //     showLabels: true,
+        //     showScale: true
+        // });
+        //
+        // $('#generate_distance').jRange({
+        //     from: 0,
+        //     to: 255,
+        //     step: 1,
+        //     scale: [0, 60, 120, 180, 255],
+        //     format: '%s',
+        //     width: 316,
+        //     snap: true,
+        //     showLabels: true,
+        //     showScale: true
+        // });
 
-        $('#upload_interval').jRange({
-            from: 0,
-            to: 255,
-            step: 1,
-            scale: [0, 60, 120, 180, 255],
-            format: '%s',
-            width: 316,
-            snap: true,
-            showLabels: true,
-            showScale: true
-        });
+        var scanInterval0 = '',
+            uploadInterval0 = '',
+            generateDistance0 = '',
+            scanInterval1 = '',
+            uploadInterval1 = '',
+            generateDistance1 = '';
 
-        $('#generate_distance').jRange({
-            from: 0,
-            to: 255,
-            step: 1,
-            scale: [0, 60, 120, 180, 255],
-            format: '%s',
-            width: 316,
-            snap: true,
-            showLabels: true,
-            showScale: true
+        $.getJSON("../../../manage/car/getGpsConfByCarNumber.do",
+            function (data, textStatus, jqXHR) {
+                if (data == null) {
+                    scanInterval0 = '';
+                    uploadInterval0 = '';
+                    generateDistance0 = '';
+                } else {
+                    scanInterval0 = data.scanInterval;
+                    uploadInterval0 = data.uploadInterval;
+                    generateDistance0 = data.generateDistance;
+                }
+                $("#scan_interval").val(scanInterval0);
+                $("#upload_interval").val(uploadInterval0);
+                $("#generate_distance").val(generateDistance0);
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
+                    location.reload(true);
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
+            }
         });
 
         $("#config_scope").change(function () {
             var scope = $("#config_scope").val();
             if (scope > 0) {
+                $("#scan_interval").val(scanInterval1);
+                $("#upload_interval").val(uploadInterval1);
+                $("#generate_distance").val(generateDistance1);
                 $("#allcar").hide();
                 $("#carno").closest(".combo-select").show();
             } else {
+                $("#scan_interval").val(scanInterval0);
+                $("#upload_interval").val(uploadInterval0);
+                $("#generate_distance").val(generateDistance0);
                 $("#carno").closest(".combo-select").hide();
                 $("#allcar").show();
             }
         });
+
+        $("#carno").change(function () {
+            $.getJSON("../../../manage/car/getGpsConfByCarNumber.do", "carNumber=" + encodeURIComponent($("#carno").val()),
+                function (data, textStatus, jqXHR) {
+                    if (data == null) {
+                        scanInterval1 = '';
+                        uploadInterval1 = '';
+                        generateDistance1 = '';
+                    } else {
+                        scanInterval1 = data.scanInterval;
+                        uploadInterval1 = data.uploadInterval;
+                        generateDistance1 = data.generateDistance;
+                    }
+                    $("#scan_interval").val(scanInterval1);
+                    $("#upload_interval").val(uploadInterval1);
+                    $("#generate_distance").val(generateDistance1);
+                }
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
+                        location.reload(true);
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
+                }
+            });
+        });
+
+        function isInterval(num) {
+            var reg = /^-?\d+$/;
+            if (reg.test(num)) {
+                return num >=0 && num < 256;
+            }
+            return false;
+        }
 
         $("#confirm").click(function () {
             var scope = $("#config_scope").val();
@@ -186,8 +276,29 @@
                 }
             }
             var scan_interval = $('#scan_interval').val();
+            if (!isInterval(scan_interval)) {
+                layer.alert('轨迹采集间隔必须为0~255的整数！', { icon: 0 }, function(index2) {
+                    layer.close(index2);
+                    $("#scan_interval").select();
+                });
+                return;
+            }
             var upload_interval = $('#upload_interval').val();
+            if (!isInterval(scan_interval)) {
+                layer.alert('轨迹上报间隔必须为0~255的整数！', { icon: 0 }, function(index2) {
+                    layer.close(index2);
+                    $("#upload_interval").select();
+                });
+                return;
+            }
             var generate_distance = $('#generate_distance').val();
+            if (!isInterval(scan_interval)) {
+                layer.alert('轨迹生成距离间隔必须为0~255的整数！', { icon: 0 }, function(index2) {
+                    layer.close(index2);
+                    $("#generate_distance").select();
+                });
+                return;
+            }
             var loadIndex = layer.load();
             $.post("../../../manage/remote/asyn_terminal_config_request",
                 encodeURI("scope=" + scope + "&carNumber=" + carno + "&scanInterval=" + scan_interval +

@@ -392,6 +392,32 @@
         	)}
         ]]>
 	</select>
+	
+	<select id="getGpsConfByTerminalId" parameterType="java.lang.Integer" resultType="com.tipray.bean.VehicleTerminalConfig">
+       	SELECT
+        	t1.vehicle_device_id terminalId,
+            IFNULL( t2.param_cfg_value, 0 ) scanInterval,
+            IFNULL( t3.param_cfg_value, 0 ) uploadInterval,
+            IFNULL( t4.param_cfg_value, 0 ) generateDistance 
+        FROM
+            ( SELECT #{terminalId} vehicle_device_id ) t1
+            LEFT JOIN tbl_vehicle_param_cfg t2 ON t1.vehicle_device_id = t2.vehicle_device_id AND t2.param_cfg_name = 'TrackSampleSpanSec'
+            LEFT JOIN tbl_vehicle_param_cfg t3 ON t1.vehicle_device_id = t3.vehicle_device_id AND t3.param_cfg_name = 'TrackUploadSpanSec'
+            LEFT JOIN tbl_vehicle_param_cfg t4 ON t1.vehicle_device_id = t4.vehicle_device_id AND t4.param_cfg_name = 'TrackUploadSpanMeter'
+    </select>
+    
+	<select id="getGpsConfByCarNumber" parameterType="java.lang.String" resultType="com.tipray.bean.VehicleTerminalConfig">
+       	SELECT
+        	t1.vehicle_device_id terminalId,
+            t2.param_cfg_value scanInterval,
+            t3.param_cfg_value uploadInterval,
+            t4.param_cfg_value generateDistance
+        FROM
+            ( SELECT vehicle_device_id FROM tbl_vehicle WHERE vehicle_number = #{carNumber}) t1
+            LEFT JOIN tbl_vehicle_param_cfg t2 ON t1.vehicle_device_id = t2.vehicle_device_id AND t2.param_cfg_name = 'TrackSampleSpanSec'
+            LEFT JOIN tbl_vehicle_param_cfg t3 ON t1.vehicle_device_id = t3.vehicle_device_id AND t3.param_cfg_name = 'TrackUploadSpanSec'
+            LEFT JOIN tbl_vehicle_param_cfg t4 ON t1.vehicle_device_id = t4.vehicle_device_id AND t4.param_cfg_name = 'TrackUploadSpanMeter'
+    </select>
 
     <select id="countTerminalEnable" resultType="java.lang.Integer">
         SELECT COUNT(*) FROM tbl_vehicle_param_cfg WHERE vehicle_device_id = 0 AND param_cfg_name = 'VehicleWorkOnOff'

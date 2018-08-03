@@ -219,6 +219,19 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     void terminalConfig(VehicleTerminalConfig terminalConfig);
 
     /**
+     * 根据车台设备ID获取GPS配置信息
+     * @param terminalId 车台设备ID
+     * @return GPS配置信息
+     */
+    VehicleTerminalConfig getGpsConfByTerminalId(Integer terminalId);
+    /**
+     * 根据车牌号获取GPS配置信息
+     * @param carNumber 车牌号
+     * @return GPS配置信息
+     */
+    VehicleTerminalConfig getGpsConfByCarNumber(String carNumber);
+
+    /**
      * 查询台功能启用配置记录数目
      */
     Integer countTerminalEnable();
@@ -372,7 +385,17 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      */
     Integer getOnline(Long carId);
 
+    /**
+     * 查询车辆最新状态
+     * @param carId 车辆id
+     * @return 状态，时间
+     */
     Map<String, Object> getCarStatusByCarId(Long carId);
 
+    /**
+     * 查询某段时间之后所有车辆的状态
+     * @param begin 查询时间
+     * @return 车辆id，状态，时间
+     */
     List<LastCarStatus> findCarStatusAfterTime(Date begin);
 }

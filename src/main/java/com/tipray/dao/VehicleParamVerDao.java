@@ -46,4 +46,6 @@ public interface VehicleParamVerDao extends BaseDao<VehicleParamVer> {
 	 * @return
 	 */
     Map<String, BigInteger> getVersionsOfOilDepotAndGasStation();
+
+
 }

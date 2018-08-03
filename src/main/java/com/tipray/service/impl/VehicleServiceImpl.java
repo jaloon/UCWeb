@@ -355,6 +355,22 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
+    public VehicleTerminalConfig getGpsConfByTerminalId(Integer terminalId) {
+        if (terminalId == null) {
+            terminalId = 0;
+        }
+        return vehicleDao.getGpsConfByTerminalId(terminalId);
+    }
+
+    @Override
+    public VehicleTerminalConfig getGpsConfByCarNumber(String carNumber) {
+        if (StringUtil.isEmpty(carNumber)) {
+            return vehicleDao.getGpsConfByTerminalId(0);
+        }
+        return vehicleDao.getGpsConfByCarNumber(carNumber);
+    }
+
+    @Override
     public Integer getFuncEnable() {
         Integer func = vehicleDao.getTerminalEnable();
         return func == null ? 0 : func;

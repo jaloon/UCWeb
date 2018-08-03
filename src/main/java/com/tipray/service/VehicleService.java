@@ -243,6 +243,20 @@ public interface VehicleService {
     void terminalConfig(VehicleTerminalConfig terminalConfig) throws ServiceException;
 
     /**
+     * 根据车台设备ID获取GPS配置信息
+     * @param terminalId 车台设备ID
+     * @return GPS配置信息
+     */
+    VehicleTerminalConfig getGpsConfByTerminalId(Integer terminalId);
+
+    /**
+     * 根据车牌号获取GPS配置信息
+     * @param carNumber 车牌号
+     * @return GPS配置信息
+     */
+    VehicleTerminalConfig getGpsConfByCarNumber(String carNumber);
+
+    /**
      * 获取车台已启用的功能
      *
      * @return 车台已启用的功能

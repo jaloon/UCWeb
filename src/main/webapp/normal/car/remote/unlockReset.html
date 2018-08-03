@@ -35,7 +35,7 @@
             background: #ffffff;
         }
 
-        .lock>table {
+        .lock > table {
             width: 480px;
             position: relative;
             left: 10px;
@@ -107,11 +107,6 @@
                     <td>
                         <div class="lock-box">
                             <ol id="locks">
-                                <li>
-                                    <span id="add" style="font-size: 16px; color: #0154ad">
-                                        <img alt="添加" title="添加" src="../../../resources/images/operate/addNew.png">&nbsp;添加锁设备ID
-                                    </span>
-                                </li>
                             </ol>
                         </div>
                     </td>
@@ -140,45 +135,8 @@
 </div>
 </body>
 <script>
-    var add = false;
-    var lockLayer;
 
-    function openLockLayer() {
-        var title = "更改";
-        if (add) {
-            title = "添加";
-        }
-        lockLayer = layer.open({
-            type: 1,
-            title: [title + '待重置锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            area: ['500px', '145px'],
-            // area: ['500px', '149px'],
-            content: $('.lock'),
-            end: clearLockDiv()
-        });
-    }
-
-    function clearLockDiv() {
-        $("#lock_id").val("");
-    }
-
-    function addLock() {
-        add = true;
-        openLockLayer();
-    }
-
-    function delLock(obj) {
-        $(obj).closest("li").remove();
-    }
-
-    function alterLock(obj) {
-        add = false;
-        liObj = $(obj).closest("li");
-        openLockLayer();
-        $("#lock_id").val(liObj.children().eq(2).html());
-    }
-
-    $(function() {
+    $(function () {
         var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
 
         $.getJSON("../../../manage/car/selectCars.do", "scope=2",
@@ -227,76 +185,92 @@
             }
         });
 
-        $("#add").click(addLock);
+        function parseLock(lock) {
+            return "仓" + lock.store_id + "-" + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index;
+        }
 
-        $("#lock_cancel").click(function() {
-            layer.close(lockLayer);
-        });
-
-        $("#lock_confirm").click(function () {
-            var lock_id = $("#lock_id").val();
-            if (isNull(lock_id)) {
-                layer.alert("锁设备ID不能为空！", { icon: 2}, function (index2) {
-                    layer.close(index2);
-                    $("#lock_id").select();
-                });
-                return;
-            }
-            if (!isInteger(lock_id)) {
-                layer.alert("锁设备ID必须为整数数字！", { icon: 2}, function (index2) {
-                    layer.close(index2);
-                    $("#lock_id").select();
-                });
-                return;
-            }
-
-            var liHtml = "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delLock(this)\">\n" +
-                    "<span onclick=\"alterLock(this)\">锁：</span>" +
-                    "<span onclick=\"alterLock(this)\">" + lock_id + "</span></li>";
-            if (add) {
-                $("#locks li:eq(-1)").before(liHtml);
-                // 用js控制div的滚动条,让它在内容更新时自动滚动到底部
-                $(".lock-box").scrollTop($(".lock-box")[0].scrollHeight);
-            } else {
-                liObj.replaceWith(liHtml);
-            }
-            layer.close(lockLayer);
-        });
-
-        $("#cancel").click(function() {
-            parent.layer.close(index);
-        });
-
-        $("#confirm").click(function() {
+        $("#carno").change(function () {
             var carno = $("#carno").val();
-            if (!isCarNo(carno)) {
-                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
-                    icon: 2
-                }, function(index2) {
+            if (carno.length == 0) {
+                $("#locks").html("");
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#carno").select();
                 });
                 return;
             }
-            var lockNum = $("#locks").children().length - 1;
-            if (lockNum == 0) {
-                layer.alert('至少要重置一把锁！', { icon: 2 }, function(index2) {
+            $.getJSON("../../../manage/car/findlocksByCarNo.do", "carNumber=" + encodeURIComponent(carno),
+                function (data, textStatus, jqXHR) {
+                    if (data == null || data.length == 0) {
+                        $("#locks").html("");
+                        layer.msg('车辆' + carno + '无可重置的锁！', {icon: 0});
+                        return;
+                    }
+                    var liHtml = "";
+                    data.forEach(function (lock) {
+                        if (lock.is_has_bind == 1 && lock.bind_status == 2 && lock.lock_device_id != 0) {
+                            liHtml += "<li><label><input type='checkbox' class='reset-locks' value='"
+                                + lock.lock_device_id + "'>" + parseLock(lock) + "</label></li>";
+                        }
+                    });
+                    if (liHtml.length == 0) {
+                        layer.msg('车辆' + carno + '无可重置的锁！', {icon: 0});
+                    }
+                    $("#locks").html(liHtml);
+
+                }
+            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
+                        location.reload(true);
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
+                }
+            });
+
+        });
+
+        $("#cancel").click(function () {
+            parent.layer.close(index);
+        });
+
+        $("#confirm").click(function () {
+            var carno = $("#carno").val();
+            if (!isCarNo(carno)) {
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
+                    icon: 2
+                }, function (index2) {
                     layer.close(index2);
-                    $("#add").click();
+                    $("#carno").select();
                 });
                 return;
             }
-            var lockIds = "";
-            for (var i = 0; i < lockNum; i++) {
-                var li = $("#locks").children().eq(i);
-                lockIds += li.children().eq(2).html();
-                lockIds += ',';
+            var resetLock = $(".reset-locks:checked");
+            if (resetLock.length == 0) {
+                layer.alert('至少要重置一把锁！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $(".reset-locks")[0].select();
+                });
+                return;
             }
-            lockIds = lockIds.substr(0, lockIds.length - 1);
+
+            var lockIds = "";
+            resetLock.each(function () {
+               lockIds += ',' + $(this).val();
+            });
+            lockIds = lockIds.slice(1);
             var loadIndex = layer.load();
             $.post("../../../manage/remote/asyn_lock_reset_request",
                 "car_number=" + encodeURIComponent(carno) + "&lock_ids=" + lockIds + "&token=" + generateUUID(),
-                function(data) {
+                function (data) {
                     layer.close(loadIndex);
                     if (data.id > 0) {
                         layer.msg(data.msg, {
@@ -307,7 +281,7 @@
                         layer.msg('请求发送成功！', {
                             icon: 1,
                             time: 500
-                        }, function() {
+                        }, function () {
                             parent.layer.close(index);
                         });
                     }

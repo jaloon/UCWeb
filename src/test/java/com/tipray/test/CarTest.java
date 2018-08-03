@@ -65,6 +65,14 @@ public class CarTest {
     private GasStationDao gasStationDao;
 
     @Test
+    public void getGpsConfByTerminalId() {
+        VehicleTerminalConfig gps1 = vehicleDao.getGpsConfByTerminalId(0);
+        System.out.println(gps1);
+        VehicleTerminalConfig gps2 = vehicleDao.getGpsConfByCarNumber("桂A98326");
+        System.out.println(gps2);
+    }
+
+    @Test
     public void findLastTracks2() {
         carService.findLastTracks();
     }

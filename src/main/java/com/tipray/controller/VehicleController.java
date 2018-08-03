@@ -546,4 +546,15 @@ public class VehicleController extends BaseAction {
     public Map<String, Object> getTrackAndLockInfoByTrackId(String trackId) {
         return vehicleService.getTrackAndLockInfoByTrackId(trackId);
     }
+
+    /**
+     * 根据车牌号获取GPS配置信息
+     * @param carNumber 车牌号
+     * @return GPS配置信息
+     */
+    @RequestMapping(value = "getGpsConfByCarNumber.do")
+    @ResponseBody
+    public VehicleTerminalConfig getGpsConfByCarNumber(String carNumber) {
+        return vehicleService.getGpsConfByCarNumber(carNumber);
+    }
 }

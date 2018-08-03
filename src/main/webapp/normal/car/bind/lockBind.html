@@ -16,6 +16,11 @@
             height: 28px;
         }
 
+        li {
+            list-style-type:none;
+            cursor: pointer;
+        }
+
         .lock-box {
             height: 148px;
             width: 384px;
@@ -246,13 +251,13 @@
 
     function alterLock(obj) {
         add = false;
-        liObj = $(obj).closest("li");
         openLockLayer();
-        $("#lock_id").val(liObj.children().eq(2).html());
-        $("#store_id").val(liObj.children().eq(3).html());
-        $("#seat").val(liObj.children().eq(4).html());
-        $("#seat_index").val(liObj.children().eq(5).html());
-        $("#open_allowed").val(liObj.children().eq(6).html());
+        var nextAll = $(obj).nextAll();
+        $("#lock_id").val(nextAll.eq(0).html());
+        $("#store_id").val(nextAll.eq(1).html());
+        $("#seat").val(nextAll.eq(2).html());
+        $("#seat_index").val(nextAll.eq(3).html());
+        $("#open_allowed").val(nextAll.eq(4).html());
     }
 
     $(function () {
@@ -337,7 +342,80 @@
             }
         });
 
-        $("#add").click(addLock);
+        // 1: 待车台触发确认 | 2：车台已触发确认
+        function parseLock(lock) {
+            return "锁：" + lock.lock_device_id + "-仓" + lock.store_id + "-"
+                + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index
+                + (lock.is_allowed_open == 2 ? "-" : "-不") + "允许开锁-"
+                + (lock.bind_status == 2 ? "已同步绑定" : (lock.bind_status == 1
+                    ? "未同步绑定" : "未知绑定状态[" + lock.bind_status + "]"));
+        }
+
+        $("#bind_type").change(function () {
+            var bindType = $("#bind_type").val();
+            var liHtml = "";
+            if (bindType == 1) {
+                liHtml = "<li><span class='layable' id='add' style='font-size: 16px; color: #0154ad'>" +
+                    "<img alt='添加' title='添加' src='../../../resources/images/operate/addNew.png'>&nbsp;添加锁信息</span></li>";
+            } else {
+                var carno = $("#carno").val();
+                if (carno.length > 0) {
+                    $.getJSON("../../../manage/car/findlocksByCarNo.do", "carNumber=" + encodeURIComponent(carno),
+                        function (data, textStatus, jqXHR) {
+                            if (data == null || data.length == 0) {
+                                $("#locks").html("");
+                                layer.msg('车辆' + carno + '未绑定锁，请先增加锁！', {icon: 0}, function (index2) {
+                                    layer.close(index2);
+                                    $("#bind_type").select();
+                                });
+                                return;
+                            }
+                            var liHtml = "";
+                            data.forEach(function (lock) {
+                                if (lock.lock_device_id != 0) {
+                                    if (bindType == 2) {
+                                        liHtml += "<li><span class='layable' onclick='alterLock(this)'>" + parseLock(lock) + "</span>"
+                                    } else {
+                                        liHtml += "<li><label><input type='checkbox' class='check-locks'>" + parseLock(lock) + "</label>";
+                                    }
+                                    liHtml += "<span style=\"display: none;\">" + lock.lock_device_id + "</span>" +
+                                        "<span style=\"display: none;\">" + lock.store_id + "</span>" +
+                                        "<span style=\"display: none;\">" + lock.seat + "</span>" +
+                                        "<span style=\"display: none;\">" + lock.seat_index + "</span>" +
+                                        "<span style=\"display: none;\">" + lock.is_allowed_open + "</span></li>";
+                                }
+                            });
+                            if (liHtml.length == 0) {
+                                layer.msg('车辆' + carno + '未绑定锁，请先增加锁！', {icon: 0}, function (index2) {
+                                    layer.close(index2);
+                                    $("#bind_type").select();
+                                });
+                            }
+                            $("#locks").html(liHtml);
+                        }
+                    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                        if (XMLHttpRequest.readyState == 4) {
+                            var http_status = XMLHttpRequest.status;
+                            if (http_status == 0 || http_status > 600) {
+                                location.reload(true);
+                            } else if (http_status == 200) {
+                                if (textStatus == "parsererror") {
+                                    layer.alert("应答数据格式解析错误！")
+                                } else {
+                                    layer.alert("http response error: " + textStatus)
+                                }
+                            } else {
+                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                            }
+                        }
+                    });
+                }
+            }
+            $("#locks").html(liHtml);
+        });
+
+        // $("#add").click(addLock);
+        $("#locks").on("click", "#add", addLock);
 
         $("#lock_cancel").click(function () {
             layer.close(lockLayer);
