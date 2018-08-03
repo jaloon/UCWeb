@@ -23,13 +23,19 @@ $(function() {
                 permissions = response;
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             }
         });
@@ -122,13 +128,19 @@ $(function() {
                         }
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                            layer.confirm('登录失效，是否刷新页面重新登录？', {
-                                icon: 0,
-                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                            }, function() {
+                        if (XMLHttpRequest.readyState == 4) {
+                            var http_status = XMLHttpRequest.status;
+                            if (http_status == 0 || http_status > 600) {
                                 location.reload(true);
-                            });
+                            } else if (http_status == 200) {
+                                if (textStatus == "parsererror") {
+                                    layer.alert("应答数据格式解析错误！")
+                                } else {
+                                    layer.alert("http response error: " + textStatus)
+                                }
+                            } else {
+                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                            }
                         }
                     }
                 });
@@ -156,13 +168,19 @@ $(function() {
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
                     location.reload(true);
-                });
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
             }
         });
 

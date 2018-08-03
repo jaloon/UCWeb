@@ -6,11 +6,11 @@ $(function() {
         var h = "604px";
         if ("edit" == mode) {
             title = "修改加油站信息";
-            h = "654px";
+            h = "664px";
         }
         if ("view" == mode) {
             title = "查看加油站信息";
-            h = "603px";
+            h = "613px";
         }
         layer.open({
             type: 2,

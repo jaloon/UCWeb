@@ -115,7 +115,7 @@
             AND t1.device_type = t2.device_type
             AND (t1.device_id = t2.device_id OR t1.lock_id = t2.lock_id)
             AND t1.type = t2.type
-            AND t1.alarm_time <= t2.alarm_time
+--             AND t1.alarm_time <= t2.alarm_time
             AND t1.`status` = 0
         ]]>
     </select>

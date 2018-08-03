@@ -209,7 +209,7 @@ public interface VehicleService {
      * @param carTrack
      * @return
      */
-    List<ReTrack> findTracks(ReTrack carTrack);
+    Map<String, Object> findTracks(ReTrack carTrack);
 
     /**
      * 根据车辆ID获取车载终端ID
@@ -459,4 +459,11 @@ public interface VehicleService {
      * @return 升级状态
      */
     Integer getUpgradeStatusById(Long upgradeRecordId);
+
+    /**
+     * 根据轨迹ID查询轨迹和锁信息
+     * @param trackId 轨迹ID
+     * @return 轨迹和锁信息
+     */
+    Map<String, Object> getTrackAndLockInfoByTrackId(String trackId);
 }

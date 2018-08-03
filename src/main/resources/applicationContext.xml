@@ -109,6 +109,6 @@
     <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
 
     <!-- <import resource="applicationContext-ehcache.xml" /> -->
-    <import resource="applicationContext-webservice.xml"/>
+    <!--<import resource="applicationContext-webservice.xml"/>-->
     <import resource="applicationContext-job.xml"/>
 </beans>

@@ -24,25 +24,7 @@ var point_opts = {
     // shadowBlur: 1,
     // globalCompositeOperation: 'lighter',
     methods: {
-        click: function (item) {
-            if (item != null) {
-                console.log(item);
-                layer.open({
-                    type: 2,
-                    title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                    shadeClose: true,
-                    shade: 0.6,
-                    resize: false,
-                    area: ['800px', '560px'],
-                    content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
-                    '&carId=' + item.carid + '&carNumber=' + encodeURIComponent(item.carno) +
-                    '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
-                    end: function () {
-                        ws.send(focusCancelOrder);
-                    }
-                });
-            }
-        }
+        click: openFocusLayer
     },
     size: 2,
     draw: 'simple'
@@ -50,25 +32,7 @@ var point_opts = {
 var icon_opts = {
     draw: 'icon',
     methods: {
-        click: function (item) {
-            if (item != null) {
-                console.log(item);
-                layer.open({
-                    type: 2,
-                    title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                    shadeClose: true,
-                    shade: 0.6,
-                    resize: false,
-                    area: ['800px', '560px'],
-                    content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
-                    '&carId=' + item.carid + '&carNumber=' + encodeURIComponent(item.carno) +
-                    '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
-                    end: function () {
-                        ws.send(focusCancelOrder);
-                    }
-                });
-            }
-        }
+        click: openFocusLayer
     }
 };
 var text_opts = {
@@ -96,6 +60,26 @@ var alarm_car_img = new Image();
 alarm_car_img.src = '../../resources/images/marker/车辆图标-32-红.png';
 var normal_car_img = new Image();
 normal_car_img.src = '../../resources/images/marker/车辆图标-32-黄.png';
+
+function openFocusLayer(item) {
+    if (item != null) {
+        console.log(item);
+        layer.open({
+            type: 2,
+            title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            shadeClose: true,
+            shade: 0.6,
+            resize: false,
+            area: ['800px', '560px'],
+            content: '../../normal/car/monitor/carMonitorFocusTrack.html?wsUrl=' + wsUrl +
+            '&carId=' + item.carid + '&carNumber=' + encodeURIComponent(item.carno) +
+            '&parentSession=' + sessionId + '&user=' + encodeURIComponent(userJson),
+            end: function () {
+                ws.send(focusCancelOrder);
+            }
+        });
+    }
+}
 
 /**
  * 更新视图
@@ -186,7 +170,7 @@ function show(point_data, icon_data, text_data) {
 }
 
 var onlineCarIds = [];
-var $tbody = $("#table-cont").find("tbody");
+var $tbody = $(".table-body");
 
 function getCarIcon(alarm) {
     if (alarm == "是") {
@@ -204,6 +188,7 @@ function flushTrack(tracks) {
     var ne = bounds.getNorthEast(); // 返回矩形区域的东北角
     var swlng = sw.lng,
         swlat = sw.lat,
+
         nelng = ne.lng,
         nelat = ne.lat;
 
@@ -211,11 +196,14 @@ function flushTrack(tracks) {
         var carId = track.carId;
         var lng = track.longitude;
         var lat = track.latitude;
-        var pos = [lng, lat];
+        // var pos = [lng, lat];
+        var pos = wgs84tobd09(lng, lat);
         var deg = 360 - track.angle;
         var img = getCarIcon(track.alarm);
         var text = track.carNumber;
-        car_pos_cache.set(carId, pos);
+        if (pos[0] != 0 && pos[1] != 0) {
+            car_pos_cache.set(carId, pos);
+        }
         car_deg_cache.set(carId, deg);
         car_img_cache.set(carId, img);
         car_text_cache.set(carId, text);
@@ -232,7 +220,7 @@ function flushTrack(tracks) {
                 "<td class=\"car-online\">在线</td>" +
                 "</tr>";
             car_list_cache.set(carId, carTr);
-            if (lng > swlng && lng < nelng && lat > swlat && lat < nelat) {
+            if (pos[0] > swlng && pos[0] < nelng && pos[1] > swlat && pos[1] < nelat) {
                 var geometry = {
                     type: GeometryType.Point,
                     coordinates: pos
@@ -330,21 +318,6 @@ $(function () {
         }
     }).resize();
 
-    // 固定表头
-    var tableCont = document.querySelector('#table-cont');
-
-    /**
-     * scroll handle
-     * @param {event} e -- scroll event
-     */
-    function scrollHandle(e) {
-        // console.log(this)
-        var scrollTop = this.scrollTop;
-        this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
-    }
-
-    tableCont.addEventListener('scroll', scrollHandle);
-
     $.getJSON("../../../manage/car/selectCars.do", "scope=0",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#search_text');
@@ -404,18 +377,28 @@ $(function () {
             realtimeSelectObj.siblings(".combo-input").height(2);
         }
     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-            layer.confirm('登录失效，是否刷新页面重新登录？', {
-                icon: 0,
-                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-            }, function () {
+        if (XMLHttpRequest.readyState == 4) {
+            var http_status = XMLHttpRequest.status;
+            if (http_status == 0 || http_status > 600) {
                 location.reload(true);
-            });
+            } else if (http_status == 200) {
+                if (textStatus == "parsererror") {
+                    layer.alert("应答数据格式解析错误！")
+                } else {
+                    layer.alert("http response error: " + textStatus)
+                }
+            } else {
+                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+            }
         }
     });
 
     userId = getUrlParam("user");
     var ctx = getUrlParam("ctx");
+    var wsProtocol = "ws";
+    if( "https:" == document.location.protocol || location.href.indexOf("https") > -1 ) {
+        wsProtocol = "wss";
+    }
     wsUrl = window.location.host + ctx;
     if (window.console) console.log("wsUrl: " + wsUrl);
 
@@ -427,7 +410,7 @@ $(function () {
 
     function createWebSocket() {
         if ('WebSocket' in window) {
-            ws = new ReconnectingWebSocket("ws://" + wsUrl + "/track");
+            ws = new ReconnectingWebSocket(wsProtocol + "://" + wsUrl + "/track");
             // } else if ('MozWebSocket' in window) {
             //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
         } else {
@@ -470,6 +453,13 @@ $(function () {
                 case "tracks":
                     // console.log(receive)
                     var tracks = receiveObj.tracks;
+                    if (!isInitMap) {
+                        var track = tracks[0];
+                        var bd09 = wgs84tobd09(track.longitude, track.latitude);
+                        var centerPoint = new BMap.Point(bd09[0], bd09[1]);
+                        initMap(centerPoint, 18);
+                        isInitMap = true;
+                    }
                     flushTrack(tracks);
                     break;
                 case "session":
@@ -662,13 +652,19 @@ $(function () {
             selectObj.append(comHtml);
         }
     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-            layer.confirm('登录失效，是否刷新页面重新登录？', {
-                icon: 0,
-                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-            }, function () {
+        if (XMLHttpRequest.readyState == 4) {
+            var http_status = XMLHttpRequest.status;
+            if (http_status == 0 || http_status > 600) {
                 location.reload(true);
-            });
+            } else if (http_status == 200) {
+                if (textStatus == "parsererror") {
+                    layer.alert("应答数据格式解析错误！")
+                } else {
+                    layer.alert("http response error: " + textStatus)
+                }
+            } else {
+                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+            }
         }
     });
 
@@ -809,7 +805,22 @@ $(function () {
                     content: '../../manage/car/carStatusDispatch.do?' + encodeURI('mode=' + mode + '&carNumber=' + carNumber)
                 });
             }
-        );
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
+                    location.reload(true);
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
+            }
+        });
     }
 
     $("#into_oildepot").click(function () {
@@ -931,18 +942,21 @@ $(function () {
                 }
             }
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function () {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
                     location.reload(true);
-                });
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
             }
-            return;
         });
-
-
     });
 
 });

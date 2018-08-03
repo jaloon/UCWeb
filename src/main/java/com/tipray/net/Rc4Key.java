@@ -1,11 +1,8 @@
 package com.tipray.net;
 
 import com.tipray.bean.ResponseMsg;
-import com.tipray.constant.CenterConfigConst;
-import com.tipray.util.BytesUtil;
-import com.tipray.util.HttpRequestUtil;
-import com.tipray.util.JSONUtil;
-import com.tipray.util.RC4Util;
+import com.tipray.constant.CenterConst;
+import com.tipray.util.*;
 
 import java.util.Arrays;
 
@@ -18,9 +15,9 @@ import java.util.Arrays;
 public enum Rc4Key {
     INSTANCE;
 
-    private static final String RC4_URL = new StringBuffer(CenterConfigConst.PLTONE_URL).append("/api/getCenterRc4.do").toString();
-    private static final String RC4_PARAM = new StringBuffer("id=").append(CenterConfigConst.CENTER_ID).append("&ver=")
-            .append(CenterConfigConst.CENTER_VER).toString();
+    private static final String RC4_URL = new StringBuffer(CenterConst.PLTONE_URL).append("/api/getCenterRc4.do").toString();
+    private static final String RC4_PARAM = new StringBuffer("id=").append(CenterConst.CENTER_ID).append("&ver=")
+            .append(CenterConst.CENTER_VER).toString();
 
     /**
      * 中心rc4密钥
@@ -40,14 +37,14 @@ public enum Rc4Key {
      */
     private void initRc4() {
         try {
-            String msgJson = HttpRequestUtil.sendGet(RC4_URL, RC4_PARAM);
+            String msgJson = OkHttpUtil.get(RC4_URL, RC4_PARAM);
             ResponseMsg responseMsg = JSONUtil.parseToObject(msgJson, ResponseMsg.class);
             if (responseMsg.getId() > 0) {
                 throw new IllegalArgumentException(responseMsg.getMsg() + RC4_PARAM);
             }
             String rc4Hex = (String) responseMsg.getMsg();
             byte[] encryptedData = BytesUtil.hexStringToBytes(rc4Hex);
-            byte[] key = RC4Util.getKeyByDeviceId(CenterConfigConst.CENTER_ID);
+            byte[] key = RC4Util.getKeyByDeviceId(CenterConst.CENTER_ID);
             byte[] decryptedData = RC4Util.rc4(encryptedData, key);
             RC4_KEY = Arrays.copyOf(decryptedData, decryptedData.length - 1);
             RC4_VER = decryptedData[decryptedData.length - 1];

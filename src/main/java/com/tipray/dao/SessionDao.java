@@ -1,10 +1,11 @@
 package com.tipray.dao;
 
-import java.util.Date;
-
 import com.tipray.bean.Session;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * SessionDao
@@ -66,5 +67,5 @@ public interface SessionDao extends BaseDao<Session> {
 	 * @param userId
 	 * @return
 	 */
-    Session getByUser(Long userId);
+    List<Session> getByUser(Long userId);
 }

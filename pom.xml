@@ -461,8 +461,15 @@
             <version>8.5.23</version>
         </dependency> -->
 
-        <!-- cxf config begin -->
+        <!-- http client -->
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.11.0</version>
+        </dependency>
+
+        <!-- cxf config begin -->
+        <!--<dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
             <version>${cxf.version}</version>
@@ -476,7 +483,7 @@
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http</artifactId>
             <version>${cxf.version}</version>
-        </dependency>
+        </dependency>-->
         <!-- <dependency>
             <groupId>javax.mws.rs</groupId>
             <artifactId>jsr311-api</artifactId>

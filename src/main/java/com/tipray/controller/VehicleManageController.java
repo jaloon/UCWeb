@@ -9,6 +9,7 @@ import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.log.VehicleManageLog;
 import com.tipray.bean.record.AlarmRecord;
+import com.tipray.bean.record.AuthorizedRecord;
 import com.tipray.bean.upgrade.TerminalUpgradeFile;
 import com.tipray.bean.upgrade.TerminalUpgradeInfo;
 import com.tipray.cache.AsynUdpCommCache;
@@ -37,6 +38,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -63,6 +66,8 @@ public class VehicleManageController {
     @Resource
     private VehicleManageLogService vehicleManageLogService;
     @Resource
+    private AuthorizedRecordService authorizedRecordService;
+    @Resource
     private NioUdpServer udpServer;
     @Resource
     private MonitorWebSocketHandler monitorWebSocketHandler;
@@ -79,8 +84,8 @@ public class VehicleManageController {
      * @param uploadInterval   {@link Integer} 默认轨迹上报间隔（秒）
      * @param generateDistance {@link Integer} 轨迹生成距离间隔（米）
      * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude        {@link Integer} 手机定位经度
-     * @param latitude         {@link Integer} 手机定位纬度
+     * @param longitude        {@link Float} 手机定位经度
+     * @param latitude         {@link Float} 手机定位纬度
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -174,7 +179,7 @@ public class VehicleManageController {
             result = "失败，发送更新车台配置请求异常！";
             logger.error("更新车台配置异常：e={}", e.toString());
             logger.debug("更新车台配置异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -195,8 +200,8 @@ public class VehicleManageController {
      *                        <li>是否只允许一次开锁</li>
      *                        </ol>
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      * @see TerminalConfigBitMarkConst
@@ -259,7 +264,7 @@ public class VehicleManageController {
             result = "失败，车台功能启用配置异常！";
             logger.error("车台功能启用配置异常：e={}", e.toString());
             logger.debug("车台功能启用配置异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -273,8 +278,8 @@ public class VehicleManageController {
      * @param deviceId        {@link Integer} 车台设备ID
      * @param storeNum        {@link Integer} 仓数
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -383,7 +388,7 @@ public class VehicleManageController {
             result = "失败，发送车载终端绑定请求异常！";
             logger.error("车载终端绑定异常：e={}", e.toString());
             logger.debug("车载终端绑定异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLogResult(vehicleManageLog, isOk, type, description, result);
         }
@@ -398,8 +403,8 @@ public class VehicleManageController {
      *                        1 开始监听<br>
      *                        2 结束监听
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -483,7 +488,7 @@ public class VehicleManageController {
             result = "失败，发送监听待绑定锁控制请求异常！";
             logger.error("监听待绑定锁列表异常：e={}", e.toString());
             logger.debug("监听待绑定锁列表异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -495,8 +500,8 @@ public class VehicleManageController {
      * @param token           {@link String} UUID令牌
      * @param carNumber       {@link String} 车牌号
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -567,7 +572,7 @@ public class VehicleManageController {
             result = "失败，发送锁监听待绑定列表清除请求异常！";
             logger.error("清除待绑定锁列表异常：e={}", e.toString());
             logger.debug("清除待绑定锁列表异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -582,8 +587,8 @@ public class VehicleManageController {
      *                        1 开始进行锁绑定触发<br>
      *                        2 结束锁绑定触发
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -666,7 +671,7 @@ public class VehicleManageController {
             result = "失败，发送锁绑定触发开启关闭控制请求异常！";
             logger.error("锁绑定触发控制异常：e={}", e.toString());
             logger.debug("锁绑定触发控制异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -681,8 +686,8 @@ public class VehicleManageController {
      * @param bindingLocks    {@link String} 锁列表json，结构如下：
      *                        [{"lockId":33554438,"storeId":1,"seat":1,"seatIndex":1,"allowOpen":2}]
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -822,7 +827,7 @@ public class VehicleManageController {
             result = "失败，发送锁绑定变更下发请求异常！";
             logger.error("锁绑定变更下发异常：e={}", e.toString());
             logger.debug("锁绑定变更下发异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLogResult(vehicleManageLog, isOk, type, description, result);
         }
@@ -912,9 +917,13 @@ public class VehicleManageController {
             String verStr = null;
             if (upgradeType != 2 && matchVer > 0) {
                 verStr = FtpUtil.downloadVer(ftpPath);
+                if (!VersionUtil.isVerSion(verStr)) {
+                    logger.error("获取车台升级文件失败：{}", TerminalSoftwareUpgradeErrorEnum.VERSION_INVALID);
+                    return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.VERSION_INVALID);
+                }
             }
 
-            Integer ver = verStr == null ? 0 : FtpUtil.parseVerToInt(verStr);
+            Integer ver = verStr == null ? 0 : VersionUtil.parseVerToInt(verStr);
 
             Long index = System.currentTimeMillis();
 
@@ -927,7 +936,7 @@ public class VehicleManageController {
             return ResponseMsgUtil.success(map);
         } catch (Exception e) {
             logger.error("获取车台升级文件异常：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         }
     }
 
@@ -937,8 +946,8 @@ public class VehicleManageController {
      * @param token           {@link String} UUID令牌
      * @param index           {@link Long} 车台升级缓存索引
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1007,7 +1016,7 @@ public class VehicleManageController {
             result = "失败，发送车台软件升级请求异常！";
             logger.error("车台软件升级异常：e={}", e.toString());
             logger.debug("车台软件升级异常堆栈信息", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -1020,8 +1029,8 @@ public class VehicleManageController {
      * @param token            {@link String} UUID令牌
      * @param upgradeRecordIds {@link String} 车辆升级记录ID，英文逗号“,”分隔
      * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude        {@link Integer} 手机定位经度
-     * @param latitude         {@link Integer} 手机定位纬度
+     * @param longitude        {@link Float} 手机定位经度
+     * @param latitude         {@link Float} 手机定位纬度
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1062,19 +1071,6 @@ public class VehicleManageController {
                 logger.error("车台取消升级失败：{}", TerminalSoftwareUpgradeErrorEnum.UPGRADE_INFO_ID_NULL);
                 return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.UPGRADE_INFO_ID_NULL);
             }
-
-            // Integer isHasUpgrade = vehicleService.getUpgradeStatusById(upgradeRecordId);
-            // if (isHasUpgrade == null) {
-            //     isOk = true;
-            //     result = "成功，已取消！";
-            //     logger.error("车台取消升级成功！");
-            //     return ResponseMsgUtil.success("已取消！");
-            // }
-            // if (isHasUpgrade == 2) {
-            //     result = "失败，车台已升级，不可取消！";
-            //     logger.error("车台取消升级失败：{}", TerminalSoftwareUpgradeErrorEnum.HAS_UPGRADED);
-            //     return ResponseMsgUtil.error(TerminalSoftwareUpgradeErrorEnum.HAS_UPGRADED);
-            // }
             vehicleService.deleteUpgradeRecord(upgradeRecordIds);
             isOk = true;
             result = "成功！";
@@ -1084,7 +1080,7 @@ public class VehicleManageController {
             result = "失败，车台取消升级异常！";
             logger.error("车台取消升级异常：e={}", e.toString());
             logger.debug("车台取消升级异常堆栈信息", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             if (!isOk) {
                 type++;
@@ -1103,8 +1099,8 @@ public class VehicleManageController {
      * @param transportId      {@link Long} 原配送ID
      * @param changedStationId {@link Long} 新加油站ID
      * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude        {@link Integer} 手机定位经度
-     * @param latitude         {@link Integer} 手机定位纬度
+     * @param longitude        {@link Float} 手机定位经度
+     * @param latitude         {@link Float} 手机定位纬度
      * @param isLocationValid  {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1219,7 +1215,7 @@ public class VehicleManageController {
             result = "失败，发送远程换站请求异常！";
             logger.error("远程换站异常：e={}", e.toString());
             logger.debug("远程换站异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -1232,8 +1228,8 @@ public class VehicleManageController {
      * @param carNumber       {@link String} 车牌号
      * @param alarmIds        {@link String} 报警ID集合，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1388,7 +1384,7 @@ public class VehicleManageController {
             result = "失败，发送远程报警消除请求异常！";
             logger.error("远程报警消除异常：e={}", e.toString());
             logger.debug("远程报警消除异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLogResult(vehicleManageLog, isOk, type, description, result);
         }
@@ -1404,8 +1400,8 @@ public class VehicleManageController {
      * @param stationId       {@link Integer} 站点ID
      * @param lockIds         {@link String} 车辆状态要求变更为【应急】时有效。锁设备ID列表，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1648,7 +1644,7 @@ public class VehicleManageController {
             result = "失败，发送远程车辆进出请求异常！";
             logger.error("远程车辆进出异常：e={}", e.toString());
             logger.debug("远程车辆进出异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -1666,8 +1662,8 @@ public class VehicleManageController {
      *                        按位标识；每个位代表一个仓位。位序从低位开始对应到每个仓位。
      * @param lockIds         {@link String} 车辆状态要求变更为【应急】时有效。锁设备ID列表，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1835,7 +1831,7 @@ public class VehicleManageController {
             result = "失败，发送远程车辆状态强制变更请求异常！";
             logger.error("远程车辆状态强制变更异常：e={}", e.toString());
             logger.debug("远程车辆状态强制变更异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
         }
@@ -1848,8 +1844,8 @@ public class VehicleManageController {
      * @param carNumber       {@link String} 车牌号
      * @param lockIds         {@link String} 锁设备ID，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param longitude       {@link Integer} 手机定位经度
-     * @param latitude        {@link Integer} 手机定位纬度
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
@@ -1956,9 +1952,72 @@ public class VehicleManageController {
             result = "失败，发送远程开锁重置请求异常！";
             logger.error("远程开锁重置异常：e={}", e.toString());
             logger.debug("远程开锁重置异常堆栈信息：", e);
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } finally {
             broadcastAndUpdateLog(vehicleManageLog, type, description, result);
+        }
+    }
+
+    /**
+     * 授权记录上报
+     *
+     * @param token           {@link String} UUID令牌
+     * @param authCode        {@link Integer} 授权码（6位10进制数）
+     * @param authTime        {@link String} 授权时间
+     * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
+     * @param isLocationValid {@link Integer} 手机定位是否有效
+     * @return {@link ResponseMsg}
+     */
+    @RequestMapping(value = "authorized_record_report", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public ResponseMsg authorizedRecordReport(
+            @RequestParam(value = "token", required = false) String token,
+            @RequestParam(value = "auth_code", required = false) Integer authCode,
+            @RequestParam(value = "auth_time", required = false) String authTime,
+            @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
+            @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
+            @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
+            @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
+        if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
+            return null;
+        } else {
+            session.setAttribute("token", token);
+        }
+        logger.info(
+                "授权记录上报：token={}, authCode={}, authTime={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, authCode, authTime, isApp, longitude, latitude, isLocationValid);
+        if (authCode == null) {
+            logger.error("授权记录上报错误：{}", AuthReportErrorEnum.AUTH_CODE_NULL);
+            return ResponseMsgUtil.error(AuthReportErrorEnum.AUTH_CODE_NULL);
+        }
+        if (StringUtil.isEmpty(authTime)) {
+            logger.error("授权记录上报错误：{}", AuthReportErrorEnum.AUTH_TIME_NULL);
+            return ResponseMsgUtil.error(AuthReportErrorEnum.AUTH_TIME_NULL);
+        }
+        try {
+            new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(authTime);
+        } catch (ParseException e) {
+            logger.error("授权记录上报错误：{}", AuthReportErrorEnum.TIME_FORMAT_INVALID);
+            return ResponseMsgUtil.error(AuthReportErrorEnum.TIME_FORMAT_INVALID);
+        }
+        try {
+            User user = ThreadVariable.getUser();
+            AuthorizedRecord authorizedRecord = new AuthorizedRecord();
+            authorizedRecord.setUserId(user.getId());
+            authorizedRecord.setAuthCode(authCode);
+            authorizedRecord.setAuthTime(authTime);
+            authorizedRecord.setIsApp(isApp);
+            authorizedRecord.setIsLocationValid(isLocationValid);
+            authorizedRecord.setLongitude(longitude);
+            authorizedRecord.setLatitude(latitude);
+            authorizedRecordService.addAuthorizedRecord(authorizedRecord);
+            return ResponseMsgUtil.success();
+        } catch (Exception e) {
+            logger.error("授权记录上报异常！", e);
+            return ResponseMsgUtil.exception(e);
         }
     }
 

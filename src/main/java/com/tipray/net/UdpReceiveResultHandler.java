@@ -6,7 +6,7 @@ import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.net.constant.UdpBizId;
-import com.tipray.net.constant.UdpReplyErrorTag;
+import com.tipray.net.constant.UdpReplyCommonErrorEnum;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.service.ChangeRecordService;
 import com.tipray.service.VehicleManageLogService;
@@ -118,7 +118,7 @@ public class UdpReceiveResultHandler {
                 result = "处理应答结果异常！";
                 logger.error("处理业务【{}】应答结果异常：{}", bizId, e.toString());
                 logger.debug("处理业务应答结果异常堆栈信息：", e);
-                msg = ResponseMsgUtil.excetion(e);
+                msg = ResponseMsgUtil.exception(e);
             } finally {
                 AsynUdpCommCache.putResultCache(cacheId, msg);
                 Long logId = AsynUdpCommCache.getLogCache(cacheId);
@@ -156,41 +156,35 @@ public class UdpReceiveResultHandler {
             case ErrorTagConst.UDP_PARSE_ERROR_TAG:
                 return "失败，UDP应答数据解析错误！";
             case ErrorTagConst.UDP_REPLY_ERROR_TAG:
-                if (bizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
-                    String errorMsg = (String) msg.getMsg();
-                    int beginIndex = errorMsg.indexOf("[") + 1;
-                    int endIndex = errorMsg.indexOf("]");
-                    if (beginIndex > 1 && endIndex > beginIndex) {
-                        String terminalIds = errorMsg.substring(beginIndex, endIndex);
-                        List<String> carNumbers = VEHICLE_SERVICE.findCarNumbersByTerminalIds(terminalIds);
-                        if (EmptyObjectUtil.isEmptyList(carNumbers)) {
-                            return "失败，数据库车辆数据异常！";
-                        }
-                        StringBuffer strBuf = new StringBuffer();
-                        for (String carNumber : carNumbers) {
-                            strBuf.append('，').append(carNumber);
-                        }
-                        strBuf.deleteCharAt(0);
-                        strBuf.append("车载终端软件升级通知失败！");
-                        return strBuf.toString();
-                    }
-                    return "失败，UDP应答数据解析错误！";
-                }
+                // if (bizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
+                //     String errorMsg = (String) msg.getMsg();
+                //     int beginIndex = errorMsg.indexOf("[") + 1;
+                //     int endIndex = errorMsg.indexOf("]");
+                //     if (beginIndex > 1 && endIndex > beginIndex) {
+                //         String terminalIds = errorMsg.substring(beginIndex, endIndex);
+                //         List<String> carNumbers = VEHICLE_SERVICE.findCarNumbersByTerminalIds(terminalIds);
+                //         if (EmptyObjectUtil.isEmptyList(carNumbers)) {
+                //             return "失败，数据库车辆数据异常！";
+                //         }
+                //         StringBuffer strBuf = new StringBuffer();
+                //         for (String carNumber : carNumbers) {
+                //             strBuf.append('，').append(carNumber);
+                //         }
+                //         strBuf.deleteCharAt(0);
+                //         strBuf.append("车载终端软件升级通知失败！");
+                //         return strBuf.toString();
+                //     }
+                //     return "失败，UDP应答数据解析错误！";
+                // }
                 int errorId = msg.getCode();
                 int commonError = errorId >>> 16;
                 int workError = errorId & 0xFFFF;
                 StringBuffer strBuf = new StringBuffer("失败，");
                 if (commonError > 0) {
-                    if (commonError == UdpReplyErrorTag.COMMON_ERROR_DEVICE_OFFLINE) {
-                        strBuf.append("车载终端离线，");
-                    }else if (commonError == UdpReplyErrorTag.COMMON_ERROR_TIME_OUT) {
-                        strBuf.append("车载终端应答超时，");
-                    } else {
-                        strBuf.append("UDP请求公共错误，");
-                    }
+                    strBuf.append("公共错误：").append(UdpReplyCommonErrorEnum.codeToMsg(commonError)).append('；');
                 }
                 if (workError > 0) {
-                    strBuf.append("UDP请求业务信息错误，");
+                    strBuf.append("业务错误：").append(workError).append('；');
                 }
                 strBuf.deleteCharAt(strBuf.length() - 1);
                 strBuf.append('！');

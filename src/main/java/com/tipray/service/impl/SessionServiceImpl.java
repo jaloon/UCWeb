@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author chends
@@ -36,7 +37,18 @@ public class SessionServiceImpl implements SessionService {
         if (userId == null) {
             return null;
         }
-        return sessionDao.getByUser(userId);
+        List<Session> sessions = sessionDao.getByUser(userId);
+        if (sessions == null) {
+            return null;
+        }
+        int size = sessions.size();
+        if (size == 1) {
+            return sessions.get(0);
+        }
+        if (size > 1) {
+            sessionDao.deleteByUser(userId);
+        }
+        return null;
     }
 
     @Override
@@ -118,11 +130,14 @@ public class SessionServiceImpl implements SessionService {
             if (userDb == null) {
                 throw new LoginException("账号错误");
             }
-            String newPassword = MD5Util.md5Encode(user.getPassword());
+            String newPassword = user.getPassword();
+            if (isApp == 0) {
+                newPassword = MD5Util.md5Encode(newPassword);
+            }
             if (!newPassword.equals(userDb.getPassword())) {
                 throw new LoginException("密码错误");
             }
-            if ((userDb.getAppRole() == null || userDb.getAppRole().getId() == 0) && isApp > 0) {
+            if (isApp > 0 && (userDb.getAppRole() == null || userDb.getAppRole().getId() == 0)) {
                 throw new PermissionException(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
             }
             return userDb;

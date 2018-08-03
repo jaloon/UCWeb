@@ -21,50 +21,55 @@
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/oildepot/oildepotList.js"></script>
     <style type="text/css">
-        .oildepot-id {
-            width: 100px;
-        }
+        /*.oildepot-id {*/
+            /*width: 100px;*/
+        /*}*/
+
+        /*.oildepot-no {*/
+            /*width: 100px;*/
+        /*}*/
+
+        /*.oildepot-name {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .oildepot-name {
-            width: 200px;
-        }
+        /*.oildepot-abbr {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .oildepot-abbr {
-            width: 160px;
-        }
+        /*.oildepot-coordinate {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .oildepot-coordinate {
-            width: 200px;
-        }
+        /*.oildepot-director {*/
+            /*width: 100px;*/
+        /*}*/
         
-        .oildepot-director {
-            width: 100px;
-        }
+        /*.oildepot-phone {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .oildepot-phone {
-            width: 160px;
-        }
+        /*.oildepot-address {*/
+            /*width: 300px;*/
+        /*}*/
         
-        .oildepot-address {
-            width: 300px;
-        }
+        /*.oildepot-company {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .oildepot-company {
-            width: 200px;
-        }
+        /*.oildepot-remark {*/
+            /*width: 100px;*/
+        /*}*/
         
-        .oildepot-remark {
-            width: 100px;
-        }
-        
-        .oildepot-action {
-            width: 200px;
-        }
+        /*.oildepot-action {*/
+            /*width: 200px;*/
+        /*}*/
         
         .file-box {
-	        position:absolute;
-		    left: 600px;
-		    top: 31px;
+            position: relative;
+            float: right;
+            top: 10px;
+            margin-right: 30px;
         }
         
         .inputfile-1+label {
@@ -101,13 +106,19 @@
                 },
                 "json"
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             });
         });
@@ -146,7 +157,8 @@
                 for (var i = 0; i < gridPage.currentRows; i++) {
                     var oildepot = oildepots[i];
                     tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + oildepot.id + ")\">" +
-                        "<td class=\"oildepot-id\">" + oildepot.officialId + "</td>" +
+                        "<td class=\"oildepot-id\">" + oildepot.id + "</td>" +
+                        "<td class=\"oildepot-no\">" + oildepot.officialId + "</td>" +
                         "<td class=\"oildepot-name\">" + oildepot.name + "</td>" +
                         "<td class=\"oildepot-abbr\">" + oildepot.abbr + "</td>" +
                         "<td class=\"oildepot-coordinate\">(" + oildepot.longitude + ", " + oildepot.latitude + ")</td>" +
@@ -170,13 +182,19 @@
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
                     location.reload(true);
-                });
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
             }
         });
     }
@@ -255,11 +273,12 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class='table-cont' id='table-cont'>
-                <table width="100%">
+            <div class='table-box'>
+                <table class="table-cont" width="100%">
                     <thead class="table-head">
                         <tr>
-                            <th class="oildepot-id">油库编号</th>
+                            <th class="oildepot-id">油库ID</th>
+                            <th class="oildepot-no">油库编号</th>
                             <th class="oildepot-name">油库名称</th>
                             <th class="oildepot-abbr">油库简称</th>
                             <th class="oildepot-coordinate">油库经纬度</th>

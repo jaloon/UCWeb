@@ -1,12 +1,11 @@
 package com.tipray.core.tag;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
-
 import com.tipray.bean.Session;
 import com.tipray.core.ThreadVariable;
 import com.tipray.util.PermissionUtil;
+
+import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.TagSupport;
 /**
  * 权限标签
  * 通过此标签包围的代码，只有在拥有对应权限的情况下，才会显示
@@ -31,6 +30,9 @@ public class PermissionTag extends TagSupport {
 		Session session = ThreadVariable.getSession();
 		if (session == null || session.getUser() == null) {
 			return Tag.SKIP_BODY;
+		}
+		if (ThreadVariable.getRole().getIsSuper()) {
+			return Tag.EVAL_BODY_INCLUDE;
 		}
 		if("true".equals(ename)){
 			return Tag.EVAL_BODY_INCLUDE;

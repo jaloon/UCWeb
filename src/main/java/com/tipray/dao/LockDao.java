@@ -25,6 +25,14 @@ public interface LockDao extends BaseDao<Lock> {
     List<Lock> findLocksByCarId(Long carId);
 
     /**
+     * 根据车辆ID获取已触发绑定的锁信息
+     *
+     * @param carId 车辆ID
+     * @return 锁信息
+     */
+    List<Lock> findTriggedLocksByCarId(Long carId);
+
+    /**
      * 根据车辆ID获取锁最大索引号
      *
      * @param carId车辆ID

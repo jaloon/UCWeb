@@ -64,6 +64,8 @@ public class ErrorTagConst {
 	public static final byte LOCK_OPEN_RESET_ERROR_TAG = 43;
 	/** 轨迹查询错误标志位 */
 	public static final byte FIND_TRACK_ERROR_TAG = 46;
+	/** 授权记录上报错误标志位 */
+	public static final byte AUTH_REPORT_ERROR_TAG = 47;
 
 	/** 道闸接口错误标志位 */
 	public static final byte BARRIER_ERROR_TAG = 50;

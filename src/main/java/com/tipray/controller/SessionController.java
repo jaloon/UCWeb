@@ -5,18 +5,21 @@ import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.Session;
 import com.tipray.bean.baseinfo.Role;
 import com.tipray.bean.baseinfo.User;
+import com.tipray.cache.TrustAppUuidCache;
+import com.tipray.constant.reply.LoginErrorEnum;
 import com.tipray.constant.reply.PermissionErrorEnum;
+import com.tipray.core.CenterVariableConfig;
 import com.tipray.core.base.BaseAction;
 import com.tipray.core.exception.LoginException;
 import com.tipray.core.exception.PermissionException;
+import com.tipray.service.AppService;
 import com.tipray.service.PermissionService;
 import com.tipray.service.SessionService;
-import com.tipray.util.HttpServletUtil;
-import com.tipray.util.ResponseMsgUtil;
-import com.tipray.util.SessionUtil;
+import com.tipray.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -46,15 +49,67 @@ public class SessionController extends BaseAction {
     @Autowired
     private SessionService sessionService;
     @Autowired
+    private AppService appService;
+    @Autowired
     private PermissionService permissionService;
 
     @RequestMapping(value = "login.do")
     @ResponseBody
     public ResponseMsg login(@ModelAttribute User user,
                              @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
+                             @RequestParam(value = "uuid", required = false) String uuid,
+                             @RequestParam(value = "system", required = false) String system,
+                             @RequestParam(value = "app_ver", required = false) String appVer,
                              ModelMap modelMap, HttpServletRequest request,
                              HttpServletResponse response) {
         try {
+            String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
+            if (isApp > 0) {
+                logger.info("操作员{}请求APP登录，uuid：{}，system：{}，app_ver：{}，user-agent：{}",
+                        user.getAccount(), uuid, system, appVer, userAgent);
+                if (CenterVariableConfig.isValidateAppdev()) {
+                    // APP设备认证
+                    if (StringUtil.isEmpty(uuid)) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_UUID_NULL);
+                        return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_UUID_NULL);
+                    }
+                    if (CenterVariableConfig.isValidateLocal()) {
+                        // 通过本地配置文件验证UUID
+                        if (!TrustAppUuidCache.checkAppId(uuid)) {
+                            logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_NOT_CERTIFY);
+                            return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_NOT_CERTIFY);
+                        }
+                    } else {
+                        // 通过普利通中心同步的APP设备信息数据认证
+                        if (appService.isAppdevExist(uuid)) {
+                            logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_NOT_CERTIFY);
+                            return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_NOT_CERTIFY);
+                        }
+                    }
+                }
+                if (CenterVariableConfig.isValidateAppver()) {
+                    // APP版本验证
+                    if (StringUtil.isEmpty(system)) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_SYSTEM_NULL);
+                        return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_SYSTEM_NULL);
+                    }
+                    if (StringUtil.isEmpty(appVer)) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_NULL);
+                        return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_NULL);
+                    }
+                    String minimumVer = appService.getMinverBySystem(system);
+                    if (StringUtil.isEmpty(minimumVer)) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_CONFIG_INVALID);
+                        return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_CONFIG_INVALID);
+                    }
+                    if (VersionUtil.compareVer(appVer, minimumVer) < 0) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_OUTDATED);
+                        return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_OUTDATED);
+                    }
+                }
+            } else {
+                logger.info("操作员{}请求网页登录，user-agent：{}", user.getAccount(), userAgent);
+            }
             HttpSession httpSession = request.getSession();
             String sessionId = httpSession.getId();
             if (isLogin(sessionId, user)) {
@@ -87,7 +142,7 @@ public class SessionController extends BaseAction {
             return msg;
         } catch (LoginException e) {
             logger.error("操作员{}登录异常：{}", user.getAccount(), e.getMessage());
-            return ResponseMsgUtil.excetion(e);
+            return ResponseMsgUtil.exception(e);
         } catch (PermissionException e) {
             logger.error("操作员{}登录异常：账户未配置APP角色！", user.getAccount());
             return ResponseMsgUtil.error(PermissionErrorEnum.APP_NOT_ACCEPTABLE);

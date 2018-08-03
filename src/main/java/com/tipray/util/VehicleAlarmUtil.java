@@ -138,7 +138,7 @@ public class VehicleAlarmUtil {
                     alarm.append("异常移动报警、");
                 }
                 if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
-                    alarm.append("无、");
+                    alarm.append("无报警、");
                 }
                 alarm.deleteCharAt(alarm.length() - 1);
                 alarmMap.put(i + 1, alarm.toString());
@@ -174,7 +174,7 @@ public class VehicleAlarmUtil {
             alarm.append("异常移动报警、");
         }
         if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
-            alarm.append("、无");
+            alarm.append("、无报警");
         }
         if (alarm.length() > 0) {
             alarm.deleteCharAt(0);

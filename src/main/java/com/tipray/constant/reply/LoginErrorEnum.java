@@ -16,7 +16,19 @@ public enum LoginErrorEnum {
     /** 登录超时 */
     LOGIN_TIME_OUT(4, "登录超时！"),
     /** 异地登录 */
-    OFFSITE_LOGIN(5, "异地登录!");
+    OFFSITE_LOGIN(5, "异地登录！"),
+    /** 手机未认证 */
+    MOBILE_NOT_CERTIFY(6, "手机未认证！"),
+    /** UUID为空 */
+    MOBILE_UUID_NULL(7, "UUID为空！"),
+    /** 系统类型为空 */
+    MOBILE_SYSTEM_NULL(8, "系统类型为空！"),
+    /** 版本号为空 */
+    APP_VERSION_NULL(9, "版本号为空！"),
+    /** APP最低版本未配置或同步失败 */
+    APP_VERSION_CONFIG_INVALID(10, "APP最低版本未配置或同步失败！"),
+    /** APP版本太低 */
+    APP_VERSION_OUTDATED(11, "APP版本太低！");
 
     private int code;
     private String msg;

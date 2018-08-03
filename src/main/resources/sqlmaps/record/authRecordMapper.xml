@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.AuthorizedRecordDao">
+    <resultMap id="fullResultMap" type="com.tipray.bean.record.AuthorizedRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="auth_code" property="authCode"/>
+        <result column="auth_time" property="authTime"/>
+        <result column="is_app" property="isApp"/>
+        <result column="is_lnglat_valid" property="isLocationValid"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="gmt_create" property="reportTime"/>
+    </resultMap>
+    <sql id="select_colums">
+		a.id,
+		a.user_id,
+		u.`name` user_name,
+		DATE_FORMAT( a.auth_time, '%Y-%m-%d %H:%i:%s' ) auth_time,
+		a.is_app,
+		a.is_lnglat_valid,
+		a.longitude,
+		a.latitude,
+		a.gmt_create
+	</sql>
+
+    <select id="findAll" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_authorized a
+        LEFT JOIN tbl_user u ON a.user_id = u.id
+    </select>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_authorized a
+        LEFT JOIN tbl_user u ON a.user_id = u.id
+        WHERE
+        a.id = #{id}
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.record.AuthorizedRecord">
+		INSERT INTO tbl_authorized ( user_id, auth_code, auth_time, is_app, is_lnglat_valid, longitude, latitude )
+		VALUES
+			(
+			  #{userId},
+			  #{authCode},
+			  #{authTime},
+			  IFNULL(#{isApp}, 0),
+			  IFNULL(#{isLocationValid}, 0),
+			  IFNULL(#{longitude}, 0),
+			  IFNULL(#{latitude}, 0)
+			)
+	</insert>
+
+
+</mapper>

@@ -22,7 +22,7 @@ public class ResponseMsgUtil {
     /**
      * 异常ID
      */
-    private static final int ID_EXCEPTON = 2;
+    private static final int ID_EXCEPTION = 2;
     /**
      * 成功结果
      */
@@ -71,6 +71,16 @@ public class ResponseMsgUtil {
      */
     public static ResponseMsg error(LoginErrorEnum loginError) {
         return error(ErrorTagConst.LOGIN_ERROR_TAG, loginError.code(), loginError.msg());
+    }
+
+    /**
+     * 错误回复（授权记录上报错误）
+     *
+     * @param authReportError {@link AuthReportErrorEnum} 道闸接口错误
+     * @return {@link ResponseMsg}
+     */
+    public static ResponseMsg error(AuthReportErrorEnum authReportError) {
+        return error(ErrorTagConst.AUTH_REPORT_ERROR_TAG, authReportError.code(), authReportError.msg());
     }
 
     /**
@@ -191,8 +201,8 @@ public class ResponseMsgUtil {
      * @param errorMsg  {@link Object} 错误信息
      * @return {@link ResponseMsg}
      */
-    public static ResponseMsg excetion(byte errorTag, int errorCode, Object errorMsg) {
-        return new ResponseMsg(ID_EXCEPTON, ERROR, errorTag, errorCode, errorMsg);
+    public static ResponseMsg exception(byte errorTag, int errorCode, Object errorMsg) {
+        return new ResponseMsg(ID_EXCEPTION, ERROR, errorTag, errorCode, errorMsg);
     }
 
     /**
@@ -201,9 +211,9 @@ public class ResponseMsgUtil {
      * @param e {@link Exception} 异常
      * @return {@link ResponseMsg}
      */
-    public static ResponseMsg excetion(Exception e) {
+    public static ResponseMsg exception(Exception e) {
         String msg = e.getMessage() == null ? e.toString() : e.getMessage();
-        return new ResponseMsg(ID_EXCEPTON, ERROR, ErrorTagConst.EXCEPTON_MESSAGE_TAG, 10, msg);
+        return new ResponseMsg(ID_EXCEPTION, ERROR, ErrorTagConst.EXCEPTON_MESSAGE_TAG, 10, msg);
     }
 
 }

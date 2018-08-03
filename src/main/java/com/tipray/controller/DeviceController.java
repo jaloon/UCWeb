@@ -6,15 +6,15 @@ import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.log.InfoManageLog;
-import com.tipray.constant.CenterConfigConst;
+import com.tipray.constant.CenterConst;
 import com.tipray.constant.LogTypeConst;
 import com.tipray.core.ThreadVariable;
 import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
 import com.tipray.service.DeviceService;
 import com.tipray.service.InfoManageLogService;
-import com.tipray.util.HttpRequestUtil;
 import com.tipray.util.JSONUtil;
+import com.tipray.util.OkHttpUtil;
 import com.tipray.util.OperateLogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,9 +168,10 @@ public class DeviceController extends BaseAction {
                 | LogTypeConst.TYPE_SYNC | LogTypeConst.RESULT_DONE;
         StringBuffer description = new StringBuffer("同步");
         try {
-            description.append(CenterConfigConst.CENTER_NAME).append("设备，");
-            String url = new StringBuffer(CenterConfigConst.PLTONE_URL).append("/api/deviceSync.do").toString();
-            String json = HttpRequestUtil.sendGet(url, "id=" + CenterConfigConst.CENTER_ID);
+            description.append(CenterConst.CENTER_NAME).append("设备，");
+            String url = new StringBuffer(CenterConst.PLTONE_URL).append("/api/deviceSync.do?id=")
+                    .append(CenterConst.CENTER_ID).toString();
+            String json = OkHttpUtil.get(url);
             List<Device> devices = JSONUtil.parseToList(json, Device.class);
             deviceService.sync(devices);
             description.append("成功！");

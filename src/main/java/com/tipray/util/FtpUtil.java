@@ -1,7 +1,7 @@
 package com.tipray.util;
 
 import com.tipray.bean.upgrade.TerminalUpgradeFile;
-import com.tipray.constant.CenterConfigConst;
+import com.tipray.constant.CenterConst;
 import com.tipray.constant.TerminalUpgradeConst;
 import com.tipray.ftp.FtpClient;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -16,10 +16,10 @@ public class FtpUtil {
      * ftp客户端
      */
     public static final FtpClient FTP_CLIENT = new FtpClient(
-            CenterConfigConst.FTP_HOST,
-            CenterConfigConst.FTP_PORT,
-            CenterConfigConst.FTP_ACOUNT,
-            CenterConfigConst.FTP_PASSWORD);
+            CenterConst.FTP_HOST,
+            CenterConst.FTP_PORT,
+            CenterConst.FTP_ACOUNT,
+            CenterConst.FTP_PASSWORD);
 
     /**
      * ftp上传文件
@@ -28,7 +28,7 @@ public class FtpUtil {
      */
     public static void upload(File localFile) {
         if (FTP_CLIENT.login()) {
-            FTP_CLIENT.uploadFile(localFile, CenterConfigConst.FTP_UPLOAD_PATH);
+            FTP_CLIENT.uploadFile(localFile, CenterConst.FTP_UPLOAD_PATH);
             FTP_CLIENT.logout();
         }
     }
@@ -66,6 +66,7 @@ public class FtpUtil {
         } finally {
             if (byteArrayOutputStream != null) {
                 byteArrayOutputStream.close();
+                byteArrayOutputStream = null;
             }
         }
     }
@@ -134,43 +135,4 @@ public class FtpUtil {
             }
         }
     }
-
-    /**
-     * 将版本号字符串解析为整形数版本号
-     *
-     * @param verStr 版本号字符串（格式：1.2.3456）
-     * @return 整形数版本号
-     * @throws IllegalArgumentException 版本号字符串格式不正确
-     */
-    public static int parseVerToInt(String verStr) {
-        if (verStr == null || verStr.isEmpty()) {
-            throw new IllegalArgumentException("版本号字符串为空！");
-        }
-        String[] verArray = verStr.split("\\.");
-        if (verArray.length != 3) {
-            throw new IllegalArgumentException("版本号字符串格式不正确！");
-        }
-        byte v1 = Byte.parseByte(verArray[0], 10);
-        byte v2 = Byte.parseByte(verArray[1], 10);
-        short v3 = Short.parseShort(verArray[2], 10);
-        int ver = ((0xff & v1) << 24)
-                | ((0xff & v2) << 16)
-                | (0xffff & v3);
-        return ver;
-    }
-
-    /**
-     * 将整形数版本号转为版本号字符串
-     *
-     * @param ver 整形数版本号
-     * @return 版本号字符串（格式：1.2.3456）
-     */
-    public static String stringifyVer(int ver) {
-        StringBuffer strBuf = new StringBuffer();
-        strBuf.append((ver >> 24) & 0xff).append('.');
-        strBuf.append((ver >> 16) & 0xff).append('.');
-        strBuf.append(ver & 0xffff);
-        return strBuf.toString();
-    }
-
 }

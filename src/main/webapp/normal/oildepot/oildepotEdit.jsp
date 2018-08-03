@@ -26,7 +26,7 @@
     <div class="container">
         <input type="hidden" id="mode" value="${mode}">
         <c:if test="${mode=='view'}">
-            <div class="info-zone" style="height:530px">
+            <div class="info-zone" style="height:540px">
                 <div class="tab-title">
                     <div class="on">油库基本信息</div>
                     <div>读卡器信息</div>
@@ -35,6 +35,12 @@
                 <div class="tab-con">
                     <div class="tab-con-list">
                         <table class="base-table">
+                            <tr>
+                                <td>油库ID:</td>
+                                <td>
+                                    <input type="text" class="editInfo" id="id" value="${oilDepot.id}" readonly>
+                                </td>
+                            </tr>
                             <tr>
                                 <td>油库编号:</td>
                                 <td>
@@ -246,8 +252,7 @@
                 </div>
             </c:if>
             <c:if test="${mode=='edit'}">
-                <input type="hidden" id="id" value="${oilDepot.id}">
-                <div class="info-zone" style="height:530px">
+                <div class="info-zone" style="height:540px">
                     <div class="tab-title">
                         <div class="on">油库基本信息</div>
                         <div>读卡器信息</div>
@@ -256,6 +261,12 @@
                     <div class="tab-con">
                         <div class="tab-con-list">
                             <table class="base-table">
+                                <tr>
+                                    <td>油库ID:</td>
+                                    <td>
+                                        <input type="text" class="editInfo" id="id" value="${oilDepot.id}" readonly>
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>油库编号:</td>
                                     <td>

@@ -4,6 +4,8 @@ import com.tipray.bean.*;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.track.LastCarStatus;
+import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.core.annotation.MapResultAnno;
@@ -11,6 +13,7 @@ import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -368,4 +371,8 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      * @return {@link Integer} 1 在线，0 离线
      */
     Integer getOnline(Long carId);
+
+    Map<String, Object> getCarStatusByCarId(Long carId);
+
+    List<LastCarStatus> findCarStatusAfterTime(Date begin);
 }

@@ -52,7 +52,7 @@ public class FtpServer {
 		/*
 		 * //代码设置用户 // 加载中心配置文件 Properties properties = new Properties();
 		 * properties.load(FtpServer.class.getClassLoader().getResourceAsStream(
-		 * "center.properties")); // 获取ftp路径 String ftpPath =
+		 * "center-constant.properties")); // 获取ftp路径 String ftpPath =
 		 * properties.getProperty("ftp.path"); // 添加一个匿名用户anonymous，只读权限 BaseUser user =
 		 * new BaseUser(); user.setName("anonymous"); user.setHomeDirectory(ftpPath);
 		 * serverFactory.getUserManager().save(user); // 添加一个测试用户test，密码123456，读写权限 user

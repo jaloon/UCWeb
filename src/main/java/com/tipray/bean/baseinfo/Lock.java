@@ -46,6 +46,10 @@ public class Lock extends BaseBean {
      * 是否允许开锁（1 否，2 是）
      */
     private Integer allowOpen;
+    /**
+     * 绑定状态（ 0：未知（非法值） | 1：待车台触发确认 | 2：车台已触发确认 ）
+     */
+    private Integer bindStatus;
 
     public Long getCarId() {
         return carId;
@@ -119,6 +123,14 @@ public class Lock extends BaseBean {
         this.allowOpen = allowOpen;
     }
 
+    public Integer getBindStatus() {
+        return bindStatus;
+    }
+
+    public void setBindStatus(Integer bindStatus) {
+        this.bindStatus = bindStatus;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
@@ -151,6 +163,9 @@ public class Lock extends BaseBean {
         }
         if (allowOpen != null) {
             sb.append(", allowOpen=").append(allowOpen);
+        }
+        if (bindStatus != null) {
+            sb.append(", bindStatus=").append(bindStatus);
         }
         if (getRemark() != null) {
             sb.append(", remark='").append(getRemark()).append('\'');

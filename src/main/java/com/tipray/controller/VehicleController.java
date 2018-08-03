@@ -336,10 +336,10 @@ public class VehicleController extends BaseAction {
      */
     @RequestMapping(value = "retrack.do")
     @ResponseBody
-    public List<ReTrack> reTrack(ReTrack carTrack) {
+    public Map<String, Object> reTrack(ReTrack carTrack) {
         logger.info("retrack, carTrack={}", carTrack);
-        List<ReTrack> list = vehicleService.findTracks(carTrack);
-        return list;
+        Map<String, Object> map = vehicleService.findTracks(carTrack);
+        return map;
     }
 
     /**
@@ -534,5 +534,16 @@ public class VehicleController extends BaseAction {
     @ResponseBody
     public List<UpgradeCancelVehicle> findUnfinishUpgradeVehicles(String carNumber) {
         return vehicleService.findUnfinishUpgradeVehicles(carNumber);
+    }
+
+    /**
+     * 根据轨迹ID查询轨迹和锁信息
+     * @param trackId 轨迹ID
+     * @return 轨迹和锁信息
+     */
+    @RequestMapping(value = "getTrackAndLockInfoByTrackId.do")
+    @ResponseBody
+    public Map<String, Object> getTrackAndLockInfoByTrackId(String trackId) {
+        return vehicleService.getTrackAndLockInfoByTrackId(trackId);
     }
 }

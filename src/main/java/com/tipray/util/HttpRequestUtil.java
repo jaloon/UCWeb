@@ -3,6 +3,9 @@ package com.tipray.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,13 +59,13 @@ public class HttpRequestUtil {
 
 	/**
 	 * 发送GET请求
-	 * 
+	 *
 	 * @param url
 	 *            目的地址
 	 * @param parameters
 	 *            请求参数，Map类型。
 	 * @return 远程响应结果
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String sendGet(String url, Map<String, String> parameters) throws IOException {
 		BufferedReader in = null;// 读取响应输入流
@@ -83,13 +86,13 @@ public class HttpRequestUtil {
 
 	/**
 	 * 向指定 URL 发送POST方法的请求
-	 * 
+	 *
 	 * @param url
 	 *            发送请求的 URL
 	 * @param params
 	 *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
 	 * @return 所代表远程资源的响应结果
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String sendPost(String url, String params) throws IOException {
 		BufferedReader in = null;// 读取响应输入流
@@ -114,13 +117,13 @@ public class HttpRequestUtil {
 
 	/**
 	 * 发送POST请求
-	 * 
+	 *
 	 * @param url
 	 *            目的地址
 	 * @param parameters
 	 *            请求参数，Map类型。
 	 * @return 远程响应结果
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String sendPost(String url, Map<String, String> parameters) throws IOException {
 		BufferedReader in = null;// 读取响应输入流
@@ -309,4 +312,14 @@ public class HttpRequestUtil {
 		}
 		return resultBuf.toString();
 	}
+
+	public void test() throws Exception {
+        TrustManager[] myTMs = new TrustManager[] { new MyX509TrustManager() };
+        SSLContext ctx = SSLContext.getInstance("TLS");
+        ctx.init(null, myTMs, null);
+
+        SSLSocketFactory sslSocketFactory = ctx.getSocketFactory();
+
+    }
+
 }

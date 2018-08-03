@@ -49,13 +49,19 @@
                     </c:if>
                 }
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             });
             $.getJSON("../../manage/transcard/findUnusedTranscards.do",
@@ -74,13 +80,19 @@
                     </c:if>
       	         }
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             });
         });
@@ -381,6 +393,7 @@
 	                            <td>仓号</td>
 	                            <td>仓位</td>
 	                            <td>仓位序号</td>
+	                            <td>是否允许开锁</td>
 	                            <td>备注</td>
 	                        </tr>
 	                        <c:forEach var="lock" items="${locks}" varStatus="status">
@@ -390,6 +403,12 @@
 	                                <td>${lock.storeId}</td>
 	                                <td>${lock.seatName}</td>
 	                                <td>${lock.seatIndex}</td>
+									<c:if test="${lock.allowOpen==1}">
+                                        <td>否</td>
+                                    </c:if>
+									<c:if test="${lock.allowOpen==2}">
+                                        <td>是</td>
+                                    </c:if>
 	                                <td>${lock.remark}</td>
 	                            </tr>
 	                        </c:forEach>

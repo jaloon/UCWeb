@@ -20,45 +20,45 @@
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/car/carList.js"></script>
     <style type="text/css">
-        .car-num {
-            width: 160px;
-        }
+        /*.car-num {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .car-company {
-            width: 200px;
-        }
+        /*.car-company {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .car-type {
-            width: 120px;
-        }
+        /*.car-type {*/
+            /*width: 120px;*/
+        /*}*/
         
-        .car-device {
-            width: 120px;
-        }
+        /*.car-device {*/
+            /*width: 120px;*/
+        /*}*/
         
-        .car-dmodel {
-            width: 120px;
-        }
+        /*.car-dmodel {*/
+            /*width: 120px;*/
+        /*}*/
         
-        .car-sim {
-            width: 120px;
-        }
+        /*.car-sim {*/
+            /*width: 120px;*/
+        /*}*/
         
-        .car-transcard {
-            width: 160px;
-        }
+        /*.car-transcard {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .car-store {
-            width: 80px;
-        }
+        /*.car-store {*/
+            /*width: 80px;*/
+        /*}*/
 
-        .car-remark {
-            width: 100px;
-        }
+        /*.car-remark {*/
+            /*width: 100px;*/
+        /*}*/
         
-        .car-action {
-            width: 200px;
-        }
+        /*.car-action {*/
+            /*width: 200px;*/
+        /*}*/
     </style>
     <script type="text/javascript">
 	    
@@ -80,13 +80,19 @@
 	                },
 	                "json"
 	            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                        layer.confirm('登录失效，是否刷新页面重新登录？', {
-                            icon: 0,
-                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                        }, function() {
+                    if (XMLHttpRequest.readyState == 4) {
+                        var http_status = XMLHttpRequest.status;
+                        if (http_status == 0 || http_status > 600) {
                             location.reload(true);
-                        });
+                        } else if (http_status == 200) {
+                            if (textStatus == "parsererror") {
+                                layer.alert("应答数据格式解析错误！")
+                            } else {
+                                layer.alert("http response error: " + textStatus)
+                            }
+                        } else {
+                            layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                        }
                     }
                 });
 	        });
@@ -166,17 +172,16 @@
 	            "json"
 	        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
                 if (XMLHttpRequest.readyState == 4) {
-                    var httpStatus = XMLHttpRequest.status;
-                    if (httpStatus == 200 && textStatus == "parsererror") {
-                        layer.confirm('登录失效，是否刷新页面重新登录？', {
-                            icon: 0,
-                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                        }, function () {
-                            location.reload(true);
-                        });
-                        return;
-                    }
-                    if (httpStatus == 406 && textStatus == "error") {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
+                        location.reload(true);
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else if (http_status == 406) {
                         layer.alert('权限不足，请重新选择权限范围内的车辆进行查询！', {
                             icon: 5,
                             title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']
@@ -184,6 +189,8 @@
                             layer.close(index2);
                             $("#search_text").select();
                         });
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
                     }
                 }
             });
@@ -211,8 +218,8 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class='table-cont' id='table-cont'>
-                <table width="100%">
+            <div class='table-box'>
+                <table class="table-cont" width="100%">
                     <thead class="table-head">
                         <tr>
                             <th class="car-num">车牌号码</th>

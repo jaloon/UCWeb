@@ -1,11 +1,17 @@
 package com.tipray.core.job;
 
+import com.tipray.bean.baseinfo.AppSync;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.cache.RC4KeyCache;
+import com.tipray.constant.CenterConst;
+import com.tipray.core.CenterVariableConfig;
 import com.tipray.dao.TrackDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
+import com.tipray.service.AppService;
 import com.tipray.service.VehicleService;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.OkHttpUtil;
 import com.tipray.websocket.MonitorWebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +35,23 @@ public class ScheduledJob {
     @Resource
     private VehicleService vehicleService;
     @Resource
+    private AppService appService;
+    @Resource
     private TrackDao trackDao;
     private MonitorWebSocketHandler monitorWebSocketHandler = new MonitorWebSocketHandler();
+    /**
+     * APP配置信息同步路径
+     */
+    private static final String APP_SYNC_URL = new StringBuffer().append(CenterConst.PLTONE_URL)
+            .append("/api/appSync.do?id=").append(CenterConst.CENTER_ID).toString();
 
     /**
      * 定时更新RC4秘钥信息任务
      */
     public void executeUpdateRC4Key() {
-        RC4KeyCache.initRc4();
+        if (CenterVariableConfig.isRc4Net()) {
+            RC4KeyCache.loadPltoneRc4();
+        }
     }
 
     /**
@@ -47,6 +62,19 @@ public class ScheduledJob {
             udpServer.send(SendPacketBuilder.buildProtocol0x1100());
         } catch (Exception e) {
             logger.error("UDP心跳包发送异常：{}", e.toString());
+        }
+    }
+
+    /**
+     * APP设备和版本信息定时同步任务
+     */
+    public void executeAppSync() {
+        try {
+            String json = OkHttpUtil.get(APP_SYNC_URL);
+            AppSync appsync = JSONUtil.parseToObject(json, AppSync.class);
+            appService.sync(appsync);
+        } catch (Exception e) {
+            logger.error("APP配置信息同步异常：{}", e.toString());
         }
     }
 
@@ -64,9 +92,8 @@ public class ScheduledJob {
     public void executeLastTtracksQuery() {
         // trackDao.updateTracks(UpdateTrack.random());
         List<LastTrack> lastTracks = vehicleService.findLastTracks();
-        if (lastTracks == null) {
-            return;
+        if (lastTracks != null) {
+            monitorWebSocketHandler.pushLastTracks(lastTracks);
         }
-        monitorWebSocketHandler.pushLastTracks(lastTracks);
     }
 }

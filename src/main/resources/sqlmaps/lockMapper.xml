@@ -12,6 +12,7 @@
         <result column="seat_index" property="seatIndex" />
         <result column="store_id" property="storeId" />
         <result column="is_allowed_open" property="allowOpen" />
+        <result column="bind_status" property="bindStatus" />
         <result column="vehicle_number" property="carNumber" />
     </resultMap>
 	<sql id="select_colums">
@@ -22,7 +23,7 @@
 		select
 		<include refid="select_colums"></include>
 		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and l.is_has_bind = 1
+		where l.vehicle_id=c.id and l.is_has_bind = 1 and l.bind_status = 2
 	</select>
 	
 	<select id="getByLockId" resultMap="fullResultMap">
@@ -31,6 +32,7 @@
 		from tbl_lock l,tbl_vehicle c
 		where l.vehicle_id=c.id
 		and l.is_has_bind = 1
+		and l.bind_status = 2
 		and l.lock_device_id=#{lockId}
 		and c.id=#{carId}
 	</select>
@@ -39,12 +41,20 @@
 		select
 		<include refid="select_colums"></include>
 		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and l.is_has_bind = 1
+		where l.vehicle_id=c.id and l.lock_device_id != 0
+		and c.id=#{carId}
+	</select>
+
+	<select id="findTriggedLocksByCarId" resultMap="fullResultMap">
+		select
+		<include refid="select_colums"></include>
+		from tbl_lock l,tbl_vehicle c
+		where l.vehicle_id=c.id and l.is_has_bind = 1 and l.bind_status = 2
 		and c.id=#{carId}
 	</select>
 
 	<select id="getMaxLockIndexByCarId" parameterType="java.lang.Long" resultType="java.lang.Integer">
-		select max(lock_index) from tbl_lock where vehicle_id = #{carId}
+		select max(lock_index) from tbl_lock where lock_device_id != 0 and vehicle_id = #{carId}
 	</select>
 	
 	<select id="findUnusedLocks" resultType="java.lang.Integer">

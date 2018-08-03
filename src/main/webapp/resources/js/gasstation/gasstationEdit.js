@@ -25,7 +25,7 @@ function confirmTr(obj) {
     var cardId = id.children().first().val();
     id.html(cardId);
     id.addClass("cardIds");
-    var oper = tr.children().last();
+    var oper = trChildren.last();
     oper.html("<img alt=\"删除\" title=\"删除\" src=\"../../resources/images/operate/delete.png\" onclick=\"deleteTr(this)\">");
 }
 
@@ -33,7 +33,6 @@ function changeCardId(obj) {
     var type = obj.value;
     var tr = $(obj).closest('tr');
     var td = tr.children().eq(2);
-    td.empty();
     td.html(getCardId(type));
 }
 
@@ -78,13 +77,19 @@ function getCardId(cardType) {
             tdHtml += "</select>";
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
                     location.reload(true);
-                });
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
             }
         }
     });
@@ -101,17 +106,17 @@ function addTr() {
     if (preTrLastChildren.children().length > 1) {
         confirmTr(preTrLastChildren);
     }
-    var emergencyCards = getCardId(1);
+    var commonCards = getCardId(5);
     var trHtml = "<tr><td class=\"serialNo\">" + index + "</td>" +
         "<td><select onchange=\"changeCardId(this)\">" +
-        "<option value=1>应急卡</option>" +
         // "<option value=2>入库卡</option>" +
         // "<option value=3>出库卡</option>" +
         // "<option value=4>出入库卡</option>" +
         "<option value=5>普通卡</option>" +
+        "<option value=1>应急卡</option>" +
         // "<option value=6>管理卡</option>" +
         "</select></td>" +
-        "<td>" + emergencyCards + "</td><td>" +
+        "<td>" + commonCards + "</td><td>" +
         "<img alt=\"取消\" title=\"取消\" src=\"../../resources/images/operate/cancel.png\" onclick=\"deleteTr(this)\">&emsp;" +
         "<img alt=\"确认\" title=\"确认\" src=\"../../resources/images/operate/confirm.png\" onclick=\"confirmTr(this)\">" +
         "</td></tr>";
@@ -194,13 +199,19 @@ $(function() {
                         }
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                            layer.confirm('登录失效，是否刷新页面重新登录？', {
-                                icon: 0,
-                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                            }, function() {
+                        if (XMLHttpRequest.readyState == 4) {
+                            var http_status = XMLHttpRequest.status;
+                            if (http_status == 0 || http_status > 600) {
                                 location.reload(true);
-                            });
+                            } else if (http_status == 200) {
+                                if (textStatus == "parsererror") {
+                                    layer.alert("应答数据格式解析错误！")
+                                } else {
+                                    layer.alert("http response error: " + textStatus)
+                                }
+                            } else {
+                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                            }
                         }
                     }
                 });
@@ -232,13 +243,19 @@ $(function() {
                         }
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                        if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                            layer.confirm('登录失效，是否刷新页面重新登录？', {
-                                icon: 0,
-                                title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                            }, function() {
+                        if (XMLHttpRequest.readyState == 4) {
+                            var http_status = XMLHttpRequest.status;
+                            if (http_status == 0 || http_status > 600) {
                                 location.reload(true);
-                            });
+                            } else if (http_status == 200) {
+                                if (textStatus == "parsererror") {
+                                    layer.alert("应答数据格式解析错误！")
+                                } else {
+                                    layer.alert("http response error: " + textStatus)
+                                }
+                            } else {
+                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                            }
                         }
                     }
                 });
@@ -305,27 +322,33 @@ $(function() {
             return;
         }
 
-        // $.post(url, encodeURI(param),
-        //     function(data) {
-        //         if ("error" == data.msg) {
-        //             layer.msg(error_zh_text, { icon: 2, time: 500 });
-        //         } else {
-        //             layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
-        //                 parent.layer.close(index);
-        //             });
-        //         }
-        //     },
-        //     "json"
-        // ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-        //     if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-        //         layer.confirm('登录失效，是否刷新页面重新登录？', {
-        //             icon: 0,
-        //             title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-        //         }, function() {
-        //             location.reload(true);
-        //         });
-        //     }
-        // });
+        $.post(url, encodeURI(param),
+            function(data) {
+                if ("error" == data.msg) {
+                    layer.msg(error_zh_text, { icon: 2, time: 500 });
+                } else {
+                    layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
+                        parent.layer.close(index);
+                    });
+                }
+            },
+            "json"
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
+                    location.reload(true);
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
+            }
+        });
 
     });
 });

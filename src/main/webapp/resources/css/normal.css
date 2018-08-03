@@ -11,7 +11,7 @@
 
 .search-zone {
     width: 100%;
-    min-width: 650px;
+    min-width: 792px;
     height: 56px;
     background: #eef1f7;
     font-family: "微软雅黑";
@@ -87,49 +87,52 @@ select.search-text {
     position: fixed;
 }
 
-.table-cont {
-    /**make table can scroll**/
-    max-height: 750px;
+.table-box {
     overflow: auto;
-    /** add some style**/
-    /*padding: 2px;*/
-    /*background: #ddd;*/
     margin: 10px;
     box-shadow: 0 0 1px 3px #e6e7e9;
 }
 
+.table-cont {
+    background: #e6e7e9;
+}
+
 .table-head {
-    width: 100%;
+    display: table;
+    width: calc(100% - 1em);
     height: 36px;
     color: #445065;
     font-weight: 500;
-    /* background: #009688; */
     background: #e6e7e9;
+    table-layout: fixed;
 }
 
 .table-body {
     width: 100%;
+    display: block;
     color: #5a6779;
     font-size: 13px;
-    /* background: #ffffff; */
-    /*内容超出容器只显示垂直滚动条*/
-    overflow: auto;
+    background: #ffffff;
+    overflow-y: scroll;
 }
 
-.table-body::-webkit-scrollbar {
-    /*width表示垂直滚动条宽度，此处0表示滚动时不显示滚动条*/
-    width: 0;
-    /*height表示水平滚动条宽度*/
-}
-
-.data-zone th, td {
+.data-zone th {
     text-align: center;
     vertical-align: middle;
     height: 30px;
 }
 
 .data-zone td {
+    text-align: center;
+    vertical-align: middle;
+    height: 30px;
     border-bottom: 1px solid #e6e7e9;
+}
+
+.table-body tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
 .list-content {

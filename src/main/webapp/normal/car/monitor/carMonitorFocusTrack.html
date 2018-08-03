@@ -11,7 +11,8 @@
     <script src="../../../resources/plugins/ReconnectingWebSocket/reconnecting-websocket.min.js"></script>
     <script src="../../../resources/plugins/layer/layer.js"></script>
     <script src="../../../resources/js/base.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=F0i6SrLmHquLVNLCqpExxPrj8mWVdFwx"></script>
+    <script type="text/javascript"
+            src="https://api.map.baidu.com/api?v=2.0&ak=F0i6SrLmHquLVNLCqpExxPrj8mWVdFwx&s=1"></script>
     <style>
         .map {
             width: 100%;
@@ -21,12 +22,12 @@
 </head>
 
 <body>
-    <div class="map" id="bmap"></div>
+<div class="map" id="bmap"></div>
 </body>
 
 </html>
 <script type="text/javascript">
-    $(function() {
+    $(function () {
         var map = new BMap.Map("bmap"); // 创建Map实例
         map.centerAndZoom("厦门", 12); // 初始化地图,设置中心点坐标和地图级别
         map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
@@ -42,29 +43,33 @@
         var carNumber = getUrlParam("carNumber");
         var parentSession = getUrlParam("parentSession");
         var user = decodeURIComponent(getUrlParam("user"));
+        var wsProtocol = "ws";
+        if( "https:" == document.location.protocol || location.href.indexOf("https") > -1 ) {
+            wsProtocol = "wss";
+        }
         var wsUrl = getUrlParam("wsUrl");
         var ws = null;
 
         if ('WebSocket' in window) {
-            ws = new ReconnectingWebSocket("ws://" + wsUrl + "/track");
-        // } else if ('MozWebSocket' in window) {
-        //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
+            ws = new ReconnectingWebSocket(wsProtocol + "://" + wsUrl + "/track");
+            // } else if ('MozWebSocket' in window) {
+            //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
         } else {
             // ws = new SockJS("http://" + wsUrl + "/sockjs/track");
             layer.alert("您的浏览器不支持websocket协议，建议使用新版谷歌、火狐等浏览器，请勿使用IE10以下浏览器，360浏览器请使用极速模式，不要使用兼容模式！");
         }
-        ws.onopen = function(event) {
+        ws.onopen = function (event) {
             if (window.console) console.log("websocket connected");
             sendOrder();
         };
-        ws.onmessage = function(event) {
+        ws.onmessage = function (event) {
             if (window.console) console.log("websocket receive message");
             var receive = event.data;
             switch (receive) {
                 case "timeout": // 监控超时
                     if (window.console) console.log("monitor timeout");
                     clearInterval(timer);
-                    layer.msg('单次最长只能查看1个小时！', {icon: 0}, function() {
+                    layer.msg('单次最长只能查看1个小时！', {icon: 0}, function () {
                         parent.layer.close(index);
                     });
                     break;
@@ -82,12 +87,12 @@
                     reRequest('关注车辆数据连接中断，是否重新连接？', '连接中断');
                     break;
                 case "parse_error": // 服务器JSON解析异常
-                    layer.msg('解析监控指令异常，请查证指令格式是否正确！', {icon: 2}, function() {
+                    layer.msg('解析监控指令异常，请查证指令格式是否正确！', {icon: 2}, function () {
                         parent.layer.close(index);
                     });
                     break;
                 case "db_error": // 服务器数据库操作异常
-                    layer.msg('数据库操作异常，请联系管理员！', {icon: 2}, function() {
+                    layer.msg('数据库操作异常，请联系管理员！', {icon: 2}, function () {
                         parent.layer.close(index);
                     });
                     break;
@@ -96,30 +101,24 @@
                     break;
             }
         };
-        ws.onerror = function(event) {
+        ws.onerror = function (event) {
             if (window.console) console.log("websocket error");
         };
-        ws.onclose = function(event) {
+        ws.onclose = function (event) {
             if (window.console) console.log("websocket closed： " + event);
         };
 
         var points = [];
         var carMarker = null;
 
+        var alarm_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-红.png', new BMap.Size(32, 15));
+        var normal_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-黄.png', new BMap.Size(32, 15));
+
         function initCarIcon(alarm) {
-            var carIcon;
-            if (alarm == true || alarm == "true") {
-                carIcon = new BMap.Icon(
-                    '../../../resources/images/marker/车辆图标-32-红.png',
-                    new BMap.Size(32, 15)
-                );
-            } else {
-                carIcon = new BMap.Icon(
-                    '../../../resources/images/marker/车辆图标-32-黄.png',
-                    new BMap.Size(32, 15)
-                );
+            if (alarm == "是") {
+                return alarm_car_icon;
             }
-            return carIcon;
+            return normal_car_icon;
         }
 
         function reFreshPage(track) {
@@ -131,13 +130,14 @@
                         icon: 5,
                         time: 1000
                     },
-                    function() {
+                    function () {
                         parent.layer.close(index);
                     }
                 );
                 return;
             }
-            var point = new BMap.Point(track.longitude, track.latitude);
+            var bd09 = wgs84tobd09(track.longitude, track.latitude);
+            var point = new BMap.Point(bd09[0], bd09[1]);
             points.push(point);
             var len = points.length;
             if (len > 1) {
@@ -168,6 +168,8 @@
             });
             carMarker.setLabel(carLabel);
             map.addOverlay(carMarker);
+            // 图随点移
+            map.panTo(point);
         }
 
         function sendOrder() {
@@ -188,18 +190,18 @@
                     icon: 3,
                     title: [title, 'font-size:14px;color:#ffffff;background:#478de4;'],
                     btn: ['是', '否'],
-                    cancel: function() {
+                    cancel: function () {
                         //右上角关闭回调
                         parent.layer.close(index); //关闭父窗口
                     }
                 },
-                function(index0) {
+                function (index0) {
                     //按钮【是】的回调
                     //重发监控指令
                     sendOrder();
                     layer.close(index0);
                 },
-                function(index0) {
+                function (index0) {
                     //按钮【否】的回调
                     parent.layer.close(index); //关闭父窗口
                 }

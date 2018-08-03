@@ -4,7 +4,7 @@ import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
-import com.tipray.constant.CenterConfigConst;
+import com.tipray.constant.CenterConst;
 import com.tipray.core.exception.ServiceException;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
@@ -23,21 +23,13 @@ import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlMimeType;
-import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.soap.MTOM;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -51,7 +43,6 @@ import java.util.Map;
  * @version 1.0 2017-12-22
  */
 @Component
-@Transactional(rollbackForClassName = "Exception")
 @WebService(name = "ElockSoap", serviceName = "Elock", portName = "ElockSoap", targetNamespace = "http://www.cnpc.com/")
 @MTOM // 开启MTOM功能
 public class ElockWebService {
@@ -62,8 +53,6 @@ public class ElockWebService {
     private static final String FOOTER = "</TradeData>";
     private static final String REPLY_MESSAGE_SUCCESS = "<Message>success</Message>";
     @Resource
-    private WebServiceContext context;
-    @Resource
     private VehicleService vehicleService;
     @Resource
     private DistributionRecordService distributionRecordService;
@@ -72,32 +61,33 @@ public class ElockWebService {
     @Resource
     private NioUdpServer udpServer;
 
-    @WebMethod
-    public String getInfo(@WebParam(name = "params") String params) {
-        System.out.println(params);
-        return "success";
-    }
-
     /**
      * 物流配送接口
      *
-     * @param Param 物流配送信息，xml文本字符串
+     * @param txt 物流配送信息，xml文本字符串
      * @return <code>&lt;Message&gt;success&lt;/Message&gt;</code>成功；<code>&lt;Message&gt;fail：错误描述&lt;/Message&gt;</code>错误
      */
-    @SuppressWarnings("unchecked")
     @WebMethod(operationName = "SetPlan")
     @WebResult(name = "SetPlanResult", targetNamespace = "http://www.cnpc.com/")
-    public String SetPlan(@WebParam(name = "Param", targetNamespace = "http://www.cnpc.com/") String Param) {
-        logger.info("WebService收到物流配送报文：{}", Param);
-        forword(Param);
-        int beginIndex = Param.indexOf(HEADER);
-        int footerIndex = Param.indexOf(FOOTER);
+    public String SetPlan(@WebParam(name = "txt", targetNamespace = "http://www.cnpc.com/") String txt) {
+        logger.info("WebService收到物流配送报文：{}", txt);
+        if (txt == null) {
+            logger.warn("XML报文为null！");
+            return "<Message>fail：XML报文为null！</Message>";
+        }
+        if (txt.trim().isEmpty()) {
+            logger.warn("XML报文为空字符串！");
+            return "<Message>fail：XML报文为空字符串！</Message>";
+        }
+        forword(txt);
+        int beginIndex = txt.indexOf(HEADER);
+        int footerIndex = txt.indexOf(FOOTER);
         int endIndex = footerIndex + FOOTER.length();
         if (beginIndex < 0 || beginIndex >= footerIndex) {
             logger.warn("XML未包含规范格式的配送信息！");
             return "<Message>fail：XML未包含规范格式的配送信息！</Message>";
         }
-        String distributeXmlStr = Param.substring(beginIndex, endIndex);
+        String distributeXmlStr = txt.substring(beginIndex, endIndex);
         Document document;
         try {
             // 读取XML文本内容获取Document对象
@@ -224,12 +214,12 @@ public class ElockWebService {
      * @param distributeXmlStr {@link String} 配送信息XML文本
      */
     private void forword(String distributeXmlStr) {
-        if (CenterConfigConst.WEBSERVICE_FORWORD) {
+        if (CenterConst.WEBSERVICE_FORWORD) {
             ThreadPool.CACHED_THREAD_POOL.execute(() -> {
                 int repeatCount = 0;
                 while (repeatCount < FORWORD_REPEAT_MAX) {
                     try {
-                        String rtReply = ElockClient.setPlan(CenterConfigConst.WEBSERVICE_RT_URL, distributeXmlStr);
+                        String rtReply = ElockClient.setPlan(CenterConst.WEBSERVICE_RT_URL, distributeXmlStr);
                         if (rtReply.equals(REPLY_MESSAGE_SUCCESS)) {
                             return;
                         }
@@ -241,40 +231,6 @@ public class ElockWebService {
                 }
                 logger.error("转发配送信息失败！");
             });
-        }
-    }
-
-    @WebMethod
-    @WebResult
-    @XmlMimeType("*/*")
-    public DataHandler downloadFile(@WebParam(name = "file") String filePath) {
-        File downloadFile = new File(filePath);
-        if (downloadFile.exists()) {
-            return new DataHandler(new FileDataSource(downloadFile) {
-                @Override
-                public String getContentType() {
-                    return "application/octet-stream";
-                }
-            });
-        }
-        return null;
-    }
-
-    @WebMethod
-    public void uploadFile(@WebParam(name = "fileName") String fileName,
-                           @XmlMimeType("*/*") @WebParam(name = "dataHandler") DataHandler dataHandler) throws Exception {
-        OutputStream out = null;
-        try {
-            File file = new File("输出文件路径");
-            if (!file.exists()) {
-                out = new FileOutputStream(file);
-                dataHandler.writeTo(out);
-                out.flush();
-            }
-        } finally {
-            if (out != null) {
-                out.close();
-            }
         }
     }
 }

@@ -6,6 +6,7 @@ import com.tipray.bean.log.VehicleManageLog;
 import com.tipray.util.*;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +22,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 @SuppressWarnings({ "unused" })
 public class ByteTest {
+	@Test
+	public void appsync() throws IOException {
+        String json = OkHttpUtil.get("https://www.pltone.com:3003/api/appSync.do?id=1");
+	}
+
     @Test
     public void test01(){
         Set<Long> set = new CopyOnWriteArraySet<>();

@@ -708,4 +708,28 @@
 	<select id="getOnline" parameterType="java.lang.Long" resultType="java.lang.Integer">
         SELECT is_online FROM tbl_vehicle_realtime_status WHERE vehicle_id = #{carId}
     </select>
+
+	<select id="getCarStatusByCarId" parameterType="java.lang.Long" resultType="java.util.Map">
+        SELECT
+            `status`,
+            UNIX_TIMESTAMP(trigger_time) `trigger_time`
+        FROM
+            tbl_vehicle_seal_status
+        WHERE
+            vehicle_id = #{carId}
+            AND trigger_time = (SELECT MAX(trigger_time) FROM tbl_vehicle_seal_status WHERE vehicle_id = #{carId})
+        ORDER BY id DESC LIMIT 1
+    </select>
+
+    <select id="findCarStatusAfterTime" parameterType="java.util.Date" resultType="com.tipray.bean.track.LastCarStatus">
+        select
+            vehicle_id id,
+            `status`,
+            trigger_time time
+        from
+            tbl_vehicle_seal_status
+        where
+            trigger_time > #{begin}
+    </select>
+
 </mapper>

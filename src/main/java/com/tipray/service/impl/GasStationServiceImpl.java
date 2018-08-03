@@ -62,9 +62,11 @@ public class GasStationServiceImpl implements GasStationService {
 			gasStationDao.update(gasStation);
 			Long id = gasStation.getId();
 			handsetDao.resetGasStationOfHandsetByGasStationId(id);
-			Handset handset = handsetDao.getByDeviceId(handsetId);
-			handset.setGasStation(gasStation);
-			handsetDao.update(handset);
+			if (handsetId != null && handsetId > 0) {
+				Handset handset = handsetDao.getByDeviceId(handsetId);
+				handset.setGasStation(gasStation);
+				handsetDao.update(handset);
+			}
 			gasStationDao.deleteGasStationCardsById(id);
 			if (StringUtil.isNotEmpty(cardIds)) {
 				String[] cardIdStrArray = cardIds.split(",");

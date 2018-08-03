@@ -8,10 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import com.tipray.constant.CenterConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.tipray.constant.CenterConfigConst;
 
 public class JDBCUtil {
 	private static final Logger logger = LoggerFactory.getLogger(JDBCUtil.class);
@@ -139,7 +138,7 @@ public class JDBCUtil {
 		try {
 			setDriver("org.sqlite.JDBC");
 			Class.forName(driver); // 加载驱动
-			url = new StringBuffer("jdbc:sqlite:").append(CenterConfigConst.SQLITE_FILE_PATH).append('/')
+			url = new StringBuffer("jdbc:sqlite:").append(CenterConst.SQLITE_FILE_PATH).append('/')
 					.append(sqliteDbName).append(".db").toString();
 			connection = DriverManager.getConnection(url);// sqlite不需要用户名密码
 			connection.setAutoCommit(false);// 设置不自动提交

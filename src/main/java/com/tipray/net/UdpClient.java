@@ -4,7 +4,7 @@ import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.upgrade.TerminalUpgradeFile;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.cache.SerialNumberCache;
-import com.tipray.constant.CenterConfigConst;
+import com.tipray.constant.CenterConst;
 import com.tipray.core.exception.UdpException;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.util.BytesConverterByLittleEndian;
@@ -40,11 +40,11 @@ public class UdpClient {
     /**
      * 默认通信服务端UDP服务器地址
      */
-    private static final InetAddress DEFAULT_UDP_SERVER_ADDRESS = CenterConfigConst.UDP_REMOTE_ADDR;
+    private static final InetAddress DEFAULT_UDP_SERVER_ADDRESS = CenterConst.UDP_REMOTE_ADDR;
     /**
      * 默认通信服务端UDP服务器端口
      */
-    private static final int DEFAULT_UDP_SERVER_PORT = CenterConfigConst.UDP_REMOTE_PORT;
+    private static final int DEFAULT_UDP_SERVER_PORT = CenterConst.UDP_REMOTE_PORT;
 
     /**
      * UDP客户端socket

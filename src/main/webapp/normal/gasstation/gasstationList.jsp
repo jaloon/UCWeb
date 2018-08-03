@@ -21,50 +21,55 @@
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/gasstation/gasstationList.js"></script>
     <style type="text/css">
-        .gasstation-id {
-            width: 100px;
-        }
+        /*.gasstation-id {*/
+            /*width: 100px;*/
+        /*}*/
+
+        /*.gasstation-no {*/
+            /*width: 100px;*/
+        /*}*/
+
+        /*.gasstation-name {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .gasstation-name {
-            width: 200px;
-        }
+        /*.gasstation-abbr {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .gasstation-abbr {
-            width: 160px;
-        }
+        /*.gasstation-coordinate {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .gasstation-coordinate {
-            width: 200px;
-        }
+        /*.gasstation-director {*/
+            /*width: 100px;*/
+        /*}*/
         
-        .gasstation-director {
-            width: 100px;
-        }
+        /*.gasstation-phone {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .gasstation-phone {
-            width: 160px;
-        }
+        /*.gasstation-address {*/
+            /*width: 300px;*/
+        /*}*/
         
-        .gasstation-address {
-            width: 300px;
-        }
+        /*.gasstation-company {*/
+            /*width: 200px;*/
+        /*}*/
         
-        .gasstation-company {
-            width: 200px;
-        }
+        /*.gasstation-remark {*/
+            /*width: 100px;*/
+        /*}*/
         
-        .gasstation-remark {
-            width: 100px;
-        }
-        
-        .gasstation-action {
-            width: 200px;
-        }
+        /*.gasstation-action {*/
+            /*width: 200px;*/
+        /*}*/
         
         .file-box {
-	        position:absolute;
-		    left: 600px;
-		    top: 31px;
+            position: relative;
+            float: right;
+            top: 10px;
+            margin-right: 30px;
         }
         
         .inputfile-1+label {
@@ -101,13 +106,19 @@
 	                },
 	                "json"
 	            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                        layer.confirm('登录失效，是否刷新页面重新登录？', {
-                            icon: 0,
-                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                        }, function() {
+                    if (XMLHttpRequest.readyState == 4) {
+                        var http_status = XMLHttpRequest.status;
+                        if (http_status == 0 || http_status > 600) {
                             location.reload(true);
-                        });
+                        } else if (http_status == 200) {
+                            if (textStatus == "parsererror") {
+                                layer.alert("应答数据格式解析错误！")
+                            } else {
+                                layer.alert("http response error: " + textStatus)
+                            }
+                        } else {
+                            layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                        }
                     }
                 });
 	        });
@@ -146,7 +157,8 @@
 	                for (var i = 0; i < gridPage.currentRows; i++) {
 	                    var gasstation = gasstations[i];
 	                    tableData += "<tr class='list-content' onclick=\"dispatch('edit'," + gasstation.id + ")\">" +
-	                        "<td class=\"gasstation-id\">" + gasstation.officialId + "</td>" +
+	                        "<td class=\"gasstation-id\">" + gasstation.id + "</td>" +
+	                        "<td class=\"gasstation-no\">" + gasstation.officialId + "</td>" +
 	                        "<td class=\"gasstation-name\">" + gasstation.name + "</td>" +
 	                        "<td class=\"gasstation-abbr\">" + gasstation.abbr + "</td>" +
 	                        "<td class=\"gasstation-coordinate\">(" + gasstation.longitude + ", " + gasstation.latitude +  ")</td>" +
@@ -170,13 +182,19 @@
 	            },
 	            "json"
 	        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             });
 	    }
@@ -255,11 +273,12 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class='table-cont' id='table-cont'>
-                <table width="100%">
+            <div class='table-box'>
+                <table class="table-cont" width="100%">
                     <thead class="table-head">
                         <tr>
-                            <th class="gasstation-id">加油站编号</th>
+                            <th class="gasstation-id">加油站ID</th>
+                            <th class="gasstation-no">加油站编号</th>
                             <th class="gasstation-name">加油站名称</th>
                             <th class="gasstation-abbr">加油站简称</th>
                             <th class="gasstation-coordinate">加油站经纬度</th>

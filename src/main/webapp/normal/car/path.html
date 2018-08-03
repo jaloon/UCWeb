@@ -17,7 +17,7 @@
         
         #allmap {
             width: 100%;
-            height: 500px;
+            height: 800px;
             overflow: hidden;
         }
         
@@ -54,7 +54,7 @@
 
         // 百度地图API功能  
         var map = new BMap.Map('map');
-        var poi = new BMap.Point(113.948913, 22.530844);
+        var poi = new BMap.Point(118.162433,24.503358);
         map.centerAndZoom(poi, 16);
         map.enableScrollWheelZoom();
         var overlays = [];
@@ -66,14 +66,14 @@
             fillColor: "red", //填充颜色。当参数为空时，圆形将没有填充效果。  
             strokeWeight: 3, //边线的宽度，以像素为单位。  
             strokeOpacity: 0.8, //边线透明度，取值范围0 - 1。  
-            fillOpacity: 0.6, //填充的透明度，取值范围0 - 1。  
+            fillOpacity: 0.1, //填充的透明度，取值范围0 - 1。
             strokeStyle: 'solid' //边线的样式，solid或dashed。  
         }
 
         //实例化鼠标绘制工具  
         var drawingManager = new BMapLib.DrawingManager(map, {
             isOpen: false, //是否开启绘制模式  
-            //enableDrawingTool: true, //是否显示工具栏  
+            enableDrawingTool: true, //是否显示工具栏
             drawingToolOptions: {
                 anchor: BMAP_ANCHOR_TOP_RIGHT, //位置  
                 offset: new BMap.Size(5, 5), //偏离值  
@@ -87,6 +87,26 @@
 
         //添加鼠标绘制工具监听事件，用于获取绘制结果  
         drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+
+        drawingManager.addEventListener("markercomplete", function(e, overlay) {
+            var point = overlay.getPosition();
+            console.log("point: " + point.lng + "," + point.lat);
+        });
+
+        drawingManager.addEventListener("circlecomplete", function(e, overlay) {
+            var center = overlay.getCenter();
+            console.log("center: " + center.lng + "," + center.lat);
+            console.log("radius: " + overlay.getRadius());
+        });
+
+        drawingManager.addEventListener("polygoncomplete", function(e, overlay) {
+            var path = overlay.getPath();
+            path.forEach(function (point, index) {
+                console.log("point" + index + ": " + point.lng + "," + point.lat);
+            })
+        });
+
+
 
         map.addEventListener("rightclick", function(e) {
             if (confirm(e.point.lng + "," + e.point.lat)) {

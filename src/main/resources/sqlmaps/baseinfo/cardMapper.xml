@@ -72,9 +72,9 @@
         select c.card_id
         from tbl_card c
         where c.is_invalid=0
-        <if test="cardType != null">
+        <if test="_parameter != null">
             and c.type=#{cardType,jdbcType=TINYINT}
-            <if test="cardType != 6">
+            <if test="_parameter != 6">
                 and c.card_id not in (select co.card_id from tbl_oildepot_card co)
                 and c.card_id not in (select cg.card_id from tbl_gasstation_card cg)
             </if>

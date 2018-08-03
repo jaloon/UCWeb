@@ -5,10 +5,10 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
+import com.tipray.constant.CenterConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tipray.constant.CenterConfigConst;
 import com.tipray.mq.MyQueue;
 
 /**
@@ -22,7 +22,7 @@ public class UdpServer extends Thread {
 	private static final Logger logger = LoggerFactory.getLogger(UdpServer.class);
 	// 缓冲数组的大小
 	public static final int BUFFER_SIZE = 1024;
-	private static final int SERVER_PORT = CenterConfigConst.UDP_LOCAL_PORT;
+	private static final int SERVER_PORT = CenterConst.UDP_LOCAL_PORT;
 	private DatagramSocket serverSocket = null;
 	private DatagramPacket receivePacket = null;
 	private boolean enabled = true;

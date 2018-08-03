@@ -20,6 +20,8 @@ public class SystemPropertyConst {
 	public static final String PATH_SEP = System.getProperty("path.separator");
 	/** 行分隔符（在 UNIX 系统中是“/n”） */
 	public static final String LINE_SEP = System.getProperty("line.separator");
+	/** tomcat服务器的绝对路径 */
+	public static final String CATALINA_HOME = System.getProperty("catalina.home");
 	/** JRE平台架构（x32/x64）JRE_ARCHITECTURE */
 	public static final String JRE_ARCH = System.getProperty("sun.arch.data.model");
 	/** dll/accredit */

@@ -1,10 +1,9 @@
 package com.tipray.webservice.client;
 
-import java.io.IOException;
-import java.net.URL;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * ElockClient
@@ -19,12 +18,12 @@ public class ElockClient {
 	 * 
 	 * @param wsAaddr
 	 *            {@link String} WebService服务器地址
-	 * @param param
+	 * @param txt
 	 *            {@link String} 物流信息XML文本
 	 * @return
 	 * @throws IOException
 	 */
-	public static String setPlan(String wsAaddr, String param) throws IOException {
+	public static String setPlan(String wsAaddr, String txt) throws IOException {
 		String wsdl = new StringBuffer(wsAaddr).append("?wsdl").toString();
 		// 创建WSDL的URL，注意不是服务地址
 		URL url = new URL(wsdl);
@@ -42,7 +41,7 @@ public class ElockClient {
 		// 例如<wsdl:port name="ElockSoap" binding="tns:ElockSoap">)
 		ElockSoap elockSoap = service.getPort(ElockSoap.class);
 		// 调用查询方法
-		String result = elockSoap.SetPlan(param);
+		String result = elockSoap.SetPlan(txt);
 		return result;
 	}
 

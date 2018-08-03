@@ -1,6 +1,6 @@
 package com.tipray.init.impl;
 
-import com.tipray.constant.CenterConfigConst;
+import com.tipray.constant.CenterConst;
 import com.tipray.constant.SqliteFileConst;
 import com.tipray.init.AbstractInitialization;
 import com.tipray.util.JDBCUtil;
@@ -41,8 +41,8 @@ public class SqliteInit extends AbstractInitialization {
 	 *            sqlite数据库名称
 	 */
 	private void initSqliteDb(String sqliteDbName) {
-		if (StringUtil.isNotEmpty(CenterConfigConst.SQLITE_FILE_PATH)) {
-			String pathname = new StringBuffer(CenterConfigConst.SQLITE_FILE_PATH).append('/')
+		if (StringUtil.isNotEmpty(CenterConst.SQLITE_FILE_PATH)) {
+			String pathname = new StringBuffer(CenterConst.SQLITE_FILE_PATH).append('/')
 					.append(sqliteDbName).append(".db").toString();
 			File file = new File(pathname);
 			if (file.exists()) {

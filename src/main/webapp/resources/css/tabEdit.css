@@ -1,25 +1,20 @@
 .container {
     width: 540px;
     background: #ffffff;
-    /* background: #8ff1f5; */
 }
 
 .info-zone {
     width: 510px;
     padding: 15px 15px;
-    /* height: 530px; */
-    /* background: greenyellow; */
     overflow: auto;
 }
 
 .base-info {
     width: 480px;
-    /* background: burlywood; */
 }
 
 .sub-info {
     width: 480px;
-    /* background: burlywood; */
     margin-top: 15px;
 }
 

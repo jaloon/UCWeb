@@ -1,23 +1,21 @@
 package com.tipray.test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
+import com.tipray.bean.baseinfo.InOutReader;
+import com.tipray.bean.baseinfo.OilDepot;
+import com.tipray.service.OilDepotService;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.OkHttpUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tipray.bean.baseinfo.InOutReader;
-import com.tipray.bean.baseinfo.OilDepot;
-import com.tipray.service.OilDepotService;
-import com.tipray.util.HttpRequestUtil;
-import com.tipray.util.JSONUtil;
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 油库管理测试
@@ -99,7 +97,7 @@ public class OilDepotTest {
 		params.put("center", "159816");
 		params.put("radius", "159816");
 		try {
-			HttpRequestUtil.sendGet(url, params);
+			OkHttpUtil.get(url, params);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

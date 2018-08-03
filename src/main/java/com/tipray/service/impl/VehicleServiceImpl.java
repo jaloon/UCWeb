@@ -2,6 +2,7 @@ package com.tipray.service.impl;
 
 import com.tipray.bean.*;
 import com.tipray.bean.baseinfo.*;
+import com.tipray.bean.track.LastCarStatus;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.track.TrackInfo;
@@ -249,7 +250,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<ReTrack> findTracks(ReTrack carTrack) {
+    public Map<String, Object> findTracks(ReTrack carTrack) {
         String carNo = carTrack.getCarNumber();
         Long carId = vehicleDao.getIdByCarNo(carNo);
         if (carId == null) {
@@ -260,19 +261,63 @@ public class VehicleServiceImpl implements VehicleService {
             return null;
         }
         List<ReTrack> carTracks = new ArrayList<>();
-        trackInfos.forEach(trackInfo -> {
+        Set<Point> doubtablePoints = new HashSet<>();
+        long preTrackTime = 0;
+        Point prePoint = null;
+        for (int i = 0, len = trackInfos.size(); i < len; i++) {
+            TrackInfo trackInfo = trackInfos.get(i);
             ReTrack reTrack = new ReTrack();
-            reTrack.setId(carId);
-            reTrack.setCarNumber(carNo);
+            reTrack.setTrackId(trackInfo.getId());
+            reTrack.setCoorValid(trackInfo.getCoorValid());
             reTrack.setLongitude(trackInfo.getLongitude());
             reTrack.setLatitude(trackInfo.getLatitude());
             reTrack.setVelocity(trackInfo.getSpeed());
             reTrack.setAngle(trackInfo.getAngle());
             reTrack.setAlarm(VehicleAlarmUtil.isAlarm(trackInfo.getTerminalAlarm().byteValue(), trackInfo.getLockStatusInfo()));
-            reTrack.setCarStatus(parseCarStatus(trackInfo.getCarStatus()));
+            reTrack.setCarStatus(trackInfo.getCarStatus());
+            reTrack.setCreateDate(trackInfo.getTrackTime());
+
+            long curTrackTime = trackInfo.getTrackTime().getTime();
+            Point curPoint = new Point();
+            curPoint.setLongitude(trackInfo.getLongitude());
+            curPoint.setLatitude(trackInfo.getLatitude());
+            if (i > 0) {
+                long duration = curTrackTime - preTrackTime;
+                // 两点间隔时间超过5分钟
+                if (duration > DateUtil.MINUTE_DIFF * 5) {
+                    preTrackTime = curTrackTime;
+                    prePoint = curPoint;
+                    reTrack.setDoubtable(true);
+                    carTracks.add(reTrack);
+                    doubtablePoints.add(curPoint);
+                    continue;
+                }
+                // 两点坐标相同
+                if (curPoint.equals(prePoint)) {
+                    preTrackTime = curTrackTime;
+                    prePoint = curPoint;
+                    reTrack.setDoubtable(true);
+                    carTracks.add(reTrack);
+                    doubtablePoints.add(curPoint);
+                    continue;
+                }
+            }
+            preTrackTime = curTrackTime;
+            prePoint = curPoint;
+
+            // gps速度小于1m/s（即 3.6km/h）时，认为没有移动
+            if (trackInfo.getSpeed() < 4) {
+                reTrack.setDoubtable(true);
+                doubtablePoints.add(curPoint);
+            }
+
             carTracks.add(reTrack);
-        });
-        return carTracks;
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("tracks", carTracks);
+        map.put("doubtable", doubtablePoints);
+        return map;
     }
 
     /**
@@ -286,34 +331,6 @@ public class VehicleServiceImpl implements VehicleService {
         if (StringUtil.isNotEmpty(driverIds)) {
             driverDao.setCar(driverIds, carNumber);
         }
-    }
-
-    /**
-     * 解析车辆状态
-     *
-     * @param carStatus 车辆状态码
-     * @return 车辆状态
-     */
-    private String parseCarStatus(int carStatus) {
-        switch (carStatus) {
-            case 0:
-                return "未知";
-            case 1:
-                return "在油库";
-            case 2:
-                return "在途中";
-            case 3:
-                return "在加油站";
-            case 4:
-                return "返程中";
-            case 5:
-                return "应急";
-            case 6:
-                return "待入库";
-            default:
-                break;
-        }
-        return "未知";
     }
 
     @Override
@@ -416,7 +433,7 @@ public class VehicleServiceImpl implements VehicleService {
             return null;
         }
         List<Map<String, Object>> locks = lockDao.findlocksByCarNo(carNumber);
-        locks.forEach(lock-> {
+        locks.forEach(lock -> {
             Integer status = lockDao.getLockStatus(lock);
             lock.put("switch_status", status == null ? 0 : status);
         });
@@ -528,7 +545,7 @@ public class VehicleServiceImpl implements VehicleService {
             Integer ver = vehicleTree.getVer();
             if (ver != null && ver != 0) {
                 String name = vehicleTree.getName();
-                name = new StringBuffer(name).append('（').append(FtpUtil.stringifyVer(ver)).append('）').toString();
+                name = new StringBuffer(name).append('（').append(VersionUtil.stringifyVer(ver)).append('）').toString();
                 vehicleTree.setName(name);
             }
         });
@@ -554,7 +571,26 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public List<LastTrack> findLastTracks() {
-        return trackDao.findLastTracks();
+        List<LastTrack> lastTracks = trackDao.findLastTracks();
+        if (!EmptyObjectUtil.isEmptyList(lastTracks)) {
+            Date begin = lastTracks.get(0).getTrackTime();
+            List<LastCarStatus> list = vehicleDao.findCarStatusAfterTime(begin);
+            Date trackTime;
+            Date stateTime;
+            for (LastTrack lastTrack : lastTracks) {
+                trackTime = lastTrack.getTrackTime();
+                for (LastCarStatus lastCarStatus : list) {
+                    if (lastTrack.getCarId().equals(lastCarStatus.getId())) {
+                        stateTime = lastCarStatus.getTime();
+                        if (trackTime.before(stateTime)) {
+                            lastTrack.setCarStatus(lastCarStatus.getStatus());
+                            lastTrack.setTrackTime(stateTime);
+                        }
+                    }
+                }
+            }
+        }
+        return lastTracks;
     }
 
     @Override
@@ -600,6 +636,42 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public Integer getUpgradeStatusById(Long upgradeRecordId) {
-       return terminalUpgradeDao.getUpgradeStatusById(upgradeRecordId);
+        return terminalUpgradeDao.getUpgradeStatusById(upgradeRecordId);
+    }
+
+    @Override
+    public Map<String, Object> getTrackAndLockInfoByTrackId(String trackId) {
+        if (StringUtil.isEmpty(trackId)) {
+            return null;
+        }
+        TrackInfo trackInfo = trackDao.getTrackByTrackId(trackId);
+        if (trackInfo == null) {
+            return null;
+        }
+        trackInfo.getTerminalAlarm();
+        long carId = trackInfo.getCarId();
+        List<Lock> locks = lockDao.findLocksByCarId(carId);
+        Integer maxLockIndex = lockDao.getMaxLockIndexByCarId(carId);
+        StringBuffer lockStatusBuf = new StringBuffer();
+        if (EmptyObjectUtil.isEmptyList(locks)) {
+            lockStatusBuf.append("锁绑定状态异常！");
+        } else {
+            byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
+            if (lockStatusInfo.length < locks.size() || lockStatusInfo.length != maxLockIndex) {
+                lockStatusBuf.append("锁绑定状态异常！");
+            } else {
+                locks.forEach(lock -> {
+                    int lockIndex = lock.getIndex();
+                    lockStatusBuf.append('仓').append(lock.getStoreId()).append('-').append(lock.getSeatName())
+                            .append('-').append(lock.getSeatIndex()).append('：');
+                    lockStatusBuf.append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lockIndex)).append('。');
+                    lockStatusBuf.append(VehicleAlarmUtil.getLockAlarmByLockIndex(lockStatusInfo, lockIndex)).append("。<br>");
+                });
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("track", trackInfo);
+        map.put("locks", lockStatusBuf.toString());
+        return map;
     }
 }

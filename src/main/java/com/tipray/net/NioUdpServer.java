@@ -1,7 +1,7 @@
 package com.tipray.net;
 
 import com.tipray.cache.AsynUdpCommCache;
-import com.tipray.constant.CenterConfigConst;
+import com.tipray.constant.CenterConst;
 import com.tipray.mq.MyQueue;
 import com.tipray.pool.ThreadPool;
 import org.slf4j.Logger;
@@ -36,10 +36,10 @@ public class NioUdpServer {
 	/** 默认数据报接收缓冲区（容量1024字节） */
 	private static final ByteBuffer DEFAULT_RECEIVE_BUF = ByteBuffer.allocate(1024);
 	/** 服务器默认绑定端口 */
-	private static final int DEFAULT_BIND_PORT = CenterConfigConst.UDP_LOCAL_PORT;
+	private static final int DEFAULT_BIND_PORT = CenterConst.UDP_LOCAL_PORT;
 	/** 默认数据报发送地址 */
 	private static final InetSocketAddress DEFAULT_SEND_ADDRESS = new InetSocketAddress(
-			CenterConfigConst.UDP_REMOTE_ADDR, CenterConfigConst.UDP_REMOTE_PORT);
+			CenterConst.UDP_REMOTE_ADDR, CenterConst.UDP_REMOTE_PORT);
 	/** 接收数据是否可用标志 */
 	private boolean enabled = true;
 
@@ -118,15 +118,15 @@ public class NioUdpServer {
 							// 1.判断是否来自预期地址和端口号
 							// InetSocketAddress.getHostName()获取的主机名称是计算机名，InetAddress.getHostAddress()获取的才是IP地址
 							String host = address.getAddress().getHostAddress();
-							if (!host.equals(CenterConfigConst.UDP_REMOTE_HOST)) {
+							if (!host.equals(CenterConst.UDP_REMOTE_HOST)) {
 								// 远程主机名称非预期，抛掉
-								logger.warn("远程主机地址【{}】与预期地址【{}】不符！", host, CenterConfigConst.UDP_REMOTE_HOST);
+								logger.warn("远程主机地址【{}】与预期地址【{}】不符！", host, CenterConst.UDP_REMOTE_HOST);
 								continue;
 							}
 							int port = address.getPort();
-							if (port != CenterConfigConst.UDP_REMOTE_PORT) {
+							if (port != CenterConst.UDP_REMOTE_PORT) {
 								// 远程主机端口非预期，抛掉
-								logger.warn("远程主机端口【{}】与预期端口【{}】不符！", port, CenterConfigConst.UDP_REMOTE_PORT);
+								logger.warn("远程主机端口【{}】与预期端口【{}】不符！", port, CenterConst.UDP_REMOTE_PORT);
 								continue;
 							}
 							

@@ -19,10 +19,10 @@ function isNull(obj) {
 }
 
 /**
-* 将整形数版本号转为版本号字符串
-* @param ver {number} 整形数版本号
-* @returns {string} 版本号字符串（格式：1.2.3456）
-*/
+ * 将整形数版本号转为版本号字符串
+ * @param ver {number} 整形数版本号
+ * @returns {string} 版本号字符串（格式：1.2.3456）
+ */
 function stringifyVer(ver) {
     if (ver == 0) {
         return "";
@@ -67,7 +67,7 @@ function toHexId(id) {
 
 /**
  * 将一个4字节整形数转为两个2字节整形数
- * @param {*} dword 
+ * @param {*} dword
  */
 function parseIntToTwoShort(dword) {
     var hex = dword.toString(16);
@@ -82,7 +82,7 @@ function parseIntToTwoShort(dword) {
 
 /**
  * 将一个4字节整形数转为两个2字节整形数
- * @param {*} dword 
+ * @param {*} dword
  */
 function parseIntToTwoShortUseBit(dword) {
     return [dword >>> 16, dword & 0xFFFF];
@@ -93,12 +93,89 @@ function parseIntToTwoShortUseBit(dword) {
  */
 function generateUUID() {
     var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = (d + Math.random() * 16) % 16 | 0;
         d = Math.floor(d / 16);
         return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
     });
     return uuid;
+}
+
+//定义一些常量
+var x_PI = 3.14159265358979324 * 3000.0 / 180.0;
+var PI = 3.1415926535897932384626;
+var a = 6378245.0;
+var ee = 0.00669342162296594323;
+
+function wgs84tobd09(lng, lat) {
+    var gcg02 = wgs84togcj02(lng, lat);
+    return gcj02tobd09(gcg02[0], gcg02[1])
+}
+
+/**
+ * 火星坐标系 (GCJ-02) 与百度坐标系 (BD-09) 的转换
+ * 即谷歌、高德 转 百度
+ * @param lng
+ * @param lat
+ * @returns {*[]}
+ */
+function gcj02tobd09(lng, lat) {
+    var z = Math.sqrt(lng * lng + lat * lat) + 0.00002 * Math.sin(lat * x_PI);
+    var theta = Math.atan2(lat, lng) + 0.000003 * Math.cos(lng * x_PI);
+    var bd_lng = z * Math.cos(theta) + 0.0065;
+    var bd_lat = z * Math.sin(theta) + 0.006;
+    return [bd_lng, bd_lat]
+}
+
+/**
+ * WGS84转GCj02
+ * @param lng
+ * @param lat
+ * @returns {*[]}
+ */
+function wgs84togcj02(lng, lat) {
+    if (out_of_china(lng, lat)) {
+        return [lng, lat]
+    }
+    else {
+        var dlat = transformlat(lng - 105.0, lat - 35.0);
+        var dlng = transformlng(lng - 105.0, lat - 35.0);
+        var radlat = lat / 180.0 * PI;
+        var magic = Math.sin(radlat);
+        magic = 1 - ee * magic * magic;
+        var sqrtmagic = Math.sqrt(magic);
+        dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * PI);
+        dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * PI);
+        var mglat = lat + dlat;
+        var mglng = lng + dlng;
+        return [mglng, mglat]
+    }
+}
+
+/**
+ * 判断是否在国内，不在国内则不做偏移
+ * @param lng
+ * @param lat
+ * @returns {boolean}
+ */
+function out_of_china(lng, lat) {
+    return (lng < 72.004 || lng > 137.8347) || ((lat < 0.8293 || lat > 55.8271) || false);
+}
+
+function transformlat(lng, lat) {
+    var ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+    ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
+    ret += (20.0 * Math.sin(lat * PI) + 40.0 * Math.sin(lat / 3.0 * PI)) * 2.0 / 3.0;
+    ret += (160.0 * Math.sin(lat / 12.0 * PI) + 320 * Math.sin(lat * PI / 30.0)) * 2.0 / 3.0;
+    return ret
+}
+
+function transformlng(lng, lat) {
+    var ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng + 0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng));
+    ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0;
+    ret += (20.0 * Math.sin(lng * PI) + 40.0 * Math.sin(lng / 3.0 * PI)) * 2.0 / 3.0;
+    ret += (150.0 * Math.sin(lng / 12.0 * PI) + 300.0 * Math.sin(lng / 30.0 * PI)) * 2.0 / 3.0;
+    return ret
 }
 
 /**
@@ -135,33 +212,33 @@ function trimAll(str) {
 
 /**
  * 对String字符串的扩展，判断当前字符串是否以str开始
- * @param {*} str 
+ * @param {*} str
  */
-String.prototype.startsWith = function(str) {
+String.prototype.startsWith = function (str) {
     return this.slice(0, str.length) == str;
 };
 
 /**
  * 对String字符串的扩展，判断当前字符串是否以str结束
- * @param {*} str 
+ * @param {*} str
  */
-String.prototype.endsWith = function(str) {
+String.prototype.endsWith = function (str) {
     return this.slice(-str.length) == str;
 };
 
 /**
  * 对String字符串的扩展，判断当前字符串是否以str开始，忽略大小写
- * @param {*} str 
+ * @param {*} str
  */
-String.prototype.startsWithIgnoreCase = function(str) {
+String.prototype.startsWithIgnoreCase = function (str) {
     return this.slice(0, str.length).toLowerCase() == str.toLowerCase();
 };
 
 /**
  * 对String字符串的扩展，判断当前字符串是否以str结束，忽略大小写
- * @param {*} str 
+ * @param {*} str
  */
-String.prototype.endsWithIgnoreCase = function(str) {
+String.prototype.endsWithIgnoreCase = function (str) {
     return this.slice(-str.length).toLowerCase() == str.toLowerCase();
 };
 
@@ -228,8 +305,8 @@ function angle2aspect(angle) {
 
 /**
  * 比较任意两个对象是否相等
- * @param {*} x 
- * @param {*} y 
+ * @param {*} x
+ * @param {*} y
  */
 function equals(x, y) {
     // If both x and y are null or undefined and exactly the same 
@@ -281,15 +358,16 @@ function equals(x, y) {
     }
     return true;
 }
+
 /**
  * 对Array数组的扩展，根据元素值从数组中删除指定元素
  * eg:
  * var somearray = ["mon", "tue", "wed", "thur"]
  * somearray.removeByValue("tue");
  * ==> somearray will now have "mon", "wed", "thur"
- * @param {*} val 
+ * @param {*} val
  */
-Array.prototype.removeByValue = function(val) {
+Array.prototype.removeByValue = function (val) {
     for (var i = 0, len = this.length; i < len; i++) {
         if (equals(this[i], val)) {
             this.splice(i, 1);
@@ -304,9 +382,9 @@ Array.prototype.removeByValue = function(val) {
  * var somearray = ["mon", "tue", "wed", "thur"]
  * somearray.isContain("tue");
  * ==> true
- * @param {*} val 
+ * @param {*} val
  */
-Array.prototype.isContain = function(val) {
+Array.prototype.isContain = function (val) {
     for (var i = 0, len = this.length; i < len; i++) {
         // if (JSON.stringify(this[i]) == JSON.stringify(val)) { //将对象转换成字符串比较
         if (equals(this[i], val)) {
@@ -316,18 +394,18 @@ Array.prototype.isContain = function(val) {
     return false;
 };
 
-/** 
+/**
  * 对Date的扩展，将 Date 转化为指定格式的String
  * 月(M)、日(d)、12小时(h)、24小时(H)、分(m)、秒(s)、周(E)、季度(q)可以用 1-2 个占位符
  * 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
  * eg:
- * (new Date()).format("yyyy-MM-dd hh:mm:ss.S")==> 2006-07-02 08:09:04.423      
- * (new Date()).format("yyyy-MM-dd E HH:mm:ss") ==> 2009-03-10 二 20:09:04      
- * (new Date()).format("yyyy-MM-dd EE hh:mm:ss") ==> 2009-03-10 周二 08:09:04      
- * (new Date()).format("yyyy-MM-dd EEE hh:mm:ss") ==> 2009-03-10 星期二 08:09:04      
- * (new Date()).format("yyyy-M-d h:m:s.S") ==> 2006-7-2 8:9:4.18      
+ * (new Date()).format("yyyy-MM-dd hh:mm:ss.S")==> 2006-07-02 08:09:04.423
+ * (new Date()).format("yyyy-MM-dd E HH:mm:ss") ==> 2009-03-10 二 20:09:04
+ * (new Date()).format("yyyy-MM-dd EE hh:mm:ss") ==> 2009-03-10 周二 08:09:04
+ * (new Date()).format("yyyy-MM-dd EEE hh:mm:ss") ==> 2009-03-10 星期二 08:09:04
+ * (new Date()).format("yyyy-M-d h:m:s.S") ==> 2006-7-2 8:9:4.18
  */
-Date.prototype.format = function(fmt) {
+Date.prototype.format = function (fmt) {
     var o = {
         "M+": this.getMonth() + 1, //月份         
         "d+": this.getDate(), //日         

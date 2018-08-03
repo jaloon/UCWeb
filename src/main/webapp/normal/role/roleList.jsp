@@ -19,25 +19,25 @@
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/role/roleList.js"></script>
     <style type="text/css">
-        .role-id {
-            width: 100px;
-        }
+        /*.role-id {*/
+            /*width: 100px;*/
+        /*}*/
         
-        .role-name {
-            width: 160px;
-        }
+        /*.role-name {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .role-app {
-            width: 100px;
-        }
+        /*.role-app {*/
+            /*width: 100px;*/
+        /*}*/
 
-        .role-remark {
-            width: 160px;
-        }
+        /*.role-remark {*/
+            /*width: 160px;*/
+        /*}*/
         
-        .role-action {
-            width: 200px;
-        }
+        /*.role-action {*/
+            /*width: 200px;*/
+        /*}*/
     </style>
     <script type="text/javascript">
     <pop:Permission ename="editRole">
@@ -61,13 +61,19 @@
                     },
                     "json"
                 ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                        layer.confirm('登录失效，是否刷新页面重新登录？', {
-                            icon: 0,
-                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                        }, function() {
+                    if (XMLHttpRequest.readyState == 4) {
+                        var http_status = XMLHttpRequest.status;
+                        if (http_status == 0 || http_status > 600) {
                             location.reload(true);
-                        });
+                        } else if (http_status == 200) {
+                            if (textStatus == "parsererror") {
+                                layer.alert("应答数据格式解析错误！")
+                            } else {
+                                layer.alert("http response error: " + textStatus)
+                            }
+                        } else {
+                            layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                        }
                     }
                 });
             });
@@ -134,13 +140,19 @@
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                layer.confirm('登录失效，是否刷新页面重新登录？', {
-                    icon: 0,
-                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                }, function() {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
                     location.reload(true);
-                });
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
             }
         });
     }
@@ -162,8 +174,8 @@
             </pop:Permission>
         </div>
         <div class="data-zone">
-            <div class='table-cont' id='table-cont'>
-                <table width="100%">
+            <div class='table-box'>
+                <table class="table-cont" width="100%">
                     <thead class="table-head">
                         <tr>
                             <th class="role-id">角色ID</th>

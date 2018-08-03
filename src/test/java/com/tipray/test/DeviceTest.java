@@ -1,21 +1,23 @@
 package com.tipray.test;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-
-import javax.annotation.Resource;
-
+import com.tipray.bean.baseinfo.AppSync;
+import com.tipray.bean.baseinfo.Device;
+import com.tipray.core.GridProperties;
+import com.tipray.core.exception.ServiceException;
+import com.tipray.service.AppService;
+import com.tipray.service.DeviceService;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.OkHttpUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tipray.bean.baseinfo.Device;
-import com.tipray.core.GridProperties;
-import com.tipray.core.exception.ServiceException;
-import com.tipray.service.DeviceService;
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * 设备管理测试
@@ -29,12 +31,25 @@ import com.tipray.service.DeviceService;
 public class DeviceTest {
 	@Resource
 	private DeviceService deviceService;
+	@Resource
+    private AppService appService;
+
+	@Test
+	public void appSync() {
+        try {
+			String json = OkHttpUtil.get("https://www.pltone.com:3003/api/appSync.do?id=1");
+            AppSync appsync = JSONUtil.parseToObject(json, AppSync.class);
+            appService.sync(appsync);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 	@Test
 	public void getCenterByProperties() {
 		try {
 			Properties properties = new Properties();
-			properties.load(GridProperties.class.getClassLoader().getResourceAsStream("center.properties"));
+			properties.load(GridProperties.class.getClassLoader().getResourceAsStream("center-constant.properties"));
 			Long id = Long.valueOf(properties.getProperty("center.id"));
 			String name = properties.getProperty("center.name");
 			System.out.println(id + name);

@@ -123,7 +123,7 @@ function addAlarm(alarm) {
             "<td class='alarm-id'>" + alarmId + "</td>" +
             "<td class='alarm-dev'>" + (alarm.deviceType == 1 ? "车载终端（" : "锁（")  + alarm.deviceId + "）</td>" +
             "<td class='alarm-type'>" + alarm.typeName + "</td>" +
-            "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarm.carNumber + "," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
+            "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(\"" + alarm.carNumber + "\"," + alarmId + ")'><img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>" +
             "</tr>";
         $("#alarm_tips tbody").append(trHtml);
     }
@@ -185,6 +185,7 @@ function showAlarm(alarmId) {
         area: ['800px', '560px'],
         content: 'normal/alarm/alarmTipView.html?alarmId=' + alarmId
     });
+    event.stopPropagation();
 }
 
 $(function() {
@@ -205,6 +206,10 @@ $(function() {
     tipIcoUrl = tipIcoObj.attr("src");
     css3filter = grayscale(tipIcoObj);
     var ctx = $("#ctx").val();
+    var wsProtocol = "ws";
+    if( "https:" == document.location.protocol || location.href.indexOf("https") > -1 ) {
+        wsProtocol = "wss";
+    }
     var wsUrl = window.location.host + ctx;
     if (window.Notification) {
         alarmNotify = new iNotify({
@@ -243,7 +248,7 @@ $(function() {
         alarmNotify.faviconClear();
     }
     if ('WebSocket' in window) {
-        ws = new ReconnectingWebSocket("ws://" + wsUrl + "/alarm");
+        ws = new ReconnectingWebSocket(wsProtocol + "://" + wsUrl + "/alarm");
     // } else if ('MozWebSocket' in window) {
     //     ws = new MozWebSocket("ws://" + wsUrl + "/alarm");
     } else {

@@ -64,6 +64,8 @@ public class UdpReplyErrorTag {
 	public static final short COMMON_ERROR_DEVICE_ID = 25;
 	/** 车台应答超时 */
 	public static final short COMMON_ERROR_TIME_OUT = 26;
+	/** 设备类型不合法 */
+	public static final short COMMON_ERROR_DEVICE_TYPE = 27;
 
 	private UdpReplyErrorTag() {}
 }

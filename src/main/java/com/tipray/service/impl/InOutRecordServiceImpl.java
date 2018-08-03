@@ -22,27 +22,26 @@ import java.util.Map;
 
 /**
  * 车辆进出记录业务层
- * 
+ *
  * @author chenlong
  * @version 1.0 2017-12-22
- *
  */
 @Transactional(rollbackForClassName = "Exception")
 @Service("inOutRecordService")
 public class InOutRecordServiceImpl implements InOutRecordService {
     private static final Logger logger = LoggerFactory.getLogger(InOutRecordServiceImpl.class);
-	@Resource
-	private InOutRecordDao inOutRecordDao;
+    @Resource
+    private InOutRecordDao inOutRecordDao;
     @Resource
     private TrackDao trackDao;
     @Resource
     private LockDao lockDao;
 
-	@Override
-	public InOutRecord getRecordById(Long id) {
-		if (id != null) {
-			InOutRecord inOutRecord = inOutRecordDao.getById(id);
-			TrackInfo trackInfo = trackDao.getTrackByTrackId(inOutRecord.getTrackId().toString());
+    @Override
+    public InOutRecord getRecordById(Long id) {
+        if (id != null) {
+            InOutRecord inOutRecord = inOutRecordDao.getById(id);
+            TrackInfo trackInfo = trackDao.getTrackByTrackId(inOutRecord.getTrackId().toString());
             if (trackInfo == null) {
                 logger.warn("轨迹数据异常！");
             } else {
@@ -88,25 +87,25 @@ public class InOutRecordServiceImpl implements InOutRecordService {
                 inOutRecord.setAlarmType(alarmType.toString());
                 inOutRecord.setLockStatus(lockStatusBuf.toString());
             }
-			return inOutRecord;
-		}
-		return null;
-	}
+            return inOutRecord;
+        }
+        return null;
+    }
 
-	@Override
-	public List<InOutRecord> findAllRecords() {
-		List<InOutRecord> list = inOutRecordDao.findAll();
-		return list;
-	}
+    @Override
+    public List<InOutRecord> findAllRecords() {
+        List<InOutRecord> list = inOutRecordDao.findAll();
+        return list;
+    }
 
-	@Override
-	public long countRecord(InOutRecord record) {
-		return inOutRecordDao.count(record);
-	}
+    @Override
+    public long countRecord(InOutRecord record) {
+        return inOutRecordDao.count(record);
+    }
 
-	@Override
-	public List<InOutRecord> findByPage(InOutRecord record, Page page) {
-		List<InOutRecord> list = inOutRecordDao.findByPage(record, page);
+    @Override
+    public List<InOutRecord> findByPage(InOutRecord record, Page page) {
+        List<InOutRecord> list = inOutRecordDao.findByPage(record, page);
         if (!EmptyObjectUtil.isEmptyList(list)) {
             StringBuffer trackIds = new StringBuffer();
             list.forEach(inOutRecord -> trackIds.append(',').append(inOutRecord.getTrackId()));
@@ -125,8 +124,8 @@ public class InOutRecordServiceImpl implements InOutRecordService {
                 logger.error("轨迹数据异常：{}", e.toString());
             }
         }
-		return list;
-	}
+        return list;
+    }
 
     private InOutRecord setTrackForRecord(InOutRecord inOutRecord, TrackInfo trackInfo) {
         inOutRecord.setLongitude(trackInfo.getLongitude());
@@ -137,10 +136,10 @@ public class InOutRecordServiceImpl implements InOutRecordService {
     }
 
     @Override
-	public GridPage<InOutRecord> findRecordsForPage(InOutRecord record, Page page) {
-		long records = countRecord(record);
-		List<InOutRecord> list = findByPage(record, page);
-		return new GridPage<InOutRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
-	}
+    public GridPage<InOutRecord> findRecordsForPage(InOutRecord record, Page page) {
+        long records = countRecord(record);
+        List<InOutRecord> list = findByPage(record, page);
+        return new GridPage<InOutRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+    }
 
 }

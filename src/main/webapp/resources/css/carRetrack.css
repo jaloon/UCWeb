@@ -3,10 +3,11 @@
 }
 
 .nav-addr {
-	background-color: rgba(68, 80, 101, 0.8);
-	color: #ffffff;
-	padding-left: 30px;
+    background-color: rgba(68, 80, 101, 0.8);
+    color: #ffffff;
+    padding-left: 30px;
 }
+
 .search-zone {
     width: 100%;
     min-width: 1500px;
@@ -15,13 +16,13 @@
     font-family: "微软雅黑";
 }
 
-.search-zone>table {
+.search-zone > table {
     position: relative;
     left: 30px;
     top: 10px;
 }
 
-.search-zone>table td:nth-of-type(8) {
+.search-zone > table td:nth-of-type(8) {
     height: 40px;
     padding: 0 10px;
     background: #ffffff;
@@ -83,4 +84,151 @@ select.search-text {
     height: 100% !important;
     position: fixed;
     padding: 6px 0;
+}
+
+.coords {
+    width: 750px;
+    margin: 10px;
+    display: none;
+    /*position: fixed;*/
+    /*top: 100px;*/
+    /*right: 30px;*/
+    /*height: 600px;*/
+    /*background: lightcyan;*/
+}
+
+.filter-zone {
+    width: 750px;
+    height: 28px;
+    padding-bottom: 15px;
+}
+
+.filter-type {
+    height: 28px;
+    color: #5a6779;
+    font-size: 16px;
+    padding-left: 8px;
+    margin-right: 5px;
+}
+
+.filter-text {
+    font-size: 12px;
+    padding: 0 8px 0 8px;
+    border: 1px solid #b0b9c6;
+    border-radius: 3px;
+    margin-right: 10px;
+    width: 60px;
+    height: 26px;
+}
+
+.filter-btn {
+    width: 76px;
+    height: 28px;
+    font-size: 16px;
+    background: #478de4;
+    border: 0;
+    border-radius: 3px;
+    color: white;
+    margin-left: 10px;
+    position: relative;
+    top: 1px;
+    left: 30px;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    background: #5ca1f7;
+}
+
+.table-zone {
+    box-shadow: 0 0 1px 3px #e6e7e9;
+}
+
+#track_tbl {
+    background: #e6e7e9;
+}
+
+.coords tr {
+    height: 36px;
+}
+
+.table-head {
+    display: table;
+    width: calc(100% - 1em);
+    height: 36px;
+    color: #445065;
+    font-weight: 500;
+    background: #e6e7e9;
+    table-layout: fixed;
+}
+
+.table-body {
+    width: 100%;
+    max-height: 600px;
+    display: block;
+    color: #5a6779;
+    font-size: 13px;
+    background: #ffffff;
+    overflow-y: scroll;
+}
+
+.coords th {
+    text-align: center;
+    vertical-align: middle;
+    height: 35px;
+}
+
+.coords td {
+    text-align: center;
+    vertical-align: middle;
+    height: 30px;
+    border-bottom: 1px solid #e6e7e9;
+}
+
+.table-body tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.replayed {
+    cursor: pointer;
+}
+
+.replayed:hover {
+    background: #e1e5f0;
+}
+
+.active {
+    background-color: #a1adf1;
+}
+
+.track-index {
+    width: 60px;
+}
+
+.track-time {
+    width: 135px;
+}
+.track-valid{
+    width: 85px;
+}
+.track-lng {
+    width: 100px;
+}
+
+.track-lat {
+    width: 100px;
+}
+
+.track-speed {
+    width: 50px;
+}
+
+.track-aspect {
+    width: 100px;
+}
+
+.track-status {
+    width: 100px;
 }

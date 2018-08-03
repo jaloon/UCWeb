@@ -22,26 +22,25 @@ import java.util.Map;
 
 /**
  * 卡及设备使用记录业务层
- * 
+ *
  * @author chenlong
  * @version 1.0 2017-12-22
- *
  */
 @Transactional(rollbackForClassName = "Exception")
 @Service("deviceRecordService")
 public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecordService {
     private static final Logger logger = LoggerFactory.getLogger(CardAndDeviceUseRecordServiceImpl.class);
-	@Resource
-	private CardAndDeviceUseRecordDao deviceRecordDao;
+    @Resource
+    private CardAndDeviceUseRecordDao deviceRecordDao;
     @Resource
     private TrackDao trackDao;
     @Resource
     private LockDao lockDao;
 
-	@Override
-	public CardAndDeviceUseRecord getRecordById(Long id) {
-		if (id != null) {
-			CardAndDeviceUseRecord deviceRecord = deviceRecordDao.getById(id);
+    @Override
+    public CardAndDeviceUseRecord getRecordById(Long id) {
+        if (id != null) {
+            CardAndDeviceUseRecord deviceRecord = deviceRecordDao.getById(id);
             TrackInfo trackInfo = trackDao.getTrackByTrackId(deviceRecord.getTrackId().toString());
             if (trackInfo == null) {
                 logger.warn("轨迹数据异常！");
@@ -88,25 +87,25 @@ public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecord
                 deviceRecord.setAlarmType(alarmType.toString());
                 deviceRecord.setLockStatus(lockStatusBuf.toString());
             }
-			return deviceRecord;
-		}
-		return null;
-	}
+            return deviceRecord;
+        }
+        return null;
+    }
 
-	@Override
-	public List<CardAndDeviceUseRecord> findAllRecords() {
-		List<CardAndDeviceUseRecord> list = deviceRecordDao.findAll();
-		return list;
-	}
+    @Override
+    public List<CardAndDeviceUseRecord> findAllRecords() {
+        List<CardAndDeviceUseRecord> list = deviceRecordDao.findAll();
+        return list;
+    }
 
-	@Override
-	public long countRecord(CardAndDeviceUseRecord record) {
-		return deviceRecordDao.count(record);
-	}
+    @Override
+    public long countRecord(CardAndDeviceUseRecord record) {
+        return deviceRecordDao.count(record);
+    }
 
-	@Override
-	public List<CardAndDeviceUseRecord> findByPage(CardAndDeviceUseRecord record, Page page) {
-		List<CardAndDeviceUseRecord> list = deviceRecordDao.findByPage(record, page);
+    @Override
+    public List<CardAndDeviceUseRecord> findByPage(CardAndDeviceUseRecord record, Page page) {
+        List<CardAndDeviceUseRecord> list = deviceRecordDao.findByPage(record, page);
         if (!EmptyObjectUtil.isEmptyList(list)) {
             StringBuffer trackIds = new StringBuffer();
             list.forEach(useRecord -> trackIds.append(',').append(useRecord.getTrackId()));
@@ -125,8 +124,8 @@ public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecord
                 logger.error("轨迹数据异常：{}", e.toString());
             }
         }
-		return list;
-	}
+        return list;
+    }
 
     private CardAndDeviceUseRecord setTrackForRecord(CardAndDeviceUseRecord useRecord, TrackInfo trackInfo) {
         useRecord.setLongitude(trackInfo.getLongitude());
@@ -136,10 +135,10 @@ public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecord
         return useRecord;
     }
 
-	@Override
-	public GridPage<CardAndDeviceUseRecord> findRecordsForPage(CardAndDeviceUseRecord record, Page page) {
-		long records = countRecord(record);
-		List<CardAndDeviceUseRecord> list = findByPage(record, page);
-		return new GridPage<CardAndDeviceUseRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
-	}
+    @Override
+    public GridPage<CardAndDeviceUseRecord> findRecordsForPage(CardAndDeviceUseRecord record, Page page) {
+        long records = countRecord(record);
+        List<CardAndDeviceUseRecord> list = findByPage(record, page);
+        return new GridPage<CardAndDeviceUseRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+    }
 }

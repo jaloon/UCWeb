@@ -17,7 +17,7 @@ public class CardAndDeviceUseRecord extends Record {
     /**
      * 设备ID
      */
-    private Integer devId;
+    private Long devId;
     /**
      * 设备类型
      */
@@ -47,11 +47,11 @@ public class CardAndDeviceUseRecord extends Record {
         this.carId = carId;
     }
 
-    public Integer getDevId() {
+    public Long getDevId() {
         return devId;
     }
 
-    public void setDevId(Integer devId) {
+    public void setDevId(Long devId) {
         this.devId = devId;
     }
 

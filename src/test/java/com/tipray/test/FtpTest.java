@@ -29,7 +29,7 @@ public class FtpTest {
 	public void testServer() throws Exception {
 		// 加载中心配置文件
 		Properties properties = new Properties();
-		properties.load(UdpProtocol.class.getClassLoader().getResourceAsStream("center.properties"));
+		properties.load(UdpProtocol.class.getClassLoader().getResourceAsStream("center-constant.properties"));
 		// 获取ftp路径
 		String ftpPath = properties.getProperty("ftp.path");
 

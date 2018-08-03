@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>车辆轨迹回放</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,58 +18,75 @@
     <script src="../../../resources/plugins/verify.js"></script>
     <script src="../../../resources/js/base.js"></script>
     <!--加载百度地图api-->
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt"></script>
+    <script type="text/javascript"
+            src="https://api.map.baidu.com/api?v=2.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt&s=1"></script>
     <script src="../../../resources/js/car/carRetrack.js"></script>
 
 </head>
 
 <body>
-    <div class="container">
-    	<div class="nav-addr">
-	        <img src="../../../resources/images/navbar/car.png"> 车辆管理
-	        <img src="../../../resources/images/navbar/nav_right_12.png"> 车辆轨迹回放
-	    </div>
-        <div class="search-zone">
-            <table>
-                <tr>
-                    <td><label for="text_car" class="search-type" id="type_car">车牌号</label></td>
-                    <td>
-                        <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
-                        <select class="search-text" id="text_car">
-                            <option value="">车牌号</option>
-                        </select>
-                    </td>
-                    <td><label for="text_begin" class="search-type" id="type_begin">开始时间</label></td>
-                    <td><input type="text" class="search-text" id="text_begin" readonly></td>
-                    <td><label for="text_end" class="search-type" id="type_end">结束时间</label></td>
-                    <td><input type="text" class="search-text" id="text_end" readonly></td>
-                    <td><label for="text_interval" class="search-type" id="type_interval">回放速度</label></td>
-                    <td><input type="hidden" class="search-text" id="text_interval" value="300" /></td>
-                    <td><input type="button" class="search-btn" id="btn_start" value="启动"></td>
-                    <td><input type="button" class="search-btn" id="btn_stop" value="停止" disabled></td>
-                    <td><input type="button" class="search-btn" id="btn_pause" value="暂停" disabled></td>
-                    <td> <input type="button" class="search-btn" id="btn_go_on" value="继续" disabled></td>
-                </tr>
-            </table>
-        </div>
-        <div class="data-zone">
-            <div class="map" id="bmap"></div>
-        </div>
+<div class="container">
+    <div class="nav-addr">
+        <img src="../../../resources/images/navbar/car.png"> 车辆管理
+        <img src="../../../resources/images/navbar/nav_right_12.png"> 车辆轨迹回放
     </div>
-    <div class="coords" id="tracks" style="z-index: 10000; position: fixed; right: 10px; top: 50px;">
+    <div class="search-zone">
         <table>
-            <thead>
             <tr>
-                <th>序号</th>
-                <th>时间</th>
-                <th>经度</th>
-                <th>纬度</th>
-                <th>速度</th>
-                <th>方向</th>
+                <td><label for="text_car" class="search-type" id="type_car">车牌号</label></td>
+                <td>
+                    <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
+                    <select class="search-text" id="text_car">
+                        <option value="">车牌号</option>
+                    </select>
+                </td>
+                <td><label for="text_begin" class="search-type" id="type_begin">开始时间</label></td>
+                <td><input type="text" class="search-text" id="text_begin" readonly></td>
+                <td><label for="text_end" class="search-type" id="type_end">结束时间</label></td>
+                <td><input type="text" class="search-text" id="text_end" readonly></td>
+                <td><label for="text_interval" class="search-type" id="type_interval">回放速度</label></td>
+                <td><input type="hidden" class="search-text" id="text_interval" value="300"/></td>
+                <td><input type="button" class="search-btn" id="btn_gps" value="查询轨迹"></td>
+                <td><input type="button" class="search-btn" id="btn_start" value="开始回放" disabled></td>
+                <td><input type="button" class="search-btn" id="btn_stop" value="停止回放" disabled></td>
+                <td><input type="button" class="search-btn" id="btn_pause" value="暂停回放" disabled></td>
+                <td><input type="button" class="search-btn" id="btn_go_on" value="继续回放" disabled></td>
             </tr>
-            </thead>
         </table>
     </div>
+    <div class="data-zone">
+        <div class="map" id="bmap"></div>
+    </div>
+</div>
+<div class="coords" id="tracks">
+    <div class="filter-zone">
+        <label class="filter-type" for="filter_id">序号</label>
+        <input type="text" class="filter-text" id="filter_id">
+        <label class="filter-type" for="filter_lng">经度</label>
+        <input type="text" class="filter-text" id="filter_lng">
+        <label class="filter-type" for="filter_lat">纬度</label>
+        <input type="text" class="filter-text" id="filter_lat">
+        <input type="button" class="filter-btn" id="filter_btn" value="筛选">
+        <input type="button" class="filter-btn" id="doubtable_btn" value="筛选">
+    </div>
+    <div class="table-zone">
+        <table id="track_tbl" width="100%">
+            <thead class="table-head">
+            <tr>
+                <th class="track-index">序号</th>
+                <th class="track-time">时间</th>
+                <th class="track-valid">GPS有效性</th>
+                <th class="track-lng">经度</th>
+                <th class="track-lat">纬度</th>
+                <th class="track-speed">速度</th>
+                <th class="track-aspect">方向</th>
+                <th class="track-status">状态</th>
+            </tr>
+            </thead>
+            <tbody class="table-body"></tbody>
+        </table>
+    </div>
+</div>
 </body>
 
 </html>

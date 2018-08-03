@@ -17,17 +17,18 @@
     <!-- 配置定时任务的线程池（多任务时需要进行配置，若不配置多任务下会有问题。） -->
     <task:scheduler id="scheduler" pool-size="5"/>
 
-    <task:scheduled-tasks scheduler="scheduler">
-        <!--<task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/>-->
-        <!--定时更新RC4秘钥信息任务，每隔5分钟执行一次-->
-        <task:scheduled ref="scheduledJob" method="executeUpdateRC4Key" cron="0 */5 * * * ?"/>
-        <!--链路维护心跳任务，每隔2分钟执行一次-->
-        <task:scheduled ref="scheduledJob" method="executeUdpHeartbeat" cron="0 */2 * * * ?"/>
-        <!--<task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" />-->
-        <!--车辆在线状态监测任务，每隔15秒执行一次-->
-        <task:scheduled ref="scheduledJob" method="executeVehicleOnlineMonitor" cron="*/15 * * * * ?"/>
-        <!--最新车辆轨迹推送任务，每隔5秒执行一次-->
-        <task:scheduled ref="scheduledJob" method="executeLastTtracksQuery" cron="*/5 * * * * ?"/>
-    </task:scheduled-tasks>
-
+    <!--<task:scheduled-tasks scheduler="scheduler">-->
+        <!--&lt;!&ndash;<task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;定时更新RC4秘钥信息任务，每隔5分钟执行一次&ndash;&gt;-->
+        <!--<task:scheduled ref="scheduledJob" method="executeUpdateRC4Key" cron="0 */5 * * * ?"/>-->
+        <!--&lt;!&ndash;链路维护心跳任务，每隔2分钟执行一次&ndash;&gt;-->
+        <!--<task:scheduled ref="scheduledJob" method="executeUdpHeartbeat" cron="0 */2 * * * ?"/>-->
+        <!--&lt;!&ndash;<task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" />&ndash;&gt;-->
+        <!--&lt;!&ndash;APP APP设备和版本信息定时同步任务，每隔10分钟执行一次&ndash;&gt;-->
+        <!--<task:scheduled ref="scheduledJob" method="executeAppSync" cron="0 */10 * * * ?"/>-->
+        <!--&lt;!&ndash;车辆在线状态监测任务，每隔15秒执行一次&ndash;&gt;-->
+        <!--<task:scheduled ref="scheduledJob" method="executeVehicleOnlineMonitor" cron="*/15 * * * * ?"/>-->
+        <!--&lt;!&ndash;最新车辆轨迹推送任务，每隔5秒执行一次&ndash;&gt;-->
+        <!--<task:scheduled ref="scheduledJob" method="executeLastTtracksQuery" cron="*/5 * * * * ?"/>-->
+    <!--</task:scheduled-tasks>-->
 </beans>

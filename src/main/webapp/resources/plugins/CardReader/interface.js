@@ -70,7 +70,8 @@ var SmartReader = {
         var WSonClose = function() {
             SocketOpen = false;
         };
-        var WSonError = function() {
+        var WSonError = function(event) {
+            console.log(event)
             alert("Card Reader Server not running");
         };
         reader.createSocket = function() {
@@ -90,6 +91,7 @@ var SmartReader = {
                 target = new EventTarget();
                 return true;
             } catch (ex) {
+                console.log(ex)
                 return false;
             }
         };

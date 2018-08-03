@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.AppdevDao">
+    <resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.AppDev">
+        <id column="id" property="id"/>
+        <result column="uuid" property="uuid"/>
+        <result column="system" property="system"/>
+        <result column="model" property="model"/>
+        <result column="current_webapp_version" property="currentVer"/>
+        <result column="name" property="owner"/>
+        <result column="phone" property="phone"/>
+        <result column="duty" property="duty"/>
+        <result column="institution" property="institution"/>
+    </resultMap>
+
+    <sql id="select_colums">
+        a.id,
+    	a.uuid,
+        a.system,
+        a.model,
+        a.current_webapp_version,
+        a.name,
+        a.phone,
+        a.duty,
+        a.institution
+    </sql>
+
+    <select id="findAll" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_webapp_device a
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.AppVer">
+		INSERT INTO tbl_webapp_device(id, uuid, system, model, current_webapp_version, `name`, phone, duty, institution)
+		VALUES
+			(
+				#{id},
+				#{uuid},
+				#{system},
+				#{model},
+				#{currentVer},
+				#{owner},
+				#{phone},
+				IFNULL(#{duty}, ""),
+				IFNULL(#{institution}, "")
+			)
+	</insert>
+
+    <update id="update" parameterType="com.tipray.bean.baseinfo.AppDev">
+        update tbl_webapp_device set
+            system                  = #{system},
+            model                   = #{model},
+            current_webapp_version  = #{currentVer},
+            `name`                  = #{owner},
+            phone                   = #{phone},
+            duty                    = #{duty},
+            institution             = #{institution}
+        where id                    = #{id}
+    </update>
+
+    <update id="updateModelAndCurrentVerByUuid">
+		update tbl_webapp_device set
+		    model                   = #{model},
+			current_webapp_version	= #{currentVer}
+		where uuid 			        = #{uuid}
+	</update>
+
+    <update id="delete" parameterType="java.lang.Long">
+		delete from tbl_webapp_device where id = #{id}
+	</update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM tbl_webapp_device a
+        WHERE
+         a.id = #{id}
+    </select>
+
+    <select id="getByUuid" parameterType="java.lang.String" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_webapp_device a
+        WHERE
+         a.uuid = #{uuid}
+    </select>
+
+    <select id="countByUuid" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from tbl_webapp_device where uuid = #{uuid}
+    </select>
+
+    <select id="findIdsByUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+        select id from tbl_webapp_device where uuid = #{uuid}
+    </select>
+
+    <delete id="deleteByUuid" parameterType="java.lang.String">
+        delete from tbl_webapp_device where uuid = #{uuid}
+    </delete>
+
+    <select id="count" parameterType="com.tipray.bean.baseinfo.AppDev" resultType="java.lang.Long">
+        select count(*) from tbl_webapp_device where 1 = 1
+        <if test="uuid != null and uuid !=''">
+            and uuid like CONCAT('%',#{uuid},'%')
+        </if>
+        <if test="owner != null and owner != ''">
+            and `name` like CONCAT('%',#{owner},'%')
+        </if>
+    </select>
+
+    <select id="findByPage" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_webapp_device a
+        WHERE 1 = 1
+        <if test="entity.uuid != null and entity.uuid !=''">
+            and a.uuid like CONCAT('%',#{entity.uuid},'%')
+        </if>
+        <if test="entity.owner != null and entity.owner != ''">
+            and a.`name` like CONCAT('%',#{entity.owner},'%')
+        </if>
+        order by a.id asc
+        limit #{page.startRow}, #{page.rows}
+    </select>
+
+    <select id="findAllUuids" resultType="java.lang.String">
+        SELECT uuid FROM tbl_webapp_device;
+    </select>
+
+    <insert id="batchAdd" parameterType="java.util.List">
+        insert into
+        tbl_webapp_device
+        (id, uuid, system, model, current_webapp_version, `name`, phone, duty, institution, gmt_create, gmt_modified)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.id},
+            #{item.uuid},
+            #{item.system},
+            #{item.model},
+            #{item.currentVer},
+            #{item.owner},
+            #{item.phone},
+            IFNULL(#{item.duty}, ""),
+            IFNULL(#{item.institution}, ""),
+            IFNULL(#{item.createDate}, NOW()),
+            IFNULL(#{item.modifyDate}, NOW())
+            )
+        </foreach>
+    </insert>
+
+    <!-- 通用批量更新方法 -->
+    <update id="batchUpdate" parameterType="java.util.List">
+        update tbl_webapp_device set
+        system =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.system}
+        </foreach>
+        , model =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.model}
+        </foreach>
+        , current_webapp_version =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.currentVer}
+        </foreach>
+        , `name` =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.owner}
+        </foreach>
+        , phone =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.phone}
+        </foreach>
+        , duty =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.duty}
+        </foreach>
+        , institution =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.institution}
+        </foreach>
+        , gmt_create =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then IFNULL(#{item.createDate}, NOW())
+        </foreach>
+        , gmt_modified =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then IFNULL(#{item.modifyDate}, NOW())
+        </foreach>
+        where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item.id, jdbcType=INTEGER}
+        </foreach>
+    </update>
+
+    <delete id="batchDelete" parameterType="java.util.List">
+        delete from tbl_webapp_device where uuid in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item, jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+</mapper>

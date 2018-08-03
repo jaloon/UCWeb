@@ -56,20 +56,22 @@ public class LoginValidateFilter implements Filter {
                 }
                 chain.doFilter(servletRequest, servletResponse);
             } else {
-                // 判断是否为ajax请求
-                // String requestType = request.getHeader("X-Requested-With");
-                // boolean isAjaxRequest = requestType != null && ("XMLHttpRequest").equals(requestType);
-                // if (isAjaxRequest) {
-                //     PrintWriter out = response.getWriter();
-                //     out.write(JSONUtil.stringify(ResponseMsgUtil.error(LoginError)));
-                //     out.close();
-                //     response.flushBuffer();
-                //     return;
-                // }
 
                 // 是否手机APP请求
                 boolean appReq = NetUtil.isMobile(request);
                 if (appReq) {
+                    response.setStatus(loginStatus);
+                    return;
+                }
+
+                // 判断是否为ajax请求
+                String requestType = request.getHeader("X-Requested-With");
+                boolean isAjaxRequest = requestType != null && ("XMLHttpRequest").equals(requestType);
+                if (isAjaxRequest) {
+                    // PrintWriter out = response.getWriter();
+                    // out.write(JSONUtil.stringify(ResponseMsgUtil.error(LoginError)));
+                    // out.close();
+                    // response.flushBuffer();
                     response.setStatus(loginStatus);
                     return;
                 }

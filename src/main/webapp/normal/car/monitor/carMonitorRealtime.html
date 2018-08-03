@@ -11,7 +11,7 @@
     <script src="../../../resources/plugins/ReconnectingWebSocket/reconnecting-websocket.min.js"></script>
     <script src="../../../resources/plugins/layer/layer.js"></script>
     <script src="../../../resources/js/base.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=F0i6SrLmHquLVNLCqpExxPrj8mWVdFwx"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=F0i6SrLmHquLVNLCqpExxPrj8mWVdFwx&s=1"></script>
     <style>
         .map {
             width: 100%;
@@ -38,6 +38,10 @@
         map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
 
         var index = parent.layer.getFrameIndex(window.name); //获取父窗口索引
+        var wsProtocol = "ws";
+        if( "https:" == document.location.protocol || location.href.indexOf("https") > -1 ) {
+            wsProtocol = "wss";
+        }
         var wsUrl = getUrlParam("wsUrl");
         var ws = null;
         var order = {
@@ -55,7 +59,7 @@
         var orderText = JSON.stringify(order);
 
         if ('WebSocket' in window) {
-            ws = new ReconnectingWebSocket("ws://" + wsUrl + "/track");
+            ws = new ReconnectingWebSocket(wsProtocol + "://" + wsUrl + "/track");
         // } else if ('MozWebSocket' in window) {
         //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
         } else {
@@ -136,20 +140,14 @@
 
         var carMarker = null;
 
+        var alarm_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-红.png', new BMap.Size(32, 15));
+        var normal_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-黄.png', new BMap.Size(32, 15));
+
         function initCarIcon(alarm) {
-            var carIcon;
-            if (alarm == true || alarm == "true") {
-                carIcon = new BMap.Icon(
-                    '../../../resources/images/marker/车辆图标-32-红.png',
-                    new BMap.Size(32, 15)
-                );
-            } else {
-                carIcon = new BMap.Icon(
-                    '../../../resources/images/marker/车辆图标-32-黄.png',
-                    new BMap.Size(32, 15)
-                );
+            if (alarm == "是") {
+                return alarm_car_icon;
             }
-            return carIcon;
+            return normal_car_icon;
         }
 
         function reFreshPage(track) {
@@ -167,7 +165,8 @@
             if (!isNull(carMarker)) {
                 map.removeOverlay(carMarker);
             }
-            var point = new BMap.Point(track.longitude, track.latitude);
+            var bd09 = wgs84tobd09(track.longitude, track.latitude);
+            var point = new BMap.Point(bd09[0], bd09[1]);
             var carLabel = new BMap.Label(track.carNumber + ", " + track.carStatus, {
                 position: point,
                 offset: new BMap.Size(-32, -18)

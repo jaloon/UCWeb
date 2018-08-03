@@ -25,15 +25,15 @@ public class SqliteFileConst {
 	public static final String GAS_STATION = "gasstation_info";
 
 	/** sqlite油库数据库文件 */
-	public static final File OIL_DEPOT_DB_FILE = new File(CenterConfigConst.SQLITE_FILE_PATH, OIL_DEPOT + ".db");
+	public static final File OIL_DEPOT_DB_FILE = new File(CenterConst.SQLITE_FILE_PATH, OIL_DEPOT + ".db");
 	/** sqlite油库设备数据库文件 */
-	public static final File IN_OUT_DEV_DB_FILE = new File(CenterConfigConst.SQLITE_FILE_PATH, IN_OUT_DEV + ".db");
+	public static final File IN_OUT_DEV_DB_FILE = new File(CenterConst.SQLITE_FILE_PATH, IN_OUT_DEV + ".db");
 	/** sqlite出入库卡数据库文件 */
-	public static final File IN_OUT_CARD_DB_FILE = new File(CenterConfigConst.SQLITE_FILE_PATH, IN_OUT_CARD + ".db");
+	public static final File IN_OUT_CARD_DB_FILE = new File(CenterConst.SQLITE_FILE_PATH, IN_OUT_CARD + ".db");
 	/** sqlite管理卡卡数据库文件 */
-	public static final File MANAGE_CARD_DB_FILE = new File(CenterConfigConst.SQLITE_FILE_PATH, MANAGE_CARD + ".db");
+	public static final File MANAGE_CARD_DB_FILE = new File(CenterConst.SQLITE_FILE_PATH, MANAGE_CARD + ".db");
 	/** sqlite应急卡数据库文件 */
-	public static final File URGENT_CARD_DB_FILE = new File(CenterConfigConst.SQLITE_FILE_PATH, URGENT_CARD + ".db");
+	public static final File URGENT_CARD_DB_FILE = new File(CenterConst.SQLITE_FILE_PATH, URGENT_CARD + ".db");
 
 	private SqliteFileConst() {
 	}

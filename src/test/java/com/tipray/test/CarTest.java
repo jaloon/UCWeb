@@ -14,6 +14,7 @@ import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.*;
 import com.tipray.service.AlarmRecordService;
+import com.tipray.service.DistributionRecordService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.DateUtil;
@@ -45,6 +46,8 @@ public class CarTest {
     @Resource
     private DistributionRecordDao distributionRecordDao;
     @Resource
+    private DistributionRecordService distributionRecordService;
+    @Resource
     private VehicleManageLogDao vehicleManageLogDao;
     @Resource
     private VehicleManageLogService vehicleManageLogService;
@@ -60,6 +63,17 @@ public class CarTest {
     private VehicleDao vehicleDao;
     @Resource
     private GasStationDao gasStationDao;
+
+    @Test
+    public void findLastTracks2() {
+        carService.findLastTracks();
+    }
+
+    @Test
+    public void findDistributionsByGasStationId() {
+        List<Map<String, Object>> list = distributionRecordService.findDistributionsByGasStationId(1L);
+        System.out.println(list);
+    }
 
     @Test
     public void findlocksByCarNo() throws Exception{

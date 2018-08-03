@@ -18,11 +18,11 @@ public interface ElockSoap {
 	/**
 	 * 配送函数
 	 * 
-	 * @param Param
+	 * @param txt
 	 * @return
 	 */
 	@WebMethod(operationName = "SetPlan")
 	@WebResult(name = "SetPlanResult", targetNamespace = "http://www.cnpc.com/")
-    String SetPlan(@WebParam(name = "Param", targetNamespace = "http://www.cnpc.com/") String Param);
+    String SetPlan(@WebParam(name = "txt", targetNamespace = "http://www.cnpc.com/") String txt);
 
 }

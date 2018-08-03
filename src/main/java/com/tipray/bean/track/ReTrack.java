@@ -12,16 +12,34 @@ import java.util.Map;
  */
 public class ReTrack extends Record {
     private static final long serialVersionUID = 1L;
-    private String carStatus;
+    private boolean coorValid;
+    private Integer carStatus;
+    private boolean doubtable;
     private boolean alarm;
     private Map<Integer, String> alarmMap;
 
-    public String getCarStatus() {
+    public boolean isCoorValid() {
+        return coorValid;
+    }
+
+    public void setCoorValid(boolean coorValid) {
+        this.coorValid = coorValid;
+    }
+
+    public Integer getCarStatus() {
         return carStatus;
     }
 
-    public void setCarStatus(String carStatus) {
+    public void setCarStatus(Integer carStatus) {
         this.carStatus = carStatus;
+    }
+
+    public boolean isDoubtable() {
+        return doubtable;
+    }
+
+    public void setDoubtable(boolean doubtable) {
+        this.doubtable = doubtable;
     }
 
     public boolean isAlarm() {
@@ -46,16 +64,21 @@ public class ReTrack extends Record {
         if (getId() != null) {
             sb.append(", id=").append(getId());
         }
+        if (getTrackId() != null) {
+            sb.append(", trackId=").append(getTrackId());
+        }
         if (getCarNumber() != null) {
             sb.append(", carNumber='").append(getCarNumber()).append('\'');
         }
         if (carStatus != null) {
-            sb.append("carStatus='").append(carStatus).append('\'');
+            sb.append("carStatus=").append(carStatus);
         }
+        sb.append(", doubtable=").append(doubtable);
         sb.append(", alarm=").append(alarm);
         if (alarmMap != null) {
             sb.append(", alarmMap=").append(alarmMap);
         }
+        sb.append(", coorValid=").append(coorValid);
         if (getLongitude() != null) {
             sb.append(", longitude=").append(getLongitude());
         }

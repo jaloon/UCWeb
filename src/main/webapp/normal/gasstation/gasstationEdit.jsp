@@ -31,7 +31,7 @@
                         }
                         var len = data.length;
                         if (len == 0 && ${handset == null || handset.deviceId == null}) {
-                            $("#handset").replaceWith("<td>无可配手持机</td><td id='handset' style='display: none;'>0</td>")
+                            $("#handset").closest("td").replaceWith("<td style='text-align: center'>无可配手持机<input type='hidden' id='handset' value='0'></td><")
                         }
                         for (var i = 0; i < len; i++) {
                             var handset = data[i];
@@ -42,13 +42,19 @@
                         }
                     }
                 ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                    if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                        layer.confirm('登录失效，是否刷新页面重新登录？', {
-                            icon: 0,
-                            title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                        }, function () {
+                    if (XMLHttpRequest.readyState == 4) {
+                        var http_status = XMLHttpRequest.status;
+                        if (http_status == 0 || http_status > 600) {
                             location.reload(true);
-                        });
+                        } else if (http_status == 200) {
+                            if (textStatus == "parsererror") {
+                                layer.alert("应答数据格式解析错误！")
+                            } else {
+                                layer.alert("http response error: " + textStatus)
+                            }
+                        } else {
+                            layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                        }
                     }
                 });
                 </c:if>
@@ -61,7 +67,7 @@
     <div class="container">
         <input type="hidden" id="mode" value="${mode}">
         <c:if test="${mode=='view'}">
-            <div class="info-zone" style="height:530px">
+            <div class="info-zone" style="height:540px">
                 <div class="tab-title">
                     <div class="on">加油站基本信息</div>
                     <div>手持机信息</div>
@@ -70,6 +76,12 @@
                 <div class="tab-con">
                     <div class="tab-con-list">
                         <table class="base-table">
+                            <tr>
+                                <td>加油站ID:</td>
+                                <td>
+                                    <input type="text" class="editInfo" id="id" value="${gasStation.id}" readonly>
+                                </td>
+                            </tr>
                             <tr>
                                 <td>加油站编号:</td>
                                 <td>
@@ -162,13 +174,12 @@
                                 </tr>
                                 <tr>
                                     <td>1</td>
-                                    <td id="handset">${handset.deviceId}</td>
+                                    <td>${handset.deviceId}</td>
                                 </tr>
                             </c:if>
                             <c:if test="${handset == null}">
                                 <tr>
                                     <td colspan="2">未配置手持机</td>
-                                    <td id="handset" style="display: none;">0</td>
                                 </tr>
                             </c:if>
                             </tr>
@@ -284,8 +295,7 @@
                 </div>
             </c:if>
             <c:if test="${mode=='edit'}">
-                <input type="hidden" id="id" value="${gasStation.id}">
-                <div class="info-zone" style="height:530px">
+                <div class="info-zone" style="height:540px">
                     <div class="tab-title">
                         <div class="on">加油站基本信息</div>
                         <div>手持机信息</div>
@@ -294,6 +304,12 @@
                     <div class="tab-con">
                         <div class="tab-con-list">
                             <table class="base-table">
+                                <tr>
+                                    <td>加油站ID:</td>
+                                    <td>
+                                        <input type="text" class="editInfo" id="id" value="${gasStation.id}" readonly>
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>加油站编号:</td>
                                     <td>

@@ -37,6 +37,7 @@ public final class TrackCache {
         String track;
         synchronized (newTtracks) {
             newTtracks.clear();
+            // Long trackMillis = lastTracks.get(0).getTrackTime().getTime();
             for (int i = 0; i < len; i++) {
                 lastTrack = lastTracks.get(i);
                 Long carId = lastTrack.getCarId();

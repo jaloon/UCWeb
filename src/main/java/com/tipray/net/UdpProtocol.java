@@ -632,12 +632,13 @@ public class UdpProtocol {
 
         // 应答数据体
         byte[] data = Arrays.copyOfRange(replyBizBuf, index, replyBizBuf.length);
-        ResponseMsg msg;
-        if (replyBizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
-            msg = dealReplyDataForTerminalSoftwareUpdate(data);
-        } else {
-            msg = dealReplyDataForCommen(data);
-        }
+        // ResponseMsg msg;
+        // if (replyBizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
+        //     msg = dealReplyDataForTerminalSoftwareUpdate(data);
+        // } else {
+        //     msg = dealReplyDataForCommen(data);
+        // }
+        ResponseMsg msg = dealReplyDataForCommen(data);
         int cacheId = AsynUdpCommCache.buildCacheId(replyBizId ^ 128, serialNo);
         if (replyBizId == UdpBizId.TERMINAL_COMMEN_CONFIG_UPDATE_RESPONSE
                 || replyBizId == UdpBizId.TRANSPORT_CARD_UPDATE_RESPONSE) {
