@@ -35,7 +35,7 @@ public class InitializationsRunner extends HttpServlet {
 			}
 			logger.info("===>InitializationsRunner end init,cost{}", System.currentTimeMillis() - start);
 		} catch (Exception e) {
-			logger.error("===>InitializationsRunner init error!\n{}", e.toString());
+			logger.error("===>InitializationsRunner init error!", e);
 		}
 	}
 
@@ -49,7 +49,7 @@ public class InitializationsRunner extends HttpServlet {
 				logger.info("==>InitializationsRunner execute [{}] end,cost [{}]ms", init.toString(),
 						System.currentTimeMillis() - startTime);
 			} catch (Exception e) {
-				logger.error("==>InitializationsRunner execute [" + init.toString() + "] error!\n{}", e.toString());
+				logger.error("==>InitializationsRunner execute [" + init.toString() + "] error!", e);
 			}
 		}
 	}

@@ -1,12 +1,11 @@
 package com.tipray.core.listener;
 
-import java.lang.reflect.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.reflect.Field;
 
 /**
  * dll文件路径监听器
@@ -57,7 +56,7 @@ public class DllListener implements ServletContextListener {
 			// 将增加目录后的数组赋给path变量对象
 			field.set(null, tem);
 		} catch (Exception e) {
-			logger.error("添加系统环境变量异常：\n{}", e.toString());
+			logger.error("添加系统环境变量异常！", e);
 		}
 	}
 }

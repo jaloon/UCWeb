@@ -524,7 +524,7 @@
 				0 station_id,
 				0 vehicle_track_id
 			) v_base
-			JOIN ( SELECT store_id, seat, seat_index FROM tbl_lock WHERE lock_device_id = #{lockId} ) v_lock
+			JOIN ( SELECT store_id, seat, seat_index FROM tbl_lock WHERE lock_device_id = #{lockId} AND vehicle_id = #{carId} ) v_lock
 		);
 	</insert>
 	

@@ -26,7 +26,7 @@ public class SessionUtil {
 	public static final String LOGIN_SESSION_ID = "sid";
 	public static final String OLD_LOGIN_SESSION_ID = "oldSid";
 	public static final long SESSION_TIMEOUT_MILLISECOND = 30 * 60 * 1000L;
-	public static final long APP_TIMEOUT_MILLISECOND = 6 * 60 * 1000L;
+	public static final long WEBAPP_TIMEOUT_MILLISECOND = 6 * 60 * 1000L;
 
 	private static final Map<String, Session> SESSION_LIST = new ConcurrentHashMap<String, Session>();
 	private static final SessionService SESSION_SERVICE = SpringBeanUtil.getSessionService();
@@ -134,6 +134,35 @@ public class SessionUtil {
 	}
 
 	/**
+	 * 获取登录时的Session ID
+	 * @param request
+	 * @return
+	 */
+	public static String getLoginSessionId(HttpServletRequest request) {
+		String sessionId = getSessionId(request,LOGIN_SESSION_ID);
+		if (sessionId == null) {
+			sessionId = UUIDUtil.getHexUUID();
+			synchronized (SESSION_LIST) {
+				SESSION_LIST.clear();
+				SESSION_LIST.putAll(SESSION_SERVICE.findSessions());
+				while (SESSION_LIST.keySet().contains(sessionId)) {
+					sessionId = UUIDUtil.getHexUUID();
+				}
+			}
+		}
+		return sessionId;
+	}
+
+	/**
+	 * 获取退出时的Session ID
+	 * @param request
+	 * @return
+	 */
+	public static String getLogoutSessionId(HttpServletRequest request) {
+		return getSessionId(request,LOGIN_SESSION_ID);
+	}
+
+	/**
 	 * 判断是否登录超时
 	 * 
 	 * @param session
@@ -144,7 +173,7 @@ public class SessionUtil {
 			long timeout = System.currentTimeMillis() - session.getOperateDate().getTime();
 			boolean isApp = session.getIsApp() > 0;
 			if (isApp) {
-				return timeout > APP_TIMEOUT_MILLISECOND;
+				return timeout > WEBAPP_TIMEOUT_MILLISECOND;
 			}
 			return timeout > SESSION_TIMEOUT_MILLISECOND;
 		}

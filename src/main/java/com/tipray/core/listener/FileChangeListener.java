@@ -19,7 +19,6 @@ public class FileChangeListener implements ServletContextListener {
     private AppUuidConfigWatcher appUuidConfigWatcher;
     private CenterVariableWatcher centerVariableWatcher;
 
-
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         appUuidConfigWatcher = new AppUuidConfigWatcher();

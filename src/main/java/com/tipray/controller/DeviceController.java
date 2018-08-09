@@ -44,6 +44,7 @@ public class DeviceController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("deviceModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch device edit page, mode={}, id={}", mode, id);
@@ -72,8 +73,7 @@ public class DeviceController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加设备异常：device={}, e={}", device, e.toString());
-            logger.debug("添加设备异常堆栈信息：", e);
+            logger.error("添加设备异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -96,8 +96,7 @@ public class DeviceController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改设备异常：device={}, e={}", device, e.toString());
-            logger.debug("修改设备异常堆栈信息：", e);
+            logger.error("修改设备异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -120,8 +119,7 @@ public class DeviceController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除设备异常：id={}, e={}", id, e.toString());
-            logger.debug("删除设备异常堆栈信息：", e);
+            logger.error("删除设备异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);

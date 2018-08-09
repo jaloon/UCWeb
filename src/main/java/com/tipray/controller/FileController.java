@@ -88,7 +88,7 @@ public class FileController extends BaseAction {
             return Message.error("参数未指定！");
         }
         if (biz < 1 || biz > 3) {
-            logger.error("参数超出规定范围！！biz={}", biz);
+            logger.error("参数超出规定范围！biz={}", biz);
             return Message.error("参数超出规定范围！");
         }
         boolean result = false;
@@ -125,7 +125,6 @@ public class FileController extends BaseAction {
             type++;
             description.append("失败。");
             logger.error("批量导入{}异常：e={}", biz == 1 ? "油库" : biz == 2 ? "加油站" : "车辆", e.toString());
-            logger.debug("批量导入异常堆栈信息：", e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
@@ -149,8 +148,7 @@ public class FileController extends BaseAction {
             try {
                 uploadFile.transferTo(destFile);
             } catch (Exception e) {
-                logger.error("save upload file error: e={}", e.toString());
-                logger.debug("save upload file error stack info: ", e);
+                logger.error("save upload file error！", e);
             }
         }
     }
@@ -190,8 +188,7 @@ public class FileController extends BaseAction {
             // 设为HttpStatus.CREATED时，IE无法下载文件
             return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(file), headers, HttpStatus.OK);
         } catch (IOException e) {
-            logger.error("文件下载失败！filename={}, e={}", filename, e.toString());
-            logger.debug("文件下载异常堆栈信息：", e);
+            logger.error("文件下载失败！", e);
             throw new FileException(FileException.FILE_DOWNLOAD_EXCEPTION, e);
         }
     }

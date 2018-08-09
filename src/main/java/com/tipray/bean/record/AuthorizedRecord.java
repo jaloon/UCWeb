@@ -25,6 +25,8 @@ public class AuthorizedRecord implements Serializable {
     private Date reportTime;
     /** 是否手机操作 */
     private Integer isApp;
+    /** 手机UUID */
+    private String uuid;
     /** 定位是否有效 */
     private Integer isLocationValid;
     /** 经度 */
@@ -88,6 +90,14 @@ public class AuthorizedRecord implements Serializable {
         this.isApp = isApp;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public Integer getIsLocationValid() {
         return isLocationValid;
     }
@@ -122,6 +132,11 @@ public class AuthorizedRecord implements Serializable {
         sb.append(", authTime='").append(authTime).append('\'');
         sb.append(", reportTime=").append(reportTime);
         sb.append(", isApp=").append(isApp);
+        if (uuid == null) {
+            sb.append(", uuid=null");
+        } else {
+            sb.append(", uuid='").append(uuid).append('\'');
+        }
         sb.append(", isLocationValid=").append(isLocationValid);
         sb.append(", longitude=").append(longitude);
         sb.append(", latitude=").append(latitude);

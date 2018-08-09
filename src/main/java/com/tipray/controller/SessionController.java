@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -110,8 +109,9 @@ public class SessionController extends BaseAction {
             } else {
                 logger.info("操作员{}请求网页登录，user-agent：{}", user.getAccount(), userAgent);
             }
-            HttpSession httpSession = request.getSession();
-            String sessionId = httpSession.getId();
+            // HttpSession httpSession = request.getSession();
+            // String sessionId = httpSession.getId();
+            String sessionId = SessionUtil.getLoginSessionId(request);
             if (isLogin(sessionId, user)) {
                 if (isApp == null || isApp == 0) {
                     return ResponseMsgUtil.success("已登录！");

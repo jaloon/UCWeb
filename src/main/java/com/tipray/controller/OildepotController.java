@@ -51,6 +51,7 @@ public class OildepotController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("oilDepotModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch oilDepot edit page, mode={}, id={}", mode, id);
@@ -73,7 +74,7 @@ public class OildepotController extends BaseAction {
         return "normal/oildepot/oildepotEdit.jsp";
     }
 
-    @PermissionAnno("oilDepotModule")
+    @PermissionAnno("editOildepot")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addOilDepot(@ModelAttribute OilDepot oilDepot) {
@@ -89,15 +90,14 @@ public class OildepotController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加油库异常：oilDepot={}, e={}", oilDepot, e.toString());
-            logger.debug("添加油库异常堆栈信息：", e);
+            logger.debug("添加油库异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("oilDepotModule")
+    @PermissionAnno("editOildepot")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateOilDepot(@ModelAttribute OilDepot oilDepot, String readersJson, String cardIds) {
@@ -113,15 +113,14 @@ public class OildepotController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改油库异常：oilDepot={}, e={}", oilDepot, e.toString());
-            logger.debug("修改油库异常堆栈信息：", e);
+            logger.debug("修改油库异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("oilDepotModule")
+    @PermissionAnno("editOildepot")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteOilDepot(Long id) {
@@ -137,8 +136,7 @@ public class OildepotController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除油库异常：id={}, e={}", id, e.toString());
-            logger.debug("删除油库异常堆栈信息：", e);
+            logger.error("删除油库异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -158,7 +156,7 @@ public class OildepotController extends BaseAction {
         return oilDepotService.isOilDepotExist(oilDepot) != null;
     }
 
-    @PermissionAnno("viewOilDepot")
+    @PermissionAnno("viewOildepot")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<OilDepot> ajaxFindOilDepotsForPage(@ModelAttribute OilDepot oilDepot, @ModelAttribute Page page) {

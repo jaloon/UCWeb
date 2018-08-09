@@ -1,5 +1,6 @@
 package com.tipray.service;
 
+import com.tipray.bean.alarm.AlarmInfo;
 import com.tipray.bean.record.AlarmRecord;
 import com.tipray.core.exception.ServiceException;
 
@@ -78,6 +79,12 @@ public interface AlarmRecordService extends RecordService<AlarmRecord> {
 	 * @return {@link List} 未消除的报警信息
 	 */
     List<AlarmRecord> findNotElimited();
+
+    /**
+     * 获取未消除的报警信息
+     * @return
+     */
+    List<AlarmInfo> findNotElimitedAlarmInfo();
 
 	/**
 	 * 获取未消除的报警信息(按数据库字段名称)

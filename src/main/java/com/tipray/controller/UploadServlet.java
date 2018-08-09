@@ -1,19 +1,15 @@
 package com.tipray.controller;
 
-import java.io.PrintWriter;
+import com.tipray.core.exception.FileException;
+import com.tipray.util.HttpServletUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.tipray.core.exception.FileException;
-import com.tipray.util.HttpServletUtil;
+import java.io.PrintWriter;
 
 /**
  * 文件上传控制器
@@ -22,8 +18,8 @@ import com.tipray.util.HttpServletUtil;
  * @version 1.0 2018-02-01
  *
  */
-@MultipartConfig(maxFileSize = 1024 * 1024 * 200)
-@WebServlet(description = "文件上传控制器", urlPatterns = { "/api/upload" })
+// @MultipartConfig(maxFileSize = 1024 * 1024 * 200)
+// @WebServlet(description = "文件上传控制器", urlPatterns = { "/api/upload" })
 public class UploadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(UploadServlet.class);

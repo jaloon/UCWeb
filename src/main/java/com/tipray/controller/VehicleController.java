@@ -55,6 +55,7 @@ public class VehicleController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("carModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch car edit page, mode={}, id={}", mode, id);
@@ -69,7 +70,7 @@ public class VehicleController extends BaseAction {
         return "normal/car/carEdit.jsp";
     }
 
-    @PermissionAnno("carModule")
+    @PermissionAnno("editCar")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addCar(@ModelAttribute Vehicle car, String driverIds) {
@@ -85,39 +86,38 @@ public class VehicleController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加车辆异常：car={}, e={}", car, e.toString());
-            logger.debug("添加车辆异常堆栈信息：", e);
+            logger.error("添加车辆异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("carModule")
+    @PermissionAnno("editCar")
     @RequestMapping(value = "update.do")
     @ResponseBody
-    public Message updateCar(@ModelAttribute Vehicle car, String driverIds) {
-        logger.info("update car, car={}, driverIds={}", car, driverIds);
+    public Message updateCar(@ModelAttribute Vehicle car, String driverIds, String locksJson) {
+        logger.info("update car, car={}, driverIds={}, locksJson={}", car, driverIds, locksJson);
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_VEHICLE
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
         StringBuffer description = new StringBuffer("修改车辆：").append(car.getCarNumber()).append('。');
         try {
-            vehicleService.updateCar(car, driverIds);
+            List<Lock> locks = JSONUtil.parseToList(locksJson, Lock.class);
+            vehicleService.updateCar(car, driverIds, locks);
             description.append("成功！");
             return Message.success();
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改车辆异常：car={}, e={}", car, e.toString());
-            logger.debug("修改车辆异常堆栈信息：", e);
+            logger.error("修改车辆异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("carModule")
+    @PermissionAnno("editCar")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteCar(Long id, String carNumber) {
@@ -133,15 +133,14 @@ public class VehicleController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除车辆异常：carNumber={}, e={}", carNumber, e.toString());
-            logger.debug("删除车辆异常堆栈信息：", e);
+            logger.error("删除车辆异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("carModule")
+    @PermissionAnno("viewCar")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Vehicle> ajaxFindCarsForPage(@ModelAttribute Vehicle car, @ModelAttribute Page page) {
@@ -279,6 +278,7 @@ public class VehicleController extends BaseAction {
      * @param modelMap
      * @return
      */
+    @PermissionAnno("remoteModule")
     @RequestMapping(value = "carStatusDispatch.do")
     public String carStatusDispatch(Integer mode, String carNumber, ModelMap modelMap) {
         logger.info("dispatch remote control page, mode={}, carNumber={}", mode, carNumber);
@@ -315,6 +315,7 @@ public class VehicleController extends BaseAction {
         return vehicleService.getDistributionsByCarNumber(carNumber);
     }
 
+    @PermissionAnno("changeModule")
     @RequestMapping(value = "changeDispatch.do")
     public String changeDispatch(String carNumber, ModelMap modelMap) {
         logger.info("dispatch change station page, carNumber={}", carNumber);

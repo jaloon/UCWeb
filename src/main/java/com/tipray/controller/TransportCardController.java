@@ -41,6 +41,7 @@ public class TransportCardController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("transcardModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch transportCard edit page, mode={}, id={}", mode, id);
@@ -53,7 +54,7 @@ public class TransportCardController extends BaseAction {
         return "normal/transcard/transcardEdit.jsp";
     }
 
-    @PermissionAnno("transcardModule")
+    @PermissionAnno("editTranscard")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addTransportCard(@ModelAttribute TransportCard transportCard) {
@@ -69,15 +70,14 @@ public class TransportCardController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加配送卡异常：transportCard={}, e={}", transportCard, e.toString());
-            logger.debug("添加配送卡异常堆栈信息：", e);
+            logger.error("添加配送卡异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("transcardModule")
+    @PermissionAnno("editTranscard")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateTransportCard(TransportCard transportCard) {
@@ -93,15 +93,14 @@ public class TransportCardController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改配送卡异常：transportCard={}, e={}", transportCard, e.toString());
-            logger.debug("修改配送卡异常堆栈信息：", e);
+            logger.error("修改配送卡异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("transcardModule")
+    @PermissionAnno("editTranscard")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteTransportCard(Long id) {
@@ -117,15 +116,14 @@ public class TransportCardController extends BaseAction {
         } catch (ServiceException e) {
             type++;
             description.append("失败！");
-            logger.error("删除配送卡异常：id={}, e={}", id, e.toString());
-            logger.debug("删除配送卡异常堆栈信息：", e);
+            logger.error("删除配送卡异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("transcardModule")
+    @PermissionAnno("viewTranscard")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<TransportCard> ajaxFindTransportCardsForPage(@ModelAttribute TransportCard transportCard,

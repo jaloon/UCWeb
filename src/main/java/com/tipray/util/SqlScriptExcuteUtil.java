@@ -1,5 +1,8 @@
 package com.tipray.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
@@ -7,9 +10,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /**
  * sql脚本执行工具类
  * @author chends
@@ -58,7 +58,7 @@ public class SqlScriptExcuteUtil {
 			executeBatchSql(sqls, statement);
 			con.commit();
 		} catch (Exception e) {
-			logger.error("异常信息：\n{}", e.toString());
+			logger.error("异常信息：", e);
 			con.rollback();
 		} finally {
 			statement.close();

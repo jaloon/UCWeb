@@ -7,6 +7,7 @@ import com.tipray.cache.RC4KeyCache;
 import com.tipray.cache.VehicleCompanyRelationCache;
 import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.constant.reply.ErrorTagConst;
+import com.tipray.mq.MyQueue;
 import com.tipray.mq.MyQueueElement;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
@@ -577,7 +578,7 @@ public class UdpProtocol {
         }
         if (bizId == UdpBizId.UDP_TRACK_UPLOAD) {
             // 轨迹上报业务
-            // MyQueue.queueTaskForTrack(receiveBizBuf);
+            MyQueue.queueTaskForTrack(receiveBizBuf);
             return;
         }
         if (Arrays.binarySearch(UdpBizId.RESPONSE_BIZ_IDS, bizId) >= 0) {

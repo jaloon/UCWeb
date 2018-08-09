@@ -230,7 +230,7 @@ public class CardServiceImpl implements CardService {
 			}
 			executeAsynUdp(commonConfig);
 		} catch (SQLException e) {
-			logger.error("sqlite更新卡相关数据库文件异常！\n{}", e.toString());
+			logger.error("sqlite更新卡相关数据库文件异常！", e);
 			rollback(cardType);
 		} finally {
 			close(cardType);

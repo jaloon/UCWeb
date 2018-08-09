@@ -1,16 +1,12 @@
 package com.tipray.util;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Properties;
-
 import com.tipray.constant.CenterConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.sql.*;
+import java.util.Properties;
 
 public class JDBCUtil {
 	private static final Logger logger = LoggerFactory.getLogger(JDBCUtil.class);
@@ -111,7 +107,7 @@ public class JDBCUtil {
 			this.username = properties.getProperty("jdbc.username");
 			this.password = properties.getProperty("jdbc.password");
 		} catch (IOException e) {
-			logger.error("读取数据源配置文件异常！\n{}", e.toString());
+			logger.error("读取数据源配置文件异常！", e);
 		}
 	}
 
@@ -124,7 +120,7 @@ public class JDBCUtil {
 			connection = DriverManager.getConnection(url, username, password); // 获取连接
 			connection.setAutoCommit(false);// 设置不自动提交
 		} catch (Exception e) {
-			logger.error("建立数据库连接异常！\n{}", e.toString());
+			logger.error("建立数据库连接异常！", e);
 		}
 	}
 
@@ -143,7 +139,7 @@ public class JDBCUtil {
 			connection = DriverManager.getConnection(url);// sqlite不需要用户名密码
 			connection.setAutoCommit(false);// 设置不自动提交
 		} catch (Exception e) {
-			logger.error("建立sqlite数据库连接异常！\n{}", e.toString());
+			logger.error("建立sqlite数据库连接异常！", e);
 		}
 	}
 
@@ -161,7 +157,7 @@ public class JDBCUtil {
 				throw new Exception("connection is null");
 			}
 		} catch (Exception e) {
-			logger.error("实例化预编译的 SQL语句的对象异常！\n{}", e.toString());
+			logger.error("实例化预编译的 SQL语句的对象异常！", e);
 		}
 
 	}
@@ -404,7 +400,7 @@ public class JDBCUtil {
 			commit();
 			logger.info("SQL语句执行成功，影响{}条记录！", i);
 		} catch (Exception e) {
-			logger.error("增删改操作异常！\n{}", e.toString());
+			logger.error("增删改操作异常！", e);
 			rollback();
 		} finally {
 			close();

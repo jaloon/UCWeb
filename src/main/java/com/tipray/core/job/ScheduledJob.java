@@ -38,7 +38,8 @@ public class ScheduledJob {
     private AppService appService;
     @Resource
     private TrackDao trackDao;
-    private MonitorWebSocketHandler monitorWebSocketHandler = new MonitorWebSocketHandler();
+    @Resource
+    private MonitorWebSocketHandler monitorWebSocketHandler;
     /**
      * APP配置信息同步路径
      */
@@ -74,7 +75,7 @@ public class ScheduledJob {
             AppSync appsync = JSONUtil.parseToObject(json, AppSync.class);
             appService.sync(appsync);
         } catch (Exception e) {
-            logger.error("APP配置信息同步异常：{}", e.toString());
+            logger.error("APP配置信息同步异常！", e);
         }
     }
 

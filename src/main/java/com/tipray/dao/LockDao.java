@@ -116,4 +116,10 @@ public interface LockDao extends BaseDao<Lock> {
      * @return 锁信息
      */
     Map<String, Integer> getByIdForAppAlarm(Long id);
+
+    /**
+     * 批量更新锁备注
+     * @param locks
+     */
+    void updateLockRemarks(List<Lock> locks);
 }

@@ -42,6 +42,7 @@ public class CardController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("cardModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch card edit page, mode={}, id={}", mode, id);
@@ -56,7 +57,7 @@ public class CardController extends BaseAction {
         return "normal/card/cardEdit.jsp";
     }
 
-    @PermissionAnno("deviceModule")
+    @PermissionAnno("editCard")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addCard(@ModelAttribute Card card) {
@@ -72,15 +73,14 @@ public class CardController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加卡异常：card={}, e={}", card, e.toString());
-            logger.debug("添加卡异常堆栈信息：", e);
+            logger.error("添加卡异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("deviceModule")
+    @PermissionAnno("editCard")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateCard(@ModelAttribute Card card) {
@@ -96,15 +96,14 @@ public class CardController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改卡异常：card={}, e={}", card, e.toString());
-            logger.debug("修改卡异常堆栈信息：", e);
+            logger.error("修改卡异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("deviceModule")
+    @PermissionAnno("editCard")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteCard(Long id) {
@@ -120,8 +119,7 @@ public class CardController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除卡异常：id={}, e={}", id, e.toString());
-            logger.debug("删除卡异常堆栈信息：", e);
+            logger.error("删除卡异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -135,7 +133,7 @@ public class CardController extends BaseAction {
         return cardService.isCardExist(cardId) != null;
     }
 
-    @PermissionAnno("viewDevice")
+    @PermissionAnno("viewCard")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Card> ajaxFindCardsForPage(@ModelAttribute Card card, @ModelAttribute Page page) {

@@ -4,7 +4,7 @@ Implementation-Version: 2.00.171025.SC
 Built-By: jazur
 Implementation-Build: 1001
 Implementation-Vendor-Id: com.tipray
-Implementation-Timestamp: 07230051
+Implementation-Timestamp: 08070908
 Created-By: IntelliJ IDEA
 Build-Jdk: 1.8.0_152
 Implementation-URL: http://www.pltone.com

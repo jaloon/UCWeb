@@ -61,8 +61,7 @@ public class WebSocketUtil {
                 }
                 session.sendMessage(new TextMessage(payload));
             } catch (Exception e) {
-                logger.error("send message to {} error: {}", sessionId, e.getMessage());
-                logger.debug("send message error stack: ", e);
+                logger.error("send message error！", e);
             }
         }
     }
@@ -89,8 +88,7 @@ public class WebSocketUtil {
             try {
                 session.sendMessage(new TextMessage(message));
             } catch (Exception e) {
-                logger.error("send text message to {} error: {}\nmsg: {}", sessionId, e.getMessage(), message);
-                logger.debug("send text message error stack: ", e);
+                logger.error("send text message error！", e);
             }
         }
     }
@@ -113,8 +111,7 @@ public class WebSocketUtil {
         try {
             session.sendMessage(new TextMessage(message));
         } catch (Exception e) {
-            logger.error("send text message to {} error: {}\nmsg: {}", sessionId, e.getMessage(), message);
-            logger.debug("send text message error stack: ", e);
+            logger.error("send text message error stack！", e);
         }
     }
 

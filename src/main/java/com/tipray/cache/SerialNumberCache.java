@@ -103,7 +103,7 @@ public final class SerialNumberCache {
 	private static void readObjFromFile() {
 		try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(CACHE_FILE))) {
 			Map<Short, Short> temp = (Map<Short, Short>) in.readObject();
-			temp.keySet().parallelStream().forEach(udpBizId -> SERIAL_NUMBER_MAP.put(udpBizId, temp.get(udpBizId)));
+			SERIAL_NUMBER_MAP.putAll(temp);
 		} catch (Exception e) {
 			logger.error("从文件中读取对象异常！\n{}", e.toString());
 		}

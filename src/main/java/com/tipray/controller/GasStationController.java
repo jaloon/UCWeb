@@ -49,6 +49,7 @@ public class GasStationController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("gasstationModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch gasStation edit page, mode={}, id={}", mode, id);
@@ -67,7 +68,7 @@ public class GasStationController extends BaseAction {
         return "normal/gasstation/gasstationEdit.jsp";
     }
 
-    @PermissionAnno("gasStationModule")
+    @PermissionAnno("editGasstation")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addGasStation(@ModelAttribute GasStation gasStation) {
@@ -83,15 +84,14 @@ public class GasStationController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加加油站异常：gasStation={}, e={}", gasStation, e.toString());
-            logger.debug("添加加油站异常堆栈信息：", e);
+            logger.error("添加加油站异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("gasStationModule")
+    @PermissionAnno("editGasstation")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateGasStation(@ModelAttribute GasStation gasStation, Integer handset, String cardIds) {
@@ -107,15 +107,14 @@ public class GasStationController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改加油站异常：gasStation={}, e={}", gasStation, e.toString());
-            logger.debug("修改加油站异常堆栈信息：", e);
+            logger.error("修改加油站异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("gasStationModule")
+    @PermissionAnno("editGasstation")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteGasStation(Long id) {
@@ -131,8 +130,7 @@ public class GasStationController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除加油站异常：id={}, e={}", id, e.toString());
-            logger.debug("删除加油站异常堆栈信息：", e);
+            logger.error("删除加油站异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -158,7 +156,7 @@ public class GasStationController extends BaseAction {
         return gasStationService.findAllGasStations();
     }
 
-    @PermissionAnno("viewOilDepot")
+    @PermissionAnno("viewGasstation")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<GasStation> ajaxFindGasStationsForPage(@ModelAttribute GasStation gasStation,

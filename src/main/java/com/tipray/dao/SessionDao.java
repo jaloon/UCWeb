@@ -3,9 +3,11 @@ package com.tipray.dao;
 import com.tipray.bean.Session;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+import org.apache.ibatis.annotations.MapKey;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SessionDao
@@ -68,4 +70,11 @@ public interface SessionDao extends BaseDao<Session> {
 	 * @return
 	 */
     List<Session> getByUser(Long userId);
+
+	/**
+	 * 获取session列表
+	 * @return
+	 */
+	@MapKey("uuid")
+	Map<String, Session> findSessions();
 }

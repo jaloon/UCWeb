@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chends
@@ -126,24 +127,24 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public User userCheck(User user, Integer isApp) throws LoginException, PermissionException {
         User userDb = userService.getUserByAccount(user.getAccount());
-        try {
-            if (userDb == null) {
-                throw new LoginException("账号错误");
-            }
-            String newPassword = user.getPassword();
-            if (isApp == 0) {
-                newPassword = MD5Util.md5Encode(newPassword);
-            }
-            if (!newPassword.equals(userDb.getPassword())) {
-                throw new LoginException("密码错误");
-            }
-            if (isApp > 0 && (userDb.getAppRole() == null || userDb.getAppRole().getId() == 0)) {
-                throw new PermissionException(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
-            }
-            return userDb;
-        } catch (NoSuchAlgorithmException e) {
-            throw new LoginException("密码加密异常", e);
+        if (userDb == null) {
+            throw new LoginException("账号错误");
         }
+        String newPassword = user.getPassword();
+        if (isApp == 0) {
+            try {
+                newPassword = MD5Util.md5Encode(newPassword);
+            } catch (NoSuchAlgorithmException e) {
+                throw new LoginException("密码加密异常", e);
+            }
+        }
+        if (!newPassword.equals(userDb.getPassword())) {
+            throw new LoginException("密码错误");
+        }
+        if (isApp > 0 && (userDb.getAppRole() == null || userDb.getAppRole().getId() == 0)) {
+            throw new PermissionException(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
+        }
+        return userDb;
     }
 
     @Override
@@ -154,5 +155,10 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public void deleteTimeOutSession(Date timeoutDate) {
         sessionDao.deleteTimeOutSession(timeoutDate);
+    }
+
+    @Override
+    public Map<String, Session> findSessions() {
+        return sessionDao.findSessions();
     }
 }

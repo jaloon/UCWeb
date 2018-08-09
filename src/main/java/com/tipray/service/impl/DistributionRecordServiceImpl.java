@@ -186,16 +186,18 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 		list.forEach(map -> {
 		    Long carId = (Long) map.get("vehicle_id");
             Map<String, Object> track = trackDao.getLastTrackForAppByMap(map);
-            Long trackTime = (Long) track.get("track_time"); // unix_timestamp，uint32
-            Map<String, Object> status = vehicleDao.getCarStatusByCarId(carId);
-            if (status != null) {
-                Long triggerTime = (Long) status.get("trigger_time"); // unix_timestamp，uint32
-                if (trackTime.compareTo(triggerTime) < 0) {
-                    track.put("vehicle_status", status.get("status"));
+            if (track != null) {
+                Long trackTime = (Long) track.get("track_time"); // unix_timestamp，uint32
+                Map<String, Object> status = vehicleDao.getCarStatusByCarId(carId);
+                if (status != null) {
+                    Long triggerTime = (Long) status.get("trigger_time"); // unix_timestamp，uint32
+                    if (trackTime.compareTo(triggerTime) < 0) {
+                        track.put("vehicle_status", status.get("status"));
+                    }
                 }
+                map.put("track", track);
             }
-		    map.put("is_online", vehicleDao.getOnline(carId));
-		    map.put("track", track);
+            map.put("is_online", vehicleDao.getOnline(carId));
         });
 		return list;
 	}

@@ -121,7 +121,7 @@ public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecord
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常：{}", e.toString());
+                logger.error("轨迹数据异常！", e);
             }
         }
         return list;

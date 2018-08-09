@@ -75,15 +75,18 @@ function receiveAlarm(receiveObj) {
 }
 
 function cacheAlarm(receiveObj) {
-    var list = receiveObj.cacheAlarm;
-    var len = list.length;
+    var alarmlist = receiveObj.cacheAlarm;
+    var len = alarmlist.length;
     if (len < 1) {
         return;
     }
     removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
     var trHtml = "";
+    alarmlist.forEach(function (alarm) {
+
+    });
     for (var i = 0; i < len; i++) {
-        var alarm = list[i];
+        var alarm = alarmlist[i];
         var alarm_id = alarm.id;
         if (alarmCount == 0 || !alarmIds.isContain(alarm_id)) {
             alarmIds.push(alarm_id);
@@ -277,7 +280,8 @@ $(function() {
                 // receiveAlarm(receive, receiveObj);
                 break;
             case 111: //缓存报警
-                Concurrent.Thread.create(cacheAlarm, receiveObj);
+                console.log(receive)
+                // Concurrent.Thread.create(cacheAlarm, receiveObj);
                 // cacheAlarm(receiveObj);
                 break;
             default:

@@ -174,7 +174,7 @@ public class NetUtil {
             inet = InetAddress.getByName(ip);
             return inet.getHostName();
         } catch (UnknownHostException e) {
-            logger.error("the local host name could not be resolved into an address! \n{}", e.toString());
+            logger.error("the local host name could not be resolved into an address! ", e);
         }
         return "";
     }
@@ -212,9 +212,9 @@ public class NetUtil {
                 candidateAddress = InetAddress.getLocalHost();
             }
         } catch (SocketException e) {
-            logger.error("an I/O error occurs when get NetworkInterfaces! \n{}", e.toString());
+            logger.error("an I/O error occurs when get NetworkInterfaces! ", e);
         } catch (UnknownHostException e) {
-            logger.error("the local host name could not be resolved into an address! \n{}", e.toString());
+            logger.error("the local host name could not be resolved into an address! ", e);
         }
         return candidateAddress;
     }
@@ -242,7 +242,7 @@ public class NetUtil {
             // 把字符串所有小写字母改为大写成为正规的mac地址并返回
             return sb.toString().toUpperCase();
         } catch (SocketException e) {
-            logger.error("an I/O error occurs when get HardwareAddress! \n{}", e.toString());
+            logger.error("an I/O error occurs when get HardwareAddress! ", e);
             return null;
         }
     }

@@ -63,7 +63,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Vehicle updateCar(Vehicle car, String driverIds) {
+    public Vehicle updateCar(Vehicle car, String driverIds, List<Lock> locks) {
         if (car != null) {
             Long id = car.getId();
             Integer terminalId = vehicleDao.getTerminalIdById(id);
@@ -71,6 +71,7 @@ public class VehicleServiceImpl implements VehicleService {
             Long newTransportCardId = car.getTransportCard().getTransportCardId();
             vehicleDao.update(car);
             updateDrivers(driverIds, car.getCarNumber());
+            lockDao.updateLockRemarks(locks);
             if (terminalId != null && terminalId != 0 && !oldTransportCardId.equals(newTransportCardId)) {
                 ByteBuffer src = SendPacketBuilder.buildProtocol0x1203(terminalId, newTransportCardId);
                 boolean isSend = udpServer.send(src);
@@ -610,7 +611,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public void terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList) {
+    public Long terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList) {
         terminalUpgradeDao.addTerminalUpgradeInfo(terminalUpgradeInfo);
         Long upgradeId = terminalUpgradeInfo.getId();
         Integer ver = terminalUpgradeInfo.getVer();
@@ -638,6 +639,7 @@ public class VehicleServiceImpl implements VehicleService {
                 terminalUpgradeDao.addTerminalUpgradeRecord(record);
             }
         }
+        return upgradeId;
     }
 
     @Override

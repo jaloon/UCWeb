@@ -29,7 +29,7 @@ public class FtpServer {
 			init();
 			ftpServer.start();
 		} catch (FtpException e) {
-			logger.error("FtpServer start error!\n{}", e.toString());
+			logger.error("FtpServer start error!", e);
 		}
 	}
 

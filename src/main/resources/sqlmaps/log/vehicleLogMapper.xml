@@ -37,9 +37,9 @@
 	</select>
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.log.VehicleManageLog">
-		INSERT INTO tbl_vehicle_manage_log ( user_id, type, description, result, is_app, udp_id, token )
+		INSERT INTO tbl_vehicle_manage_log ( user_id, type, description, result, is_app, uuid, udp_id, token )
 		VALUES
-			(#{user.id}, #{type}, #{description}, #{result}, IFNULL(#{isApp}, 0), 0, fn_uuid_to_bin(#{token}))
+			(#{user.id}, #{type}, #{description}, #{result}, IFNULL(#{isApp}, 0), IFNULL(#{uuid}, '') 0, fn_uuid_to_bin(#{token}))
 	</insert>
 
 	<update id="update"  parameterType="com.tipray.bean.log.VehicleManageLog">
@@ -47,13 +47,19 @@
 		UPDATE tbl_vehicle_manage_log
 		<set>
 			<if test="type != null and type != 0">
-				`type`			= #{type},
+				`type`				= #{type},
 			</if>
 			<if test="udpBizId != null and udpBizId != 0">
-				`udp_id`		= #{udpBizId},
+				`udp_id`			= #{udpBizId},
 			</if>
 			<if test="result != null and result != ''">
-				`result`		= #{result},
+				`result`			= #{result},
+			</if>
+			<if test="uuid != null and uuid != ''">
+				`uuid`				= #{uuid},
+			</if>
+			<if test="remoteId != null and remoteId != 0">
+				`remote_record_id`	= #{remoteId},
 			</if>
 			<!--<if test="responseMsg != null">-->
 				<!--`response_msg`	= JSON_OBJECT (-->
@@ -65,7 +71,7 @@
 												<!--),-->
 			<!--</if>-->
 			<if test="responseMsgJson != null">
-				`response_msg`	= #{responseMsgJson}
+				`response_msg`		= #{responseMsgJson}
 			</if>
 		</set>
 		WHERE

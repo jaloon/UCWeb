@@ -146,8 +146,7 @@ public class NioUdpServer {
 						}
 					}
 				} catch (Exception e) {
-					logger.error("UDP接收数据异常：{}", e.getMessage());
-					logger.debug("UDP接收数据异常堆栈信息：", e);
+					logger.error("UDP接收数据异常！", e);
 				}
 			}
 		});
@@ -214,8 +213,7 @@ public class NioUdpServer {
 			serverChannel.disconnect();
 			return true;
 		} catch (Exception e) {
-			logger.error("向客户端{}发送数据异常：{}", target, e.toString());
-			logger.debug("UDP发送数据异常堆栈信息：", e);
+			logger.error("向客户端发送数据异常！",  e);
 			return false;
 		}
 	}
@@ -262,7 +260,7 @@ public class NioUdpServer {
 		try {
 			return serverChannel.getLocalAddress();
 		} catch (Exception e) {
-			logger.error("获取本地地址异常：{}", e.getMessage());
+			logger.error("获取本地地址异常！", e);
 		}
 		return null;
 	}

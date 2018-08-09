@@ -366,8 +366,6 @@ public class OkHttpUtil {
                 fileOutputStream.write(buf, 0, len);
             }
             fileOutputStream.flush();
-        } catch (IOException e) {
-            throw new IOException(e);
         } finally {
             if (fileOutputStream != null) {
                 try {
@@ -412,5 +410,4 @@ public class OkHttpUtil {
         HttpUrl downloadUrl = response.request().url(); // 获得实际下载文件的URL
         return downloadUrl.pathSegments().get(downloadUrl.pathSize() - 1);
     }
-
 }

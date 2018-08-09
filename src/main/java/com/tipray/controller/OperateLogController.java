@@ -4,6 +4,7 @@ import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.log.InfoManageLog;
 import com.tipray.bean.log.VehicleManageLog;
+import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
 import com.tipray.service.InfoManageLogService;
 import com.tipray.service.VehicleManageLogService;
@@ -32,6 +33,7 @@ public class OperateLogController extends BaseAction {
     @Resource
     private VehicleManageLogService vehicleManageLogService;
 
+    @PermissionAnno("infologModule")
     @RequestMapping(value = "ajaxFindInfoLogsForPage.do")
     @ResponseBody
     public GridPage<InfoManageLog> ajaxFindInfoManageLogsForPage(@ModelAttribute InfoManageLog infoManageLog,
@@ -41,6 +43,7 @@ public class OperateLogController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("carlogModule")
     @RequestMapping(value = "ajaxFindCarLogsForPage.do")
     @ResponseBody
     public GridPage<VehicleManageLog> ajaxFindVehicleManageLogsForPage(@ModelAttribute VehicleManageLog infoManageLog,

@@ -189,6 +189,7 @@
 	            <div class="tab-title">
 					<div class="on">车辆基本信息</div>
 					<div>司机信息</div>
+                    <div>锁信息</div>
 				</div>
 				<div class="tab-con">
 					<div class="tab-con-list">
@@ -283,6 +284,48 @@
 	                            <td></td>
 	                        </tr>
 	                    </table>
+					</div>
+					<div class="tab-con-list">
+						<table class="sub-table" style="cursor: default;">
+							<c:if test="${locks==null || fn:length(locks)==0}">
+								<tr><td>未绑定锁</td></tr>
+							</c:if>
+							<c:if test="${locks!=null && fn:length(locks)!=0}">
+								<tr>
+									<td width="80px">锁设备ID</td>
+									<td width="34px">仓号</td>
+									<td width="50px">仓位</td>
+									<td width="66px">仓位序号</td>
+									<td width="66px">允许开锁</td>
+									<td width="84px">绑定状态</td>
+									<td width="100px">备注</td>
+								</tr>
+								<c:forEach var="lock" items="${locks}" varStatus="status">
+									<tr class="locks">
+										<td style="display: none;">${lock.id}</td>
+										<td>${lock.lockId}</td>
+										<td>${lock.storeId}</td>
+										<td>${lock.seatName}</td>
+										<td>${lock.seatIndex}</td>
+										<c:if test="${lock.allowOpen==1}">
+											<td>否</td>
+										</c:if>
+										<c:if test="${lock.allowOpen==2}">
+											<td>是</td>
+										</c:if>
+										<c:if test="${lock.bindStatus==1}">
+											<td>未同步绑定</td>
+										</c:if>
+										<c:if test="${lock.bindStatus==2}">
+											<td>已同步绑定</td>
+										</c:if>
+										<td>
+                                            <input type="text" value="${lock.remark}" style="width: 96px; height: 20px">
+                                        </td>
+									</tr>
+								</c:forEach>
+							</c:if>
+						</table>
 					</div>
 				</div>
             </div>
@@ -388,17 +431,16 @@
 							</c:if>
 							<c:if test="${locks!=null && fn:length(locks)!=0}">
 	                        <tr>
-	                            <td>序号</td>
-	                            <td>锁ID</td>
+	                            <td>锁设备ID</td>
 	                            <td>仓号</td>
 	                            <td>仓位</td>
 	                            <td>仓位序号</td>
-	                            <td>是否允许开锁</td>
+	                            <td>允许开锁</td>
+	                            <td>绑定状态</td>
 	                            <td>备注</td>
 	                        </tr>
 	                        <c:forEach var="lock" items="${locks}" varStatus="status">
 	                            <tr>
-	                                <td>${lock.index}</td>
 	                                <td>${lock.lockId}</td>
 	                                <td>${lock.storeId}</td>
 	                                <td>${lock.seatName}</td>
@@ -408,6 +450,12 @@
                                     </c:if>
 									<c:if test="${lock.allowOpen==2}">
                                         <td>是</td>
+                                    </c:if>
+									<c:if test="${lock.bindStatus==1}">
+                                        <td>未同步绑定</td>
+                                    </c:if>
+									<c:if test="${lock.bindStatus==2}">
+                                        <td>已同步绑定</td>
                                     </c:if>
 	                                <td>${lock.remark}</td>
 	                            </tr>

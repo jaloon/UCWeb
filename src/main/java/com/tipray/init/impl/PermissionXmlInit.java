@@ -1,16 +1,15 @@
 package com.tipray.init.impl;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tipray.bean.PermissionConfig;
 import com.tipray.bean.baseinfo.Permission;
 import com.tipray.init.AbstractInitialization;
 import com.tipray.service.PermissionService;
 import com.tipray.util.ConvertXmlAndBeanUtil;
 import com.tipray.util.SpringBeanUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * 权限树的初始化 读取permissionConfig.xml文件
@@ -70,7 +69,7 @@ public class PermissionXmlInit extends AbstractInitialization {
 					.xmlToBean(getPermissionConfigPath(xml), PermissionConfig.class, getMapInputPermissionPath());
 			return permissionConfig;
 		} catch (Exception e) {
-			logger.error("problem in execute!\n{}", e.toString());
+			logger.error("problem in execute!", e);
 			return null;
 		}
 	}

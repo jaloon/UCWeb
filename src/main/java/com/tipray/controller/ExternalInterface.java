@@ -101,8 +101,7 @@ public class ExternalInterface extends BaseAction {
                 return;
             }
         } catch (Exception e) {
-            logger.error("处理监控信息异常：\n{}", e.toString());
-            logger.debug("处理监控信息异常堆栈信息：", e);
+            logger.error("处理监控信息异常！", e);
         }
     }
 

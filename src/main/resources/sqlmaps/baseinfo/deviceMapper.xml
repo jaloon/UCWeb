@@ -2,23 +2,35 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tipray.dao.DeviceDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.Device">
+		<id column="id" property="id"/>
+		<result column="device_id" property="deviceId"/>
+		<result column="type" property="type"/>
+		<result column="type_name" property="typeName"/>
+		<result column="device_version" property="ver"/>
+		<result column="center_id" property="centerId"/>
+		<result column="model" property="model"/>
+		<result column="produce" property="produce"/>
+		<result column="delivery" property="delivery"/>
+		<result column="remark" property="remark"/>
+		<result column="gmt_create" property="createDate"/>
+		<result column="gmt_modified" property="modifyDate"/>
+	</resultMap>
 	<sql id="select_colums">
-		d.id id,
-		d.device_id deviceId,
-		d.type `type`,
-		fn_type2name('deviceType',d.type) typeName,
-		d.device_version deviceVer,
-		d.center_id centerId,
-		d.model model,
-		d.produce_time produceTime,
+		d.id,
+		d.device_id,
+		d.type,
+		fn_type2name('deviceType',d.type) type_name,
+		d.device_version,
+		d.center_id,
+		d.model,
 		date_format(d.produce_time,'%Y-%m-%d %H:%i:%s') produce,
-		d.delivery_time deliveryTime,
 		date_format(d.delivery_time,'%Y-%m-%d %H:%i:%s') delivery,
-		d.remark remark,
-		d.gmt_create createDate,
-		d.gmt_modified modifyDate
+		d.remark,
+		d.gmt_create,
+		d.gmt_modified
 	</sql>
-	<select id="findAll" resultType="com.tipray.bean.baseinfo.Device">
+	<select id="findAll" resultMap="fullResultMap">
 		select
 		<include refid="select_colums"></include>
 		from tbl_device d
@@ -32,18 +44,20 @@
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Device">
 		insert into
 		tbl_device(device_id,type,center_id,produce_time,delivery_time,model,remark)
-		values(#{deviceId},#{type},#{centerId},#{produceTime},#{deliveryTime},ifnull(#{model},'')},ifnull(#{remark},''))
+		values(#{deviceId},#{type},#{centerId},#{produce},#{delivery},ifnull(#{model},'')},ifnull(#{remark},''))
 	</insert>
 	
 	<update id="update" parameterType="com.tipray.bean.baseinfo.Device">
 		update tbl_device set
-		device_id=#{deviceId},
-		type=#{type},
-		center_id=#{centerId},
-		produce_time=#{produceTime},
-		delivery_time=#{deliveryTime},
-		model=ifnull(#{model},'')},
-		remark=ifnull(#{remark},'')
+		    device_version    = #{ver},
+			center_id         = #{centerId},
+			produce_time      = #{produce},
+			delivery_time     = #{delivery},
+			model             = ifnull(#{model}, ''),
+			remark            = ifnull(#{remark}, ''),
+			is_invalid        = 0,
+			is_disallowed     = 0,
+			device_id_status  = 2
 		where id=#{id}
 	</update>
 
@@ -52,27 +66,30 @@
         update tbl_device set
         type =
         <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
-            when #{item.device_id} then #{item.type}
+            when #{item.deviceId} then #{item.type}
         </foreach>
         , produce_time =
         <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
-            when #{item.device_id} then #{item.produceTime}
+            when #{item.deviceId} then #{item.produce}
         </foreach>
         , delivery_time =
         <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
-            when #{item.device_id} then #{item.deliveryTime}
+            when #{item.deviceId} then #{item.delivery}
         </foreach>
         , model =
         <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
-            when #{item.device_id} then #{item.model}
+            when #{item.deviceId} then #{item.model}
         </foreach>
         , remark =
         <foreach collection="list" item="item" index="index" separator=" " open="case device_id" close="end">
-            when #{item.device_id} then #{item.remark}
+            when #{item.deviceId} then #{item.remark}
         </foreach>
+        ,is_invalid        = 0
+        ,is_disallowed     = 0
+        ,device_id_status  = 2
         where device_id in
         <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
-            #{item.device_id, jdbcType=INTEGER}
+            #{item.deviceId, jdbcType=INTEGER}
         </foreach>
     </update>
 
@@ -103,25 +120,25 @@
         </foreach>
     </update>
 
-	<select id="getById" parameterType="java.lang.Long" resultType="com.tipray.bean.baseinfo.Device">
+	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0 and d.id=#{id}
 	</select>
 	
-	<select id="getByDeviceId" parameterType="java.lang.Integer" resultType="com.tipray.bean.baseinfo.Device">
+	<select id="getByDeviceId" parameterType="java.lang.Integer" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0 and d.device_id=#{deviceId}
 	</select>
 	
-	<select id="findByCenterId" parameterType="java.lang.Integer" resultType="com.tipray.bean.baseinfo.Device">
+	<select id="findByCenterId" parameterType="java.lang.Integer" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_device d
 		where c.id=#{centerId} and d.is_disallowed=0 and d.is_invalid=0
 	</select>
 	
-	<select id="findByType" parameterType="java.lang.Integer" resultType="com.tipray.bean.baseinfo.Device">
+	<select id="findByType" parameterType="java.lang.Integer" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_device d
 		where d.type=#{deviceType} and d.is_disallowed=0 and d.is_invalid=0
@@ -137,7 +154,7 @@
 		</if>
 	</select>
 	
-	<select id="findByPage" resultType="com.tipray.bean.baseinfo.Device">
+	<select id="findByPage" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0
@@ -153,18 +170,19 @@
 	
 	<insert id="addDevices" parameterType="java.util.List">
 		insert into
-		tbl_device(id,device_id,`type`,device_version,center_id,produce_time,delivery_time,model,remark) values
+		tbl_device(id,device_id,`type`,device_version,center_id,produce_time,delivery_time,model,remark,device_id_status) values
 		<foreach collection="list" item="device" index="index" separator="," > 
 			(
 			#{device.id},
 			#{device.deviceId},
 			#{device.type},
-			ifnull(#{device.deviceVer},0),
+			ifnull(#{device.ver},0),
 			#{device.centerId},
-			#{device.produceTime},
-			#{device.deliveryTime},
+			#{device.produce},
+			#{device.delivery},
 			ifnull(#{device.model},''),
-			ifnull(#{device.remark},'')
+			ifnull(#{device.remark},''),
+            2
 			)
 		</foreach>
 	</insert>

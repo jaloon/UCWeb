@@ -41,6 +41,7 @@ public class TransCompanyController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("transcomModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch transCompany edit page, mode={}, id={}", mode, id);
@@ -53,7 +54,7 @@ public class TransCompanyController extends BaseAction {
         return "normal/transcom/transcomEdit.jsp";
     }
 
-    @PermissionAnno("transcomModule")
+    @PermissionAnno("editTranscom")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addTransCompany(@ModelAttribute TransCompany transCompany) {
@@ -69,15 +70,14 @@ public class TransCompanyController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加运输公司异常：transCompany={}, e={}", transCompany, e.toString());
-            logger.debug("添加运输公司异常堆栈信息：", e);
+            logger.error("添加运输公司异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("transcomModule")
+    @PermissionAnno("editTranscom")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateTransCompany(TransCompany transCompany) {
@@ -93,15 +93,14 @@ public class TransCompanyController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改运输公司异常：transCompany={}, e={}", transCompany, e.toString());
-            logger.debug("修改运输公司异常堆栈信息：", e);
+            logger.error("修改运输公司异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("transcomModule")
+    @PermissionAnno("editTranscom")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteTransCompany(Long id) {
@@ -117,8 +116,7 @@ public class TransCompanyController extends BaseAction {
         } catch (ServiceException e) {
             type++;
             description.append("失败！");
-            logger.error("删除运输公司异常：id={}, e={}", id, e.toString());
-            logger.debug("删除运输公司异常堆栈信息：", e);
+            logger.error("删除运输公司异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -144,7 +142,7 @@ public class TransCompanyController extends BaseAction {
         return transCompanyService.getByName(name) != null;
     }
 
-    @PermissionAnno("transcomModule")
+    @PermissionAnno("viewTranscom")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<TransCompany> ajaxFindTransCompanysForPage(@ModelAttribute TransCompany transCompany,

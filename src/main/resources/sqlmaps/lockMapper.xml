@@ -199,4 +199,16 @@
 		WHERE id = #{id}
 	</select>
 
+    <update id="updateLockRemarks" parameterType="java.util.List">
+        update tbl_lock set
+        remark =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.remark}
+        </foreach>
+        where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item.id, jdbcType=INTEGER}
+        </foreach>
+    </update>
+
 </mapper>

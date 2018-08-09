@@ -42,6 +42,7 @@ public class DriverController extends BaseAction {
 	@Resource
 	private InfoManageLogService infoManageLogService;
 
+	@PermissionAnno("driverModule")
 	@RequestMapping(value = "dispatch.do")
 	public String dispatch(String mode, Long id, ModelMap modelMap) {
 		logger.info("dispatch driver edit page, mode={}, id={}", mode, id);
@@ -54,7 +55,7 @@ public class DriverController extends BaseAction {
 		return "normal/driver/driverEdit.jsp";
 	}
 
-	@PermissionAnno("driverModule")
+	@PermissionAnno("editDriver")
 	@RequestMapping(value = "add.do")
 	@ResponseBody
 	public Message addDriver(@ModelAttribute Driver driver) {
@@ -70,15 +71,14 @@ public class DriverController extends BaseAction {
 		} catch (Exception e) {
 			type++;
 			description.append("失败！");
-			logger.error("添加司机异常：driver={}, e={}", driver, e.toString());
-			logger.debug("添加司机异常堆栈信息：", e);
+			logger.error("添加司机异常！", e);
 			return Message.error(e);
 		} finally {
 			OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
 		}
 	}
 
-	@PermissionAnno("driverModule")
+	@PermissionAnno("editDriver")
 	@RequestMapping(value = "update.do")
 	@ResponseBody
 	public Message updateDriver(Driver driver) {
@@ -94,15 +94,14 @@ public class DriverController extends BaseAction {
 		} catch (Exception e) {
 			type++;
 			description.append("失败！");
-            logger.error("修改司机异常：driver={}, e={}", driver, e.toString());
-            logger.debug("修改司机异常堆栈信息：", e);
+            logger.error("修改司机异常！", e);
 			return Message.error(e);
 		} finally {
 			OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
 		}
 	}
 
-	@PermissionAnno("driverModule")
+	@PermissionAnno("editDriver")
 	@RequestMapping(value = "delete.do")
 	@ResponseBody
 	public Message deleteDriver(Long id) {
@@ -118,15 +117,14 @@ public class DriverController extends BaseAction {
 		} catch (ServiceException e) {
 			type++;
 			description.append("失败！");
-            logger.error("删除司机异常：id={}, e={}", id, e.toString());
-            logger.debug("删除司机异常堆栈信息：", e);
+            logger.error("删除司机异常！", e);
 			return Message.error(e);
 		} finally {
 			OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
 		}
 	}
 
-	@PermissionAnno("driverModule")
+	@PermissionAnno("viewDriver")
 	@RequestMapping(value = "ajaxFindForPage.do")
 	@ResponseBody
 	public GridPage<Driver> ajaxFinddriversForPage(@ModelAttribute Driver driver, @ModelAttribute Page page) {

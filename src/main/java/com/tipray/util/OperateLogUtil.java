@@ -35,8 +35,7 @@ public class OperateLogUtil {
             infoManageLogService.addInfoManageLog(infoManageLog);
             return infoManageLog.getId();
         } catch (Exception e) {
-            logger.error("添加信息管理日志异常：infoManageLog={}, e={}", infoManageLog, e.toString());
-            logger.debug("添加信息管理日志异常堆栈信息：", e);
+            logger.error("添加信息管理日志异常！", e);
             return null;
         }
     }
@@ -89,8 +88,7 @@ public class OperateLogUtil {
             vehicleManageLogService.addVehicleManageLog(vehicleManageLog);
             return vehicleManageLog.getId();
         } catch (Exception e) {
-            logger.error("添加车辆管理日志异常：VehicleManageLog={}, e={}", vehicleManageLog, e.toString());
-            logger.debug("添加车辆管理日志异常堆栈信息：", e);
+            logger.error("添加车辆管理日志异常！", e);
             return null;
         }
     }
@@ -108,8 +106,7 @@ public class OperateLogUtil {
         try {
             vehicleManageLogService.updateVehicleManageLog(vehicleManageLog);
         } catch (Exception e) {
-            logger.error("更新车辆管理日志异常：VehicleManageLog={}, e={}", vehicleManageLog, e.toString());
-            logger.debug("添加车辆管理日志异常堆栈信息：", e);
+            logger.error("更新车辆管理日志异常！", e);
         }
     }
 }

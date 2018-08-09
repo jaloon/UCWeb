@@ -5,18 +5,18 @@ var confirmTr;
 var changeDriverName;
 var addTr;
 
-$(function() {
-    getDriver = function() {
+$(function () {
+    getDriver = function () {
         var drivers = null;
         $.ajax({
             type: "get",
             async: false, //不异步，先执行完ajax，再干别的
             url: "../../manage/driver/findFreeDrivers.do",
             dataType: "json",
-            success: function(response) {
+            success: function (response) {
                 drivers = response;
             },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+            error: function (XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
                 if (XMLHttpRequest.readyState == 4) {
                     var http_status = XMLHttpRequest.status;
                     if (http_status == 0 || http_status > 600) {
@@ -38,19 +38,19 @@ $(function() {
 
     var drivers = getDriver();
 
-    deleteNewTr = function(obj) {
+    deleteNewTr = function (obj) {
         $(obj).closest('tr').remove();
         var serialNo = 0;
-        $(".serialNo").each(function() {
+        $(".serialNo").each(function () {
             serialNo += 1;
             $(this).text(serialNo);
         });
     };
 
-    deleteTr = function(obj, driverId) {
+    deleteTr = function (obj, driverId) {
         deleteNewTr(obj);
         $.getJSON("../../manage/driver/getDriverById.do", encodeURI("id=" + driverId),
-            function(data) {
+            function (data) {
                 var len = drivers.length;
                 if ((len > 0 && !drivers.isContain(data)) || len == 0) {
                     drivers.push(data);
@@ -74,7 +74,7 @@ $(function() {
         });
     };
 
-    confirmTr = function(obj) {
+    confirmTr = function (obj) {
         var tr = $(obj).closest('tr');
         var name = tr.children().eq(2);
         var select = name.children().first();
@@ -95,9 +95,9 @@ $(function() {
         }
     };
 
-    changeDriverName = function(obj, driverId) {
+    changeDriverName = function (obj, driverId) {
         $.getJSON("../../manage/driver/getDriverById.do", encodeURI("id=" + driverId),
-            function(data) {
+            function (data) {
                 var tr = $(obj).closest('tr');
                 var id = tr.children().eq(1);
                 var phone = tr.children().eq(3);
@@ -124,7 +124,7 @@ $(function() {
         });
     };
 
-    addTr = function() {
+    addTr = function () {
         var index = $("#driver_info").find("tr").length - 1;
         var preTr = $("#driver_info").children().eq(0).children().eq(index - 1);
         if (preTr.children().eq(2).children().length > 0) {
@@ -147,27 +147,26 @@ $(function() {
                 "</td></tr>";
             $("#driver_info tr:eq(-2)").after(trHtml);
         } else {
-            layer.alert('没有多余的司机可供分配了，<br>请前往司机管理添加司机！', { icon: 5 });
+            layer.alert('没有多余的司机可供分配了，<br>请前往司机管理添加司机！', {icon: 5});
         }
     };
 
     // 必填字段添加星号标识
-    $('input[required]').each(function(i, e) {
-    	$(e).closest('tr').children().first().prepend('<span style="color:red">* </span>');
+    $('input[required]').each(function (i, e) {
+        $(e).closest('tr').children().first().prepend('<span style="color:red">* </span>');
     });
-    
+
     var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
 
     var success_zh_text = "修改成功！";
     var error_zh_text = "修改失败！";
     var mode = $("#mode").val();
 
-    $("#cancel").click(function() {
+    $("#cancel").click(function () {
         parent.layer.close(index);
     });
 
-    $("#confirm").click(function() {
-        var id = $("#id").val();
+    $("#confirm").click(function () {
         var cid = trimAll($("#cid").val());
         var company = $("#company").val();
         var type = $("#type").val();
@@ -176,24 +175,37 @@ $(function() {
         var store = $.trim($("#store").val());
         var remark = $.trim($("#remark").val());
         var driverIds = "";
-        $(".driverIds").each(function() {
+        $(".driverIds").each(function () {
             driverIds += $(this).text() + ",";
         });
         driverIds = driverIds.substring(0, driverIds.length - 1);
-        var url = "../../manage/car/update.do";
-        var param = "id=" + id + "&carNumber=" + cid + "&transCompany.id=" + company + "&type=" + type + "&sim=" + sim +
-            "&transportCard.transportCardId=" + transcard + "&storeNum=" + store + "&remark=" + remark + "&driverIds=" + driverIds;
-
-        if ("add" == mode) {
+        var url, param;
+        if ("edit" == mode) {
+            var id = $("#id").val();
+            var locks = [];
+            $(".locks").each(function () {
+                var lockTds = $(this).children();
+                locks.push({
+                    id: parseInt(lockTds.first().html(), 10),
+                    remark: lockTds.last().children().first().val()
+                });
+            });
+            url = "../../manage/car/update.do";
+            param = "id=" + id + "&carNumber=" + encodeURIComponent(cid) + "&transCompany.id=" + company
+                + "&type=" + type + "&sim=" + sim + "&transportCard.transportCardId=" + transcard
+                + "&storeNum=" + store + "&remark=" + remark + "&driverIds=" + driverIds
+                + "&locksJson=" + encodeURIComponent(JSON.stringify(locks));
+        } else if ("add" == mode) {
             url = "../../manage/car/add.do";
-            param = "carNumber=" + cid + "&transCompany.id=" + company + "&type=" + type + "&transportCard.transportCardId=" +
-                transcard + "&storeNum=" + store + "&remark=" + remark + "&driverIds=" + driverIds;
+            param = "carNumber=" + encodeURIComponent(cid) + "&transCompany.id=" + company + "&type=" + type
+                + "&transportCard.transportCardId=" + transcard + "&storeNum=" + store + "&remark=" + remark
+                + "&driverIds=" + driverIds;
 
             success_zh_text = "添加成功！";
             error_zh_text = "添加失败！";
 
             if (!isCarNo(cid)) {
-                layer.alert('车牌号不正确，请输入一个完整的车牌号！', { icon: 2 }, function(index2) {
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#cid").select();
                 });
@@ -206,16 +218,16 @@ $(function() {
                     url: "../../manage/car/getCarByNo.do",
                     data: encodeURI("carNo=" + cid),
                     dataType: "json",
-                    success: function(response) {
+                    success: function (response) {
                         if (!isNull(response)) {
                             ajaxFlag = false;
-                            layer.alert('车牌号已存在！', { icon: 5 }, function(index2) {
+                            layer.alert('车牌号已存在！', {icon: 5}, function (index2) {
                                 layer.close(index2);
                                 $("#officialId").select();
                             });
                         }
                     },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
                         if (XMLHttpRequest.readyState == 4) {
                             var http_status = XMLHttpRequest.status;
                             if (http_status == 0 || http_status > 600) {
@@ -240,19 +252,19 @@ $(function() {
 
 
         if (isNull(store)) {
-            layer.alert('仓数不能为空！', { icon: 2 }, function(index2) {
+            layer.alert('仓数不能为空！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#store").select();
             });
             return;
         }
 
-        $.post(url, encodeURI(param),
-            function(data) {
+        $.post(url, param,
+            function (data) {
                 if ("error" == data.msg) {
-                    layer.msg(error_zh_text, { icon: 2, time: 500 });
+                    layer.msg(error_zh_text, {icon: 2, time: 500});
                 } else {
-                    layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
+                    layer.msg(success_zh_text, {icon: 1, time: 500}, function () {
                         parent.layer.close(index);
                     });
                 }

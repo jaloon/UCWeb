@@ -24,7 +24,7 @@ public class RC4KeyCache {
     private static final Integer CENTER_ID = CenterConst.CENTER_ID;
     private static final Integer CENTER_VER = CenterConst.CENTER_VER;
     private static final String RC4_URL = new StringBuffer(PLTONE_URL).append("/api/getCenterRc4.do?id=")
-            .append(CENTER_ID).append(CENTER_ID).append("&ver=").append(CENTER_VER).toString();
+            .append(CENTER_ID).append("&ver=").append(CENTER_VER).toString();
 
     static {
         if (initRc4()) {

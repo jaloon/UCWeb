@@ -45,6 +45,7 @@ public class UserController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("userModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch user edit page, mode={}, id={}", mode, id);
@@ -58,7 +59,7 @@ public class UserController extends BaseAction {
         return "normal/user/userEdit.jsp";
     }
 
-    @PermissionAnno("userModule")
+    @PermissionAnno("editUser")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addUser(@ModelAttribute User user) {
@@ -74,15 +75,14 @@ public class UserController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加操作员异常：user={}, e={}", user, e.toString());
-            logger.debug("添加操作员异常堆栈信息：", e);
+            logger.error("添加操作员异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("userModule")
+    @PermissionAnno("editUser")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateUser(User user) {
@@ -98,15 +98,14 @@ public class UserController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改操作员异常：user={}, e={}", user, e.toString());
-            logger.debug("修改操作员异常堆栈信息：", e);
+            logger.error("修改操作员异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("userModule")
+    @PermissionAnno("editUser")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteUser(Long id) {
@@ -123,15 +122,14 @@ public class UserController extends BaseAction {
         } catch (ServiceException e) {
             type++;
             description.append("失败！");
-            logger.error("删除操作员异常：id={}, e={}", id, e.toString());
-            logger.debug("删除操作员异常堆栈信息：", e);
+            logger.error("删除操作员异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("userModule")
+    @PermissionAnno("editUser")
     @RequestMapping(value = "reset.do")
     @ResponseBody
     public Message resetPassword(User user) {
@@ -148,15 +146,13 @@ public class UserController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("重置密码异常：user={}, e={}", user, e.toString());
-            logger.debug("重置密码异常堆栈信息：", e);
+            logger.error("重置密码异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("userModule")
     @RequestMapping(value = "updatePwd.do")
     @ResponseBody
     public Message updatePassword(User user, String oldPwd) {
@@ -179,8 +175,7 @@ public class UserController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改密码异常：user={}, e={}", user, e.toString());
-            logger.debug("修改密码异常堆栈信息：", e);
+            logger.error("修改密码异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -195,7 +190,7 @@ public class UserController extends BaseAction {
         return bean != null && user.getId() != bean.getId();
     }
 
-    @PermissionAnno("userModule")
+    @PermissionAnno("viewUser")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<User> ajaxFindUsersForPage(@ModelAttribute User user, @ModelAttribute Page page) {
@@ -205,7 +200,7 @@ public class UserController extends BaseAction {
         return gridPage;
     }
 
-    @PermissionAnno("userModule")
+    @PermissionAnno("viewUser")
     @RequestMapping(value = "findForPage.do")
     @ResponseBody
     public String findUsersForPage(User user, Page page, ModelMap modelMap) {

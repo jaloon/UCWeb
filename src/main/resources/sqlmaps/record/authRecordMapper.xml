@@ -45,10 +45,11 @@
     </select>
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.record.AuthorizedRecord">
-		INSERT INTO tbl_authorized ( user_id, auth_code, auth_time, is_app, is_lnglat_valid, longitude, latitude )
+		INSERT INTO tbl_authorized ( user_id, uuid, auth_code, auth_time, is_app, is_lnglat_valid, longitude, latitude )
 		VALUES
 			(
 			  #{userId},
+			  IFNULL(#{uuid}, ''),
 			  #{authCode},
 			  #{authTime},
 			  IFNULL(#{isApp}, 0),

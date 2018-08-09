@@ -116,8 +116,7 @@ public class UdpReceiveResultHandler {
                 }
             } catch (Exception e) {
                 result = "处理应答结果异常！";
-                logger.error("处理业务【{}】应答结果异常：{}", bizId, e.toString());
-                logger.debug("处理业务应答结果异常堆栈信息：", e);
+                logger.error(result, e);
                 msg = ResponseMsgUtil.exception(e);
             } finally {
                 AsynUdpCommCache.putResultCache(cacheId, msg);

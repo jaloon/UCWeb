@@ -5,7 +5,6 @@ import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.dao.DeviceDao;
 import com.tipray.service.DeviceService;
-import com.tipray.util.DateUtil;
 import com.tipray.util.EmptyObjectUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,6 @@ public class DeviceServiceImpl implements DeviceService {
 	@Override
 	public Device addDevice(Device device) {
 		if (device != null) {
-			device = setTime(device);
 			deviceDao.add(device);
 		}
 		return device;
@@ -39,7 +37,6 @@ public class DeviceServiceImpl implements DeviceService {
 	@Override
 	public Device updateDevice(Device device) {
 		if (device != null) {
-			device = setTime(device);
 			deviceDao.update(device);
 		}
 		return device;
@@ -95,13 +92,6 @@ public class DeviceServiceImpl implements DeviceService {
 	@Override
 	public Device getDeviceByDeviceId(Integer deviceId) {
 		return deviceDao.getByDeviceId(deviceId);
-	}
-
-	private Device setTime(Device device) {
-		String pattern = "yyyy-MM-dd HH:mm:ss";
-		device.setProduceTime(DateUtil.convertDateStrToDate(device.getProduce(), pattern));
-		device.setDeliveryTime(DateUtil.convertDateStrToDate(device.getDelivery(), pattern));
-		return device;
 	}
 
 	@Override

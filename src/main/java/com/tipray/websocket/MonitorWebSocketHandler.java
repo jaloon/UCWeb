@@ -137,14 +137,14 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         try {
             msgText = URLDecoder.decode((String) message.getPayload(), "utf-8");
         } catch (UnsupportedEncodingException e) {
-            logger.error("接收WebSocket信息解码异常：", e.getMessage());
+            logger.error("接收WebSocket信息解码异常：{}", e.getMessage());
             return;
         }
         Map<String, Object> msgMap;
         try {
             msgMap = JSONUtil.parseToMap(msgText);
         } catch (Exception e) {
-            logger.error("JSON解析异常：", e.getMessage());
+            logger.error("JSON解析异常：{}", e.getMessage());
             return;
         }
         Long sessionId = Long.parseLong(session.getId(), 16);
@@ -258,7 +258,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     }
                 }
             } catch (Exception e) {
-                logger.error("普通监控：WebSocket通信异常：{}", e.getMessage());
+                logger.error("普通监控：WebSocket通信异常！", e);
             }
         }
     }
@@ -328,8 +328,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，重点监控异常！";
-                    logger.error("重点监控异常：e={}", e.toString());
-                    logger.debug("重点监控异常堆栈信息：", e);
+                    logger.error("重点监控异常！", e);
                     WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
                 } finally {
                     updateLog(vehicleManageLog, type, result);
@@ -409,8 +408,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，重点监控取消异常！";
-                    logger.error("重点监控取消异常：e={}", e.toString());
-                    logger.debug("重点监控取消异常堆栈信息：", e);
+                    logger.error("重点监控取消异常！", e);
                 } finally {
                     updateLog(vehicleManageLog, type, result);
                 }
@@ -503,8 +501,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         removeUdpCache(cacheId, description);
                         result = "失败，实时监控异常！";
                         carNoBuf.append(car.getCarNumber()).append('、');
-                        logger.error("实时监控异常：e={}", e.toString());
-                        logger.debug("实时监控异常堆栈信息：", e);
+                        logger.error("实时监控异常！", e);
                     } finally {
                         updateLog(vehicleManageLog, type, result);
                     }
@@ -586,8 +583,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，实时监控取消异常！";
-                    logger.error("实时监控取消异常：e={}", e.toString());
-                    logger.debug("实时监控取消异常堆栈信息：", e);
+                    logger.error("实时监控取消异常！", e);
                 } finally {
                     updateLog(vehicleManageLog, type, result);
                 }
@@ -927,6 +923,9 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         }
         if (((paramStatus >> 10) & 1) > 0) {
             strBuf.append("，车辆轨迹上报参数未同步！");
+        }
+        if (((paramStatus >> 11) & 1) > 0) {
+            strBuf.append("，车台功能启用配置未同步！");
         }
         if (strBuf.length() > 0) {
             strBuf.insert(0, carNumber);

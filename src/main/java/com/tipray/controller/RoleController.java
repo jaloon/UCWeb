@@ -65,7 +65,7 @@ public class RoleController extends BaseAction {
         return "normal/role/roleEditDlg.jsp";
     }
 
-    @PermissionAnno("roleModule")
+    @PermissionAnno("editRole")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addRole(@ModelAttribute Role role) {
@@ -81,15 +81,14 @@ public class RoleController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加角色异常：role={}, e={}", role, e.toString());
-            logger.debug("添加角色异常堆栈信息：", e);
+            logger.error("添加角色异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("roleModule")
+    @PermissionAnno("editRole")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateRole(@ModelAttribute Role role) {
@@ -111,16 +110,14 @@ public class RoleController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加角色异常：role={}, e={}", role, e.toString());
-            logger.debug("添加角色异常堆栈信息：", e);
-            logger.error("修改角色异常：\n{}", e.toString());
+            logger.error("修改角色异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("roleModule")
+    @PermissionAnno("editRole")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteRoles(Long id, Integer app) {
@@ -136,8 +133,7 @@ public class RoleController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除角色异常：id={}, e={}", id, e.toString());
-            logger.debug("删除角色异常堆栈信息：", e);
+            logger.error("删除角色异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -152,7 +148,7 @@ public class RoleController extends BaseAction {
         return bean != null && role.getId() != bean.getId();
     }
 
-    @PermissionAnno("roleModule")
+    @PermissionAnno("viewRole")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Role> ajaxFindRolesForPage(@ModelAttribute Role role, @ModelAttribute Page page) {

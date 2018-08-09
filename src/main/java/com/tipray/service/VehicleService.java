@@ -36,7 +36,7 @@ public interface VehicleService {
      * @param Vehicle
      * @throws ServiceException
      */
-    Vehicle updateCar(Vehicle car, String driverIds) throws ServiceException;
+    Vehicle updateCar(Vehicle car, String driverIds, List<Lock> locks) throws ServiceException;
 
     /**
      * 删除车辆
@@ -448,8 +448,9 @@ public interface VehicleService {
      *
      * @param terminalUpgradeInfo 车台升级信息
      * @param terminalIdList      车台ID集合
+     * @return 升级批次
      */
-    void terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList);
+    Long terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList);
 
     /**
      * 查询未完成升级的车辆信息

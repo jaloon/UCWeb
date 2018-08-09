@@ -170,6 +170,7 @@
 -- 			,tbl_vehicle_realtime_status s
 		WHERE
 			t.vehicle_id = c.id
+			AND c.vehicle_device_id > 0
 -- 			AND tt.vehicle_id = c.id
 -- 			AND s.vehicle_id = c.id
 			AND t.oildepot_id = o.id

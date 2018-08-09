@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -64,43 +63,31 @@ public class DeviceTest {
 		device.setDeviceId(1);
 		device.setType(2);
 		device.setCenterId(2);
-		device.setProduceTime(new Date());
-		device.setDeliveryTime(new Date());
 
 		Device device1 = new Device();
 		device1.setDeviceId(2);
 		device1.setType(1);
 		device1.setCenterId(1);
-		device1.setProduceTime(new Date());
-		device1.setDeliveryTime(new Date());
 
 		Device device2 = new Device();
 		device2.setDeviceId(3);
 		device2.setType(3);
 		device2.setCenterId(3);
-		device2.setProduceTime(new Date());
-		device2.setDeliveryTime(new Date());
 
 		Device device3 = new Device();
 		device3.setDeviceId(4);
 		device3.setType(4);
 		device3.setCenterId(3);
-		device3.setProduceTime(new Date());
-		device3.setDeliveryTime(new Date());
 
 		Device device4 = new Device();
 		device4.setDeviceId(5);
 		device4.setType(5);
 		device4.setCenterId(4);
-		device4.setProduceTime(new Date());
-		device4.setDeliveryTime(new Date());
 
 		Device device5 = new Device();
 		device5.setDeviceId(6);
 		device5.setType(2);
 		device5.setCenterId(1);
-		device5.setProduceTime(new Date());
-		device5.setDeliveryTime(new Date());
 
 		try {
 			deviceService.addDevice(device);
@@ -120,8 +107,6 @@ public class DeviceTest {
 		device.setId(4L);
 		device.setType(2);
 		device.setCenterId(2);
-		device.setProduceTime(new Date());
-		device.setDeliveryTime(new Date());
 		try {
 			deviceService.updateDevice(device);
 		} catch (ServiceException e) {

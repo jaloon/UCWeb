@@ -8,9 +8,6 @@
 package com.tipray.bean.baseinfo;
 
 import com.tipray.core.base.BaseBean;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
 
 /**
  * 设备信息表
@@ -35,7 +32,7 @@ public class Device extends BaseBean {
     /**
      * 设备版本
      */
-    private Integer deviceVer;
+    private Integer ver;
     /**
      * 用户中心ID
      */
@@ -51,19 +48,9 @@ public class Device extends BaseBean {
     /**
      * 出厂时间
      */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date produceTime;
-    /**
-     * 出厂时间字符串
-     */
     private String produce;
     /**
      * 发货时间
-     */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date deliveryTime;
-    /**
-     * 发货时间字符串
      */
     private String delivery;
 
@@ -91,12 +78,12 @@ public class Device extends BaseBean {
         this.typeName = typeName;
     }
 
-    public Integer getDeviceVer() {
-        return deviceVer;
+    public Integer getVer() {
+        return ver;
     }
 
-    public void setDeviceVer(Integer deviceVer) {
-        this.deviceVer = deviceVer;
+    public void setVer(Integer ver) {
+        this.ver = ver;
     }
 
     public Integer getCenterId() {
@@ -123,28 +110,12 @@ public class Device extends BaseBean {
         this.model = model;
     }
 
-    public Date getProduceTime() {
-        return produceTime;
-    }
-
-    public void setProduceTime(Date produceTime) {
-        this.produceTime = produceTime;
-    }
-
     public String getProduce() {
         return produce;
     }
 
     public void setProduce(String produce) {
         this.produce = produce;
-    }
-
-    public Date getDeliveryTime() {
-        return deliveryTime;
-    }
-
-    public void setDeliveryTime(Date deliveryTime) {
-        this.deliveryTime = deliveryTime;
     }
 
     public String getDelivery() {
@@ -170,8 +141,8 @@ public class Device extends BaseBean {
         if (typeName != null) {
             sb.append(", typeName='").append(typeName).append('\'');
         }
-        if (deviceVer != null) {
-            sb.append(", deviceVer=").append(deviceVer);
+        if (ver != null) {
+            sb.append(", ver=").append(ver);
         }
         if (centerId != null) {
             sb.append(", centerId=").append(centerId);
@@ -182,14 +153,8 @@ public class Device extends BaseBean {
         if (model != null) {
             sb.append(", model='").append(model).append('\'');
         }
-        if (produceTime != null) {
-            sb.append(", produceTime=").append(produceTime);
-        }
         if (produce != null) {
             sb.append(", produce='").append(produce).append('\'');
-        }
-        if (deliveryTime != null) {
-            sb.append(", deliveryTime=").append(deliveryTime);
         }
         if (delivery != null) {
             sb.append(", delivery='").append(delivery).append('\'');

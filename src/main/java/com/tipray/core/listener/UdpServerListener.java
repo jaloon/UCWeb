@@ -1,15 +1,14 @@
 package com.tipray.core.listener;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
+import com.tipray.cache.AsynUdpCommCache;
+import com.tipray.net.NioUdpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.tipray.cache.AsynUdpCommCache;
-import com.tipray.net.NioUdpServer;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 /**
  * 监听容器动作，控制udp服务启动/关闭
@@ -36,7 +35,7 @@ public class UdpServerListener implements ServletContextListener {
 			AsynUdpCommCache.heartbeatDetection(0);
 			logger.info("UdpServer started.");
 		} catch (Exception e) {
-			logger.error("Failed to start UdpServer!\n{}", e.toString());
+			logger.error("Failed to start UdpServer! ", e);
 		}
 	}
 

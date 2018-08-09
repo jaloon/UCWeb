@@ -218,6 +218,7 @@
 <script>
     var add = false;
     var lockLayer;
+    var liObj;
 
     function openLockLayer() {
         var title = "更改";
@@ -243,6 +244,7 @@
     function addLock() {
         add = true;
         openLockLayer();
+        setComboSelectVal("#lock_id", "");
     }
 
     function delLock(obj) {
@@ -250,14 +252,30 @@
     }
 
     function alterLock(obj) {
+        liObj = $(obj).closest("li");
         add = false;
         openLockLayer();
         var nextAll = $(obj).nextAll();
-        $("#lock_id").val(nextAll.eq(0).html());
+        // $("#lock_id").val(nextAll.eq(0).html());
+        setComboSelectVal("#lock_id", nextAll.eq(0).html());
         $("#store_id").val(nextAll.eq(1).html());
         $("#seat").val(nextAll.eq(2).html());
         $("#seat_index").val(nextAll.eq(3).html());
         $("#open_allowed").val(nextAll.eq(4).html());
+    }
+
+    function setComboSelectVal(elId, val) {
+        var $select = $(elId);
+        $select.val(val);
+        var $ul = $select.next().next()
+        $ul.children().each(function () {
+            if (val == $(this).attr("data-value")) {
+                $(this).addClass("option-selected option-hover");
+            } else {
+                $(this).removeClass("option-selected option-hover");
+            }
+        })
+        $ul.next().val(val);
     }
 
     $(function () {
@@ -341,6 +359,7 @@
                 }
             }
         });
+        
 
         // 1: 待车台触发确认 | 2：车台已触发确认
         function parseLock(lock) {
@@ -374,15 +393,20 @@
                             data.forEach(function (lock) {
                                 if (lock.lock_device_id != 0) {
                                     if (bindType == 2) {
-                                        liHtml += "<li><span class='layable' onclick='alterLock(this)'>" + parseLock(lock) + "</span>"
+                                        liHtml += "<li><span class='layable' onclick='alterLock(this)'>" + parseLock(lock) + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.lock_device_id + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.store_id + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.seat + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.seat_index + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.is_allowed_open + "</span></li>";
                                     } else {
-                                        liHtml += "<li><label><input type='checkbox' class='check-locks'>" + parseLock(lock) + "</label>";
+                                        liHtml += "<li><label><input type='checkbox' class='check-locks'>" + parseLock(lock) +
+                                            "<span style=\"display: none;\">" + lock.lock_device_id + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.store_id + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.seat + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.seat_index + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.is_allowed_open + "</span></label></li>";
                                     }
-                                    liHtml += "<span style=\"display: none;\">" + lock.lock_device_id + "</span>" +
-                                        "<span style=\"display: none;\">" + lock.store_id + "</span>" +
-                                        "<span style=\"display: none;\">" + lock.seat + "</span>" +
-                                        "<span style=\"display: none;\">" + lock.seat_index + "</span>" +
-                                        "<span style=\"display: none;\">" + lock.is_allowed_open + "</span></li>";
                                 }
                             });
                             if (liHtml.length == 0) {
@@ -462,7 +486,7 @@
                 });
                 return;
             }
-            var lockHtml = lock_id + "，" + store_id + "号" + (seat == 1 ? "上仓锁" : "下仓锁") + seat_index + "，" + (open_allowed == 1 ? "不" : "") + "允许开锁";
+            var lockHtml = lock_id + "-仓" + store_id + (seat == 1 ? "-上仓锁-" : "-下仓锁-") + seat_index + (open_allowed == 1 ? "-不" : "-") + "允许开锁";
             var liHtml = "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delLock(this)\">\n" +
                 "<span class='layable' onclick='alterLock(this)'>锁：" + lockHtml + "</span>" +
                 "<span style=\"display: none;\">" + lock_id + "</span>" +
@@ -494,7 +518,14 @@
                 return;
             }
             var bind_type = $("#bind_type").val();
-            var lockNum = $("#locks").children().length - 1;
+            var $bindLock = $(".layable");
+            if (bind_type == 3) {
+                $bindLock = $(".check-locks:checked");
+            }
+            var lockNum = $bindLock.length;
+            if (bind_type == 1) {
+                lockNum--;
+            }
             if (lockNum == 0) {
                 layer.alert('至少要重置一把锁！', {icon: 2}, function (index2) {
                     layer.close(index2);
@@ -504,13 +535,13 @@
             }
             var locks = [];
             for (var i = 0; i < lockNum; i++) {
-                var li = $("#locks").children().eq(i);
+                var nextAll = $bindLock.eq(i).nextAll();
                 locks.push({
-                    lockId: parseInt(li.children().eq(2).html(), 10),
-                    storeId: parseInt(li.children().eq(3).html(), 10),
-                    seat: parseInt(li.children().eq(4).html(), 10),
-                    seatIndex: parseInt(li.children().eq(5).html(), 10),
-                    allowOpen: parseInt(li.children().eq(6).html(), 10)
+                    lockId: parseInt(nextAll.eq(0).html(), 10),
+                    storeId: parseInt(nextAll.eq(1).html(), 10),
+                    seat: parseInt(nextAll.eq(2).html(), 10),
+                    seatIndex: parseInt(nextAll.eq(3).html(), 10),
+                    allowOpen: parseInt(nextAll.eq(4).html(), 10)
                 });
             }
             var binding_locks = encodeURIComponent(JSON.stringify(locks));

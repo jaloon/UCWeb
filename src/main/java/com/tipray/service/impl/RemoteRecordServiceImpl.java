@@ -73,7 +73,7 @@ public class RemoteRecordServiceImpl implements RemoteRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常：{}", e.toString());
+                logger.error("轨迹数据异常！", e);
             }
         }
         return list;

@@ -89,8 +89,7 @@ public class LoginValidateFilter implements Filter {
                 response.sendRedirect(location);
             }
         } catch (Exception e) {
-            log.error("登录过滤器异常：\n{}", e.toString());
-            log.debug("登录过滤器异常堆栈信息：", e);
+            log.error("登录过滤器异常！", e);
             throw new ServletException(e);
         }
     }

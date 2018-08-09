@@ -1,5 +1,6 @@
 package com.tipray.websocket;
 
+import com.tipray.bean.alarm.AlarmInfo;
 import com.tipray.bean.record.AlarmRecord;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.util.EmptyObjectUtil;
@@ -83,7 +84,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      */
     private void dealWebSocketOpen(WebSocketSession session) {
         // 报警业务类型 （100 消除报警，110 报警(default)，111 缓存报警）
-        List<AlarmRecord> alarmRecordsCache = alarmRecordService.findNotElimited();
+        List<AlarmInfo> alarmRecordsCache = alarmRecordService.findNotElimitedAlarmInfo();
         if (EmptyObjectUtil.isEmptyList(alarmRecordsCache)) {
             return;
         }
@@ -96,8 +97,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
             String alarmCacheMsg = JSONUtil.stringify(alarmCacheMap);
             sessionDecorator.sendMessage(new TextMessage(alarmCacheMsg));
         } catch (Exception e) {
-            logger.error("send cache alarm msg to {} error: {}", sessionId, e.toString());
-            logger.debug("send cache alarm msg error stack: ", e);
+            logger.error("send cache alarm msg error！", e);
         }
 
     }

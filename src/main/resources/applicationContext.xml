@@ -20,7 +20,7 @@
     <aop:aspectj-autoproxy proxy-target-class="true"/>
 
     <bean id="springBeanUtil" class="com.tipray.util.SpringBeanUtil" scope="singleton" lazy-init="false"/>
-    <bean id="ftpServer" class="com.tipray.ftp.FtpServer" scope="singleton" lazy-init="false"/>
+    <!--<bean id="ftpServer" class="com.tipray.ftp.FtpServer" scope="singleton" lazy-init="false"/>-->
     <bean id="udpServer" class="com.tipray.net.NioUdpServer" scope="singleton" lazy-init="false"/>
 
     <!-- <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

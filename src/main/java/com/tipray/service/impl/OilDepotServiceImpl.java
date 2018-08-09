@@ -89,9 +89,8 @@ public class OilDepotServiceImpl implements OilDepotService {
             }
             setParamVer(JDBC_UTIL_OIL, SqliteFileConst.OIL_DEPOT);
         } catch (SQLException e) {
-            logger.error("批量导入：sqlite批量添加油库异常！\n{}", e.toString());
             JDBC_UTIL_OIL.rollback();
-            throw new ServiceException("批量导入：批量添加油库异常！", e);
+            throw new ServiceException("批量导入：sqlite批量添加油库异常！", e);
         } finally {
             JDBC_UTIL_OIL.close();
         }

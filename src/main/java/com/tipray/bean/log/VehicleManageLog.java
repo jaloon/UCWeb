@@ -29,9 +29,17 @@ public class VehicleManageLog extends BaseBean {
      */
     private String result;
     /**
+     * 远程操作记录ID
+     */
+    private Integer remoteId;
+    /**
      * 是否手机操作
      */
     private Integer isApp = 0;
+    /**
+     * 设备uuid
+     */
+    private String uuid;
     /**
      * UDP业务ID
      */
@@ -78,11 +86,18 @@ public class VehicleManageLog extends BaseBean {
         setIsApp(isApp);
     }
 
-    public VehicleManageLog(User user, Integer isApp, short udpBizId) {
+    public VehicleManageLog(User user, Integer isApp, Short udpBizId) {
         super();
         this.user = user;
         setIsApp(isApp);
         this.udpBizId = udpBizId;
+    }
+
+    public VehicleManageLog(User user, Integer isApp, String uuid) {
+        super();
+        this.user = user;
+        setIsApp(isApp);
+        this.uuid = uuid;
     }
 
     public User getUser() {
@@ -117,6 +132,14 @@ public class VehicleManageLog extends BaseBean {
         this.result = result;
     }
 
+    public Integer getRemoteId() {
+        return remoteId;
+    }
+
+    public void setRemoteId(Integer remoteId) {
+        this.remoteId = remoteId;
+    }
+
     public Integer getIsApp() {
         return isApp;
     }
@@ -127,6 +150,13 @@ public class VehicleManageLog extends BaseBean {
         }
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
     public Short getUdpBizId() {
         return udpBizId;
     }
@@ -193,8 +223,14 @@ public class VehicleManageLog extends BaseBean {
         if (result != null) {
             sb.append(", result='").append(result).append('\'');
         }
+        if (remoteId != null) {
+            sb.append(", remoteId=").append(remoteId);
+        }
         if (isApp != null) {
             sb.append(", isApp=").append(isApp);
+        }
+        if (uuid != null) {
+            sb.append(", uuid='").append(uuid).append('\'');
         }
         if (udpBizId != null) {
             sb.append(", udpBizId=").append(udpBizId);

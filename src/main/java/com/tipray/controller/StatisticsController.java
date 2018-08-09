@@ -5,6 +5,7 @@ import com.tipray.bean.Page;
 import com.tipray.bean.Record;
 import com.tipray.bean.record.*;
 import com.tipray.constant.StatisticsMode;
+import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
 import com.tipray.service.*;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ public class StatisticsController extends BaseAction {
     @Resource
     private CardAndDeviceUseRecordService cardAndDeviceUseRecordService;
 
+    @PermissionAnno("statisticsManage")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch record bmap page, mode={}, id={}", mode, id);
@@ -79,6 +81,7 @@ public class StatisticsController extends BaseAction {
         return "normal/statistics/viewBmap.jsp";
     }
 
+    @PermissionAnno("alarmRecordModule")
     @RequestMapping(value = "findAlarmRecordsForPage.do")
     @ResponseBody
     public GridPage<AlarmRecord> findAlarmRecordsForPage(@ModelAttribute AlarmRecord alarmRecord,
@@ -88,6 +91,7 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("remoteRecordModule")
     @RequestMapping(value = "findRemoteRecordsForPage.do")
     @ResponseBody
     public GridPage<RemoteRecord> findRemoteRecordsForPage(@ModelAttribute RemoteRecord remoteRecord,
@@ -97,6 +101,7 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("lockStatusModule")
     @RequestMapping(value = "findLockRecordsForPage.do")
     @ResponseBody
     public GridPage<LockRecord> findLockRecordsForPage(@ModelAttribute LockRecord lockRecord,
@@ -106,6 +111,7 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("inAndOutRecordModule")
     @RequestMapping(value = "findInOutRecordsForPage.do")
     @ResponseBody
     public GridPage<InOutRecord> findInOutRecordsForPage(@ModelAttribute InOutRecord inOutRecord,
@@ -115,6 +121,7 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("transRecordModule")
     @RequestMapping(value = "findDistributionRecordsForPage.do")
     @ResponseBody
     public GridPage<DistributionRecord> findDistributionRecordsForPage(
@@ -124,6 +131,7 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("changeRecordModule")
     @RequestMapping(value = "findChangeRecordsForPage.do")
     @ResponseBody
     public GridPage<ChangeRecord> findChangeRecordsForPage(@ModelAttribute ChangeRecord changeRecord,
@@ -133,6 +141,7 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
+    @PermissionAnno("cardUseRecordModule")
     @RequestMapping(value = "findDeviceRecordsForPage.do")
     @ResponseBody
     public GridPage<CardAndDeviceUseRecord> findDeviceRecordsForPage(@ModelAttribute CardAndDeviceUseRecord useRecord,
@@ -147,6 +156,7 @@ public class StatisticsController extends BaseAction {
      *
      * @return
      */
+    @PermissionAnno("alarmList")
     @RequestMapping(value = "findAlarms.do")
     @ResponseBody
     public List<Map<String, Object>> findAlarms() {

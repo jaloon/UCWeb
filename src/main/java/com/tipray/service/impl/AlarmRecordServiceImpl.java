@@ -2,6 +2,8 @@ package com.tipray.service.impl;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.alarm.AlarmDevice;
+import com.tipray.bean.alarm.AlarmInfo;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.record.AlarmRecord;
 import com.tipray.bean.track.TrackInfo;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -144,7 +148,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常：{}", e.toString());
+                logger.error("轨迹数据异常！", e);
             }
         }
         return list;
@@ -193,10 +197,26 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常：{}", e.toString());
+                logger.error("轨迹数据异常！", e);
             }
         }
         return list;
+    }
+
+    @Override
+    public List<AlarmInfo> findNotElimitedAlarmInfo() {
+        List<AlarmInfo> alarmInfos = new ArrayList<>();
+        List<AlarmDevice> alarmDevices = alarmRecordDao.findNotElimitedAlarmDevice();
+        if (!EmptyObjectUtil.isEmptyList(alarmDevices)) {
+            for (AlarmDevice alarmDevice : alarmDevices) {
+                AlarmInfo alarmInfo = alarmRecordDao.getAlarmInfoByAlarmDevcie(alarmDevice);
+                if (alarmInfo != null) {
+                    alarmInfos.add(alarmInfo);
+                }
+            }
+            Collections.sort(alarmInfos);
+        }
+        return alarmInfos;
     }
 
     @Override

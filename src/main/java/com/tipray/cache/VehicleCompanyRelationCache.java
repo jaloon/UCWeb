@@ -32,7 +32,7 @@ public class VehicleCompanyRelationCache {
 				CAR_COMPANY_RELATION_MAP.put(carId, comName);
 			}
 		} catch (SQLException e) {
-			logger.error("初始化车辆与所属运输公司对应关系缓存异常！\n{}", e.toString());
+			logger.error("初始化车辆与所属运输公司对应关系缓存异常！", e);
 		} finally {
 			JDBC_UTIL.close();
 		}
@@ -62,7 +62,7 @@ public class VehicleCompanyRelationCache {
 				return comName;
 			}
 		} catch (SQLException e) {
-			logger.error("根据车辆ID获取车辆所属公司名称异常！\n{}", e.toString());
+			logger.error("根据车辆ID获取车辆所属公司名称异常！", e);
 		} finally {
 			JDBC_UTIL.close();
 		}

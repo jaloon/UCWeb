@@ -90,7 +90,7 @@ public class CenterVariableConfig {
             }
 
         } catch (IOException e) {
-            logger.error("加载中心变量配置文件异常！\n{}", e.getMessage());
+            logger.error("加载中心变量配置文件异常！", e);
         }
     }
 }

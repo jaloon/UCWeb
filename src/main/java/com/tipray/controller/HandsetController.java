@@ -41,6 +41,7 @@ public class HandsetController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
+    @PermissionAnno("handsetModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch handset edit page, mode={}, id={}", mode, id);
@@ -53,7 +54,7 @@ public class HandsetController extends BaseAction {
         return "normal/handset/handsetEdit.jsp";
     }
 
-    @PermissionAnno("deviceModule")
+    @PermissionAnno("editHandset")
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addHandset(@ModelAttribute Handset handset) {
@@ -69,15 +70,14 @@ public class HandsetController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("添加手持机异常：handset={}, e={}", handset, e.toString());
-            logger.debug("添加手持机异常堆栈信息：", e);
+            logger.error("添加手持机异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("deviceModule")
+    @PermissionAnno("editHandset")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateHandset(@ModelAttribute Handset handset) {
@@ -93,15 +93,14 @@ public class HandsetController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("修改手持机异常：handset={}, e={}", handset, e.toString());
-            logger.debug("修改手持机异常堆栈信息：", e);
+            logger.error("修改手持机异常error", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
         }
     }
 
-    @PermissionAnno("deviceModule")
+    @PermissionAnno("editHandset")
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteHandset(Long id) {
@@ -117,8 +116,7 @@ public class HandsetController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("删除手持机异常：id={}, e={}", id, e.toString());
-            logger.debug("删除手持机异常堆栈信息：", e);
+            logger.error("删除手持机异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -143,7 +141,7 @@ public class HandsetController extends BaseAction {
         return handsetService.findUnconfigGasStation();
     }
 
-    @PermissionAnno("viewDevice")
+    @PermissionAnno("viewHandset")
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Handset> ajaxFindHandsetsForPage(@ModelAttribute Handset handset, @ModelAttribute Page page) {

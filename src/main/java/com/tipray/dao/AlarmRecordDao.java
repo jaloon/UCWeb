@@ -1,5 +1,7 @@
 package com.tipray.dao;
 
+import com.tipray.bean.alarm.AlarmDevice;
+import com.tipray.bean.alarm.AlarmInfo;
 import com.tipray.bean.record.AlarmRecord;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
@@ -83,6 +85,19 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
      * @return 未消除的报警信息
      */
     List<AlarmRecord> findNotElimited();
+
+    /**
+     * 获取未消除的报警设备
+     * @return
+     */
+    List<AlarmDevice> findNotElimitedAlarmDevice();
+
+    /**
+     * 根据报警设备获取报警信息
+     * @param alarmDevice
+     * @return
+     */
+    AlarmInfo getAlarmInfoByAlarmDevcie(AlarmDevice alarmDevice);
 
     /**
      * 获取未消除的报警信息(按数据库字段名称)

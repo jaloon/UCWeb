@@ -201,7 +201,7 @@ public class ElockWebService {
                     logger.info("配送单：{}，修改成功!", distributionMap.get("distributNO"));
                 }
             } catch (ServiceException e) {
-                logger.error("配送信息存储异常！\n{}", e.toString());
+                logger.error("配送信息存储异常！", e);
                 return "<Message>fail：配送信息存储异常！</Message>";
             }
         }

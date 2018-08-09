@@ -7,6 +7,7 @@ import com.tipray.core.exception.PermissionException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * SessionService
@@ -110,4 +111,10 @@ public interface SessionService {
      * @param timeoutDate 过期临界时间
      */
     void deleteTimeOutSession(Date timeoutDate);
+
+    /**
+     * 获取session列表
+     * @return
+     */
+    Map<String, Session> findSessions();
 }
