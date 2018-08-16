@@ -81,7 +81,8 @@
 		latitude=#{latitude},
 		cover_radius=#{radius},
 		cover_lonlatlist_region=#{cover},
-		remark=ifnull(#{remark},'')
+		remark=ifnull(#{remark},''),
+		is_invalid = 0
 		where id=#{id}
 	</update>
 	<delete id="deleteGasStationCardsById" parameterType="java.lang.Long">
@@ -99,6 +100,13 @@
 		is_invalid=1 
 		where id=#{id}
 	</update>
+
+	<delete id="deleteByIds" parameterType="java.util.List">
+		delete from tbl_gasstation where id in
+		<foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+			#{item, jdbcType=INTEGER}
+		</foreach>
+	</delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
@@ -254,5 +262,17 @@
                 tbl_gasstation
 		]]>
 	</select>
+
+    <select id="countValidGasStation" parameterType="com.tipray.bean.baseinfo.GasStation" resultType="java.lang.Integer">
+        select count(id) from tbl_gasstation
+        where (official_id = #{officialId} or `name` = #{name} or short_name = #{abbr})
+        and is_invalid = 0
+    </select>
+
+    <select id="findInvalidGasStation" parameterType="com.tipray.bean.baseinfo.GasStation" resultType="java.lang.Long">
+        select id from from tbl_gasstation
+        where (official_id = #{officialId} or `name` = #{name} or short_name = #{abbr})
+        and is_invalid = 1
+    </select>
 
 </mapper>

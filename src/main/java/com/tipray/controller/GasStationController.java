@@ -147,7 +147,7 @@ public class GasStationController extends BaseAction {
     @ResponseBody
     public Boolean isGasStationExist(GasStation gasStation) {
         logger.info("gasStation exist, gasStation={}", gasStation);
-        return gasStationService.isGasStationExist(gasStation) != null;
+        return gasStationService.isGasStationExist(gasStation);
     }
 
     @RequestMapping(value = "getGasStationList.do")

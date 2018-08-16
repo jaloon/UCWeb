@@ -65,6 +65,5 @@
 	<select id="findByIds" parameterType="java.lang.String" resultMap="baseResultMap">
 		select * from tbl_role where id in (${value})
 	</select>
-	
-	
+
 </mapper>

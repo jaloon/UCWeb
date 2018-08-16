@@ -116,6 +116,7 @@ public class SessionController extends BaseAction {
                 if (isApp == null || isApp == 0) {
                     return ResponseMsgUtil.success("已登录！");
                 }
+                request.getSession().setAttribute("appdev-uuid", uuid);
                 Role appRole = sessionService.userCheck(user, isApp).getAppRole();
                 return ResponseMsgUtil.success(getAppPermissions(appRole));
             }
@@ -135,6 +136,7 @@ public class SessionController extends BaseAction {
             if (isApp == null || isApp == 0) {
                 msg = ResponseMsgUtil.success();
             } else {
+                request.getSession().setAttribute("appdev-uuid", uuid);
                 Role appRole = session.getUser().getAppRole();
                 msg = ResponseMsgUtil.success(getAppPermissions(appRole));
             }

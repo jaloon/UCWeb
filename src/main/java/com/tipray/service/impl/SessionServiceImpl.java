@@ -126,7 +126,14 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public User userCheck(User user, Integer isApp) throws LoginException, PermissionException {
-        User userDb = userService.getUserByAccount(user.getAccount());
+        String account = user.getAccount();
+        if (StringUtil.isEmpty(account)) {
+            throw new LoginException("账号错误");
+        }
+        if (account.equals("admin") && isApp > 0) {
+            throw new PermissionException(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
+        }
+        User userDb = userService.getUserByAccount(account);
         if (userDb == null) {
             throw new LoginException("账号错误");
         }

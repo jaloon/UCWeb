@@ -12,7 +12,9 @@
  * @return {boolean} 是否CSS滤镜
  */
 function grayscale(obj) {
+    $(".alarm-num").html("");
     obj.css("cursor", "default");
+    obj.next().css("cursor", "default");
     if (-[1, ]) {
         // 不是IE8及以下版本IE浏览器
         var browser = IEVersion();
@@ -42,6 +44,7 @@ function grayscale(obj) {
  */
 function removeGrayscale(obj, cssfilter, imgUrl) {
     obj.css("cursor", "pointer");
+    obj.next().css("cursor", "pointer");
     if (cssfilter) {
         obj.css("filter", 'grayscale(0)');
         return;

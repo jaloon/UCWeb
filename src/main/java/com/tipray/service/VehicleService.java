@@ -167,6 +167,14 @@ public interface VehicleService {
     void terminalUnbind(String carNumber, Integer terminalId) throws ServiceException;
 
     /**
+     * 轨迹车载终端设备ID获取车牌号
+     *
+     * @param terminalId {@link Integer} 车载终端设备ID
+     * @return {@link String} 车牌号
+     */
+    String getCarNumberByTerminalId(Integer terminalId);
+
+    /**
      * 查询绑定了车载终端的车辆
      *
      * @return

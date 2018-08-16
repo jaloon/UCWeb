@@ -98,7 +98,7 @@ public interface GasStationService {
 	 * @param gasStation
 	 * @return
 	 */
-    GasStation isGasStationExist(GasStation gasStation);
+    boolean isGasStationExist(GasStation gasStation);
 
 	/**
 	 * 批量添加加油站

@@ -1,3 +1,8 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri='http://java.sun.com/jsp/jstl/functions' prefix='fn' %>
+<%@ taglib prefix="pop" uri="/pop-tags" %>
+
 <!DOCTYPE html>
 <html>
 
@@ -43,37 +48,69 @@
         <!--<input type="button" class="search-btn button" id="search_btn" value="查询">-->
         <div id="nav">
             <ul>
-                <li>设备绑定
-                    <ul>
-                        <li id="bind_terminal">终端绑定</li>
-                        <li id="bind_lock">锁绑定</li>
-                    </ul>
-                </li>
-                <li>终端配置
-                    <ul>
-                        <li id="gps_config">GPS配置</li>
-                        <li id="func_enable">功能启用</li>
-                        <li id="soft_upgrade">软件升级</li>
-                        <li id="cancel_upgrade">取消升级</li>
-                    </ul>
-                </li>
-                <li id="realtime_monitor">实时监控</li>
-                <li>远程控制
-                    <ul>
-                        <li id="into_oildepot">进油库</li>
-                        <li id="quit_oildepot">出油库</li>
-                        <li id="into_gasstation">进加油站</li>
-                        <li id="quit_gasstation">出加油站</li>
-                        <li id="into_urgent">进入应急</li>
-                        <li id="quit_urgent">取消应急</li>
-                        <li id="wait_oildom">待进油区</li>
-                        <li id="into_oildom">进油区</li>
-                        <li id="quit_oildom">出油区</li>
-                        <li id="alter_status">状态变更</li>
-                        <li id="unlock_reset">开锁重置</li>
-                    </ul>
-                </li>
-                <li id="change_station">远程换站</li>
+                <pop:Permission ename="bindModule">
+                    <li>设备绑定
+                        <ul>
+                            <pop:Permission ename="bindTerminal">
+                                <li id="bind_terminal">终端绑定</li>
+                            </pop:Permission>
+                            <pop:Permission ename="bindLock">
+                                <li id="bind_lock">锁绑定</li>
+                            </pop:Permission>
+                        </ul>
+                    </li>
+                </pop:Permission>
+                <pop:Permission ename="configModule">
+                    <li>终端配置
+                        <ul>
+                            <pop:Permission ename="gpsConfig">
+                                <li id="gps_config">GPS配置</li>
+                            </pop:Permission>
+                            <pop:Permission ename="funcEnable">
+                                <li id="func_enable">功能启用</li>
+                            </pop:Permission>
+                            <pop:Permission ename="softUpgrade">
+                                <li id="soft_upgrade">软件升级</li>
+                                <li id="cancel_upgrade">取消升级</li>
+                            </pop:Permission>
+                        </ul>
+                    </li>
+                </pop:Permission>
+                <pop:Permission ename="realtimeMonitor">
+                    <li id="realtime_monitor">实时监控</li>
+                </pop:Permission>
+                <pop:Permission ename="remoteModule">
+                    <li>远程控制
+                        <ul>
+                            <pop:Permission ename="intoOildepot">
+                                <li id="into_oildepot">进油库</li>
+                            </pop:Permission>
+                            <pop:Permission ename="quitOildepot">
+                                <li id="quit_oildepot">出油库</li>
+                            </pop:Permission>
+                            <pop:Permission ename="intoGasstation">
+                                <li id="into_gasstation">进加油站</li>
+                            </pop:Permission>
+                            <pop:Permission ename="quitGasstation">
+                                <li id="quit_gasstation">出加油站</li>
+                            </pop:Permission>
+                            <li id="into_urgent">进入应急</li>
+                            <li id="quit_urgent">取消应急</li>
+                            <li id="wait_oildom">待进油区</li>
+                            <li id="into_oildom">进油区</li>
+                            <li id="quit_oildom">出油区</li>
+                            <pop:Permission ename="alterStatus">
+                                <li id="alter_status">状态变更</li>
+                            </pop:Permission>
+                            <pop:Permission ename="unlockReset">
+                                <li id="unlock_reset">开锁重置</li>
+                            </pop:Permission>
+                        </ul>
+                    </li>
+                </pop:Permission>
+                <pop:Permission ename="changeStation">
+                    <li id="change_station">远程换站</li>
+                </pop:Permission>
             </ul>
         </div>
     </div>
@@ -154,7 +191,7 @@
                 实时监控
             </div>
             <table class="base-table">
-                <tr>
+                <%--<tr>
                     <td>配置范围</td>
                     <td>
                         <select class="editInfo" id="scope">
@@ -162,7 +199,7 @@
                             <option value=2>运输公司</option>
                         </select>
                     </td>
-                </tr>
+                </tr>--%>
                 <tr>
                     <td id="select_name">车牌号</td>
                     <td>

@@ -67,7 +67,7 @@ function openFocusLayer(item) {
         layer.open({
             type: 2,
             title: ['车辆轨迹查看', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.6,
             resize: false,
             area: ['800px', '560px'],
@@ -198,7 +198,7 @@ function flushTrack(tracks) {
         var lat = track.latitude;
         // var pos = [lng, lat];
         var pos = wgs84tobd09(lng, lat);
-        var deg = 360 - track.angle;
+        var deg = track.angle - 90;
         var img = getCarIcon(track.alarm);
         var text = track.carNumber;
         if (pos[0] != 0 && pos[1] != 0) {
@@ -547,7 +547,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['设备绑定', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
@@ -563,7 +563,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['设备绑定', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
@@ -581,7 +581,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
@@ -597,7 +597,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
@@ -613,7 +613,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
@@ -630,7 +630,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置（取消升级）', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['640px', '600px'],
@@ -641,47 +641,47 @@ $(function () {
 
     /** 实时监控 */
 
-    $.getJSON("../../manage/transcom/getCompanyList.do",
-        function (data, textStatus, jqXHR) {
-            var selectObj = $('#company');
-            var comHtml = "";
-            for (var i = 0, len = data.length; i < len; i++) {
-                var company = data[i];
-                comHtml += "<option value=" + company.id + ">" + company.name + "</option>";
-            }
-            selectObj.append(comHtml);
-        }
-    ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-        if (XMLHttpRequest.readyState == 4) {
-            var http_status = XMLHttpRequest.status;
-            if (http_status == 0 || http_status > 600) {
-                location.reload(true);
-            } else if (http_status == 200) {
-                if (textStatus == "parsererror") {
-                    layer.alert("应答数据格式解析错误！")
-                } else {
-                    layer.alert("http response error: " + textStatus)
-                }
-            } else {
-                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
-            }
-        }
-    });
-
-    $("#scope").change(function () {
-        var scope = $("#scope").val();
-        if (scope == 1) {
-            $("#select_name").html("车牌号");
-            $("#company").hide();
-            $("#carno").closest(".combo-select").show();
-            // $("#carcom").replaceWith("<input type=\"text\" class=\"editInfo\" id=\"carcom\">");
-        } else {
-            $("#select_name").html("运输公司名称");
-            $("#carno").closest(".combo-select").hide();
-            $("#company").show();
-            // $("#carcom").replaceWith(comHtml);
-        }
-    });
+    // $.getJSON("../../manage/transcom/getCompanyList.do",
+    //     function (data, textStatus, jqXHR) {
+    //         var selectObj = $('#company');
+    //         var comHtml = "";
+    //         for (var i = 0, len = data.length; i < len; i++) {
+    //             var company = data[i];
+    //             comHtml += "<option value=" + company.id + ">" + company.name + "</option>";
+    //         }
+    //         selectObj.append(comHtml);
+    //     }
+    // ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+    //     if (XMLHttpRequest.readyState == 4) {
+    //         var http_status = XMLHttpRequest.status;
+    //         if (http_status == 0 || http_status > 600) {
+    //             location.reload(true);
+    //         } else if (http_status == 200) {
+    //             if (textStatus == "parsererror") {
+    //                 layer.alert("应答数据格式解析错误！")
+    //             } else {
+    //                 layer.alert("http response error: " + textStatus)
+    //             }
+    //         } else {
+    //             layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+    //         }
+    //     }
+    // });
+    //
+    // $("#scope").change(function () {
+    //     var scope = $("#scope").val();
+    //     if (scope == 1) {
+    //         $("#select_name").html("车牌号");
+    //         $("#company").hide();
+    //         $("#carno").closest(".combo-select").show();
+    //         // $("#carcom").replaceWith("<input type=\"text\" class=\"editInfo\" id=\"carcom\">");
+    //     } else {
+    //         $("#select_name").html("运输公司名称");
+    //         $("#carno").closest(".combo-select").hide();
+    //         $("#company").show();
+    //         // $("#carcom").replaceWith(comHtml);
+    //     }
+    // });
 
     $('#interval').jRange({
         from: 1,
@@ -717,7 +717,7 @@ $(function () {
         realtimeLayer = layer.open({
             type: 1,
             title: ['车辆实时监控', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             area: ['540px', '435px'],
             resize: false,
@@ -730,10 +730,10 @@ $(function () {
     });
 
     $("#confirm").click(function () {
-        var scope = $("#scope").val();
+        // var scope = $("#scope").val();
         var carNumber = "";
         var comId = 0;
-        if (scope == 1) {
+        // if (scope == 1) {
             carNumber = trimAll($("#carno").val());
             if (carNumber == "") {
                 layer.alert('未选择系统已有车辆！', {icon: 2}, function (index2) {
@@ -742,15 +742,15 @@ $(function () {
                 });
                 return;
             }
-        } else {
-            comId = $("#company").val();
-        }
+        // } else {
+        //     comId = $("#company").val();
+        // }
         var interval = $("#interval").val();
         var duration = $("#duration").val();
         layer.open({
             type: 2,
             title: ['车辆实时监控', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.6,
             resize: false,
             area: ['800px', '560px'],
@@ -798,7 +798,7 @@ $(function () {
                 layer.open({
                     type: 2,
                     title: ['车辆远程控制', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                    shadeClose: true,
+                    // shadeClose: true,
                     shade: 0.8,
                     resize: false,
                     area: ['540px', '435px'],
@@ -903,7 +903,7 @@ $(function () {
         layer.open({
             type: 2,
             title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
@@ -933,7 +933,7 @@ $(function () {
                     layer.open({
                         type: 2,
                         title: ['车辆远程换站', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                        shadeClose: true,
+                        // shadeClose: true,
                         shade: 0.8,
                         resize: false,
                         area: ['540px', '435px'],
@@ -960,5 +960,3 @@ $(function () {
     });
 
 });
-
-

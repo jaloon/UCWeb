@@ -46,7 +46,8 @@
             director          = #{director},
             phone             = #{phone},
             identity_card     = #{identityCard},
-            remark            = ifnull(#{remark},'')
+            remark            = ifnull(#{remark},''),
+            is_invalid        = 0
 		where id=#{id}
 	</update>
 	
@@ -79,6 +80,10 @@
         select id from tbl_handset where handset_device_id=#{deviceId}
     </select>
 
+    <select id="getDeviceIdById" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select handset_device_id from tbl_handset where id = #{id}
+    </select>
+
 	<select id="getByDeviceId" parameterType="java.lang.Integer" resultMap="fullResultMap">
         SELECT
             <include refid="select_colums"></include>
@@ -108,9 +113,9 @@
 	<select id="findUnaddHandset" resultType="java.lang.Integer">
 		select d.device_id
 		from tbl_device d
-		where d.type=4 and d.is_disallowed=0 and d.is_invalid=0
-		 and d.device_id not in 
-		 (select h.handset_device_id from tbl_handset h where h.is_invalid=0)
+		where d.type = 4 and d.is_disallowed = 0 and d.is_invalid = 0 and d.is_in_use = 0
+		<!-- and d.device_id not in
+		 (select h.handset_device_id from tbl_handset h where h.is_invalid=0) -->
 	</select>
 	
 	<select id="findUnusedHandset" resultType="java.lang.Integer">

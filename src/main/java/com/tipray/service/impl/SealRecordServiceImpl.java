@@ -3,12 +3,12 @@ package com.tipray.service.impl;
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Lock;
-import com.tipray.bean.record.CardAndDeviceUseRecord;
+import com.tipray.bean.record.SealRecord;
 import com.tipray.bean.track.TrackInfo;
-import com.tipray.dao.CardAndDeviceUseRecordDao;
 import com.tipray.dao.LockDao;
+import com.tipray.dao.SealRecordDao;
 import com.tipray.dao.TrackDao;
-import com.tipray.service.CardAndDeviceUseRecordService;
+import com.tipray.service.SealRecordService;
 import com.tipray.util.DateUtil;
 import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.VehicleAlarmUtil;
@@ -22,47 +22,47 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 卡及设备使用记录业务层
+ * 车辆进出记录业务层
  *
  * @author chenlong
  * @version 1.0 2017-12-22
  */
 @Transactional(rollbackForClassName = "Exception")
-@Service("deviceRecordService")
-public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecordService {
-    private static final Logger logger = LoggerFactory.getLogger(CardAndDeviceUseRecordServiceImpl.class);
+@Service("sealRecordService")
+public class SealRecordServiceImpl implements SealRecordService {
+    private static final Logger logger = LoggerFactory.getLogger(SealRecordServiceImpl.class);
     @Resource
-    private CardAndDeviceUseRecordDao deviceRecordDao;
+    private SealRecordDao sealRecordDao;
     @Resource
     private TrackDao trackDao;
     @Resource
     private LockDao lockDao;
 
     @Override
-    public CardAndDeviceUseRecord getRecordById(Long id) {
+    public SealRecord getRecordById(Long id) {
         if (id == null) {
             return null;
         }
-        CardAndDeviceUseRecord deviceRecord = deviceRecordDao.getById(id);
-        if (deviceRecord == null) {
+        SealRecord sealRecord = sealRecordDao.getById(id);
+        if (sealRecord == null) {
             return null;
         }
-        deviceRecord.setRecordTime(DateUtil.formatDate(deviceRecord.getCreateDate(), DateUtil.FORMAT_DATETIME));
-        TrackInfo trackInfo = trackDao.getTrackByTrackId(deviceRecord.getTrackId().toString());
+        sealRecord.setRecordTime(DateUtil.formatDate(sealRecord.getCreateDate(), DateUtil.FORMAT_DATETIME));
+        TrackInfo trackInfo = trackDao.getTrackByTrackId(sealRecord.getTrackId().toString());
         if (trackInfo == null) {
             logger.warn("轨迹数据异常！");
         } else {
-            setTrackForRecord(deviceRecord, trackInfo);
+            setTrackForRecord(sealRecord, trackInfo);
             byte terminalAlarmStatus = trackInfo.getTerminalAlarm().byteValue();
             byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
             boolean isAlarm = VehicleAlarmUtil.isAlarm(terminalAlarmStatus, lockStatusInfo);
-            deviceRecord.setAlarm(isAlarm ? "是" : "否");
+            sealRecord.setAlarm(isAlarm ? "是" : "否");
 
             StringBuffer alarmType = new StringBuffer();
             alarmType.append(VehicleAlarmUtil.getTerminalAlarmInfo(terminalAlarmStatus)).append("<br>");
 
             StringBuffer lockStatusBuf = new StringBuffer();
-            Long carId = deviceRecord.getCarId();
+            Long carId = sealRecord.getCarId();
             List<Lock> locks = lockDao.findLocksByCarId(carId);
             Integer maxLockIndex = lockDao.getMaxLockIndexByCarId(carId);
 
@@ -90,59 +90,60 @@ public class CardAndDeviceUseRecordServiceImpl implements CardAndDeviceUseRecord
                     alarmType.append(alarmBuf);
                 }
             }
-            deviceRecord.setAlarmType(alarmType.toString());
-            deviceRecord.setLockStatus(lockStatusBuf.toString());
+            sealRecord.setAlarmType(alarmType.toString());
+            sealRecord.setLockStatus(lockStatusBuf.toString());
         }
-        return deviceRecord;
+        return sealRecord;
     }
 
     @Override
-    public List<CardAndDeviceUseRecord> findAllRecords() {
-        List<CardAndDeviceUseRecord> list = deviceRecordDao.findAll();
+    public List<SealRecord> findAllRecords() {
+        List<SealRecord> list = sealRecordDao.findAll();
         return list;
     }
 
     @Override
-    public long countRecord(CardAndDeviceUseRecord record) {
-        return deviceRecordDao.count(record);
+    public long countRecord(SealRecord record) {
+        return sealRecordDao.count(record);
     }
 
     @Override
-    public List<CardAndDeviceUseRecord> findByPage(CardAndDeviceUseRecord record, Page page) {
-        List<CardAndDeviceUseRecord> list = deviceRecordDao.findByPage(record, page);
+    public List<SealRecord> findByPage(SealRecord record, Page page) {
+        List<SealRecord> list = sealRecordDao.findByPage(record, page);
         if (!EmptyObjectUtil.isEmptyList(list)) {
             StringBuffer trackIds = new StringBuffer();
-            list.forEach(useRecord -> trackIds.append(',').append(useRecord.getTrackId()));
+            list.forEach(sealRecord -> trackIds.append(',').append(sealRecord.getTrackId()));
             trackIds.deleteCharAt(0);
             try {
                 Map<Long, TrackInfo> trackInfoMap = trackDao.findTrackMapByTrackIds(trackIds.toString());
-                list.forEach(useRecord -> {
-                    TrackInfo trackInfo = trackInfoMap.get(useRecord.getTrackId());
+                list.forEach(sealRecord -> {
+                    TrackInfo trackInfo = trackInfoMap.get(sealRecord.getTrackId());
                     if (trackInfo != null) {
-                        setTrackForRecord(useRecord, trackInfo);
+                        setTrackForRecord(sealRecord, trackInfo);
                         boolean isAlarm = VehicleAlarmUtil.isAlarm(trackInfo.getTerminalAlarm().byteValue(), trackInfo.getLockStatusInfo());
-                        useRecord.setAlarm(isAlarm ? "是" : "否");
+                        sealRecord.setAlarm(isAlarm ? "是" : "否");
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常！", e);
+                logger.error("轨迹数据异常：{}", e.toString());
             }
         }
         return list;
     }
 
-    private CardAndDeviceUseRecord setTrackForRecord(CardAndDeviceUseRecord useRecord, TrackInfo trackInfo) {
-        useRecord.setLongitude(trackInfo.getLongitude());
-        useRecord.setLatitude(trackInfo.getLatitude());
-        useRecord.setAngle(trackInfo.getAngle());
-        useRecord.setVelocity(trackInfo.getSpeed());
-        return useRecord;
+    private SealRecord setTrackForRecord(SealRecord sealRecord, TrackInfo trackInfo) {
+        sealRecord.setLongitude(trackInfo.getLongitude());
+        sealRecord.setLatitude(trackInfo.getLatitude());
+        sealRecord.setAngle(trackInfo.getAngle());
+        sealRecord.setVelocity(trackInfo.getSpeed());
+        return sealRecord;
     }
 
     @Override
-    public GridPage<CardAndDeviceUseRecord> findRecordsForPage(CardAndDeviceUseRecord record, Page page) {
+    public GridPage<SealRecord> findRecordsForPage(SealRecord record, Page page) {
         long records = countRecord(record);
-        List<CardAndDeviceUseRecord> list = findByPage(record, page);
-        return new GridPage<CardAndDeviceUseRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        List<SealRecord> list = findByPage(record, page);
+        return new GridPage<SealRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
     }
+
 }

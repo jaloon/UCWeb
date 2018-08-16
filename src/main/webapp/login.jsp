@@ -15,6 +15,7 @@
 	<link rel="stylesheet" type="text/css" href="resources/css/base.css">
 	<link rel="stylesheet" type="text/css" href="resources/css/login.css" />
 	<script src="resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="resources/plugins/layer/layer.js"></script>
 	<script src="resources/js/base.js"></script>
 	<script src="resources/js/login.js"></script>
 </head>
@@ -42,7 +43,12 @@
 				<input type="button" id="login" value="登&emsp;&emsp;录" />
 			</div>
 		</div>
-		<div class="bottom">Copyright&copy;2016-<%=Calendar.getInstance().get(Calendar.YEAR) %> 普利通信息科技有限公司</div>
+		<div class="bottom">
+			Copyright&copy;2016-<%=Calendar.getInstance().get(Calendar.YEAR) %>
+			<a title="下载证书" href="manage/file/download/pltone.crt" style="color:#FFFFFF; text-decoration: none;">
+                普利通信息科技有限公司
+            </a>
+		</div>
 	</div>
 </body>
 

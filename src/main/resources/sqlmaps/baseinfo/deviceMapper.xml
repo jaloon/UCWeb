@@ -61,6 +61,18 @@
 		where id=#{id}
 	</update>
 
+	<update id="updateDeviceUse">
+        update tbl_device set
+            is_in_use = #{inUSe}
+        where device_id = #{deviceId}
+    </update>
+
+	<update id="updateDevicesUse">
+        update tbl_device set
+            is_in_use = #{inUSe}
+        where device_id in (${deviceIds})
+    </update>
+
     <!-- 通用批量更新方法 -->
     <update id="updateDevices" parameterType="java.util.List">
         update tbl_device set

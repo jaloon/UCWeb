@@ -197,10 +197,7 @@
             function (data) {
                 layer.close(loadIndex);
                 if (data.id > 0) {
-                    layer.msg(data.msg, {
-                        icon: 2,
-                        time: 500
-                    });
+                    layer.alert(data.msg, { icon: 2});
                 } else {
                     for (var i = 0; i < idArr.length; i++) {
                         var id = idArr[i];

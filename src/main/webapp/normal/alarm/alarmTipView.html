@@ -93,7 +93,7 @@
         poi, //图像标注所在的地理位置
         {
             icon: carIcon, //标注所用的图标对象
-            rotation: -record.angle, //旋转角度。正东方向0°，按顺时针方向表示角度，正南90°，正北-90°
+            rotation: record.angle - 90, //旋转角度。
             title: '' //鼠标移到marker上的显示内容
         }
     );

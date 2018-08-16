@@ -4,6 +4,7 @@ import com.tipray.bean.VehicleTerminalConfig;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.log.VehicleManageLog;
 import com.tipray.util.*;
+import com.tipray.websocket.protocol.WebSocketProtocol;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -26,6 +27,17 @@ public class ByteTest {
 	public void appsync() throws IOException {
         String json = OkHttpUtil.get("https://www.pltone.com:3003/api/appSync.do?id=1");
 	}
+
+	@Test
+    public void testJson() {
+        String json = "{\"biz\":1,\"msg\":{\"a\":1,\"b\":\"abc\"}}";
+        try {
+            WebSocketProtocol protocol = JSONUtil.parseToObject(json, WebSocketProtocol.class);
+            System.out.println(protocol.getBiz());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void test01(){

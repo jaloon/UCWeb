@@ -11,11 +11,13 @@
  * @param {*} obj
  */
 function isNull(obj) {
-    if (obj == null || obj == "" || obj == undefined) {
+    if (obj == null || obj == undefined) {
         return true;
-    } else {
-        return false;
     }
+    if (obj instanceof String && obj === "") {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -258,49 +260,50 @@ function getUrlParam(name) {
 
 /**
  * 角度转方向
+ * 正北0°，顺时针
  * @param {number} angle 角度
  */
 function angle2aspect(angle) {
+    if (isNull(angle)) {
+        return "数据异常"
+    }
     if (angle == 0 || angle == 360) {
-        return "正东";
+        return "正北";
     }
     if (angle == 45) {
         return "东北";
     }
     if (angle == 90) {
-        return "正北";
+        return "正东";
     }
     if (angle == 135) {
-        return "西北";
+        return "东南";
     }
     if (angle == 180) {
-        return "正西";
+        return "正南";
     }
     if (angle == 225) {
         return "西南";
     }
     if (angle == 270) {
-        return "正南";
+        return "正西";
     }
     if (angle == 315) {
-        return "东南";
+        return "西北";
     }
     if (angle > 0 && angle < 90) {
-        return "北偏东" + (90 - angle) + "度";
+        return "北偏东" + angle + "度";
     }
     if (angle > 90 && angle < 180) {
-        return "北偏西" + (angle - 90) + "度";
+        return "南偏东" + (180 - angle) + "度";
     }
     if (angle > 180 && angle < 270) {
-        return "南偏西" + (270 - angle) + "度";
+        return "南偏西" + (angle - 180) + "度";
     }
     if (angle > 270 && angle < 360) {
-        return "南偏东" + (angle - 270) + "度";
+        return "北偏西" + (360 - angle) + "度";
     }
-    if (isNull(angle)) {
-        return "数据异常"
-    }
-    return "角度超出范围";
+    return "角度（" + angle + "）超出范围";
 }
 
 /**

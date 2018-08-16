@@ -30,13 +30,25 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User addUser(User user) throws NoSuchAlgorithmException {
 		if (user != null) {
+            String account = user.getAccount();
+            if (account == null || account.trim().isEmpty()) {
+                throw new IllegalArgumentException("账号为空！");
+            }
 			String password = MD5Util.md5Encode("123456");
 			String upwd = user.getPassword();
 			if (StringUtil.isNotEmpty(upwd)) {
 				password = MD5Util.md5Encode(upwd);
 			}
 			user.setPassword(password);
-			userDao.add(user);
+			Integer count = userDao.countByAccount(account);
+            if (count == null || count == 0) {
+                userDao.add(user);
+            } else if (count == 1) {
+                userDao.updateByAccount(user);
+            } else {
+                userDao.deleteByAccount(account);
+                userDao.add(user);
+            }
 		}
 		return user;
 	}

@@ -25,6 +25,22 @@ public class CookieUtil {
 		response.addCookie(cookie);
 	}
 
+    /**
+     * 设置cookie
+     *
+     * @param response
+     * @param name
+     * @param value
+     * @param secure
+     */
+	public static void set(HttpServletResponse response, String name, String value, boolean secure) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setSecure(secure);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+    }
+
 	/**
 	 * 设置Cookie
 	 * 

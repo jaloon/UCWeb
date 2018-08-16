@@ -2,7 +2,7 @@ package com.tipray.cache;
 
 import com.tipray.bean.ResponseMsg;
 import com.tipray.net.Heartbeat;
-import com.tipray.websocket.MonitorWebSocketHandler;
+import com.tipray.websocket.handler.MonitorWebSocketHandler;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.AsyncContext;

@@ -67,7 +67,11 @@
 			tbl_oildepot_device od,tbl_device d
 		where od.device_id=d.device_id and od.oildepot_id=#{oilDepotId}
 	</select>
-	
+
+	<select id="findReaderIdsByOilDepotId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		select count(device_id) from tbl_oildepot_device where oildepot_id=#{oilDepotId}
+	</select>
+
 	<select id="getByDevId" parameterType="java.lang.Integer" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
 		from 
@@ -85,7 +89,8 @@
 			d.is_disallowed = 0 
 			AND d.is_invalid = 0 
 			AND d.type = 3
-			AND d.device_id NOT IN ( SELECT od.device_id FROM tbl_oildepot_device od )
+			AND d.is_in_use = 0
+			<!--AND d.device_id NOT IN ( SELECT od.device_id FROM tbl_oildepot_device od )-->
 	</select>
 
 	<select id="findBarrierReaderIdByDepotId" resultType="java.lang.Integer">

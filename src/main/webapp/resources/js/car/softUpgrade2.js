@@ -207,10 +207,7 @@ $(function () {
             function (data) {
                 if (data.id > 0) {
                     layer.close(loadIndex);
-                    layer.msg(data.msg, {
-                        icon: 2,
-                        time: 500
-                    });
+                    layer.alert(data.msg, { icon: 2});
                 } else {
                     var msg = data.msg;
                     upgradeIndex = msg.index;
@@ -267,12 +264,7 @@ $(function () {
             "index=" + upgradeIndex + "&token=" + generateUUID(),
             function (data) {
                 if (data.id > 0) {
-                    layer.msg(data.msg, {
-                        icon: 2,
-                        time: 5000
-                    }, function () {
-                        layer.close(fileLayer);
-                    });
+                    layer.alert(data.msg, { icon: 2});
                 } else {
                     layer.msg('请求发送成功！', {
                         icon: 1,

@@ -51,6 +51,10 @@ public class Record extends BaseBean {
      */
     private Integer isApp;
     /**
+     * 记录时间
+     */
+    private String recordTime;
+    /**
      * 开始时间
      */
     private String begin;
@@ -139,6 +143,14 @@ public class Record extends BaseBean {
         this.isApp = isApp;
     }
 
+    public String getRecordTime() {
+        return recordTime;
+    }
+
+    public void setRecordTime(String recordTime) {
+        this.recordTime = recordTime;
+    }
+
     public String getBegin() {
         return begin;
     }
@@ -194,6 +206,9 @@ public class Record extends BaseBean {
         }
         if (isApp != null) {
             sb.append(", isApp=").append(isApp);
+        }
+        if (recordTime != null) {
+            sb.append(", recordTime='").append(recordTime).append('\'');
         }
         if (begin != null) {
             sb.append(", begin='").append(begin).append('\'');

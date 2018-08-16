@@ -63,6 +63,8 @@ public class OilDepotServiceImpl implements OilDepotService {
     @Resource
     private InOutReaderDao inOutReaderDao;
     @Resource
+    private DeviceDao deviceDao;
+    @Resource
     private CardDao cardDao;
     @Resource
     private VehicleParamVerDao vehicleParamVerDao;
@@ -102,9 +104,35 @@ public class OilDepotServiceImpl implements OilDepotService {
     public OilDepot addOilDepot(OilDepot oilDepot) throws ServiceException {
         if (oilDepot != null) {
             try {
+                String officialId = oilDepot.getOfficialId();
+                if (StringUtil.isEmpty(officialId)) {
+                    throw new IllegalArgumentException("油库编号为空！");
+                }
+                String name = oilDepot.getName();
+                if (StringUtil.isEmpty(name)) {
+                    throw new IllegalArgumentException("油库名称为空！");
+                }
+                String abbr = oilDepot.getAbbr();
+                if (StringUtil.isEmpty(abbr)) {
+                    throw new IllegalArgumentException("油库简称为空！");
+                }
+                if (isOilDepotExist(oilDepot)) {
+                    throw new IllegalArgumentException("油库已存在！");
+                }
                 setCover(oilDepot);
-                oilDepotDao.add(oilDepot);
-                oilDepot.setId(oilDepotDao.getIdByOfficialId(oilDepot.getOfficialId()));
+                List<Long> invalidIds = oilDepotDao.findInvalidOilDepot(oilDepot);
+                int size = invalidIds.size();
+                if (size == 0) {
+                    oilDepotDao.add(oilDepot);
+                } else if (size == 1) {
+                    oilDepot.setId(invalidIds.get(0));
+                    oilDepotDao.update(oilDepot);
+                } else {
+                    oilDepotDao.deleteByIds(invalidIds);
+                    oilDepotDao.add(oilDepot);
+                }
+
+                // oilDepot.setId(oilDepotDao.getIdByOfficialId(oilDepot.getOfficialId()));
                 String sql = "INSERT INTO tbl_oildepot(official_id,name,longitude,latitude,radius,cover) VALUES(?,?,?,?,?,?)";
                 setOilDepot(sql, oilDepot, DatabaseOperateTypeEnum.INSERT);
                 FtpUtil.upload(SqliteFileConst.OIL_DEPOT_DB_FILE);
@@ -134,10 +162,17 @@ public class OilDepotServiceImpl implements OilDepotService {
             oilDepotDao.update(oilDepot);
 
             List<InOutReader> inOutReadersInDb = inOutReaderDao.findByOilDepotId(id);
-            List<InOutReader> inOutReadersOfWeb = JSONUtil.parseToList(readersJson, InOutReader.class);
+            int dbReaderNum = inOutReadersInDb.size();
+            List<InOutReader> inOutReadersOfWeb = new ArrayList<>();
+            int webReaderNum = 0;
+            if (StringUtil.isNotEmpty(readersJson)) {
+                inOutReadersOfWeb = JSONUtil.parseToList(readersJson, InOutReader.class);
+                webReaderNum = inOutReadersOfWeb.size();
+            }
+
             // 出入库读卡器是否需要更新
-            boolean isUpdateOfInOutDev = inOutReadersInDb.size() != inOutReadersOfWeb.size();
-            if (!isUpdateOfInOutDev) {
+            boolean isUpdateOfInOutDev = dbReaderNum != webReaderNum;
+            if (!isUpdateOfInOutDev && webReaderNum > 0) {
                 Map<Integer, Integer> mapInDb = new HashMap<>();
                 Map<Integer, Integer> mapOfWeb = new HashMap<>();
                 List<Integer> devIdsInDb = new ArrayList<>();
@@ -213,8 +248,24 @@ public class OilDepotServiceImpl implements OilDepotService {
 
             if (isUpdateOfInOutDev) {
                 try {
-                    inOutReaderDao.deleteByOilDepotId(id);
-                    inOutReaderDao.addReaderList(inOutReadersOfWeb);
+                    if (dbReaderNum > 0) {
+                        StringBuffer dbReaderIds = new StringBuffer();
+                        for (InOutReader reader : inOutReadersInDb) {
+                            dbReaderIds.append(',').append(reader.getDevId());
+                        }
+                        dbReaderIds.deleteCharAt(0);
+                        inOutReaderDao.deleteByOilDepotId(id);
+                        deviceDao.updateDevicesUse(dbReaderIds.toString(), 0);
+                    }
+                    if (webReaderNum > 0) {
+                        StringBuffer webReaderIds = new StringBuffer();
+                        for (InOutReader reader : inOutReadersOfWeb) {
+                            webReaderIds.append(',').append(reader.getDevId());
+                        }
+                        webReaderIds.deleteCharAt(0);
+                        inOutReaderDao.addReaderList(inOutReadersOfWeb);
+                        deviceDao.updateDevicesUse(webReaderIds.toString(), 1);
+                    }
                     setInOutDev(oilDepot, inOutReadersOfWeb);
                     FtpUtil.upload(SqliteFileConst.IN_OUT_DEV_DB_FILE);
                     commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_4_IN_OUT_DEV;
@@ -248,12 +299,24 @@ public class OilDepotServiceImpl implements OilDepotService {
         OilDepot oilDepot = new OilDepot();
         oilDepot.setId(id);
         oilDepotDao.delete(id);
-        oilDepotDao.deleteOilDepotCardsById(id);
+        Integer cardNum = cardDao.countInOutCardsByOilDepotId(id);
+        if (cardNum != null && cardNum > 0) {
+            oilDepotDao.deleteOilDepotCardsById(id);
+        }
+        List<Integer> readerIdList = inOutReaderDao.findReaderIdsByOilDepotId(id);
+        if (!EmptyObjectUtil.isEmptyList(readerIdList)) {
+            StringBuffer readerIds = new StringBuffer();
+            for (Integer readerId : readerIdList) {
+                readerIds.append(',').append(readerId);
+            }
+            inOutReaderDao.deleteByOilDepotId(id);
+            deviceDao.updateDevicesUse(readerIds.deleteCharAt(0).toString(), 0);
+        }
         try {
             String sql = "DELETE FROM tbl_oildepot WHERE official_id = ?";
             setOilDepot(sql, oilDepot, DatabaseOperateTypeEnum.DELETE);
             byte commonConfig = 0;
-            if (!EmptyObjectUtil.isEmptyList(cardDao.findInOutCardsByOilDepotId(id))) {
+            if (cardNum != null && cardNum > 0) {
                 try {
                     setInOutDev(oilDepot, null);
                     FtpUtil.upload(SqliteFileConst.IN_OUT_DEV_DB_FILE);
@@ -265,7 +328,7 @@ public class OilDepotServiceImpl implements OilDepotService {
                     JDBC_UTIL_DEV.close();
                 }
             }
-            if (!EmptyObjectUtil.isEmptyList(inOutReaderDao.findByOilDepotId(id))) {
+            if (!EmptyObjectUtil.isEmptyList(readerIdList)) {
                 try {
                     setInOutCard(oilDepot, null);
                     FtpUtil.upload(SqliteFileConst.IN_OUT_CARD_DB_FILE);
@@ -328,16 +391,15 @@ public class OilDepotServiceImpl implements OilDepotService {
     }
 
     @Override
-    public OilDepot isOilDepotExist(OilDepot oilDepot) {
-        String officialId = oilDepot.getOfficialId();
-        String name = oilDepot.getName();
-        if (StringUtil.isNotEmpty(officialId)) {
-            return oilDepotDao.getByOfficialId(officialId);
+    public boolean isOilDepotExist(OilDepot oilDepot) {
+        if (oilDepot == null) {
+            return false;
         }
-        if (StringUtil.isNotEmpty(name)) {
-            return oilDepotDao.getByName(name);
+        Integer count = oilDepotDao.countValidOilDepot(oilDepot);
+        if (count == null || count == 0) {
+            return false;
         }
-        return null;
+        return true;
     }
 
     @Override

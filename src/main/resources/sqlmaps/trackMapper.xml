@@ -146,7 +146,7 @@
         SELECT track_time FROM tbl_vehicle_newest_track WHERE vehicle_id = #{carId}
     </select>
 
-    <select id="getLastTrackForAppByMap" parameterType="java.util.Map" resultType="java.util.Map">
+    <select id="getLastTrackForAppByMap" parameterType="java.util.Map" resultType="java.util.Map" flushCache="true">
         SELECT
             vehicle_id,
             #{vehicle_number} vehicle_number,
@@ -159,9 +159,10 @@
             angle,
             speed,
             HEX( lock_status_info ) lock_status_info,
-            UNIX_TIMESTAMP(track_time) track_time
+            track_time,
+            UNIX_TIMESTAMP(track_time) timestamp
         FROM
-            tbl_vehicle_newest_track t
+            tbl_vehicle_newest_track
         WHERE
             vehicle_id = #{vehicle_id};
     </select>

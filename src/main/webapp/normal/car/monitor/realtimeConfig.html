@@ -127,11 +127,16 @@
             showScale: true
         });
 
-        $("#btn_start").click(function() {
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $("#cancel").click(function() {
+            parent.layer.close(index);
+        });
+
+        $("#confirm").click(function() {
             var scope = $("#scope").val();
             var carNumber = "";
             var comId = 0;
-            if (type == 1) {
+            if (scope == 1) {
                 carNumber = trimAll($("#text_car").val());
                 if (isNull(carNumber)) {
                     location.reload(true);
@@ -167,67 +172,6 @@
                     mws.send(JSON.stringify(order));
                 }
             });
-        });
-
-        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
-        $("#cancel").click(function() {
-            parent.layer.close(index);
-        });
-
-        $("#confirm").click(function() {
-            var carno = $("#carno").val();
-            if (!isCarNo(carno)) {
-                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {
-                    icon: 2
-                }, function(index2) {
-                    layer.close(index2);
-                    $("#carno").select();
-                });
-                return;
-            }
-            var func = 0;
-            var funcObjs = $(".func:checked");
-            funcObjs.each(function() {
-                func |= $(this).val();
-            });
-            var loadIndex = layer.load();
-            $.post("../../../manage/remote/asyn_terminal_enable_request",
-                encodeURI("car_number=" + carno + "&func_enable=" + func + "&token=" + generateUUID()),
-                function(data) {
-                    layer.close(loadIndex);
-                    if (data.id > 0) {
-                        layer.msg(data.msg, {
-                            icon: 2,
-                            time: 500
-                        });
-                    } else {
-                        layer.msg('请求发送成功！', {
-                            icon: 1,
-                            time: 500
-                        }, function() {
-                            parent.layer.close(index);
-                        });
-                    }
-                },
-                "json"
-            ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4) {
-                    var http_status = XMLHttpRequest.status;
-                    if (http_status == 0 || http_status > 600) {
-                        location.reload(true);
-                    } else if (http_status == 200) {
-                        if (textStatus == "parsererror") {
-                            layer.alert("应答数据格式解析错误！")
-                        } else {
-                            layer.alert("http response error: " + textStatus)
-                        }
-                    } else {
-                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
-                    }
-                }
-            });
-
-
         });
     });
 </script>

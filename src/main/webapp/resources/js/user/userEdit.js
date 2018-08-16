@@ -135,28 +135,30 @@ $(function() {
                 return;
             }
 
-            if (!isPhone(phone)) {
-                layer.alert('电话号码不正确！', { icon: 5 }, function(index2) {
-                    layer.close(index2);
-                    $("#phone").select();
-                });
-                return;
-            }
+            // if (!isPhone(phone)) {
+            //     layer.alert('电话号码不正确！', { icon: 5 }, function(index2) {
+            //         layer.close(index2);
+            //         $("#phone").select();
+            //     });
+            //     return;
+            // }
+            //
+            // if (!isIdCard(identityCard)) {
+            //     layer.alert('身份证号不正确！', { icon: 5 }, function(index2) {
+            //         layer.close(index2);
+            //         // $("#identityCard").focus();
+            //         $("#identityCard").select();
+            //     });
+            //     return;
+            // }
 
-            if (!isIdCard(identityCard)) {
-                layer.alert('身份证号不正确！', { icon: 5 }, function(index2) {
-                    layer.close(index2);
-                    // $("#identityCard").focus();
-                    $("#identityCard").select();
-                });
-                return;
-            }
 
-
+            var loadLayer = layer.load();
             $.post(url, encodeURI(param),
                 function(data) {
+                    layer.close(loadLayer);
                     if ("error" == data.msg) {
-                        layer.msg(error_zh_text, { icon: 2, time: 500 });
+                        layer.alert(error_zh_text + "<br>" + data.e, {icon: 2});
                     } else {
                         layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
                             parent.layer.close(index);

@@ -2,7 +2,7 @@ function showBMap(id) {
     layer.open({
         type: 2,
         title: ['远程操作查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
-        shadeClose: true,
+        // shadeClose: true,
         shade: 0.6,
         area: ['800px', '560px'],
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=remote&id=' + id)
@@ -10,7 +10,7 @@ function showBMap(id) {
 }
 
 $(function() {
-    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
             selectObj.append(data.com);

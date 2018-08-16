@@ -1,15 +1,101 @@
+/**
+ * 车辆状态
+ * @param {number} status 车辆状态值
+ * @returns {string} 车辆状态
+ */
+function parseCarStatus(status) {
+    switch (status) {
+        case 1:
+            return "在油库";
+        case 2:
+            return "在途";
+        case 3:
+            return "在加油站";
+        case 4:
+            return "返程";
+        case 5:
+            return "应急";
+        case 6:
+            return "油区外";
+        case 7:
+            return "在油区";
+        default:
+            return "未知(" + status + ")";
+    }
+}
+
+/**
+ * 施解封类型
+ * @param type
+ * @returns {string}
+ */
+function parseSealType(type) {
+    switch (type) {
+        case 1:
+            return "进油库";
+        case 2:
+            return "出油库";
+        case 3:
+            return "进加油站";
+        case 4:
+            return "出加油站";
+        case 5:
+            return "进入应急";
+        case 6:
+            return "取消应急";
+        case 7:
+            return "状态强制变更";
+        case 8:
+            return "待进油区";
+        case 9:
+            return "进油区";
+        case 10:
+            return "出油区";
+        default:
+            return "未知(" + type + ")";
+    }
+}
+
+/**
+ * 认证类型
+ * @param {number} authtype 认证类型值
+ * @returns {string} 认证类型
+ */
+function parseAuthType(authtype) {
+    switch (authtype) {
+        case 0:
+            return "其他方式";
+        case 1:
+            return "出入库读卡器";
+        case 2:
+            return "出入库卡";
+        case 3:
+            return "手持机";
+        case 4:
+            return "普通卡";
+        case 5:
+            return "应急卡";
+        case 6:
+            return "远程操作";
+        case 7:
+            return "操作员";
+        default:
+            return "未知(" + authtype + ")";
+    }
+}
+
 function showBMap(id) {
     layer.open({
         type: 2,
-        title: ['车辆进出记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
-        shadeClose: true,
+        title: ['车辆施解封记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        // shadeClose: true,
         shade: 0.6,
         area: ['800px', '560px'],
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=inout&id=' + id)
     });
 }
 $(function() {
-    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
             selectObj.append(data.com);
@@ -97,26 +183,30 @@ $(function() {
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
                 $(".table-body").html("");
-                var inouts = gridPage.dataList;
+                var seals = gridPage.dataList;
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
-                    var inout = inouts[i];
-                    var coordFlag = inout.longitude == undefined || inout.latitude == undefined;
-                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + inout.id + ")\">") +
-                        "<td class=\"inout-id\">" + inout.id + "</td>" +
-                        "<td class=\"inout-car\">" + inout.carNumber + "</td>" +
-                        "<td class=\"inout-time\">" + inout.createDate + "</td>";
+                    var seal = seals[i];
+                    var coordFlag = seal.longitude == undefined || seal.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + seal.id + ")\">") +
+                        "<td class=\"inout-id\">" + seal.id + "</td>" +
+                        "<td class=\"inout-car\">" + seal.carNumber + "</td>" +
+                        "<td class=\"inout-time\">" + seal.createDate + "</td>";
                     if (coordFlag) {
                         tableData += "<td class=\"inout-coordinate\">数据库记录异常</td>";
                     } else {
-                        tableData += "<td class=\"inout-coordinate\"><a href=\"javascript:showBMap(" + inout.id + ")\">("
-                            + inout.longitude + ", " + inout.latitude + ")</a></td>";
+                        tableData += "<td class=\"inout-coordinate\"><a href=\"javascript:showBMap(" + seal.id + ")\">("
+                            + seal.longitude + ", " + seal.latitude + ")</a></td>";
                     }
-                    tableData += "<td class=\"inout-velocity\">" + (inout.velocity == undefined ? "数据库记录异常" : inout.velocity) + "</td>" +
-                        "<td class=\"inout-aspect\">" + angle2aspect(inout.angle) + "</td>" +
-                        "<td class=\"inout-type\">" + inout.typeName + "</td>" +
-                        "<td class=\"inout-station\">" + inout.station + "</td>" +
-                        "<td class=\"inout-alarm\">" + (inout.alarm == undefined ? "数据库记录异常" : inout.alarm) + "</td>" +
+                    tableData += "<td class=\"inout-velocity\">" + (seal.velocity == undefined ? "数据库记录异常" : seal.velocity) + "</td>" +
+                        "<td class=\"inout-aspect\">" + angle2aspect(seal.angle) + "</td>" +
+                        "<td class=\"inout-prestatus\">" + parseCarStatus(seal.prestatus) + "</td>" +
+                        "<td class=\"inout-status\">" + parseCarStatus(seal.status) + "</td>" +
+                        "<td class=\"inout-type\">" + parseSealType(seal.type) + "</td>" +
+                        "<td class=\"inout-station\">" + seal.station + "</td>" +
+                        "<td class=\"inout-authtype\">" + parseAuthType(seal.authtype) + "</td>" +
+                        "<td class=\"inout-authid\">" + seal.authid + "</td>" +
+                        "<td class=\"inout-alarm\">" + (seal.alarm == undefined ? "数据库记录异常" : seal.alarm) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

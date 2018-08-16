@@ -63,7 +63,7 @@
 	<update id="terminalUnbind">
 		update tbl_vehicle set
 		vehicle_device_id = 0
-		where vehicle_number=#{carNumber}
+		where vehicle_number=#{carNumber} and vehicle_device_id=#{terminalId}
 	</update>
 	
 	<update id="delete" parameterType="java.lang.Long">
@@ -71,6 +71,29 @@
 		is_invalid=1 
 		where id=#{id}
 	</update>
+
+	<select id="getCarNumberByTerminalId" parameterType="java.lang.Integer" resultType="java.lang.String">
+        select vehicle_number from tbl_vehicle where vehicle_device_id = #{terminalId};
+    </select>
+
+	<select id="countByCarNumber" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(vehicle_number) from tbl_vehicle where vehicle_number = #{carNumber}
+    </select>
+
+    <update id="updateByCarNumber" parameterType="com.tipray.bean.baseinfo.Vehicle">
+        update tbl_vehicle set
+		store_num           = #{storeNum},
+		sim                 = ifnull(#{sim},''),
+		transport_card_id   = #{transportCard.transportCardId},
+		trans_company_id    = #{transCompany.id},
+		belong_type         = #{type},
+		remark              = ifnull(#{remark},'')
+		where vehicle_number = #{carNumber}
+    </update>
+
+    <delete id="deleteByCarNumber" parameterType="java.lang.String">
+        delete from tbl_vehicle where vehicle_number = #{carNumber}
+    </delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select
@@ -107,7 +130,6 @@
 			tbl_trans_company t
 		where c.trans_company_id=t.id and c.is_invalid=0 and c.trans_company_id=#{id}
 	</select>
-	
 
 	<select id="count" parameterType="com.tipray.bean.baseinfo.Vehicle" resultType="java.lang.Long">
 		select count(*) from tbl_vehicle where is_invalid=0 
@@ -688,8 +710,7 @@
         FROM
             tbl_vehicle v
         WHERE
-            v.vehicle_device_id != 0
-            AND v.is_invalid = 0
+            v.is_invalid = 0
     </select>
 
     <resultMap id="carOnlineMap" type="java.util.Map" >

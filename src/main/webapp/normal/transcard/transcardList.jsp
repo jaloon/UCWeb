@@ -178,7 +178,7 @@
                     layer.open({
                         type: 2,
                         title: ['卡管理（读卡器批量添加卡）', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                        shadeClose: true,
+                        // shadeClose: true,
                         shade: 0.8,
                         resize: false,
                         area: ['606px', '430px'],

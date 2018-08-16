@@ -15,7 +15,7 @@ $(function() {
         layer.open({
             type: 2,
             title: ['车辆信息管理（' + title + '）', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            shadeClose: true,
+            // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', h],

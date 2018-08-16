@@ -64,7 +64,10 @@
                 <div class="user-info" id="logout">退出</div>
             </div>
         </div>
-        <img class="alarm-tip" src="resources/images/bell-icon.png"/>
+        <div class="alarm-zone">
+            <img class="alarm-tip" src="resources/images/bell-icon.png"/>
+            <span class="alarm-num"></span>
+        </div>
         <div class="logo-zone">
             <img src="resources/images/commen-logo.png"/>
             <span class="logo-text">普利通电子签封安全监管系统</span>
@@ -108,7 +111,7 @@
                         <dd class="first_dd"><a name="normal/car/carList.jsp">车辆信息管理</a></dd>
                     </pop:Permission>
                     <dd>
-                        <a name="normal/car/carSupervise.html">车辆监控及远程操作</a>
+                        <a name="normal/car/carSupervise.jsp">车辆监控及远程操作</a>
                     </dd>
                         <%--<dd><a name="normal/car/carMonitor.html">车辆实时监控</a></dd>--%>
                     <pop:Permission ename="retrackModule">
@@ -129,7 +132,7 @@
                         <dd><a name="normal/statistics/lockstatusList.html">锁动作记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="inAndOutRecordModule">
-                        <dd><a name="normal/statistics/inandoutList.html">车辆进出记录查询</a></dd>
+                        <dd><a name="normal/statistics/sealList.html">施解封记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="transRecordModule">
                         <dd><a name="normal/statistics/transportList.html">配送信息查询</a></dd>
@@ -171,7 +174,7 @@
     <div class="main">
         <c:set var="mainAuth" value="<%=com.tipray.core.ThreadVariable.mainAuth()%>"></c:set>
         <c:if test="${mainAuth==true}">
-            <iframe src="normal/car/carSupervise.html?user=${user.id}&ctx=${pageContext.request.contextPath}"
+            <iframe src="normal/car/carSupervise.jsp?user=${user.id}&ctx=${pageContext.request.contextPath}"
                     frameborder="0" name="showContent" width="100%" height="100%"></iframe>
         </c:if>
         <c:if test="${mainAuth==false}">
@@ -184,7 +187,7 @@
         <table width="100%">
             <thead class="table-head">
                 <tr>
-                    <th class="alarm-id">报警序号</th>
+                    <th class="alarm-car">报警车辆</th>
                     <th class="alarm-dev">报警设备</th>
                     <th class="alarm-type">报警类型</th>
                     <th class="alarm-eli">操作</th>

@@ -1,10 +1,13 @@
-package com.tipray.websocket;
+package com.tipray.websocket.handler;
 
 import com.tipray.bean.alarm.AlarmInfo;
-import com.tipray.bean.record.AlarmRecord;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.JSONUtil;
+import com.tipray.websocket.WebSocketCloseStatusEnum;
+import com.tipray.websocket.WebSocketUtil;
+import com.tipray.websocket.protocol.WebSocketBizId;
+import com.tipray.websocket.protocol.WebSocketProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;
@@ -33,13 +36,6 @@ import java.util.Map;
 public class AlarmWebSocketHandler implements WebSocketHandler {
     private static final Logger logger = LoggerFactory.getLogger(AlarmWebSocketHandler.class);
     private static final Map<Long, ConcurrentWebSocketSessionDecorator> WEB_SOCKET_CLIENTS = new HashMap<>();
-    // private static final int WEB_SOCKET_CLOSE = 0;
-    private static final int WEB_SOCKET_OPEN = 1;
-    private static final int ALARM_CLEAR = 100;
-    // private static final int ALARM_CLEAR_REPLY = 101;
-    // private static final int ALARM_DEFAULT = 110;
-    private static final int ALARM_CACHE = 111;
-
     @Resource
     private AlarmRecordService alarmRecordService;
 
@@ -58,16 +54,16 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
             TextMessage textMessage = (TextMessage) message;
             String msgText = textMessage.getPayload();
             logger.debug("handle message：{}", msgText);
-            Map<String, Object> msgMap;
+            WebSocketProtocol protocol;
             try {
-                msgMap = JSONUtil.parseToMap(msgText);
+                protocol = JSONUtil.parseToObject(msgText, WebSocketProtocol.class);
             } catch (Exception e) {
                 logger.error("报警业务：解析浏览器发送的消息异常：{}", e.getMessage());
                 return;
             }
-            int biz = (int) msgMap.get("biz");
+            int biz = protocol.getBiz();
             switch (biz) {
-                case WEB_SOCKET_OPEN:
+                case WebSocketBizId.WEB_SOCKET_OPEN:
                     // WebSocket启动
                     dealWebSocketOpen(session);
                     break;
@@ -91,10 +87,8 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         Long sessionId = Long.parseLong(session.getId(), 16);
         ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
         try {
-            Map<String, Object> alarmCacheMap = new HashMap<>();
-            alarmCacheMap.put("biz", ALARM_CACHE);
-            alarmCacheMap.put("cacheAlarm", alarmRecordsCache);
-            String alarmCacheMsg = JSONUtil.stringify(alarmCacheMap);
+            WebSocketProtocol protocol = new WebSocketProtocol(WebSocketBizId.CACHE_ALARM, alarmRecordsCache);
+            String alarmCacheMsg = JSONUtil.stringify(protocol);
             sessionDecorator.sendMessage(new TextMessage(alarmCacheMsg));
         } catch (Exception e) {
             logger.error("send cache alarm msg error！", e);
@@ -153,20 +147,14 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      * @param alarmId {@link Long} 报警ID
      */
     public void broadcastAlarm(Long alarmId) {
-        AlarmRecord alarmRecord = alarmRecordService.getRecordById(alarmId);
-        if (alarmRecord == null) {
+        AlarmInfo alarmInfo = alarmRecordService.getAlarmInfoByAlarmId(alarmId);
+        if (alarmInfo == null) {
             logger.warn("alarm record is null at id: {}", alarmId);
             return;
         }
-        logger.info("broadcast alarm: {}", alarmRecord);
-        String alarmMsg;
-        try {
-            alarmMsg = JSONUtil.stringify(alarmRecord);
-        } catch (Exception e) {
-            logger.error("AlarmRecord对象转为JSON字符串异常：{}", e.toString());
-            return;
-        }
-        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, alarmMsg));
+        logger.info("broadcast alarm: {}", alarmInfo);
+        WebSocketProtocol protocol = new WebSocketProtocol(WebSocketBizId.NEW_ALARM, alarmInfo);
+        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, protocol));
     }
 
     /**
@@ -176,12 +164,13 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      */
     public void broadcastClearAlarm(Long clearAlarmId) {
         logger.info("broadcast eliminate alarm: {}", clearAlarmId);
-        StringBuffer strBuf = new StringBuffer();
-        strBuf.append('{');
-        strBuf.append("\"biz\":").append(ALARM_CLEAR).append(',');
-        strBuf.append("\"id\":").append(clearAlarmId);
-        strBuf.append('}');
-        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, strBuf));
+        upAlarmInfos();
+        // StringBuffer strBuf = new StringBuffer();
+        // strBuf.append('{');
+        // strBuf.append("\"biz\":").append(WebSocketBizId.ELIMINATE_ALARM).append(',');
+        // strBuf.append("\"id\":").append(clearAlarmId);
+        // strBuf.append('}');
+        // WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, strBuf));
     }
 
     /**
@@ -190,6 +179,25 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      * @param alarmIds {@link Long} 消除报警的报警ID集合
      */
     public void broadcastClearAlarms(List<Long> alarmIds) {
-        alarmIds.forEach(alarmId -> broadcastClearAlarm(alarmId));
+        logger.info("broadcast eliminate alarms: {}", alarmIds);
+        upAlarmInfos();
+    }
+
+    /**
+     * 更新报警信息
+     */
+    public void upAlarmInfos() {
+        List<AlarmInfo> alarmInfos = alarmRecordService.findNotElimitedAlarmInfo();
+        pushAlarmIfos(alarmInfos);
+    }
+
+    /**
+     * 推送最新报警信息集合
+     *
+     * @param alarmInfos {@link AlarmInfo} 最新未消除报警信息集合
+     */
+    public void pushAlarmIfos(List<AlarmInfo> alarmInfos) {
+        WebSocketProtocol protocol = new WebSocketProtocol(WebSocketBizId.ELIMINATE_ALARM, alarmInfos);
+        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, protocol));
     }
 }

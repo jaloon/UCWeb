@@ -150,15 +150,17 @@ $(function() {
             }
         }
 
+        var loadLayer = layer.load();
         $.post(url, encodeURI(param),
             function(data) {
+                layer.close(loadLayer);
                 if ("error" == data.msg) {
                     if ("系统内置角色不允许修改！" == data.e) {
                         layer.msg(data.e, { icon: 1, time: 1000 }, function() {
                             parent.layer.close(index);
                         });
                     } else {
-                        layer.msg(error_zh_text, { icon: 2, time: 1000 });
+                        layer.alert(error_zh_text + "<br>" + data.e, {icon: 2});
                     }
                 } else {
                     layer.msg(success_zh_text, { icon: 1, time: 1000 }, function() {

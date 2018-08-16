@@ -90,7 +90,7 @@ public class OildepotController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.debug("添加油库异常！", e);
+            logger.error("添加油库异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -113,7 +113,7 @@ public class OildepotController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.debug("修改油库异常！", e);
+            logger.error("修改油库异常！", e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);
@@ -153,7 +153,7 @@ public class OildepotController extends BaseAction {
     @ResponseBody
     public Boolean isOilDepotExist(OilDepot oilDepot) {
         logger.info("oildepot exist, oilDepot={}", oilDepot);
-        return oilDepotService.isOilDepotExist(oilDepot) != null;
+        return oilDepotService.isOilDepotExist(oilDepot);
     }
 
     @PermissionAnno("viewOildepot")

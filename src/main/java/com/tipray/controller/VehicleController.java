@@ -413,11 +413,15 @@ public class VehicleController extends BaseAction {
      * 网页车辆选择控件数据获取接口
      *
      * @param scope 选取范围（0 全部车辆，1 绑定车台的，2 在线）
+     * @param comlimit 限制公司（默认限制，null/0 限制，1 不限）
      */
     @RequestMapping(value = "selectCars.do")
     @ResponseBody
-    public Map<String, Object> selectCars(Integer scope) {
-        Long comId = ThreadVariable.getUser().getComId();
+    public Map<String, Object> selectCars(Integer scope, Integer comlimit) {
+        Long comId = 0L;
+        if (comlimit == null || comlimit == 0) {
+            comId = ThreadVariable.getUser().getComId();
+        }
         if (scope == null || scope == 0) {
             // 选取全部车辆
             return vehicleService.selectCars(0, comId);

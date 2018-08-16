@@ -1,10 +1,10 @@
 package com.tipray.dao;
 
-import java.util.List;
-
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.List;
 
 /**
  * TransCompanyDao
@@ -15,6 +15,25 @@ import com.tipray.core.base.BaseDao;
  */
 @MyBatisAnno
 public interface TransCompanyDao extends BaseDao<TransCompany> {
+    /**
+     * 统计公司名称
+     * @param name
+     * @return
+     */
+    Integer countByComName(String name);
+
+    /**
+     * 根据公司名称更新运输公司
+     * @param company
+     */
+    void updateByComName(TransCompany company);
+
+    /**
+     * 根据公司名称删除运输公司
+     * @param name
+     */
+    void deleteByComName(String name);
+
 	/**
 	 * 获取上级公司列表
 	 * 

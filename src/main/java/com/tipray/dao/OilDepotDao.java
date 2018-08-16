@@ -17,6 +17,25 @@ import java.util.Map;
  */
 @MyBatisAnno
 public interface OilDepotDao extends BaseDao<OilDepot> {
+    /**
+     * 根据油库id集合批量删除
+     * @param ids
+     */
+    void deleteByIds(List<Long> ids);
+
+    /**
+     * 根据编号或名称或简称统计有效油库
+     * @param oilDepot
+     * @return
+     */
+	Integer countValidOilDepot(OilDepot oilDepot);
+
+    /**
+     * 根据编号或名称或简称查询无效油库ID
+     * @param oilDepot
+     * @return
+     */
+	List<Long> findInvalidOilDepot(OilDepot oilDepot);
 
 	/**
 	 * 根据油库名称获取油库列表

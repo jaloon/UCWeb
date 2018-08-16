@@ -3,6 +3,7 @@ package com.tipray.dao;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -15,6 +16,20 @@ import java.util.List;
  */
 @MyBatisAnno
 public interface DeviceDao extends BaseDao<Device> {
+
+    /**
+     * 更新设备使用状态
+     * @param deviceId 设备ID
+     * @param inUSe 0 未使用，1 使用中
+     */
+	void updateDeviceUse(@Param("deviceId") Integer deviceId, @Param("inUSe") Integer inUSe);
+
+    /**
+     * 更新设备使用状态
+     * @param deviceIds 设备ID，英文逗号“,”分隔
+     * @param inUSe 0 未使用，1 使用中
+     */
+	void updateDevicesUse(@Param("deviceIds") String deviceIds, @Param("inUSe") Integer inUSe);
 
 	/**
 	 * 根据用户中心ID获取设备列表

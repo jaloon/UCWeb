@@ -54,6 +54,10 @@ public class AlarmInfo implements Serializable, Comparable<AlarmInfo> {
      * 报警锁信息
      */
     private AlarmLock alarmLock;
+    /**
+     * 报警标识
+     */
+    private String alarmTag;
 
     @Override
     public String toString() {
@@ -69,6 +73,7 @@ public class AlarmInfo implements Serializable, Comparable<AlarmInfo> {
         sb.append(", alarmTime='").append(alarmTime).append('\'');
         sb.append(", trackId=").append(trackId);
         sb.append(", alarmLock=").append(alarmLock);
+        sb.append(", alarmTag='").append(alarmTag).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -159,6 +164,14 @@ public class AlarmInfo implements Serializable, Comparable<AlarmInfo> {
 
     public void setAlarmLock(AlarmLock alarmLock) {
         this.alarmLock = alarmLock;
+    }
+
+    public String getAlarmTag() {
+        return alarmTag;
+    }
+
+    public void setAlarmTag(String alarmTag) {
+        this.alarmTag = alarmTag;
     }
 
     @Override

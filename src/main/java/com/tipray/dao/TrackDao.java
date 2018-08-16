@@ -3,7 +3,7 @@ package com.tipray.dao;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.core.annotation.MyBatisAnno;
-import com.tipray.websocket.UpdateTrack;
+import com.tipray.websocket.handler.UpdateTrack;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 

@@ -1,10 +1,11 @@
 package com.tipray.dao;
 
-import java.util.List;
-
+import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
+
+import java.util.List;
 
 /**
  * UserDao
@@ -15,6 +16,25 @@ import com.tipray.core.base.BaseDao;
  */
 @MyBatisAnno
 public interface UserDao extends BaseDao<User> {
+    /**
+     * 统计账号数目
+     * @param account
+     * @return
+     */
+    Integer countByAccount(String account);
+
+    /**
+     * 根据账号更新用户
+     * @param user
+     */
+    void updateByAccount(User user);
+
+    /**
+     * 根据账号删除用户
+     * @param account
+     */
+    void deleteByAccount(String account);
+
 	/**
 	 * 修改密码
 	 * 

@@ -7,6 +7,7 @@ import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.Handset;
 import com.tipray.bean.log.InfoManageLog;
 import com.tipray.constant.LogTypeConst;
+import com.tipray.constant.PageActionMode;
 import com.tipray.core.ThreadVariable;
 import com.tipray.core.annotation.PermissionAnno;
 import com.tipray.core.base.BaseAction;
@@ -49,6 +50,10 @@ public class HandsetController extends BaseAction {
         Handset handset = new Handset();
         if (id != null && id > 0) {
             handset = handsetService.getHandsetById(id);
+        }
+        if (PageActionMode.EDIT.equalsIgnoreCase(mode) || PageActionMode.ADD.equalsIgnoreCase(mode)) {
+            List<GasStation> stations = handsetService.findUnconfigGasStation();
+            modelMap.put("stations", stations);
         }
         modelMap.put("handset", handset);
         return "normal/handset/handsetEdit.jsp";

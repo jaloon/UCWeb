@@ -12,8 +12,8 @@ import com.tipray.service.ChangeRecordService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.*;
-import com.tipray.websocket.AlarmWebSocketHandler;
-import com.tipray.websocket.MonitorWebSocketHandler;
+import com.tipray.websocket.handler.AlarmWebSocketHandler;
+import com.tipray.websocket.handler.MonitorWebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

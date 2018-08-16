@@ -105,7 +105,7 @@ public interface OilDepotService {
      * @param oilDepot
      * @return
      */
-    Object isOilDepotExist(OilDepot oilDepot);
+    boolean isOilDepotExist(OilDepot oilDepot);
 
     /**
      * 查询未使用的读卡器

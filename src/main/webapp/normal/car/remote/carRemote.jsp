@@ -290,7 +290,7 @@
                 }
                 for (var i = 0; i < len; i++) {
                     var lock = data[i];
-                    if (lock.is_has_bind == 1 && lock.bind_status == 2 /*&& lock.is_allowed_open == 2*/) {
+                    if (lock.is_has_bind == 1 && lock.bind_status == 2 && lock.lock_device_id > 0) {
                         lock_html += "<tr><td><input type='checkbox' class='lock-check' value='"
                             + lock.lock_device_id + "'></td><td>" + parseLock(lock) + "</td></tr>";
                         lockNum++;
@@ -406,16 +406,21 @@
         $("#changeStatus").change(function () {
             var status = $("#changeStatus").val();
             if (status == 1 || status > 5) {
+                $("#store_tr").hide();
+                $("#lock_tr").hide();
                 $("#stationType").val(1);
+                $("#stationType").prop("disabled", true);
                 $("#stationId").html(depotHtml);
             } else if (status == 3) { // 3 在加油站
                 $("#lock_tr").hide();
                 $("#store_tr").show();
                 $("#stationType").val(2);
+                $("#stationType").prop("disabled", true);
                 $("#stationId").html(stationHtml);
             } else if (status == 5) { // 5 应急
                 $("#store_tr").hide();
                 $("#lock_tr").show();
+                $("#stationType").prop("disabled", false);
                 if (lock_html.length == 0) {
                     $.getJSON("../../manage/car/findlocksByCarNo.do?carNumber=${carStatus.carNumber}",
                         function (data, textStatus, jqXHR) {
@@ -469,6 +474,7 @@
             } else {
                 $("#store_tr").hide();
                 $("#lock_tr").hide();
+                $("#stationType").prop("disabled", false);
             }
         });
 
@@ -571,15 +577,12 @@
             var param = encodeURI("control_type=${mode}&car_number=${carStatus.carNumber}&station_type=" + stationType
                 + "&station_id=" + stationId + "&lock_ids=" + lockIds + "&token=" + generateUUID());
             </c:if>
+            var loadIndex = layer.load();
             $.post(url, param,
                 function (data) {
+                    layer.close(loadIndex);
                     if (data.id > 0) {
-                        layer.msg(data.msg, {
-                            icon: 2,
-                            time: 500
-                        }, function () {
-                            parent.layer.close(index);
-                        });
+                        layer.alert(data.msg, { icon: 2});
                     } else {
                         layer.msg("车辆远程控制指令发送成功！", {
                             icon: 1,

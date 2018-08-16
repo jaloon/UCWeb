@@ -271,7 +271,7 @@
                             cardLayer = layer.open({
                                 type: 1,
                                 title: ['添加卡', 'font-size:14px;color:#ffffff;background:#478de4;'],
-                                shadeClose: true,
+                                // shadeClose: true,
                                 shade: 0.8,
                                 area: '540px',
                                 resize: false,
@@ -359,8 +359,10 @@
                 return;
             }
 
+            var loadLayer = layer.load();
             $.post(url, encodeURI(param),
                 function (data) {
+                    layer.close(loadLayer);
                     if ("error" == data.msg) {
                         layer.msg("添加失败！", {icon: 2, time: 1000});
                     } else {

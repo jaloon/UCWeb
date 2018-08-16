@@ -68,7 +68,19 @@ public class CardServiceImpl implements CardService {
 	@Override
 	public Card addCard(Card card) {
 		if (card != null) {
-			cardDao.add(card);
+            Long cardId = card.getCardId();
+            if (cardId == null) {
+                throw new IllegalArgumentException("卡ID为空！");
+            }
+            Integer count = cardDao.countCardByCardId(cardId);
+            if (count == null || count == 0) {
+                cardDao.add(card);
+            } else if (count == 1) {
+                cardDao.updateByCardId(card);
+            } else {
+                cardDao.deleteByCardId(cardId);
+                cardDao.add(card);
+            }
 			setCardInSqliteDb(card, DatabaseOperateTypeEnum.INSERT);
 		}
 		return card;

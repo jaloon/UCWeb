@@ -5,7 +5,6 @@ import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.track.LastCarStatus;
-import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.core.annotation.MapResultAnno;
@@ -25,6 +24,25 @@ import java.util.Map;
  */
 @MyBatisAnno
 public interface VehicleDao extends BaseDao<Vehicle> {
+    /**
+     * 统计车牌号
+     * @param carNumber
+     * @return
+     */
+    Integer countByCarNumber(String carNumber);
+
+    /**
+     * 根据车牌号更新车辆
+     * @param vehicle
+     */
+    void updateByCarNumber(Vehicle vehicle);
+
+    /**
+     * 根据车牌号删除车辆
+     * @param carNumber
+     */
+    void deleteByCarNumber(String carNumber);
+
     /**
      * 根据车辆ID获取配送卡ID
      *
@@ -135,10 +153,18 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     List<Device> findUnusedTerminal();
 
     /**
+     * 轨迹车载终端设备ID获取车牌号
+     *
+     * @param terminalId {@link Integer} 车载终端设备ID
+     * @return {@link String} 车牌号
+     */
+    String getCarNumberByTerminalId(Integer terminalId);
+
+    /**
      * 车辆绑定车载终端
      *
      * @param carNumber  {@link String} 车牌号
-     * @param terminalId {@link Long} 车载终端设备ID
+     * @param terminalId {@link Integer} 车载终端设备ID
      */
     void terminalBind(@Param("carNumber") String carNumber, @Param("terminalId") Integer terminalId);
 
@@ -146,8 +172,9 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      * 车辆解绑车载终端
      *
      * @param carNumber {@link String} 车牌号
+     * @param terminalId {@link Integer} 车载终端设备ID
      */
-    void terminalUnbind(@Param("carNumber") String carNumber);
+    void terminalUnbind(@Param("carNumber") String carNumber, @Param("terminalId") Integer terminalId);
 
     /**
      * 查询绑定了车载终端的车辆

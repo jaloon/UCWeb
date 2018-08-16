@@ -1,5 +1,7 @@
 package com.tipray.util;
 
+import com.tipray.bean.alarm.AlarmDevice;
+import com.tipray.bean.alarm.AlarmInfo;
 import com.tipray.constant.AlarmBitMarkConst;
 
 import java.util.HashMap;
@@ -58,9 +60,10 @@ public class VehicleAlarmUtil {
         }
         if (alarm.length() > 0) {
             alarm.deleteCharAt(0);
-            alarm.insert(0, "车载终端：");
-            alarm.append('。');
+        } else {
+            alarm.append("无报警");
         }
+        alarm.insert(0, "车载终端-");
         return alarm.toString();
     }
 
@@ -171,7 +174,7 @@ public class VehicleAlarmUtil {
             alarm.append("、进入应急");
         }
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_5_UNUSUAL_MOVE) > 0) {
-            alarm.append("异常移动报警、");
+            alarm.append("、异常移动报警");
         }
         if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) == 0) {
             alarm.append("、无报警");
@@ -263,4 +266,60 @@ public class VehicleAlarmUtil {
         byte status = (byte) (lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
         return status == 0 ? "关" : "开";
     }
+
+    /**
+     * 构建报警标识
+     *
+     * @param veehicleId 车辆ID
+     * @param deviceType 设备类型
+     * @param devcieId   设备Id
+     * @param alarmType  报警类型
+     * @param lockId     锁记录ID
+     * @return 14字节16进制字符串
+     */
+    public static String buildAlarmTag(int veehicleId, byte deviceType, int devcieId, byte alarmType, int lockId) {
+        StringBuffer strBuf = new StringBuffer();
+        strBuf
+                .append(NumberHexUtil.intToHex(veehicleId))
+                .append(NumberHexUtil.byteToHex(deviceType))
+                .append(NumberHexUtil.intToHex(devcieId))
+                .append(NumberHexUtil.byteToHex(alarmType))
+                .append(NumberHexUtil.intToHex(lockId));
+        return strBuf.toString();
+    }
+
+    /**
+     * 构建报警标识
+     *
+     * @param alarmDevice {@link AlarmDevice}
+     * @return 14字节16进制字符串
+     */
+    public static String buildAlarmTag(AlarmDevice alarmDevice) {
+        StringBuffer strBuf = new StringBuffer();
+        strBuf
+                .append(NumberHexUtil.intToHex(alarmDevice.getVehicleId()))
+                .append(NumberHexUtil.byteToHex((byte) alarmDevice.getDeviceType()))
+                .append(NumberHexUtil.intToHex(alarmDevice.getDeviceId()))
+                .append(NumberHexUtil.byteToHex((byte) alarmDevice.getAlarmType()))
+                .append(NumberHexUtil.intToHex(alarmDevice.getLockId()));
+        return strBuf.toString();
+    }
+
+    /**
+     * 构建报警标识
+     *
+     * @param alarmInfo {@link AlarmInfo}
+     * @return 14字节16进制字符串
+     */
+    public static String buildAlarmTag(AlarmInfo alarmInfo) {
+        StringBuffer strBuf = new StringBuffer();
+        strBuf
+                .append(NumberHexUtil.intToHex(alarmInfo.getVehicleId()))
+                .append(NumberHexUtil.byteToHex((byte) alarmInfo.getDeviceType()))
+                .append(NumberHexUtil.intToHex(alarmInfo.getDeviceId()))
+                .append(NumberHexUtil.byteToHex((byte) alarmInfo.getAlarmType()))
+                .append(NumberHexUtil.intToHex(alarmInfo.getAlarmLock().getLockId()));
+        return strBuf.toString();
+    }
+
 }

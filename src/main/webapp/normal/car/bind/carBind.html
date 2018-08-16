@@ -25,7 +25,7 @@
     <div class="info-zone">
         <div class="base-info">
             <div class="info-title">
-                车载终端绑定
+                车载终端绑定变更
             </div>
             <table class="base-table">
                 <tr>
@@ -44,6 +44,15 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>变更类型</td>
+                    <td>
+                        <select class="editInfo" id="bind_type">
+                            <option value=1>绑定</option>
+                            <option value=2>解绑</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="store_tr">
                     <td>仓数</td>
                     <td>
                         <input type="text" class="editInfo" id="store">
@@ -99,6 +108,15 @@
             }
         });
 
+        $("#bind_type").change(function () {
+            var bindType = $("#bind_type").val();
+            if (bindType == 1) {
+                $("#store_tr").show();
+            } else {
+                $("#store_tr").hide();
+            }
+        });
+
         var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
         $("#cancel").click(function () {
             parent.layer.close(index);
@@ -131,38 +149,45 @@
                 });
                 return;
             }
-            var storeNum = $("#store").val();
-            if (isNull(storeNum)) {
-                layer.alert('仓数不能为空！', {
-                    icon: 5
-                }, function (index2) {
-                    layer.close(index2);
-                    $("#store").select();
-                });
-                return;
+            var url = "../../../manage/remote/";
+            var param = encodeURI("car_number=" + carNumber + "&device_id=" + terminalId + "&token=" + generateUUID());
+            var success = "车载终端绑定请求发送成功！";
+            var bindType = $("#bind_type").val();
+            if (bindType == 1) {
+                var storeNum = $("#store").val();
+                if (isNull(storeNum)) {
+                    layer.alert('仓数不能为空！', {
+                        icon: 5
+                    }, function (index2) {
+                        layer.close(index2);
+                        $("#store").select();
+                    });
+                    return;
+                }
+                if (!isInteger(storeNum)) {
+                    layer.alert('仓数必须为数字！', {
+                        icon: 5
+                    }, function (index2) {
+                        layer.close(index2);
+                        $("#store").select();
+                    });
+                    return;
+                }
+                url += "asyn_vehicle_bind_request";
+                param += "&store_num=" + storeNum;
+            } else {
+                url += "asyn_vehicle_unbind_request";
+                success = "车载终端解绑成功";
             }
-            if (!isInteger(storeNum)) {
-                layer.alert('仓数必须为数字！', {
-                    icon: 5
-                }, function (index2) {
-                    layer.close(index2);
-                    $("#store").select();
-                });
-                return;
-            }
+
             var loadIndex = layer.load();
-            $.post("../../../manage/remote/asyn_vehicle_bind_request",
-                encodeURI("car_number=" + carNumber + "&device_id=" + terminalId + "&store_num=" + storeNum +
-                    "&token=" + generateUUID()),
+            $.post(url, param,
                 function (data) {
                     layer.close(loadIndex);
                     if (data.id > 0) {
-                        layer.msg(data.msg, {
-                            icon: 2,
-                            time: 500
-                        });
+                        layer.alert(data.msg, { icon: 2});
                     } else {
-                        layer.msg('请求发送成功！', {
+                        layer.msg(success, {
                             icon: 1,
                             time: 500
                         }, function () {

@@ -55,18 +55,20 @@ $(function() {
             return;
         }
 
-        if (isNull(address)) {
-            layer.alert('地址不能为空！', { icon: 0 }, function(index2) {
-                layer.close(index2);
-                $("#address").select();
-            });
-            return;
-        }
+        // if (isNull(address)) {
+        //     layer.alert('地址不能为空！', { icon: 0 }, function(index2) {
+        //         layer.close(index2);
+        //         $("#address").select();
+        //     });
+        //     return;
+        // }
 
+        var loadLayer = layer.load();
         $.post(url, encodeURI(param),
             function(data) {
+                layer.close(loadLayer);
                 if ("error" == data.msg) {
-                    layer.msg(error_zh_text, { icon: 2, time: 500 });
+                    layer.alert(error_zh_text + "<br>" + data.e, {icon: 2});
                 } else {
                     layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
                         parent.layer.close(index);

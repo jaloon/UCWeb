@@ -101,5 +101,23 @@
 		order by t1.id asc  
 		limit #{page.startRow}, #{page.rows}
 	</select>
+
+    <select id="countByComName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(`name`) from tbl_trans_company where `name` = #{name}
+    </select>
+
+    <update id="updateByComName" parameterType="com.tipray.bean.baseinfo.TransCompany">
+        update tbl_trans_company set
+            director          = #{director},
+            phone             = #{phone},
+            address           = #{address},
+            parent_company_id = #{superior.id},
+            remark            = ifnull(#{remark},'')
+		where `name`          = #{name}
+    </update>
+
+    <delete id="deleteByComName" parameterType="java.lang.String">
+        delete from tbl_trans_company where `name` = #{name}
+    </delete>
 	
 </mapper>

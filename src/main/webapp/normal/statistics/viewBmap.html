@@ -98,8 +98,8 @@
             "<br> 时间：&emsp;&emsp;" + new Date("${record.createDate}").format("yyyy-MM-dd HH:mm:ss") +
             "<br> 经度：&emsp;&emsp;${record.longitude}" +
             "<br> 纬度：&emsp;&emsp;${record.latitude}" +
-            "<br> 速度：&emsp;&emsp;${record.velocity}" +
-            "<br> 方向：&emsp;&emsp;" + angle2aspect("${record.angle}") +
+            "<br> 速度：&emsp;&emsp;${record.velocity}km/h" +
+            "<br> 方向：&emsp;&emsp;" + angle2aspect(${record.angle}) +
             "<br> 报警类型：${record.typeName}" +
             "<br> 报警状态：${record.status}" +
             "<br> 锁状态：&emsp;${record.lockStatus}" +

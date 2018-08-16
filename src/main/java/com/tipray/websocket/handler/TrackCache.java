@@ -1,4 +1,4 @@
-package com.tipray.websocket;
+package com.tipray.websocket.handler;
 
 import com.tipray.bean.track.LastTrack;
 import com.tipray.constant.AlarmBitMarkConst;
@@ -74,6 +74,9 @@ public final class TrackCache {
      */
     public synchronized String cacheTrack(Long carId) {
         String track = tracks.get(carId);
+        if (track == null) {
+            return null;
+        }
         return track.replace("{", "{\"biz\":\"track\",");
     }
 

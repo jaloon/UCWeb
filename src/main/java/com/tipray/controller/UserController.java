@@ -45,7 +45,6 @@ public class UserController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
-    @PermissionAnno("userModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch user edit page, mode={}, id={}", mode, id);
@@ -82,7 +81,6 @@ public class UserController extends BaseAction {
         }
     }
 
-    @PermissionAnno("editUser")
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateUser(User user) {

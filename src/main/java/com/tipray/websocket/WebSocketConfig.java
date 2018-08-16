@@ -1,5 +1,7 @@
 package com.tipray.websocket;
 
+import com.tipray.websocket.handler.AlarmWebSocketHandler;
+import com.tipray.websocket.handler.MonitorWebSocketHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

@@ -2,7 +2,7 @@ function showBMap(id) {
     layer.open({
         type: 2,
         title: ['报警记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
-        shadeClose: true,
+        // shadeClose: true,
         shade: 0.6,
         area: ['800px', '560px'],
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=alarm&id=' + id)
@@ -10,7 +10,7 @@ function showBMap(id) {
 }
 
 $(function () {
-    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
             selectObj.append(data.com);
@@ -135,7 +135,7 @@ $(function () {
                         "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端（" : "锁（") + alarm.deviceId + "）</td>" +
                         "<td class=\"alarm-type\">" + alarm.typeName + "</td>" +
                         "<td class=\"alarm-status\">" + (alarm.status == undefined ? "数据库记录异常" : alarm.status) + "</td>" +
-                        "<td class=\"alarm-lock\">" + (alarm.lockStatus == undefined ? "数据库记录异常" : alarm.lockStatus) + "</td>" +
+                        // "<td class=\"alarm-lock\">" + (alarm.lockStatus == undefined ? "数据库记录异常" : alarm.lockStatus) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";

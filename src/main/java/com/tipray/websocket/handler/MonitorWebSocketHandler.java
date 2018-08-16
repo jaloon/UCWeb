@@ -1,4 +1,4 @@
-package com.tipray.websocket;
+package com.tipray.websocket.handler;
 
 import com.tipray.bean.VehicleRealtimeStatus;
 import com.tipray.bean.baseinfo.TransCompany;
@@ -17,6 +17,8 @@ import com.tipray.service.UserService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.*;
+import com.tipray.websocket.WebSocketCloseStatusEnum;
+import com.tipray.websocket.WebSocketUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.*;

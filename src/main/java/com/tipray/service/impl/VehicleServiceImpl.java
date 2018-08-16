@@ -56,7 +56,19 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Vehicle addCar(Vehicle car, String driverIds) {
         if (car != null) {
-            vehicleDao.add(car);
+            String carNumber = car.getCarNumber();
+            if (carNumber == null || carNumber.trim().isEmpty()) {
+                throw new IllegalArgumentException("车牌号为空！");
+            }
+            Integer count = vehicleDao.countByCarNumber(carNumber);
+            if (count == null || count == 0) {
+                vehicleDao.add(car);
+            } else if (count == 1) {
+                vehicleDao.updateByCarNumber(car);
+            } else {
+                vehicleDao.deleteByCarNumber(carNumber);
+                vehicleDao.add(car);
+            }
             updateDrivers(driverIds, car.getCarNumber());
         }
         return car;
@@ -71,7 +83,9 @@ public class VehicleServiceImpl implements VehicleService {
             Long newTransportCardId = car.getTransportCard().getTransportCardId();
             vehicleDao.update(car);
             updateDrivers(driverIds, car.getCarNumber());
-            lockDao.updateLockRemarks(locks);
+            if (!EmptyObjectUtil.isEmptyList(locks)) {
+                lockDao.updateLockRemarks(locks);
+            }
             if (terminalId != null && terminalId != 0 && !oldTransportCardId.equals(newTransportCardId)) {
                 ByteBuffer src = SendPacketBuilder.buildProtocol0x1203(terminalId, newTransportCardId);
                 boolean isSend = udpServer.send(src);
@@ -212,12 +226,18 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public void terminalBind(String carNumber, Integer terminalId) {
         vehicleDao.terminalBind(carNumber, terminalId);
+        deviceDao.updateDeviceUse(terminalId, 1);
     }
 
     @Override
     public void terminalUnbind(String carNumber, Integer terminalId) {
-        vehicleDao.terminalUnbind(carNumber);
-        deviceDao.deleteByDeviceId(terminalId);
+        vehicleDao.terminalUnbind(carNumber, terminalId);
+        deviceDao.updateDeviceUse(terminalId, 0);
+    }
+
+    @Override
+    public String getCarNumberByTerminalId(Integer terminalId) {
+        return null == terminalId ? null : vehicleDao.getCarNumberByTerminalId(terminalId);
     }
 
     @Override

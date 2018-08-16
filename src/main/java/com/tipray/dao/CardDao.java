@@ -16,6 +16,24 @@ import java.util.List;
 @MyBatisAnno
 public interface CardDao extends BaseDao<Card> {
 	/**
+	 * 统计卡ID数目
+	 * @param cardId
+	 * @return
+	 */
+	Integer countCardByCardId(Long cardId);
+
+	/**
+	 * 根据卡ID更新卡
+	 * @param card
+	 */
+	void updateByCardId(Card card);
+
+	/**
+	 * 根据卡ID删除卡
+	 * @param cardId
+	 */
+	void deleteByCardId(Long cardId);
+	/**
 	 * 根据油库ID查询卡信息
 	 * 
 	 * @param oilDepotId 油库ID
@@ -30,6 +48,13 @@ public interface CardDao extends BaseDao<Card> {
 	 * @return 出入库卡集合
 	 */
     List<Card> findInOutCardsByOilDepotId(Long oilDepotId);
+
+    /**
+     * 根据油库ID统计出入库卡
+     * @param oilDepotId油库ID
+     * @return 油库出入库卡数目
+     */
+    Integer countInOutCardsByOilDepotId(Long oilDepotId);
 
     /**
      * 根据油库ID查询出入库卡ID集合

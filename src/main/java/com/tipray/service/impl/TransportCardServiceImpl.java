@@ -40,7 +40,19 @@ public class TransportCardServiceImpl implements TransportCardService {
 	@Override
 	public TransportCard addTransportCard(TransportCard transportCard) {
 		if (transportCard != null) {
-			transportCardDao.add(transportCard);
+			Long cardId = transportCard.getTransportCardId();
+            if (cardId == null) {
+                throw new IllegalArgumentException("配送卡ID为空！");
+            }
+            Integer count = transportCardDao.countCardByCardId(cardId);
+            if (count == null || count == 0) {
+                transportCardDao.add(transportCard);
+            } else if (count == 1) {
+                transportCardDao.updateByCardId(transportCard);
+            } else {
+                transportCardDao.deleteByCardId(cardId);
+                transportCardDao.add(transportCard);
+            }
 		}
 		return transportCard;
 	}

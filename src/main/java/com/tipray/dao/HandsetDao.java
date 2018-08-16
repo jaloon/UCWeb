@@ -23,6 +23,13 @@ public interface HandsetDao extends BaseDao<Handset> {
     Long getIdByDeviceId(Integer deviceId);
 
     /**
+     * 根据手持机记录ID获取设备ID
+     * @param id
+     * @return
+     */
+    Integer getDeviceIdById(Long id);
+
+    /**
      * 根据设备ID获取手持机信息
      *
      * @param deviceId

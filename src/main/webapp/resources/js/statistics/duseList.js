@@ -1,15 +1,15 @@
 function showBMap(id) {
     layer.open({
         type: 2,
-        title: ['设备使用记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
-        shadeClose: true,
+        title: ['卡及设备使用记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        // shadeClose: true,
         shade: 0.6,
         area: ['800px', '560px'],
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=use&id=' + id)
     });
 }
 $(function() {
-    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
             selectObj.append(data.com);
@@ -114,8 +114,8 @@ $(function() {
                     }
                     tableData += "<td class=\"duse-velocity\">" + (duse.velocity == undefined ? "数据库记录异常" : duse.velocity) + "</td>" +
                         "<td class=\"duse-aspect\">" + angle2aspect(duse.angle) + "</td>" +
-                        "<td class=\"duse-dev\">" + duse.devId + "</td>" +
                         "<td class=\"duse-type\">" + duse.typeName + "</td>" +
+                        "<td class=\"duse-dev\">" + duse.devId + "</td>" +
                         "<td class=\"duse-alarm\">" + (duse.alarm == undefined ? "数据库记录异常" : duse.alarm) + "</td>" +
                         "</tr>";
                 }

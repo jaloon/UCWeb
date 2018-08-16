@@ -146,7 +146,7 @@
 	                    } else {
 	                        tableData +=
 	                            "<td class=\"car-device\">" + car.vehicleDevice.deviceId + "</td>" +
-	                            "<td class=\"car-dmodel\">" + car.vehicleDevice.model + "</td>";
+	                            "<td class=\"car-dmodel\">" + (car.vehicleDevice.model == undefined ? "" : car.vehicleDevice.model) + "</td>";
 	                    }
 	                    tableData += "<td class=\"car-sim\">" + car.sim + "</td>";
 	                    if (isNull(car.transportCard) || car.transportCard.transportCardId == 0) {
@@ -160,7 +160,7 @@
 	                        "<img class='edit-btn' src=\"../../resources/images/operate/view.png\" alt=\"查看\" title=\"查看\" onclick=\"dispatch('view'," + car.id + ")\">" +
 	                       	<pop:Permission ename="editCar">
 	                        "&emsp;<img class='edit-btn' src=\"../../resources/images/operate/edit.png\" alt=\"编辑\" title=\"编辑\" onclick=\"dispatch('edit'," + car.id + ")\">&emsp;" +
-	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteCar(" + car.id + "," + car.carNumber + ")\">" +
+	                        "<img class='edit-btn' src=\"../../resources/images/operate/delete.png\" alt=\"删除\" title=\"删除\" onclick=\"deleteCar(" + car.id + ",'" + car.carNumber + "')\">" +
 	                        </pop:Permission>
 	                        "</td>" +
 	                        "</tr>";

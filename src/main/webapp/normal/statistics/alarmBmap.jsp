@@ -25,7 +25,7 @@
 </head>
 
 <body>
-    <div>
+    <div id="content" style="display:none;">
         <table>
             <tr>
                 <td>报警ID：</td>
@@ -53,7 +53,7 @@
                     <c:if test="${record.deviceType==1}">
                         车载终端
                     </c:if>
-                    <c:if test="${record.deviceType==1}">
+                    <c:if test="${record.deviceType==2}">
                         锁
                     </c:if>
                     （${record.deviceId}）
@@ -74,16 +74,6 @@
         </table>
     </div>
 
-"<div style='margin:0;line-height:20px;padding:2px;'>" +
-    "车牌号：&emsp;${record.carNumber}" +
-    "车牌号：&emsp;${record.carNumber}" +
-    "<br> 时间：&emsp;&emsp;" + new Date("${record.createDate}").format("yyyy-MM-dd HH:mm:ss") +
-    "<br> 经度：&emsp;&emsp;${record.longitude}" +
-    "<br> 纬度：&emsp;&emsp;${record.latitude}" +
-    "<br> 报警类型：${record.typeName}" +
-    "<br> 报警状态：${record.status}" +
-    "<br> 锁状态：&emsp;${record.lockStatus}" +
-    "</div>";
     <div class="map" id="bmap"></div>
     <script type="text/javascript">
         // 百度地图API功能
@@ -138,16 +128,7 @@
             fontFamily: "微软雅黑"
         });
         //信息窗内容
-        var content = "<div style='margin:0;line-height:20px;padding:2px;'>" +
-            "车牌号：&emsp;${record.carNumber}" +
-            "车牌号：&emsp;${record.carNumber}" +
-            "<br> 时间：&emsp;&emsp;" + new Date("${record.createDate}").format("yyyy-MM-dd HH:mm:ss") +
-            "<br> 经度：&emsp;&emsp;${record.longitude}" +
-            "<br> 纬度：&emsp;&emsp;${record.latitude}" +
-            "<br> 报警类型：${record.typeName}" +
-            "<br> 报警状态：${record.status}" +
-            "<br> 锁状态：&emsp;${record.lockStatus}" +
-            "</div>";
+        var content = $("#content").html();
         var searchInfoWindow = new BMapLib.SearchInfoWindow(map, content, {
             title: "报警信息", //标题
             width: 290, //宽度

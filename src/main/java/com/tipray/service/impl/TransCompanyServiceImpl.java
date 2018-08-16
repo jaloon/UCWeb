@@ -1,19 +1,16 @@
 package com.tipray.service.impl;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.TransCompany;
-import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.TransCompanyDao;
 import com.tipray.service.TransCompanyService;
 import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 运输公司管理业务层
@@ -31,7 +28,19 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 	@Override
 	public TransCompany addTransCompany(TransCompany transCompany) {
 		if (transCompany != null) {
-			transCompanyDao.add(transCompany);
+			String name = transCompany.getName();
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("运输公司名称为空！");
+            }
+            Integer count = transCompanyDao.countByComName(name);
+            if (count == null || count == 0) {
+                transCompanyDao.add(transCompany);
+            } else if (count == 1) {
+                transCompanyDao.updateByComName(transCompany);
+            } else {
+                transCompanyDao.deleteByComName(name);
+                transCompanyDao.add(transCompany);
+            }
 		}
 		return transCompany;
 	}
@@ -46,6 +55,9 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 
 	@Override
 	public void deleteTransCompanyById(Long id) {
+        if (id == null) {
+            return;
+        }
 		transCompanyDao.delete(id);
 	}
 

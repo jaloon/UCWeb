@@ -19,7 +19,7 @@ import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.DateUtil;
 import com.tipray.util.JSONUtil;
-import com.tipray.websocket.UpdateTrack;
+import com.tipray.websocket.handler.UpdateTrack;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;

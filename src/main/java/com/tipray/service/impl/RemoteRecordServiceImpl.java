@@ -7,6 +7,7 @@ import com.tipray.bean.track.TrackInfo;
 import com.tipray.dao.RemoteRecordDao;
 import com.tipray.dao.TrackDao;
 import com.tipray.service.RemoteRecordService;
+import com.tipray.util.DateUtil;
 import com.tipray.util.EmptyObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,10 @@ public class RemoteRecordServiceImpl implements RemoteRecordService {
             return null;
         }
         RemoteRecord remoteRecord = remoteRecordDao.getById(id);
+        if (remoteRecord == null) {
+            return null;
+        }
+        remoteRecord.setRecordTime(DateUtil.formatDate(remoteRecord.getCreateDate(), DateUtil.FORMAT_DATETIME));
         TrackInfo trackInfo = trackDao.getTrackByTrackId(remoteRecord.getTrackId().toString());
         if (trackInfo == null) {
             logger.warn("轨迹数据异常！");

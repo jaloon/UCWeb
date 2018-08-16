@@ -7,6 +7,7 @@ import com.tipray.bean.track.TrackInfo;
 import com.tipray.dao.LockRecordDao;
 import com.tipray.dao.TrackDao;
 import com.tipray.service.LockRecordService;
+import com.tipray.util.DateUtil;
 import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.VehicleAlarmUtil;
 import org.slf4j.Logger;
@@ -35,18 +36,22 @@ public class LockRecordServiceImpl implements LockRecordService {
 
     @Override
     public LockRecord getRecordById(Long id) {
-        if (id != null) {
-            LockRecord lockRecord = lockRecordDao.getById(id);
-            TrackInfo trackInfo = trackDao.getTrackByTrackId(lockRecord.getTrackId().toString());
-            if (trackInfo == null) {
-                logger.warn("轨迹数据异常！");
-            } else {
-                setTrackForRecord(lockRecord, trackInfo);
-                setAlarm(lockRecord);
-            }
-            return lockRecord;
+        if (id == null) {
+            return null;
         }
-        return null;
+        LockRecord lockRecord = lockRecordDao.getById(id);
+        if (lockRecord == null) {
+            return null;
+        }
+        lockRecord.setRecordTime(DateUtil.formatDate(lockRecord.getCreateDate(), DateUtil.FORMAT_DATETIME));
+        TrackInfo trackInfo = trackDao.getTrackByTrackId(lockRecord.getTrackId().toString());
+        if (trackInfo == null) {
+            logger.warn("轨迹数据异常！");
+        } else {
+            setTrackForRecord(lockRecord, trackInfo);
+            setAlarm(lockRecord);
+        }
+        return lockRecord;
     }
 
     @Override

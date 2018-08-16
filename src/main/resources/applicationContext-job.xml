@@ -24,8 +24,10 @@
         <!--链路维护心跳任务，每隔2分钟执行一次-->
         <task:scheduled ref="scheduledJob" method="executeUdpHeartbeat" cron="0 */2 * * * ?"/>
         <!--<task:scheduled ref="scheduledJob" method="executeHeartbeat" initial-delay="180000" fixed-rate="180000" />-->
-        <!--APP APP设备和版本信息定时同步任务，每隔10分钟执行一次-->
+        <!--APP设备和版本信息定时同步任务，每隔10分钟执行一次-->
         <task:scheduled ref="scheduledJob" method="executeAppSync" cron="0 */10 * * * ?"/>
+        <!--最新报警信息更新任务，每隔10分钟执行一次-->
+        <task:scheduled ref="scheduledJob" method="executeAppSync" cron="0 */30 * * * ?"/>
         <!--车辆在线状态监测任务，每隔15秒执行一次-->
         <task:scheduled ref="scheduledJob" method="executeVehicleOnlineMonitor" cron="*/15 * * * * ?"/>
         <!--最新车辆轨迹推送任务，每隔5秒执行一次-->

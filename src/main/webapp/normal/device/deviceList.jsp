@@ -82,7 +82,7 @@
 		                                layer.msg('同步成功！', { icon: 1, time: 1000 });
 		                                showList("", 1);
 		                            } else {
-		                                layer.msg('同步失败！', { icon: 5, time: 1000 });
+		                                layer.alert('同步失败！', { icon: 5});
 		                            }
 		                        },
 		                        "json"

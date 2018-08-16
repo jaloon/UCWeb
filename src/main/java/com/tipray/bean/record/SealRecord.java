@@ -3,25 +3,37 @@ package com.tipray.bean.record;
 import com.tipray.bean.Record;
 
 /**
- * 车辆进出记录
+ * 车辆施解封记录
  *
  * @author chenlong
  * @version 1.0 2017-12-18
  */
-public class InOutRecord extends Record {
+public class SealRecord extends Record {
     private static final long serialVersionUID = 1L;
     /**
      * 车辆ID
      */
     private Long carId;
     /**
-     * 进出类型
+     * 施解封类型
      */
     private Integer type;
     /**
-     * 进出类型名称
+     * 前状态
      */
-    private String typeName;
+    private Integer prestatus;
+    /**
+     * 状态
+     */
+    private Integer status;
+    /**
+     * 认证类型
+     */
+    private Integer authtype;
+    /**
+     * 认证编号
+     */
+    private Long authid;
     /**
      * 是否报警
      */
@@ -51,12 +63,36 @@ public class InOutRecord extends Record {
         this.type = type;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public Integer getPrestatus() {
+        return prestatus;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public void setPrestatus(Integer prestatus) {
+        this.prestatus = prestatus;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getAuthtype() {
+        return authtype;
+    }
+
+    public void setAuthtype(Integer authtype) {
+        this.authtype = authtype;
+    }
+
+    public Long getAuthid() {
+        return authid;
+    }
+
+    public void setAuthid(Long authid) {
+        this.authid = authid;
     }
 
     public String getAlarm() {
@@ -98,8 +134,17 @@ public class InOutRecord extends Record {
         if (type != null) {
             sb.append(", type=").append(type);
         }
-        if (typeName != null) {
-            sb.append(", typeName='").append(typeName).append('\'');
+        if (prestatus != null) {
+            sb.append(", prestatus=").append(prestatus);
+        }
+        if (status != null) {
+            sb.append(", status=").append(status);
+        }
+        if (authtype != null) {
+            sb.append(", authtype=").append(authtype);
+        }
+        if (authid != null) {
+            sb.append(", authid=").append(authid);
         }
         if (getStation() != null) {
             sb.append(", station='").append(getStation()).append('\'');
@@ -148,7 +193,7 @@ public class InOutRecord extends Record {
             sb.append(", end='").append(getEnd()).append('\'');
         }
         if (sb.length() > 0) {
-            sb.replace(0, 2, "InOutRecord{");
+            sb.replace(0, 2, "SealRecord{");
             sb.append('}');
         }
         return sb.toString();

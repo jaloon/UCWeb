@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -187,7 +188,8 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 		    Long carId = (Long) map.get("vehicle_id");
             Map<String, Object> track = trackDao.getLastTrackForAppByMap(map);
             if (track != null) {
-                Long trackTime = (Long) track.get("track_time"); // unix_timestamp，uint32
+                Long trackTime = (Long) track.get("timestamp"); // unix_timestamp，uint32
+                track.remove("timestamp");
                 Map<String, Object> status = vehicleDao.getCarStatusByCarId(carId);
                 if (status != null) {
                     Long triggerTime = (Long) status.get("trigger_time"); // unix_timestamp，uint32
@@ -195,8 +197,29 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
                         track.put("vehicle_status", status.get("status"));
                     }
                 }
-                map.put("track", track);
+            } else {
+                track = new HashMap<>();
+                track.put("vehicle_id", carId);
+                track.put("vehicle_number", "");
+                track.put("track_id", 0);
+                track.put("is_lnglat_valid", 0);
+                track.put("longitude", 0);
+                track.put("latitude", 0);
+                track.put("vehicle_status", 0);
+                track.put("vehicle_alarm_status", 0);
+                track.put("angle", 0);
+                track.put("speed", 0);
+                track.put("speed", 0);
+                track.put("lock_status_info", "");
+                track.put("track_time", "");
+                Map<String, Object> status = vehicleDao.getCarStatusByCarId(carId);
+                if (status != null) {
+                    track.put("vehicle_status", status.get("status"));
+                } else {
+                    track.put("vehicle_status", 0);
+                }
             }
+            map.put("track", track);
             map.put("is_online", vehicleDao.getOnline(carId));
         });
 		return list;

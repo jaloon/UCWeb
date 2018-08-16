@@ -17,7 +17,25 @@ import java.util.Map;
  */
 @MyBatisAnno
 public interface GasStationDao extends BaseDao<GasStation> {
+	/**
+	 * 根据加油站id集合批量删除
+	 * @param ids
+	 */
+	void deleteByIds(List<Long> ids);
 
+	/**
+	 * 根据编号或名称或简称统计有效加油站
+	 * @param gasStation
+	 * @return
+	 */
+	Integer countValidGasStation(GasStation gasStation);
+
+	/**
+	 * 根据编号或名称或简称查询无效加油站ID
+	 * @param gasStation
+	 * @return
+	 */
+	List<Long> findInvalidGasStation(GasStation gasStation);
 	/**
 	 * 根据加油站名称获取加油站列表
 	 * 

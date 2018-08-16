@@ -112,14 +112,14 @@ public class DeviceServiceImpl implements DeviceService {
                         adds.add(device);
                     }
                 }
+				if (dbDeviceIds.size() > 0) {
+					deviceDao.deleteByDeviceIdList(dbDeviceIds);
+				}
                 if (adds.size() > 0) {
                     deviceDao.addDevices(adds);
                 }
                 if (upds.size() > 0) {
                     deviceDao.updateDevices(upds);
-                }
-                if (dbDeviceIds.size() > 0) {
-                    deviceDao.deleteByDeviceIdList(dbDeviceIds);
                 }
             }
 		}

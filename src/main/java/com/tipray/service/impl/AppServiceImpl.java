@@ -129,14 +129,14 @@ public class AppServiceImpl implements AppService {
                         adds.add(appVer);
                     }
                 }
+                if (ids.size()>0){
+                    appverDao.batchDelete(ids);
+                }
                 if (adds.size()>0){
                     appverDao.batchAdd(adds);
                 }
                 if (upds.size()>0) {
                     appverDao.batchUpdate(upds);
-                }
-                if (ids.size()>0){
-                    appverDao.batchDelete(ids);
                 }
             }
 
@@ -157,14 +157,14 @@ public class AppServiceImpl implements AppService {
                         adds.add(appDev);
                     }
                 }
+                if (dbUuids.size()>0){
+                    appdevDao.batchDelete(dbUuids);
+                }
                 if (adds.size()>0){
                     appdevDao.batchAdd(adds);
                 }
                 if (upds.size()>0) {
                     appdevDao.batchUpdate(upds);
-                }
-                if (dbUuids.size()>0){
-                    appdevDao.batchDelete(dbUuids);
                 }
             }
         }

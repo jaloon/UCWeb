@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +46,10 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
     public AlarmRecord getRecordById(Long id) {
         if (id != null) {
             AlarmRecord alarmRecord = alarmRecordDao.getById(id);
+            if (alarmRecord == null) {
+                return null;
+            }
+            alarmRecord.setRecordTime(alarmRecord.getAlarmTime());
             TrackInfo trackInfo = trackDao.getTrackByTrackId(alarmRecord.getTrackId().toString());
             if (trackInfo == null) {
                 logger.warn("轨迹数据异常！");
@@ -63,13 +66,10 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                         if (lockStatusInfo.length < locks.size() || lockStatusInfo.length != maxLockIndex) {
                             lockStatusBuf.append("锁绑定状态异常！");
                         } else {
-                            locks.forEach(lock -> {
-                                lockStatusBuf.append(',');
-                                lockStatusBuf.append(lock.getStoreId()).append("号仓");
-                                lockStatusBuf.append(lock.getSeatName()).append(lock.getSeatIndex());
-                                lockStatusBuf.append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()));
-                            });
-                            lockStatusBuf.deleteCharAt(0);
+                            locks.forEach(lock -> lockStatusBuf.append('仓').append(lock.getStoreId()).append('-')
+                                        .append(lock.getSeatName()).append('-').append(lock.getSeatIndex()).append('-')
+                                        .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()))
+                                        .append("<br>"));
                         }
                     }
                 } else {
@@ -82,9 +82,9 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                         if (lockStatusInfo.length < lockIndex) {
                             lockStatusBuf.append("锁绑定状态异常！");
                         } else {
-                            lockStatusBuf.append(lock.getStoreId()).append("号仓");
-                            lockStatusBuf.append(lock.getSeatName()).append(lock.getSeatIndex()).append('：');
-                            lockStatusBuf.append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lockIndex));
+                            lockStatusBuf.append('仓').append(lock.getStoreId()).append('-')
+                                    .append(lock.getSeatName()).append('-').append(lock.getSeatIndex()).append('-')
+                                    .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()));
                         }
                     }
                 }
@@ -211,12 +211,25 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
             for (AlarmDevice alarmDevice : alarmDevices) {
                 AlarmInfo alarmInfo = alarmRecordDao.getAlarmInfoByAlarmDevcie(alarmDevice);
                 if (alarmInfo != null) {
+                    alarmInfo.setAlarmTag(VehicleAlarmUtil.buildAlarmTag(alarmDevice));
                     alarmInfos.add(alarmInfo);
                 }
             }
-            Collections.sort(alarmInfos);
+            alarmInfos.sort(null);
         }
         return alarmInfos;
+    }
+
+    @Override
+    public AlarmInfo getAlarmInfoByAlarmId(Long alarmId) {
+        if (alarmId == null) {
+            return null;
+        }
+        AlarmInfo alarmInfo = alarmRecordDao.getAlarmInfoByAlarmId(alarmId);
+        if (alarmInfo != null) {
+            alarmInfo.setAlarmTag(VehicleAlarmUtil.buildAlarmTag(alarmInfo));
+        }
+        return alarmInfo;
     }
 
     @Override

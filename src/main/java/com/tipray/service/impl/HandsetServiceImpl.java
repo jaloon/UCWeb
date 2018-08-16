@@ -4,6 +4,7 @@ import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.Handset;
+import com.tipray.dao.DeviceDao;
 import com.tipray.dao.GasStationDao;
 import com.tipray.dao.HandsetDao;
 import com.tipray.service.HandsetService;
@@ -26,12 +27,17 @@ public class HandsetServiceImpl implements HandsetService {
 	@Resource
 	private HandsetDao handsetDao;
 	@Resource
+    private DeviceDao deviceDao;
+	@Resource
 	private GasStationDao gasStationDao;
 
 	@Override
 	public Handset addHandset(Handset handset) {
 		if (handset != null) {
 			Integer deviceId = handset.getDeviceId();
+			if (deviceId == null) {
+				throw new IllegalArgumentException("设备ID为空");
+			}
 			Long id = handsetDao.getIdByDeviceId(deviceId);
             if (id == null) {
                 handsetDao.add(handset);
@@ -39,6 +45,7 @@ public class HandsetServiceImpl implements HandsetService {
                 handset.setId(id);
                 handsetDao.update(handset);
             }
+            deviceDao.updateDeviceUse(deviceId, 1);
 		}
 		return handset;
 	}
@@ -53,7 +60,12 @@ public class HandsetServiceImpl implements HandsetService {
 
 	@Override
 	public void deleteHandsetById(Long id) {
+        if (id == null) {
+            return;
+        }
+        Integer deviceId = handsetDao.getDeviceIdById(id);
 		handsetDao.delete(id);
+        deviceDao.updateDeviceUse(deviceId, 0);
 	}
 
 	@Override

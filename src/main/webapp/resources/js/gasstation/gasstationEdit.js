@@ -74,6 +74,7 @@ function getCardId(cardType) {
                 invalid = true;
                 return;
             }
+            invalid = false;
             tdHtml += "</select>";
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
@@ -181,43 +182,6 @@ $(function() {
                     $("#officialId").select();
                 });
                 return;
-            } else {
-                var ajaxFlag = true; //ajax执行结果标记，用于判断是否中断整个程序（return若放在ajax回调函数中，则无法跳出ajax）
-                $.ajax({
-                    type: "post",
-                    async: false, //不异步，先执行完ajax，再干别的
-                    url: "../../manage/gasstation/isExist.do",
-                    data: encodeURI("officialId=" + officialId),
-                    dataType: "json",
-                    success: function(response) {
-                        if (response == true || response == "true") {
-                            ajaxFlag = false;
-                            layer.alert('加油站编号已存在！', { icon: 5 }, function(index2) {
-                                layer.close(index2);
-                                $("#officialId").select();
-                            });
-                        }
-                    },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                        if (XMLHttpRequest.readyState == 4) {
-                            var http_status = XMLHttpRequest.status;
-                            if (http_status == 0 || http_status > 600) {
-                                location.reload(true);
-                            } else if (http_status == 200) {
-                                if (textStatus == "parsererror") {
-                                    layer.alert("应答数据格式解析错误！")
-                                } else {
-                                    layer.alert("http response error: " + textStatus)
-                                }
-                            } else {
-                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
-                            }
-                        }
-                    }
-                });
-                if (!ajaxFlag) {
-                    return;
-                }
             }
             if (isNull(name)) {
                 layer.alert('加油站名称不能为空！', { icon: 0 }, function(index2) {
@@ -225,78 +189,84 @@ $(function() {
                     $("#name").select();
                 });
                 return;
-            } else {
-                var ajaxFlag = true; //ajax执行结果标记，用于判断是否中断整个程序（return若放在ajax回调函数中，则无法跳出ajax）
-                $.ajax({
-                    type: "post",
-                    async: false, //不异步，先执行完ajax，再干别的
-                    url: "../../manage/gasstation/isExist.do",
-                    data: encodeURI("name=" + name),
-                    dataType: "json",
-                    success: function(response) {
-                        if (response == true || response == "true") {
-                            ajaxFlag = false;
-                            layer.alert('加油站名称已存在！', { icon: 5 }, function(index2) {
-                                layer.close(index2);
-                                $("#name").select();
-                            });
-                        }
-                    },
-                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
-                        if (XMLHttpRequest.readyState == 4) {
-                            var http_status = XMLHttpRequest.status;
-                            if (http_status == 0 || http_status > 600) {
-                                location.reload(true);
-                            } else if (http_status == 200) {
-                                if (textStatus == "parsererror") {
-                                    layer.alert("应答数据格式解析错误！")
-                                } else {
-                                    layer.alert("http response error: " + textStatus)
-                                }
+            }
+            if (isNull(abbr)) {
+                layer.alert('加油站简称不能为空！', { icon: 0 }, function(index2) {
+                    layer.close(index2);
+                    $("#abbr").select();
+                });
+                return;
+            }
+            var ajaxFlag = true; //ajax执行结果标记，用于判断是否中断整个程序（return若放在ajax回调函数中，则无法跳出ajax）
+            $.ajax({
+                type: "post",
+                async: false, //不异步，先执行完ajax，再干别的
+                url: "../../manage/gasstation/isExist.do",
+                data: encodeURI("officialId=" + officialId + "&name=" + name + "&abbr=" + abbr),
+                dataType: "json",
+                success: function(response) {
+                    if (response == true || response == "true") {
+                        ajaxFlag = false;
+                        layer.alert('加油站已存在！', { icon: 5 }, function(index2) {
+                            layer.close(index2);
+                            $("#officialId").select();
+                        });
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                    if (XMLHttpRequest.readyState == 4) {
+                        var http_status = XMLHttpRequest.status;
+                        if (http_status == 0 || http_status > 600) {
+                            location.reload(true);
+                        } else if (http_status == 200) {
+                            if (textStatus == "parsererror") {
+                                layer.alert("应答数据格式解析错误！")
                             } else {
-                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                                layer.alert("http response error: " + textStatus)
                             }
+                        } else {
+                            layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
                         }
                     }
-                });
-                if (!ajaxFlag) {
-                    return;
                 }
+            });
+            if (!ajaxFlag) {
+                return;
             }
         }
 
 
-        if (isNull(director)) {
-            layer.alert('负责人不能为空！', { icon: 2 }, function(index2) {
-                layer.close(index2);
-                $("#director").select();
-            });
-            return;
-        }
-
-        if (!isPhone(phone)) {
-            layer.alert('电话号码不正确！', { icon: 5 }, function(index2) {
-                layer.close(index2);
-                $("#phone").select();
-            });
-            return;
-        }
-
-        if (isNull(address)) {
-            layer.alert('地址不能为空！', { icon: 0 }, function(index2) {
-                layer.close(index2);
-                $("#address").select();
-            });
-            return;
-        }
-
-        if (isNull(company)) {
-            layer.alert('所属公司不能为空！', { icon: 0 }, function(index2) {
-                layer.close(index2);
-                $("#company").select();
-            });
-            return;
-        }
+        // if (isNull(director)) {
+        //     layer.alert('负责人不能为空！', { icon: 2 }, function(index2) {
+        //         layer.close(index2);
+        //         $("#director").select();
+        //     });
+        //     return;
+        // }
+        //
+        // if (!isPhone(phone)) {
+        //     layer.alert('电话号码不正确！', { icon: 5 }, function(index2) {
+        //         layer.close(index2);
+        //         $("#phone").select();
+        //     });
+        //     return;
+        // }
+        //
+        // if (isNull(address)) {
+        //     layer.alert('地址不能为空！', { icon: 0 }, function(index2) {
+        //         layer.close(index2);
+        //         $("#address").select();
+        //     });
+        //     return;
+        // }
+        //
+        // if (isNull(company)) {
+        //     layer.alert('所属公司不能为空！', { icon: 0 }, function(index2) {
+        //         layer.close(index2);
+        //         $("#company").select();
+        //     });
+        //     return;
+        // }
 
         if (!isLng(longitude)) {
             layer.alert('经度不符规则！', { icon: 0 }, function(index2) {
@@ -322,10 +292,12 @@ $(function() {
             return;
         }
 
+        var loadLayer = layer.load();
         $.post(url, encodeURI(param),
             function(data) {
+                layer.close(loadLayer);
                 if ("error" == data.msg) {
-                    layer.msg(error_zh_text, { icon: 2, time: 500 });
+                    layer.alert(error_zh_text + "<br>" + data.e, {icon: 2});
                 } else {
                     layer.msg(success_zh_text, { icon: 1, time: 500 }, function() {
                         parent.layer.close(index);

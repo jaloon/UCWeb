@@ -28,7 +28,7 @@ import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.*;
 import com.tipray.util.*;
-import com.tipray.websocket.MonitorWebSocketHandler;
+import com.tipray.websocket.handler.MonitorWebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -84,7 +84,6 @@ public class VehicleManageController {
      * @param uploadInterval   {@link Integer} 默认轨迹上报间隔（秒）
      * @param generateDistance {@link Integer} 轨迹生成距离间隔（米）
      * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid             {@link String} 设备UUID
      * @param longitude        {@link Float} 手机定位经度
      * @param latitude         {@link Float} 手机定位纬度
      * @param isLocationValid  {@link Integer} 手机定位是否有效
@@ -97,7 +96,6 @@ public class VehicleManageController {
             @RequestParam(value = "token") String token,
             @ModelAttribute VehicleTerminalConfig terminalConfig,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -108,10 +106,11 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "更新车台配置：token={}, scope={}, carNumber={}, scanInterval={}, uploadInterval={}, generateDistance={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
+                "更新车台配置：token={}, scope={}, carNumber={}, scanInterval={}, uploadInterval={}, generateDistance={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
                 token, terminalConfig.getScope(), terminalConfig.getCarNumber(), terminalConfig.getScanInterval(),
-                terminalConfig.getUploadInterval(), terminalConfig.getGenerateDistance(), isApp, uuid, longitude, latitude, isLocationValid);
+                terminalConfig.getUploadInterval(), terminalConfig.getGenerateDistance(), isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
                 | LogTypeConst.TYPE_TERMINAL_TRACK_CONFIG | LogTypeConst.RESULT_DONE;
@@ -201,7 +200,6 @@ public class VehicleManageController {
      *                        <li>是否只允许一次开锁</li>
      *                        </ol>
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -215,7 +213,6 @@ public class VehicleManageController {
             @RequestParam(value = "token", required = false) String token,
             @RequestParam(value = "func_enable", required = false) Integer functionEnable,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -226,11 +223,12 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车台功能启用配置：token={}, functionEnable={}, token={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
+                "车台功能启用配置：token={}, functionEnable={}, token={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
                 token,
                 functionEnable == null ? null : functionEnable + "[0b" + Integer.toBinaryString(functionEnable) + "]",
-                isApp, uuid, longitude, latitude, isLocationValid);
+                isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
                 | LogTypeConst.TYPE_TERMINAL_ENABLE_CONFIG | LogTypeConst.RESULT_DONE;
@@ -280,7 +278,6 @@ public class VehicleManageController {
      * @param deviceId        {@link Integer} 车台设备ID
      * @param storeNum        {@link Integer} 仓数
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -295,7 +292,6 @@ public class VehicleManageController {
             @RequestParam(value = "device_id", required = false) Integer deviceId,
             @RequestParam(value = "store_num", required = false) Integer storeNum,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -306,9 +302,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车载终端绑定：token={}, carNumber={}, deviceId={}, storeNum={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, deviceId, storeNum, isApp, uuid, longitude, latitude, isLocationValid);
+                "车载终端绑定：token={}, carNumber={}, deviceId={}, storeNum={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, deviceId, storeNum, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL | LogTypeConst.TYPE_DEVICE_BIND
                 | LogTypeConst.RESULT_DONE;
@@ -398,6 +395,111 @@ public class VehicleManageController {
     }
 
     /**
+     * 车辆解绑
+     *
+     * @param token           {@link String} UUID令牌
+     * @param carNumber       {@link String} 车牌号
+     * @param deviceId        {@link Integer} 车台设备ID
+     * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
+     * @param longitude       {@link Float} 手机定位经度
+     * @param latitude        {@link Float} 手机定位纬度
+     * @param isLocationValid {@link Integer} 手机定位是否有效
+     * @return {@link ResponseMsg}
+     */
+    @PermissionAnno("bindTerminal")
+    @RequestMapping(value = "asyn_vehicle_unbind_request", method = {RequestMethod.POST, RequestMethod.GET})
+    @ResponseBody
+    public ResponseMsg asynVehicleUnbindRequest(
+            @RequestParam(value = "token", required = false) String token,
+            @RequestParam(value = "car_number", required = false) String carNumber,
+            @RequestParam(value = "device_id", required = false) Integer deviceId,
+            @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
+            @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
+            @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
+            @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
+        if (!UUIDUtil.verifyUUIDToken(token, session)) {
+            logger.error("令牌无效！token={}", token);
+            return null;
+        } else {
+            session.setAttribute("token", token);
+        }
+        logger.info(
+                "车载终端解绑：token={}, carNumber={}, deviceId={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, deviceId, isApp, longitude, latitude, isLocationValid);
+        User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
+        VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
+        Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL | LogTypeConst.TYPE_DEVICE_BIND
+                | LogTypeConst.RESULT_DONE;
+        String description = new StringBuffer("车载终端解绑：").append(user.getName()).append("通过")
+                .append(isApp == null || isApp == 0 ? "网页" : "手机APP").append("将车辆").append(carNumber).append("与车载终端")
+                .append(deviceId).append("解绑。").toString();
+        Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+        if (logId == null || logId == 0L) {
+            return ResponseMsgUtil.error(ErrorTagConst.DB_INSERT_ERROR_TAG, 1, "数据库操作异常！");
+        }
+        String result = "";
+        boolean isOk = false;
+        try {
+            if (StringUtil.isEmpty(carNumber)) {
+                result = "失败，车牌号为空！";
+                logger.error("车载终端解绑失败：{}", DevBindErrorEnum.CARNUMBER_NULL);
+                return ResponseMsgUtil.error(DevBindErrorEnum.CARNUMBER_NULL);
+            }
+            if (deviceId == null) {
+                result = "失败，设备ID为空！";
+                logger.error("车载终端解绑失败：{}", DevBindErrorEnum.DEVICE_ID_NULL);
+                return ResponseMsgUtil.error(DevBindErrorEnum.DEVICE_ID_NULL);
+            }
+            Device device = deviceService.getDeviceByDeviceId(deviceId);
+            if (device == null) {
+                result = "失败，设备不存在！";
+                logger.error("车载终端解绑失败：{}", DevBindErrorEnum.DEVICE_INVALID);
+                return ResponseMsgUtil.error(DevBindErrorEnum.DEVICE_INVALID);
+            }
+            if (device.getType() != 1) {
+                result = "失败，设备类型不符！";
+                logger.error("车载终端解绑失败：{}", DevBindErrorEnum.DEVICE_TYPE_INCONSISTENT);
+                return ResponseMsgUtil.error(DevBindErrorEnum.DEVICE_TYPE_INCONSISTENT);
+            }
+
+            String carNumber1 = vehicleService.getCarNumberByTerminalId(deviceId);
+            if (carNumber1 == null) {
+                isOk = true;
+                result = "成功！";
+                logger.info("车载终端【{}】未与任何车辆绑定！", deviceId);
+                return ResponseMsgUtil.success();
+            }
+            if (!carNumber1.equals(carNumber)) {
+                result = "失败，与车载终端绑定的车辆不是要解绑的车辆！";
+                logger.error("车载终端解绑失败：与车载终端【{}】绑定的车辆是{}，不是要解绑的车辆{}", deviceId, carNumber1, carNumber);
+                return ResponseMsgUtil.error(DevBindErrorEnum.BINDED_CAR_INCONSISTENT);
+            }
+
+            vehicleService.terminalUnbind(carNumber, deviceId);
+
+            isOk = true;
+            result = "成功！";
+            logger.info("车载终端【{}】与车辆{}解绑成功！", deviceId, carNumber);
+            return ResponseMsgUtil.success();
+        } catch (Exception e) {
+            result = "失败，车载终端解绑异常！";
+            logger.error("车载终端解绑异常！", e);
+            return ResponseMsgUtil.exception(e);
+        } finally {
+            int isFail = 0;
+            if (!isOk) {
+                isFail = 1;
+                type++;
+                vehicleManageLog.setType(type);
+            }
+            vehicleManageLog.setResult(result);
+            monitorWebSocketHandler.broadcastLog(isFail, description, result);
+            OperateLogUtil.updateVehicleManageLog(vehicleManageLog, vehicleManageLogService, logger);
+        }
+    }
+
+    /**
      * 监听待绑定锁列表
      *
      * @param token           {@link String} UUID令牌
@@ -406,7 +508,6 @@ public class VehicleManageController {
      *                        1 开始监听<br>
      *                        2 结束监听
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -420,7 +521,6 @@ public class VehicleManageController {
             @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "listen_state", required = false) Integer listenState,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -431,9 +531,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "监听待绑定锁列表：token={}, carNumber={}, listenState={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, listenState, isApp, uuid, longitude, latitude, isLocationValid);
+                "监听待绑定锁列表：token={}, carNumber={}, listenState={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, listenState, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_LOCK | LogTypeConst.TYPE_LOCK_LISTEN
                 | LogTypeConst.RESULT_DONE;
@@ -504,7 +605,6 @@ public class VehicleManageController {
      * @param token           {@link String} UUID令牌
      * @param carNumber       {@link String} 车牌号
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -517,7 +617,6 @@ public class VehicleManageController {
             @RequestParam(value = "token", required = false) String token,
             @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -527,9 +626,10 @@ public class VehicleManageController {
         } else {
             session.setAttribute("token", token);
         }
-        logger.info("清除待绑定锁列表：token={}, carNumber={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, isApp, uuid, longitude, latitude, isLocationValid);
+        logger.info("清除待绑定锁列表：token={}, carNumber={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_LOCK | LogTypeConst.TYPE_LOCK_CLEAR
                 | LogTypeConst.RESULT_DONE;
@@ -592,7 +692,6 @@ public class VehicleManageController {
      *                        1 开始进行锁绑定触发<br>
      *                        2 结束锁绑定触发
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -606,7 +705,6 @@ public class VehicleManageController {
             @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "trigger_state", required = false) Integer triggerState,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -617,9 +715,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "锁绑定触发控制：token={}, carNumber={}, triggerState={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, triggerState, isApp, uuid, longitude, latitude, isLocationValid);
+                "锁绑定触发控制：token={}, carNumber={}, triggerState={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, triggerState, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_LOCK | LogTypeConst.TYPE_LOCK_TRIGGER
                 | LogTypeConst.RESULT_DONE;
@@ -688,11 +787,10 @@ public class VehicleManageController {
      *
      * @param token           {@link String} UUID令牌
      * @param carNumber       {@link String} 车牌号
-     * @param bindType        {@link Integer} 锁绑定变更类型（1 增加；2删除；3修改）
+     * @param bindType        {@link Integer} 锁绑定变更类型（1 增加；2 删除；3 修改）
      * @param bindingLocks    {@link String} 锁列表json，结构如下：
      *                        [{"lockId":33554438,"storeId":1,"seat":1,"seatIndex":1,"allowOpen":2}]
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -707,7 +805,6 @@ public class VehicleManageController {
             @RequestParam(value = "bind_type", required = false) Integer bindType,
             @RequestParam(value = "binding_locks", required = false) String bindingLocks,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -718,9 +815,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "锁绑定变更下发：token={}, carNumber={}, bindType={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}, \nbindingLocks={}",
-                token, carNumber, bindType, isApp, uuid, longitude, latitude, isLocationValid, bindingLocks);
+                "锁绑定变更下发：token={}, carNumber={}, bindType={}, isApp={}, longitude={}, latitude={}, isLocationValid={}, \nbindingLocks={}",
+                token, carNumber, bindType, isApp, longitude, latitude, isLocationValid, bindingLocks);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_LOCK | LogTypeConst.TYPE_DEVICE_BIND
                 | LogTypeConst.RESULT_DONE;
@@ -953,7 +1051,6 @@ public class VehicleManageController {
      * @param token           {@link String} UUID令牌
      * @param index           {@link Long} 车台升级缓存索引
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -966,7 +1063,6 @@ public class VehicleManageController {
             @RequestParam(value = "token", required = false) String token,
             @RequestParam(value = "index", required = false) Long index,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -977,9 +1073,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车台软件升级：token={}, index={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, index, isApp, uuid, longitude, latitude, isLocationValid);
+                "车台软件升级：token={}, index={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, index, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
                 | LogTypeConst.TYPE_TERMINAL_SOFTWARE_UPGRADE | LogTypeConst.RESULT_DONE;
@@ -1007,6 +1104,7 @@ public class VehicleManageController {
             terminalUpgradeInfo.setInfo(info);
 
             Long upgradeId = vehicleService.terminalUpgrade(terminalUpgradeInfo, terminalIdList);
+            vehicleManageLog.setRemoteId(upgradeId.intValue());
 
             cacheId = addCache(UdpBizId.TERMINAL_SOFTWARE_UPGRADE_REQUEST, logId, description, null);
 
@@ -1017,7 +1115,6 @@ public class VehicleManageController {
             }
             addTimeoutTask(src, cacheId);
             vehicleManageLog.setUdpBizId(UdpBizId.TERMINAL_SOFTWARE_UPGRADE_REQUEST);
-            vehicleManageLog.setRemoteId(upgradeId.intValue());
 
             logger.info("车台软件升级指令发送成功！");
             return ResponseMsgUtil.success();
@@ -1038,7 +1135,6 @@ public class VehicleManageController {
      * @param token            {@link String} UUID令牌
      * @param upgradeRecordIds {@link String} 车辆升级记录ID，英文逗号“,”分隔
      * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid             {@link String} 设备UUID
      * @param longitude        {@link Float} 手机定位经度
      * @param latitude         {@link Float} 手机定位纬度
      * @param isLocationValid  {@link Integer} 手机定位是否有效
@@ -1051,7 +1147,6 @@ public class VehicleManageController {
             @RequestParam(value = "token", required = false) String token,
             @RequestParam(value = "upgrade_record_ids", required = false) String upgradeRecordIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -1062,9 +1157,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "车台取消升级：token={}, upgradeRecordIds={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, upgradeRecordIds, isApp, uuid, longitude, latitude, isLocationValid);
+                "车台取消升级：token={}, upgradeRecordIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, upgradeRecordIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TERMINAL
                 | LogTypeConst.TYPE_TERMINAL_CANCEL_UPGRADE | LogTypeConst.RESULT_DONE;
@@ -1092,12 +1188,14 @@ public class VehicleManageController {
             logger.error("车台取消升级异常！", e);
             return ResponseMsgUtil.exception(e);
         } finally {
+            int isFail = 0;
             if (!isOk) {
+                isFail = 1;
                 type++;
                 vehicleManageLog.setType(type);
             }
             vehicleManageLog.setResult(result);
-            monitorWebSocketHandler.broadcastLog(1, description, result);
+            monitorWebSocketHandler.broadcastLog(isFail, description, result);
             OperateLogUtil.updateVehicleManageLog(vehicleManageLog, vehicleManageLogService, logger);
         }
     }
@@ -1109,7 +1207,6 @@ public class VehicleManageController {
      * @param transportId      {@link Long} 原配送ID
      * @param changedStationId {@link Long} 新加油站ID
      * @param isApp            {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid             {@link String} 设备UUID
      * @param longitude        {@link Float} 手机定位经度
      * @param latitude         {@link Float} 手机定位纬度
      * @param isLocationValid  {@link Integer} 手机定位是否有效
@@ -1123,7 +1220,6 @@ public class VehicleManageController {
             @RequestParam(value = "transport_id", required = false) Long transportId,
             @RequestParam(value = "changed_station_id", required = false) Long changedStationId,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -1134,9 +1230,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "远程换站：token={}, transportId={}, changedStationId={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, transportId, changedStationId, isApp, uuid, longitude, latitude, isLocationValid);
+                "远程换站：token={}, transportId={}, changedStationId={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, transportId, changedStationId, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_DISTRIBUTION
                 | LogTypeConst.TYPE_CHANGE_STATION | LogTypeConst.RESULT_DONE;
@@ -1207,6 +1304,8 @@ public class VehicleManageController {
             // UDP协议数据体
             ByteBuffer dataBuffer = (ByteBuffer) map.get("dataBuffer");
 
+            vehicleManageLog.setRemoteId((int) changeId);
+
             params.put("changeId", changeId);
             params.put("transportId", transportId);
             params.put("changedTransportId", changedTransportId);
@@ -1219,7 +1318,6 @@ public class VehicleManageController {
             }
             addTimeoutTask(src, cacheId);
             vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CHANGE_STATION_REQUEST);
-            vehicleManageLog.setRemoteId((int) changeId);
 
             logger.info("远程换站指令发送成功！");
             return ResponseMsgUtil.success();
@@ -1240,7 +1338,6 @@ public class VehicleManageController {
      * @param carNumber       {@link String} 车牌号
      * @param alarmIds        {@link String} 报警ID集合，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -1254,7 +1351,6 @@ public class VehicleManageController {
             @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "alarm_ids", required = false) String alarmIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -1264,9 +1360,10 @@ public class VehicleManageController {
         } else {
             session.setAttribute("token", token);
         }
-        logger.info("远程报警消除：token={}, carNumber={}, alarmIds={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, alarmIds, isApp, uuid, longitude, latitude, isLocationValid);
+        logger.info("远程报警消除：token={}, carNumber={}, alarmIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, alarmIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_ALARM | LogTypeConst.TYPE_ALARM_ELIMINATE
                 | LogTypeConst.RESULT_DONE;
@@ -1374,6 +1471,7 @@ public class VehicleManageController {
             eAlarmMap.put("isLocationValid", isLocationValid);
             alarmRecordService.addEliminateAlarm(eAlarmMap);
             int alarmEliminateId = ((Long) eAlarmMap.get("id")).intValue();
+            vehicleManageLog.setRemoteId(alarmEliminateId);
 
             params.put("alarmIds", alarmIds);
             params.put("alarmEliminateId", alarmEliminateId);
@@ -1388,7 +1486,6 @@ public class VehicleManageController {
             }
             addTimeoutTask(src, cacheId);
             vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_ALARM_ELIMINATE_REQUEST);
-            vehicleManageLog.setRemoteId(alarmEliminateId);
 
             result = "请求发起成功！";
             isOk = true;
@@ -1414,7 +1511,6 @@ public class VehicleManageController {
      * @param stationId       {@link Integer} 站点ID
      * @param lockIds         {@link String} 车辆状态要求变更为【应急】时有效。锁设备ID列表，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -1431,7 +1527,6 @@ public class VehicleManageController {
             @RequestParam(value = "station_id", required = false) Integer stationId,
             @RequestParam(value = "lock_ids", required = false) String lockIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -1442,9 +1537,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "远程车辆进出：token={}, controlType={}, carNumber={}, stationType={}, stationId={}, lockIds={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, controlType, carNumber, stationType, stationId, lockIds, isApp, uuid, longitude, latitude, isLocationValid);
+                "远程车辆进出：token={}, controlType={}, carNumber={}, stationType={}, stationId={}, lockIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, controlType, carNumber, stationType, stationId, lockIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_REMOTE | LogTypeConst.TYPE_REMOTE_CONTROL
                 | LogTypeConst.RESULT_DONE;
@@ -1634,6 +1730,8 @@ public class VehicleManageController {
             }
             // 添加远程操作记录
             Integer remoteControlId = vehicleService.addRemoteControlRecord(map);
+            vehicleManageLog.setRemoteId(remoteControlId);
+
             params.put("remoteControlId", remoteControlId);
             cacheId = addCache(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST, logId, description, params);
 
@@ -1653,7 +1751,6 @@ public class VehicleManageController {
             }
             addTimeoutTask(src, cacheId);
             vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_IN_OUT_REQUEST);
-            vehicleManageLog.setRemoteId(remoteControlId);
 
             logger.info("远程车辆进出指令发送成功！");
             return ResponseMsgUtil.success();
@@ -1679,7 +1776,6 @@ public class VehicleManageController {
      *                        按位标识；每个位代表一个仓位。位序从低位开始对应到每个仓位。
      * @param lockIds         {@link String} 车辆状态要求变更为【应急】时有效。锁设备ID列表，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -1697,7 +1793,6 @@ public class VehicleManageController {
             @RequestParam(value = "store_ids", required = false) Short storeIds,
             @RequestParam(value = "lock_ids", required = false) String lockIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -1708,9 +1803,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "远程车辆状态强制变更：token={}, carNumber={}, stationType={}, stationId={}, status={}, storeIds={}, lockIds={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, stationType, stationId, status, storeIds, lockIds, isApp, uuid, longitude, latitude, isLocationValid);
+                "远程车辆状态强制变更：token={}, carNumber={}, stationType={}, stationId={}, status={}, storeIds={}, lockIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, stationType, stationId, status, storeIds, lockIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_REMOTE | LogTypeConst.TYPE_CAR_STATUS_ALTER
                 | LogTypeConst.RESULT_DONE;
@@ -1822,6 +1918,7 @@ public class VehicleManageController {
 
             // 添加远程操作记录
             Integer remoteControlId = vehicleService.addRemoteStatusAlterRecord(map);
+            vehicleManageLog.setRemoteId(remoteControlId);
 
             params.put("remoteControlId", remoteControlId);
 
@@ -1843,7 +1940,6 @@ public class VehicleManageController {
             }
             addTimeoutTask(src, cacheId);
             vehicleManageLog.setUdpBizId(UdpBizId.REMOTE_CAR_STATUS_ALTER_REQUEST);
-            vehicleManageLog.setRemoteId(remoteControlId);
 
             logger.info("远程车辆状态强制变更指令发送成功！");
             return ResponseMsgUtil.success();
@@ -1864,7 +1960,6 @@ public class VehicleManageController {
      * @param carNumber       {@link String} 车牌号
      * @param lockIds         {@link String} 锁设备ID，英文逗号“,”分隔
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -1878,7 +1973,6 @@ public class VehicleManageController {
             @RequestParam(value = "car_number", required = false) String carNumber,
             @RequestParam(value = "lock_ids", required = false) String lockIds,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -1889,9 +1983,10 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "远程开锁重置：token={}, carNumber={}, lockIds={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, carNumber, lockIds, isApp, uuid, longitude, latitude, isLocationValid);
+                "远程开锁重置：token={}, carNumber={}, lockIds={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, carNumber, lockIds, isApp, longitude, latitude, isLocationValid);
         User user = ThreadVariable.getUser();
+        String uuid = (String) session.getAttribute("appdev-uuid");
         VehicleManageLog vehicleManageLog = new VehicleManageLog(user, isApp, uuid);
         Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_LOCK | LogTypeConst.TYPE_LOCK_RESET
                 | LogTypeConst.RESULT_DONE;
@@ -1986,7 +2081,6 @@ public class VehicleManageController {
      * @param authCode        {@link Integer} 授权码（6位10进制数）
      * @param authTime        {@link String} 授权时间
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
-     * @param uuid            {@link String} 设备UUID
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
      * @param isLocationValid {@link Integer} 手机定位是否有效
@@ -1999,7 +2093,6 @@ public class VehicleManageController {
             @RequestParam(value = "auth_code", required = false) Integer authCode,
             @RequestParam(value = "auth_time", required = false) String authTime,
             @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
-            @RequestParam(value = "uuid", required = false) String uuid,
             @RequestParam(value = "longitude", required = false, defaultValue = "0") Float longitude,
             @RequestParam(value = "latitude", required = false, defaultValue = "0") Float latitude,
             @RequestParam(value = "is_location_valid", required = false, defaultValue = "0") Integer isLocationValid) {
@@ -2010,8 +2103,8 @@ public class VehicleManageController {
             session.setAttribute("token", token);
         }
         logger.info(
-                "授权记录上报：token={}, authCode={}, authTime={}, isApp={}, uuid={}, longitude={}, latitude={}, isLocationValid={}",
-                token, authCode, authTime, isApp, uuid, longitude, latitude, isLocationValid);
+                "授权记录上报：token={}, authCode={}, authTime={}, isApp={}, longitude={}, latitude={}, isLocationValid={}",
+                token, authCode, authTime, isApp, longitude, latitude, isLocationValid);
         if (authCode == null) {
             logger.error("授权记录上报错误：{}", AuthReportErrorEnum.AUTH_CODE_NULL);
             return ResponseMsgUtil.error(AuthReportErrorEnum.AUTH_CODE_NULL);
@@ -2028,6 +2121,7 @@ public class VehicleManageController {
         }
         try {
             User user = ThreadVariable.getUser();
+            String uuid = (String) session.getAttribute("appdev-uuid");
             AuthorizedRecord authorizedRecord = new AuthorizedRecord();
             authorizedRecord.setUserId(user.getId());
             authorizedRecord.setAuthCode(authCode);
@@ -2112,6 +2206,7 @@ public class VehicleManageController {
             log.setResult(result);
             monitorWebSocketHandler.broadcastLog(1, description, result);
         } else {
+            log.setResult(null);
             monitorWebSocketHandler.broadcastLog(0, description, "请求发起成功！");
         }
         OperateLogUtil.updateVehicleManageLog(log, vehicleManageLogService, logger);
@@ -2138,7 +2233,9 @@ public class VehicleManageController {
         } else {
             monitorWebSocketHandler.broadcastLog(0, description, result);
         }
-        if (!"请求发起成功！".equals(result)) {
+        if ("请求发起成功！".equals(result)) {
+            log.setResult(null);
+        } else {
             log.setResult(result);
         }
         OperateLogUtil.updateVehicleManageLog(log, vehicleManageLogService, logger);

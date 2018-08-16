@@ -29,14 +29,18 @@
 <script type="text/javascript">
     $(function () {
         var map = new BMap.Map("bmap"); // 创建Map实例
-        map.centerAndZoom("厦门", 12); // 初始化地图,设置中心点坐标和地图级别
-        map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
-        map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
-        map.addControl(new BMap.ScaleControl()); // 添加比例尺
-        map.addControl(new BMap.OverviewMapControl({
-            isOpen: true
-        })); //添加缩略地图控件
-        map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
+        var localCity = new BMap.LocalCity();
+        localCity.get(function (localCityResult) {
+            // center	Point	城市所在中心点
+            // level	Number	展示当前城市的最佳地图级别，如果您在使用此对象时提供了map实例，则地图级别将根据您提供的地图大小进行调整
+            // name	String	城市名称
+            map.centerAndZoom(localCityResult.center, 12); // 初始化地图,设置中心点坐标和地图级别
+            map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
+            map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
+            map.addControl(new BMap.ScaleControl()); // 添加比例尺
+            map.addControl(new BMap.OverviewMapControl({isOpen: true})); //添加缩略地图控件
+            map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
+        });
 
         var index = parent.layer.getFrameIndex(window.name); //获取父窗口索引
         var carId = getUrlParam("carId");
@@ -164,7 +168,7 @@
             });
             carMarker = new BMap.Marker(point, {
                 icon: initCarIcon(track.alarm),
-                rotation: -track.angle
+                rotation: track.angle - 90
             });
             carMarker.setLabel(carLabel);
             map.addOverlay(carMarker);

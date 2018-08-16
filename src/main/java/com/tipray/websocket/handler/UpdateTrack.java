@@ -1,4 +1,4 @@
-package com.tipray.websocket;
+package com.tipray.websocket.handler;
 
 import java.io.Serializable;
 import java.util.ArrayList;

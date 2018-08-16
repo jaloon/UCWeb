@@ -48,8 +48,34 @@ public class GasStationServiceImpl implements GasStationService {
 	@Override
 	public GasStation addGasStation(GasStation gasStation) {
 		if (gasStation != null) {
-			setCover(gasStation);
-			gasStationDao.add(gasStation);
+			String officialId = gasStation.getOfficialId();
+			if (StringUtil.isEmpty(officialId)) {
+				throw new IllegalArgumentException("加油站编号为空！");
+			}
+			String name = gasStation.getName();
+			if (StringUtil.isEmpty(name)) {
+				throw new IllegalArgumentException("加油站名称为空！");
+			}
+			String abbr = gasStation.getAbbr();
+			if (StringUtil.isEmpty(abbr)) {
+				throw new IllegalArgumentException("加油站简称为空！");
+			}
+			if (isGasStationExist(gasStation)) {
+				throw new IllegalArgumentException("加油站已存在！");
+			}
+            setCover(gasStation);
+			List<Long> invalidIds = gasStationDao.findInvalidGasStation(gasStation);
+			int size = invalidIds.size();
+			if (size == 0) {
+                gasStationDao.add(gasStation);
+			} else if (size == 1) {
+                gasStation.setId(invalidIds.get(0));
+                gasStationDao.update(gasStation);
+			} else {
+                gasStationDao.deleteByIds(invalidIds);
+                gasStationDao.add(gasStation);
+			}
+
             setVer(SqliteFileConst.GAS_STATION);
 		}
 		return gasStation;
@@ -129,16 +155,15 @@ public class GasStationServiceImpl implements GasStationService {
 	}
 
 	@Override
-	public GasStation isGasStationExist(GasStation gasStation) {
-		String officialId = gasStation.getOfficialId();
-		String name = gasStation.getName();
-		if (StringUtil.isNotEmpty(officialId)) {
-			return gasStationDao.getByOfficialId(officialId);
-		}
-		if (StringUtil.isNotEmpty(name)) {
-			return gasStationDao.getByName(name);
-		}
-		return null;
+	public boolean isGasStationExist(GasStation gasStation) {
+        if (gasStation == null) {
+            return false;
+        }
+        Integer count = gasStationDao.countValidGasStation(gasStation);
+        if (count == null || count == 0) {
+            return false;
+        }
+        return true;
 	}
 
 	private void setRegion(GasStation gasStation) {

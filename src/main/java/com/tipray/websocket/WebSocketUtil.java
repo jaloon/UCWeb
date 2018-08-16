@@ -1,6 +1,7 @@
 package com.tipray.websocket;
 
 import com.tipray.util.JSONUtil;
+import com.tipray.websocket.protocol.WebSocketProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
@@ -109,6 +110,29 @@ public class WebSocketUtil {
             return;
         }
         try {
+            session.sendMessage(new TextMessage(message));
+        } catch (Exception e) {
+            logger.error("send text message error stack！", e);
+        }
+    }
+
+    /**
+     * 并发发送WebSocket通信业务信息给指定客户端
+     *
+     * @param session   {@link ConcurrentWebSocketSessionDecorator}
+     * @param protocol  {@link WebSocketProtocol} WebSocket通信业务信息
+     */
+    public static void sendConcurrentMsg(ConcurrentWebSocketSessionDecorator session, WebSocketProtocol protocol) {
+        if (session == null || session.getDelegate() == null || protocol == null) {
+            return;
+        }
+        Long sessionId = Long.parseLong(session.getId(), 16);
+        if (!session.isOpen()) {
+            logger.warn("web socket connection {} is not still open", sessionId);
+            return;
+        }
+        try {
+            String message = JSONUtil.stringify(protocol);
             session.sendMessage(new TextMessage(message));
         } catch (Exception e) {
             logger.error("send text message error stack！", e);

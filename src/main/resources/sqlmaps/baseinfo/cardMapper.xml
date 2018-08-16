@@ -96,6 +96,10 @@
         and co.oildepot_id=#{oilDepotId}
     </select>
 
+    <select id="countInOutCardsByOilDepotId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select count(card_id) from tbl_oildepot_card where oildepot_id = #{oilDepotId};
+    </select>
+
     <select id="findInOutCardIdsByOilDepotId" parameterType="java.lang.Long" resultType="java.lang.Long">
 		SELECT
             co.card_id
@@ -134,5 +138,24 @@
         order by c.id asc
         limit #{page.startRow}, #{page.rows}
     </select>
+
+    <select id="countCardByCardId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select count(card_id) from tbl_card where card_id = #{cardId}
+    </select>
+
+    <update id="updateByCardId" parameterType="com.tipray.bean.baseinfo.Card">
+        update tbl_card set
+            `type`        = #{type},
+            director      = #{director},
+            phone         = #{phone},
+            identity_card = #{identityCard},
+            remark        = ifnull(#{remark},''),
+            is_invalid    = 0
+        where card_id     = #{cardId}
+    </update>
+
+    <delete id="deleteByCardId" parameterType="java.lang.Long">
+        delete from tbl_card where card_id = #{cardId}
+    </delete>
 
 </mapper>

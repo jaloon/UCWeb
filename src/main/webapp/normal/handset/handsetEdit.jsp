@@ -18,25 +18,18 @@
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/handset/handsetEdit.js"></script>
+    <style>
+        select.editInfo {
+            width: 398px;
+            height: 28px;
+        }
+    </style>
     <script type="text/javascript">
         $(function() {
         	<c:if test="${mode!='add'}">
                 $("#ver").val(stringifyVer(${handset.ver}));
-                <c:if test="${mode=='edit'}">
-                    $("#gasstation").click(function(){
-                        layer.msg('请前往加油站管理修改', { icon: 6, time: 1500 }); 
-                    });
-                </c:if>
             </c:if>
             <c:if test="${mode=='add'}">
-                $("#hid").css({
-                    width: '398px',
-                    height: '28px'
-                });
-                $("#gasstation").css({
-                    width: '398px',
-                    height: '28px'
-                });
                 $.getJSON("../../manage/handset/findUnaddHandset.do",
                     function(data) {
                         var len = data.length;
@@ -61,32 +54,7 @@
                         }
                     }
                 });
-                $.getJSON("../../manage/handset/findUnconfigGasStation.do",
-                    function(data) {
-                        var gasStations = eval(data);
-                        var len = gasStations.length;
-                        for (var i = 0; i < len; i++) {
-                            var gasStation = gasStations[i];
-                            $("#gasstation").append("<option value=" + gasStation.id + ">" + gasStation.name + "</option>");
-                        }
-                    }
-                ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                    if (XMLHttpRequest.readyState == 4) {
-                        var http_status = XMLHttpRequest.status;
-                        if (http_status == 0 || http_status > 600) {
-                            location.reload(true);
-                        } else if (http_status == 200) {
-                            if (textStatus == "parsererror") {
-                                layer.alert("应答数据格式解析错误！")
-                            } else {
-                                layer.alert("http response error: " + textStatus)
-                            }
-                        } else {
-                            layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
-                        }
-                    }
-                });
-            </c:if> 
+            </c:if>
         });
     </script>
 </head>
@@ -155,7 +123,10 @@
                     <td>
                     	<input type="hidden" required>
                         <select class="editInfo" id="gasstation">
-                            <option value="">暂不指定加油站</option>
+                            <option value="0">暂不指定加油站</option>
+                            <c:forEach items="${stations}" var="station">
+                                <option value="${station.id}">${station.name}</option>
+                            </c:forEach>
                         </select>
                     </td>
                 </tr>
@@ -207,8 +178,12 @@
                 <tr>
                     <td>加油站:</td>
                     <td>
-                        <input type="hidden" id="gasstation" value="${handset.gasStation.id}">
-                        <input type="text" class="editInfo" value="${handset.gasStation.name}" readonly>
+                        <select class="editInfo" id="gasstation">
+                            <option value="${handset.gasStation.id}">${handset.gasStation.name}</option>
+                            <c:forEach items="${stations}" var="station">
+                                <option value="${station.id}">${station.name}</option>
+                            </c:forEach>
+                        </select>
                     </td>
                 </tr>
                 <tr>

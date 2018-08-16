@@ -74,7 +74,7 @@ public class SessionUtil {
 		if (session != null) {
 			// 避免浏览器禁用session，在request.session中也保存一份
 			request.getSession().setAttribute(LOGIN_SESSION_ID, session.getUuid());
-			CookieUtil.set(response, LOGIN_SESSION_ID, session.getUuid());
+			CookieUtil.set(response, LOGIN_SESSION_ID, session.getUuid(), HttpServletUtil.isHttps(request));
 			addSessionToList(session);
 		}
 	}

@@ -69,7 +69,8 @@
 		latitude=#{latitude},
 		cover_radius=#{radius},
 		cover_lonlatlist_region=#{cover},
-		remark=ifnull(#{remark},'')
+		remark=ifnull(#{remark},''),
+		is_invalid=0
 		where id=#{id}
 	</update>
 	<delete id="deleteOilDepotCardsById" parameterType="java.lang.Long">
@@ -87,6 +88,13 @@
 		is_invalid=1 
 		where id=#{id}
 	</delete>
+
+    <delete id="deleteByIds" parameterType="java.util.List">
+        delete from tbl_oildepot where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item, jdbcType=INTEGER}
+        </foreach>
+    </delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select <include refid="select_colums"></include> 
@@ -167,6 +175,18 @@
 
 	<select id="barrierCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
         SELECT COUNT(*) FROM tbl_oildepot_device WHERE oildepot_id = #{oilDepotId} AND is_barrier_gate_type > 0;
+    </select>
+
+	<select id="countValidOilDepot" parameterType="com.tipray.bean.baseinfo.OilDepot" resultType="java.lang.Integer">
+        select count(id) from tbl_oildepot
+        where (official_id = #{officialId} or `name` = #{name} or short_name = #{abbr})
+        and is_invalid = 0
+    </select>
+
+    <select id="findInvalidOilDepot" parameterType="com.tipray.bean.baseinfo.OilDepot" resultType="java.lang.Long">
+        select id from from tbl_oildepot
+        where (official_id = #{officialId} or `name` = #{name} or short_name = #{abbr})
+        and is_invalid = 1
     </select>
 
 </mapper>

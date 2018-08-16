@@ -58,11 +58,16 @@
 	</select>
 	
 	<select id="findUnusedLocks" resultType="java.lang.Integer">
-		select d.device_id
-		from tbl_device d
-		where d.type = 2 and
-		 d.is_disallowed=0 and d.is_invalid=0 and d.device_id not in
-		(select l.lock_device_id from tbl_lock l)
+		SELECT
+			d.device_id
+		FROM
+			tbl_device d
+		WHERE
+			d.type = 2
+			AND d.is_disallowed = 0
+			AND d.is_invalid = 0
+			AND d.is_in_use = 0
+			<!--AND d.device_id NOT IN ( SELECT l.lock_device_id FROM tbl_lock l )-->
 	</select>
 	
 	<insert id="bindLocks" parameterType="java.util.List">

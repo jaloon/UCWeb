@@ -53,7 +53,7 @@ function parseTerminalAlarm(terminalAlarm) {
         alarm += "；时钟电池报警";
     }
     if ((terminalAlarm >> 2) != 0) {
-        alarm += "；未知(" + (alarmtype & 0b11111100) + ")";
+        alarm += "；未知(" + (alarmtype & 252) + ")";
     }
     return alarm.slice(1);
 }

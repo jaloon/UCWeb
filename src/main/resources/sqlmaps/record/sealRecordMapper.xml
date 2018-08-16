@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tipray.dao.InOutRecordDao">
-	<resultMap id="fullResultMap" type="com.tipray.bean.record.InOutRecord" >
+<mapper namespace="com.tipray.dao.SealRecordDao">
+	<resultMap id="fullResultMap" type="com.tipray.bean.record.SealRecord" >
         <id column="id" property="id" />
         <result column="vehicle_id" property="carId" />
         <result column="vehicle_number" property="carNumber" />
         <result column="status_incident" property="type" />
-        <result column="type_name" property="typeName" />
+        <result column="pre_status" property="prestatus" />
+        <result column="status" property="status" />
+        <result column="trigger_type" property="authtype" />
+        <result column="trigger_id" property="authid" />
         <result column="station" property="station" />
         <result column="trigger_time" property="createDate" />
 		<result column="track_id" property="trackId" />
@@ -16,11 +19,14 @@
 		s.id,
 		s.vehicle_id,
         s.status_incident,
+        s.pre_status,
+        s.status,
+        s.trigger_type,
+        s.trigger_id,
         fn_get_station ( s.station_type, s.station_id ) station,
         s.trigger_time,
         s.vehicle_track_id track_id,
-        v.vehicle_number vehicle_number,
-        fn_type2name ( 'inoutType', s.status_incident ) type_name
+        v.vehicle_number vehicle_number
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
@@ -31,7 +37,6 @@
             tbl_vehicle v
         WHERE
             s.vehicle_id = v.id
-            AND s.status_incident IN ( 1, 2, 3, 4 )
 	</select>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
@@ -42,13 +47,12 @@
             tbl_vehicle v
         WHERE
             s.vehicle_id = v.id
-            AND s.status_incident IN ( 1, 2, 3, 4 )
             AND s.id = #{id}
 	</select>
 
-	<select id="count" parameterType="com.tipray.bean.record.InOutRecord" resultType="java.lang.Long">
+	<select id="count" parameterType="com.tipray.bean.record.SealRecord" resultType="java.lang.Long">
 		select count(*) from tbl_vehicle_seal_status s,tbl_vehicle v
-		where s.vehicle_id = v.id and s.status_incident in (1,2,3,4)
+		where s.vehicle_id = v.id
 		<if test="begin != null and begin != '' and end != null and end != ''">
 			and s.trigger_time between #{begin} and #{end}
 		</if> 
@@ -68,7 +72,6 @@
             tbl_vehicle v
         WHERE
             s.vehicle_id = v.id
-            AND s.status_incident IN ( 1, 2, 3, 4 )
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
             AND s.trigger_time BETWEEN #{entity.begin} AND #{entity.end}
 		</if>

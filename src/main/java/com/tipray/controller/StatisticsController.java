@@ -38,7 +38,7 @@ public class StatisticsController extends BaseAction {
     @Resource
     private LockRecordService lockRecordService;
     @Resource
-    private InOutRecordService inOutRecordService;
+    private SealRecordService sealRecordService;
     @Resource
     private DistributionRecordService distributionRecordService;
     @Resource
@@ -55,6 +55,8 @@ public class StatisticsController extends BaseAction {
         switch (mode) {
             case StatisticsMode.ALARM_RECORD:
                 record = alarmRecordService.getRecordById(id);
+                // modelMap.put("record", record);
+                // return "normal/statistics/alarmBmap.jsp";
                 break;
             case StatisticsMode.REMOTE_CONTROL_RECORD:
                 record = remoteRecordService.getRecordById(id);
@@ -63,7 +65,7 @@ public class StatisticsController extends BaseAction {
                 record = lockRecordService.getRecordById(id);
                 break;
             case StatisticsMode.CAR_IN_OUT_RECORD:
-                record = inOutRecordService.getRecordById(id);
+                record = sealRecordService.getRecordById(id);
                 break;
             case StatisticsMode.DISTRIBUTION_RECORD:
                 record = distributionRecordService.getRecordById(id);
@@ -114,10 +116,10 @@ public class StatisticsController extends BaseAction {
     @PermissionAnno("inAndOutRecordModule")
     @RequestMapping(value = "findInOutRecordsForPage.do")
     @ResponseBody
-    public GridPage<InOutRecord> findInOutRecordsForPage(@ModelAttribute InOutRecord inOutRecord,
-                                                         @ModelAttribute Page page) {
-        logger.info("inout record list page, inOutRecord={}, page={}", inOutRecord, page);
-        GridPage<InOutRecord> gridPage = inOutRecordService.findRecordsForPage(inOutRecord, page);
+    public GridPage<SealRecord> findInOutRecordsForPage(@ModelAttribute SealRecord sealRecord,
+                                                        @ModelAttribute Page page) {
+        logger.info("inout record list page, sealRecord={}, page={}", sealRecord, page);
+        GridPage<SealRecord> gridPage = sealRecordService.findRecordsForPage(sealRecord, page);
         return gridPage;
     }
 

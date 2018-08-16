@@ -16,6 +16,25 @@ import java.util.Map;
  */
 @MyBatisAnno
 public interface TransportCardDao extends BaseDao<TransportCard> {
+    /**
+     * 统计卡ID数目
+     * @param cardId
+     * @return
+     */
+	Integer countCardByCardId(Long cardId);
+
+    /**
+     * 根据卡ID更新配送卡
+     * @param card
+     */
+	void updateByCardId(TransportCard card);
+
+    /**
+     * 根据卡ID删除配送卡
+     * @param cardId
+     */
+	void deleteByCardId(Long cardId);
+
 	/**
 	 * 获取未使用的配送卡
 	 */

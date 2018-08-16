@@ -114,4 +114,20 @@
             t.is_invalid = 0
             AND t.transport_card_id = #{transportCardId}
     </select>
+
+	<select id="countCardByCardId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select count(transport_card_id) from tbl_transport_card where transport_card_id = #{cardId}
+    </select>
+
+    <update id="updateByCardId" parameterType="com.tipray.bean.baseinfo.TransportCard">
+        update tbl_transport_card set
+            remark  = IFNULL(#{remark}, ''),
+            is_invalid = 0
+        where transport_card_id = #{transportCardId}
+    </update>
+
+    <delete id="deleteByCardId" parameterType="java.lang.Long">
+        delete from tbl_transport_card where transport_card_id = #{cardId}
+    </delete>
+
 </mapper>

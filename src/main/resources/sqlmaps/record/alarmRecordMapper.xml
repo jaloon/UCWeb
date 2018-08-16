@@ -208,23 +208,26 @@
         <result column="seat" property="alarmLock.seat" />
         <result column="seat_index" property="alarmLock.seatIndex" />
     </resultMap>
+    <sql id="alarmInfo_colums">
+		a.id,
+        a.vehicle_id,
+        v.vehicle_number,
+        a.device_type,
+        a.device_id,
+        a.type,
+        fn_get_alarm_type ( a.device_type, a.type ) type_name,
+        fn_get_alarm_station ( a.station_type, a.station_id ) station,
+        DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' ) alarm_time,
+        a.vehicle_track_id,
+        a.lock_id,
+        l.lock_device_id,
+        l.store_id,
+        l.seat,
+        l.seat_index
+	</sql>
     <select id="getAlarmInfoByAlarmDevcie" parameterType="com.tipray.bean.alarm.AlarmDevice" resultMap="alarmInfoMap">
         SELECT
-            a.id,
-            a.vehicle_id,
-            v.vehicle_number,
-            a.device_type,
-            a.device_id,
-            a.type,
-            fn_get_alarm_type ( a.device_type, a.type ) type_name,
-            fn_get_alarm_station ( a.station_type, a.station_id ) station,
-            DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' ) alarm_time,
-            a.vehicle_track_id,
-            a.lock_id,
-            l.lock_device_id,
-            l.store_id,
-            l.seat,
-            l.seat_index
+        <include refid="alarmInfo_colums"></include>
         FROM
             tbl_alarm a,
             tbl_vehicle v,
@@ -242,7 +245,20 @@
             a.id DESC
             LIMIT 1
     </select>
-	
+
+	<select id="getAlarmInfoByAlarmId" parameterType="java.lang.Long" resultMap="alarmInfoMap">
+        SELECT
+        <include refid="alarmInfo_colums"></include>
+        FROM
+            tbl_alarm a,
+            tbl_vehicle v,
+            tbl_lock l
+        WHERE
+            a.vehicle_id = v.id
+            AND a.lock_id = l.id
+            AND a.id = #{alarmId}
+    </select>
+
 	<select id="findNotElimitedForApp" resultType="java.util.Map">
 		SELECT
 			a.id alarm_id,

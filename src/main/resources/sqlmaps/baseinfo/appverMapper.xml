@@ -130,7 +130,7 @@
 
     <insert id="batchAdd" parameterType="java.util.List">
         insert into
-        tbl_webapp_device
+        tbl_webapp_version
         (id, center_id, system, assign_webapp_version, min_webapp_version, gmt_create, gmt_modified)
         values
         <foreach collection="list" item="item" index="index" separator="," >
@@ -148,7 +148,7 @@
 
     <!-- 通用批量更新方法 -->
     <update id="batchUpdate" parameterType="java.util.List">
-        update tbl_webapp_device set
+        update tbl_webapp_version set
         assign_webapp_version =
         <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
             when #{item.id} then #{item.assignVer}
@@ -171,11 +171,11 @@
         </foreach>
     </update>
 
-    <update id="batchDelete" parameterType="java.util.List">
-        delete from tbl_webapp_device where id in
+    <delete id="batchDelete" parameterType="java.util.List">
+        delete from tbl_webapp_version where id in
         <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
             #{item, jdbcType=INTEGER}
         </foreach>
-    </update>
+    </delete>
 
 </mapper>

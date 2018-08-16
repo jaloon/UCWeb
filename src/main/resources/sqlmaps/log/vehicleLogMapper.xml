@@ -37,9 +37,9 @@
 	</select>
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.log.VehicleManageLog">
-		INSERT INTO tbl_vehicle_manage_log ( user_id, type, description, result, is_app, uuid, udp_id, token )
+		INSERT INTO tbl_vehicle_manage_log ( user_id, `type`, description, result, is_app, uuid, udp_id, token )
 		VALUES
-			(#{user.id}, #{type}, #{description}, #{result}, IFNULL(#{isApp}, 0), IFNULL(#{uuid}, '') 0, fn_uuid_to_bin(#{token}))
+			(#{user.id}, #{type}, #{description}, #{result}, IFNULL(#{isApp}, 0), IFNULL(#{uuid}, ''), 0, fn_uuid_to_bin(#{token}))
 	</insert>
 
 	<update id="update"  parameterType="com.tipray.bean.log.VehicleManageLog">
@@ -71,7 +71,7 @@
 												<!--),-->
 			<!--</if>-->
 			<if test="responseMsgJson != null">
-				`response_msg`		= #{responseMsgJson}
+				`response_msg`		= #{responseMsgJson},
 			</if>
 		</set>
 		WHERE

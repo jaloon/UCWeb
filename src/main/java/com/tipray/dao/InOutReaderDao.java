@@ -24,6 +24,13 @@ public interface InOutReaderDao extends BaseDao<InOutReader> {
     List<InOutReader> findByOilDepotId(Long oilDepotId);
 
     /**
+     * 根据油库ID查询出入库读卡器ID
+     * @param oilDepotId
+     * @return
+     */
+    List<Integer> findReaderIdsByOilDepotId(Long oilDepotId);
+
+    /**
      * 根据油库ID删除出入库读卡器信息
      *
      * @param oilDepotId

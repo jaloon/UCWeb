@@ -100,6 +100,13 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
     AlarmInfo getAlarmInfoByAlarmDevcie(AlarmDevice alarmDevice);
 
     /**
+     * 根据报警设备获取报警信息
+     * @param alarmId 报警ID
+     * @return
+     */
+    AlarmInfo getAlarmInfoByAlarmId(Long alarmId);
+
+    /**
      * 获取未消除的报警信息(按数据库字段名称)
      *
      * @return 未消除的报警信息

@@ -1,5 +1,5 @@
 $(function() {
-    $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+    $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
             selectObj.append(data.com);

@@ -157,6 +157,7 @@ public class VehicleManageLog extends BaseBean {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
+
     public Short getUdpBizId() {
         return udpBizId;
     }

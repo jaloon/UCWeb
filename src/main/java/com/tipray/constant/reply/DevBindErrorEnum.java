@@ -43,8 +43,10 @@ public enum DevBindErrorEnum {
 	/** 请求发起时间为空 */
 	REQUEST_TIME_NULL(17, "请求发起时间为空！"),
 	/** 时间格式不正确 */
-	TIME_FORMAT_INVALID(18, "时间格式不正确！");
-	
+	TIME_FORMAT_INVALID(18, "时间格式不正确！"),
+	/** 与车载终端绑定的车辆不是要解绑的车辆 */
+	BINDED_CAR_INCONSISTENT(19, "与车载终端绑定的车辆不是要解绑的车辆！");
+
 	private int code;
 	private String msg;
 
