@@ -79,7 +79,7 @@ function upAlarmList(alarmlist) {
             + "<td class='alarm-car'>" + alarmInfo.carNumber + "</td>"
             + "<td class='alarm-dev'>" +  parseAlarmDev(alarmInfo) + "</td>"
             + "<td class='alarm-type'>" + alarmInfo.alarmName + "</td>"
-            + "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarmInfo.carNumber + "," + alarm_id + ")'>"
+            + "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(\"" + alarmInfo.carNumber + "\"," + alarm_id + ")'>"
             + "<img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>"
             + "</tr>";
         alarmTagCache.set(alarmInfo.alarmTag, alarm_id);
@@ -138,7 +138,7 @@ function addAlarm(alarmInfo) {
         + "<td class='alarm-car'>" + alarmInfo.carNumber + "</td>"
         + "<td class='alarm-dev'>" +  parseAlarmDev(alarmInfo) + "</td>"
         + "<td class='alarm-type'>" + alarmInfo.alarmName + "</td>"
-        + "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(" + alarmInfo.carNumber + "," + alarmId + ")'>"
+        + "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(\"" + alarmInfo.carNumber + "\"," + alarmId + ")'>"
         + "<img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>"
         + "</tr>";
     $("#alarm_tips tbody").prepend(trHtml);

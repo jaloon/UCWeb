@@ -132,12 +132,12 @@
                 LEFT JOIN tbl_trans_company c ON v.trans_company_id = c.id
             WHERE
                 s.vehicle_id = v.id
---                 AND s.is_online = 1
---                 AND TIMESTAMPDIFF( SECOND, last_online_time, NOW( ) ) <= 400
+                AND s.is_online = 1
+                AND TIMESTAMPDIFF( SECOND, last_online_time, NOW( ) ) <= 400
             ) t2
         WHERE
             t1.vehicle_id = t2.vehicle_id
---             AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
+            AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
         ORDER BY t1.track_time
         ]]>
     </select>
