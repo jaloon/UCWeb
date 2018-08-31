@@ -13,7 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author chenlong
  * @version 1.0 2018-06-02
  */
-public final class TrackCache {
+public enum TrackCache {
+    INSTANCE;
+
     private Map<Long, Long> carTrackTime = new ConcurrentHashMap<>();
     private Map<Long, Long> carToCom = new ConcurrentHashMap<>();
     private Map<Long, String> tracks = new ConcurrentHashMap<>();
@@ -50,14 +52,18 @@ public final class TrackCache {
                     strBuf.append("\"carId\":").append(carId).append(',');
                     strBuf.append("\"carNumber\":\"").append(lastTrack.getCarNumber()).append('\"').append(',');
                     strBuf.append("\"carCom\":\"").append(lastTrack.getCarCom()).append('\"').append(',');
+                    strBuf.append("\"gpsValid\":").append(lastTrack.getCoorValid()).append(',');
                     strBuf.append("\"longitude\":").append(lastTrack.getLongitude()).append(',');
                     strBuf.append("\"latitude\":").append(lastTrack.getLatitude()).append(',');
                     strBuf.append("\"angle\":").append(lastTrack.getAngle()).append(',');
                     strBuf.append("\"velocity\":").append(lastTrack.getSpeed()).append(',');
+                    strBuf.append("\"lastValidLongitude\":").append(lastTrack.getLastValidLongitude()).append(',');
+                    strBuf.append("\"lastValidLatitude\":").append(lastTrack.getLastValidLatitude()).append(',');
+                    strBuf.append("\"lastValidAngle\":").append(lastTrack.getLastValidAngle()).append(',');
+                    strBuf.append("\"lastValidSpeed\":").append(lastTrack.getLastValidSpeed()).append(',');
                     strBuf.append("\"carStatus\":\"").append(parseCarStatus(lastTrack.getCarStatus())).append('\"').append(',');
                     strBuf.append("\"alarm\":\"").append(isAlarm(lastTrack.getTerminalAlarm(), lastTrack.getLockStatusInfo())).append('\"');
                     strBuf.append('}');
-
                     track = strBuf.toString();
                     tracks.put(carId, track);
                     newTtracks.put(carId, track);
@@ -124,6 +130,16 @@ public final class TrackCache {
             return strBuf.toString();
         }
         return null;
+    }
+
+    /**
+     * 获取轨迹时间毫秒值
+     *
+     * @param carId 车辆ID
+     * @return 轨迹时间毫秒值
+     */
+    public synchronized Long getTrackTimeMillis(Long carId) {
+        return carTrackTime.get(carId);
     }
 
     /**

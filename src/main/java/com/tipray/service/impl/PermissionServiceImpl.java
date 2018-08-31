@@ -1,17 +1,15 @@
 package com.tipray.service.impl;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.baseinfo.Permission;
 import com.tipray.dao.PermissionDao;
 import com.tipray.service.PermissionService;
 import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 权限管理业务层
@@ -20,13 +18,12 @@ import com.tipray.util.StringUtil;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("permissionService")
 public class PermissionServiceImpl implements PermissionService {
-
 	@Resource
 	private PermissionDao permissionDao;
 
+	@Transactional
 	@Override
 	public Permission addPermission(Permission permission) {
 		if (permission != null) {
@@ -35,6 +32,7 @@ public class PermissionServiceImpl implements PermissionService {
 		return permission;
 	}
 
+    @Transactional
 	@Override
 	public Permission updatePermission(Permission permission) {
 		if (permission != null) {

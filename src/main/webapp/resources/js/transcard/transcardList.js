@@ -30,10 +30,7 @@ $(function() {
         event.stopPropagation();
     };
 
-    
-
     showList("", 1);
-
 
     $("#search_btn").click(function() {
         var transcardId = trimAll($("#search_text").val());

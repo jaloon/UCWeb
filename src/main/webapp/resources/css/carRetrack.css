@@ -131,13 +131,94 @@ select.search-text {
     color: white;
     margin-left: 10px;
     position: relative;
-    top: 1px;
-    left: 30px;
+    top: 3px;
+    /*left: 30px;*/
     cursor: pointer;
+}
+
+.doubtable-text {
+    margin-left: 10px;
+    position: relative;
+    top: 3px;
+    /*left: 30px;*/
+    cursor: pointer;
+}
+
+.toggle-button-wrapper{
+    float: right;
+    position: relative;
+    top: 2px;
+    right: 10px;
 }
 
 .filter-btn:hover {
     background: #5ca1f7;
+}
+
+#toggle_button {
+    display: none;
+}
+
+.toggle-button-label {
+    position: relative;
+    display: inline-block;
+    width: 76px;
+    height: 26px;
+    background-color: #ccc;
+    box-shadow: #ccc 0px 0px 0px 1px;
+    border-radius: 26px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.toggle-circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.toggle-button-label .toggle-text {
+    line-height: 26px;
+    font-size: 18px;
+    text-shadow: 0 0 2px #ddd;
+}
+
+.toggle-on {
+    color: #fff;
+    display: none;
+    text-indent: 10px;
+}
+
+.toggle-off {
+    color: #fff;
+    display: inline-block;
+    text-indent: 34px;
+}
+
+.toggle-button-label .toggle-circle {
+    left: 0;
+    transition: all 0.3s;
+}
+
+#toggle_button:checked + label.toggle-button-label .toggle-circle {
+    left: 50px;
+}
+
+#toggle_button:checked + label.toggle-button-label .toggle-on {
+    display: inline-block;
+}
+
+#toggle_button:checked + label.toggle-button-label .toggle-off {
+    display: none;
+}
+
+#toggle_button:checked + label.toggle-button-label {
+    background-color: #478de4;
+    box-shadow: #478de4 0px 0px 0px 1px;
 }
 
 .table-zone {
@@ -210,9 +291,11 @@ select.search-text {
 .track-time {
     width: 135px;
 }
-.track-valid{
+
+.track-valid {
     width: 85px;
 }
+
 .track-lng {
     width: 100px;
 }

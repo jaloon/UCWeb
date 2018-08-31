@@ -1,20 +1,17 @@
 package com.tipray.service.impl;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Role;
-import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.RoleDao;
 import com.tipray.dao.UserDao;
 import com.tipray.service.RoleService;
 import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 角色管理业务层
@@ -23,7 +20,6 @@ import com.tipray.util.StringUtil;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("roleService")
 public class RoleServiceImpl implements RoleService {
 	@Resource
@@ -31,6 +27,7 @@ public class RoleServiceImpl implements RoleService {
 	@Resource
 	private UserDao userDao;
 
+	@Transactional
 	@Override
 	public Role addRole(Role role) {
 		if (role != null) {
@@ -39,6 +36,7 @@ public class RoleServiceImpl implements RoleService {
 		return role;
 	}
 
+	@Transactional
 	@Override
 	public Role updateRole(Role role) {
 		if (role != null) {
@@ -47,6 +45,7 @@ public class RoleServiceImpl implements RoleService {
 		return role;
 	}
 
+    @Transactional
 	@Override
 	public void deleteRolesById(Long id, Integer app) {
 		roleDao.delete(id);
@@ -88,5 +87,4 @@ public class RoleServiceImpl implements RoleService {
 		List<Role> list = findByPage(role, page);
 		return new GridPage<Role>(list, records, page.getPageId(), page.getRows(), list.size(), role);
 	}
-
 }

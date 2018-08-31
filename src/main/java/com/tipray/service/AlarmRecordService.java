@@ -33,6 +33,13 @@ public interface AlarmRecordService extends RecordService<AlarmRecord> {
     Integer countAlarmDeviceByIds(String ids);
 
     /**
+     * 为消除报警获取报警记录
+     * @param id 报警ID
+     * @return
+     */
+    AlarmRecord getAlarmForEliById(Long id);
+
+    /**
      * 根据报警ID查询同位置设备同类型报警的报警ID
      * @param id {@link Long} 报警ID
      * @return 同位置设备同类型报警的报警ID
@@ -46,6 +53,7 @@ public interface AlarmRecordService extends RecordService<AlarmRecord> {
 	 *            {@link Map} 消除报警信息集合<br>
 	 *            userId {@link Long} 操作员ID<br>
 	 *            vehicleId {@link Long} 车辆ID<br>
+	 *            terminalId {@link Integer} 车台设备ID<br>
 	 *            alarmIds {@link byte[]} 报警ID集合（字节数组）<br>
 	 *            app {@link Integer} 是否手机app<br>
 	 *            lnt {@link Float} 手机定位经度<br>

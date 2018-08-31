@@ -113,7 +113,7 @@ public class SessionController extends BaseAction {
             // String sessionId = httpSession.getId();
             String sessionId = SessionUtil.getLoginSessionId(request);
             if (isLogin(sessionId, user)) {
-                if (isApp == null || isApp == 0) {
+                if (isApp == 0) {
                     return ResponseMsgUtil.success("已登录！");
                 }
                 request.getSession().setAttribute("appdev-uuid", uuid);
@@ -133,7 +133,7 @@ public class SessionController extends BaseAction {
 
             modelMap.put("isLogined", session != null);
             ResponseMsg msg;
-            if (isApp == null || isApp == 0) {
+            if (isApp == 0) {
                 msg = ResponseMsgUtil.success();
             } else {
                 request.getSession().setAttribute("appdev-uuid", uuid);

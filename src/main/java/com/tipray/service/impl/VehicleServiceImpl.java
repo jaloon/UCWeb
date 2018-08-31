@@ -1,7 +1,18 @@
 package com.tipray.service.impl;
 
-import com.tipray.bean.*;
-import com.tipray.bean.baseinfo.*;
+import com.tipray.bean.ChangeInfo;
+import com.tipray.bean.DropdownData;
+import com.tipray.bean.GridPage;
+import com.tipray.bean.Page;
+import com.tipray.bean.Point;
+import com.tipray.bean.VehicleRealtimeStatus;
+import com.tipray.bean.VehicleStatus;
+import com.tipray.bean.VehicleTerminalConfig;
+import com.tipray.bean.baseinfo.Device;
+import com.tipray.bean.baseinfo.Driver;
+import com.tipray.bean.baseinfo.Lock;
+import com.tipray.bean.baseinfo.TransCompany;
+import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.track.LastCarStatus;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.ReTrack;
@@ -12,13 +23,23 @@ import com.tipray.bean.upgrade.UpgradeCancelVehicle;
 import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
-import com.tipray.dao.*;
+import com.tipray.dao.DeviceDao;
+import com.tipray.dao.DriverDao;
+import com.tipray.dao.LockDao;
+import com.tipray.dao.TerminalUpgradeDao;
+import com.tipray.dao.TrackDao;
+import com.tipray.dao.VehicleDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.VehicleService;
-import com.tipray.util.*;
+import com.tipray.util.BytesUtil;
+import com.tipray.util.DateUtil;
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.StringUtil;
+import com.tipray.util.VehicleAlarmUtil;
+import com.tipray.util.VersionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,7 +47,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 车辆管理业务层
@@ -34,8 +62,7 @@ import java.util.*;
  * @author chenlong
  * @version 1.0 2017-12-22
  */
-@Transactional(rollbackForClassName = {"ServiceException", "Exception"})
-@Service("carService")
+@Service("vehicleService")
 public class VehicleServiceImpl implements VehicleService {
     private final Logger logger = LoggerFactory.getLogger(VehicleServiceImpl.class);
     @Resource
@@ -53,6 +80,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Resource
     private NioUdpServer udpServer;
 
+    @Transactional
     @Override
     public Vehicle addCar(Vehicle car, String driverIds) {
         if (car != null) {
@@ -74,6 +102,7 @@ public class VehicleServiceImpl implements VehicleService {
         return car;
     }
 
+    @Transactional
     @Override
     public Vehicle updateCar(Vehicle car, String driverIds, List<Lock> locks) {
         if (car != null) {
@@ -110,6 +139,7 @@ public class VehicleServiceImpl implements VehicleService {
         new TimeOutTask(src, cacheId).executeInfoIssueTask();
     }
 
+    @Transactional
     @Override
     public void deleteCar(Long id, String carNumber) {
         vehicleDao.delete(id);
@@ -139,6 +169,11 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public Long getIdByCarNo(String carNo) {
         return vehicleDao.getIdByCarNo(carNo);
+    }
+
+    @Override
+    public Integer getTerminalIdByCarNo(String carNo) {
+        return StringUtil.isEmpty(carNo) ? 0 : vehicleDao.getTerminalIdByCarNo(carNo);
     }
 
     @Override
@@ -223,12 +258,14 @@ public class VehicleServiceImpl implements VehicleService {
         return vehicleDao.findUnusedTerminal();
     }
 
+    @Transactional
     @Override
     public void terminalBind(String carNumber, Integer terminalId) {
         vehicleDao.terminalBind(carNumber, terminalId);
         deviceDao.updateDeviceUse(terminalId, 1);
     }
 
+    @Transactional
     @Override
     public void terminalUnbind(String carNumber, Integer terminalId) {
         vehicleDao.terminalUnbind(carNumber, terminalId);
@@ -278,7 +315,23 @@ public class VehicleServiceImpl implements VehicleService {
             return null;
         }
         List<TrackInfo> trackInfos = trackDao.findTracksByCarIdAndTimeRange(carId, carTrack.getBegin(), carTrack.getEnd());
-        if (EmptyObjectUtil.isEmptyList(trackInfos)) {
+        if (trackInfos == null) {
+            return null;
+        }
+
+        // java 8 安全移除集合元素的方式
+        // 等价于
+        // Iterator<TrackInfo> iterator = trackInfos.iterator();
+        // while (iterator.hasNext()) {
+        //     TrackInfo trackInfo = iterator.next();
+        //     if (trackInfo == null) {
+        //         iterator.remove();
+        //     }
+        // }
+        trackInfos.removeIf(EmptyObjectUtil::isEmptyBean);
+
+        int size = trackInfos.size();
+        if (size == 0) {
             return null;
         }
         List<ReTrack> carTracks = new ArrayList<>();
@@ -364,12 +417,14 @@ public class VehicleServiceImpl implements VehicleService {
         return vehicleDao.getCarNumberById(id);
     }
 
+    @Transactional
     @Override
     public void addCars(List<Vehicle> vehicles) {
         // TODO Auto-generated method stub
 
     }
 
+    @Transactional
     @Override
     public void terminalConfig(VehicleTerminalConfig terminalConfig) {
         vehicleDao.terminalConfig(terminalConfig);
@@ -381,6 +436,26 @@ public class VehicleServiceImpl implements VehicleService {
             terminalId = 0;
         }
         return vehicleDao.getGpsConfByTerminalId(terminalId);
+    }
+
+    @Override
+    public VehicleTerminalConfig getGpsConfByCarId(Long carId) {
+        List<VehicleTerminalConfig> list = vehicleDao.getGpsConfByCarId(carId);
+        if (list == null) {
+            return null;
+        }
+        list.removeIf(EmptyObjectUtil::isEmptyBean);
+        int size = list.size();
+        if (size == 0) {
+            return null;
+        }
+        if (size == 1) {
+            return list.get(0);
+        }
+        if (size == 2) {
+            return list.get(1);
+        }
+        return null;
     }
 
     @Override
@@ -397,6 +472,7 @@ public class VehicleServiceImpl implements VehicleService {
         return func == null ? 0 : func;
     }
 
+    @Transactional
     @Override
     public void terminalEnable(Integer functionEnable) {
         Integer count = vehicleDao.countTerminalEnable();
@@ -412,6 +488,7 @@ public class VehicleServiceImpl implements VehicleService {
         return lockDao.findLocksByCarId(carId);
     }
 
+    @Transactional
     @Override
     public void bindLocks(List<Lock> locks) {
         lockDao.bindLocks(locks);
@@ -427,6 +504,7 @@ public class VehicleServiceImpl implements VehicleService {
         return lockDao.findVehicleIdByLocks(locks);
     }
 
+    @Transactional
     @Override
     public Integer addRemoteControlRecord(Map<String, Object> map) {
         vehicleDao.addRemoteControlRecord(map);
@@ -434,6 +512,7 @@ public class VehicleServiceImpl implements VehicleService {
         return remoteControlId;
     }
 
+    @Transactional
     @Override
     public Integer addRemoteStatusAlterRecord(Map<String, Object> map) {
         vehicleDao.addRemoteStatusAlterRecord(map);
@@ -441,6 +520,7 @@ public class VehicleServiceImpl implements VehicleService {
         return remoteControlId;
     }
 
+    @Transactional
     @Override
     public void updateRemoteControlStatus(Integer remoteControlStatus, Integer remoteControlId) {
         vehicleDao.updateRemoteControlStatus(remoteControlStatus, remoteControlId);
@@ -487,11 +567,13 @@ public class VehicleServiceImpl implements VehicleService {
         return vehicleDao.findAllCarsForApp();
     }
 
+    @Transactional
     @Override
     public Long addLockResetRecord(Map<String, Object> map) {
         return vehicleDao.addLockResetRecord(map);
     }
 
+    @Transactional
     @Override
     public void batchUpdateResetRecord(String resetIds, Integer resetState) {
         vehicleDao.batchUpdateResetRecord(resetIds, resetState);
@@ -516,6 +598,7 @@ public class VehicleServiceImpl implements VehicleService {
         carIdsMap.keySet().forEach(carId -> carIds.append(',').append(carId));
         carIds.deleteCharAt(0);
         List<TrackInfo> trackInfoList = trackDao.findTracksByCarIdsAndBeginTime(carIds.toString(), beginTime);
+        trackInfoList.removeIf(EmptyObjectUtil::isEmptyBean);
         trackInfoList.parallelStream().forEach(trackInfo -> {
             Map<String, Object> trackMap = new HashMap<>();
             Long carId = trackInfo.getCarId();
@@ -553,7 +636,7 @@ public class VehicleServiceImpl implements VehicleService {
             beginMillis = Long.max(beginMillis, lastTtrackTime.getTime() - DateUtil.MINUTE_DIFF * 10);
             String beginTime = DateUtil.formatDate(new Date(beginMillis), DateUtil.FORMAT_DATETIME);
             List<TrackInfo> trackInfoList = trackDao.findTracksByCarIdsAndBeginTime(carId.toString(), beginTime);
-
+            trackInfoList.removeIf(EmptyObjectUtil::isEmptyBean);
             trackInfoList.parallelStream().forEach(trackInfo -> {
                 Map<String, Object> trackMap = new HashMap<>();
                 trackMap.put("vehicle_id", carId);
@@ -599,6 +682,7 @@ public class VehicleServiceImpl implements VehicleService {
         return StringUtil.isEmpty(terminalIds) ? null : vehicleDao.findCarNumbersByTerminalIds(terminalIds);
     }
 
+    @Transactional
     @Override
     public Map<Long, String> monitorVehicleOnline() {
         Map<Long, String> onlineCars = vehicleDao.findOnlineCarIds();
@@ -611,12 +695,12 @@ public class VehicleServiceImpl implements VehicleService {
         List<LastTrack> lastTracks = trackDao.findLastTracks();
         if (!EmptyObjectUtil.isEmptyList(lastTracks)) {
             Date begin = lastTracks.get(0).getTrackTime();
-            List<LastCarStatus> list = vehicleDao.findCarStatusAfterTime(begin);
+            List<LastCarStatus> lastCarStatusList = vehicleDao.findCarStatusAfterTime(begin);
             Date trackTime;
             Date stateTime;
             for (LastTrack lastTrack : lastTracks) {
                 trackTime = lastTrack.getTrackTime();
-                for (LastCarStatus lastCarStatus : list) {
+                for (LastCarStatus lastCarStatus : lastCarStatusList) {
                     if (lastTrack.getCarId().equals(lastCarStatus.getId())) {
                         stateTime = lastCarStatus.getTime();
                         if (trackTime.before(stateTime)) {
@@ -630,6 +714,7 @@ public class VehicleServiceImpl implements VehicleService {
         return lastTracks;
     }
 
+    @Transactional
     @Override
     public Long terminalUpgrade(TerminalUpgradeInfo terminalUpgradeInfo, List<Integer> terminalIdList) {
         terminalUpgradeDao.addTerminalUpgradeInfo(terminalUpgradeInfo);
@@ -667,6 +752,7 @@ public class VehicleServiceImpl implements VehicleService {
         return terminalUpgradeDao.findUnfinishUpgradeVehicles(carNumber);
     }
 
+    @Transactional
     @Override
     public void deleteUpgradeRecord(String ids) {
         terminalUpgradeDao.batchDeleteUpgradeRecord(ids);
@@ -711,5 +797,10 @@ public class VehicleServiceImpl implements VehicleService {
         map.put("track", trackInfo);
         map.put("locks", lockStatusBuf.toString());
         return map;
+    }
+
+    @Override
+    public List<Lock> findIdsByDevIds(Long carId, String devIds) {
+        return lockDao.findIdsByDevIds(carId, devIds);
     }
 }

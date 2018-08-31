@@ -47,6 +47,7 @@
             wsProtocol = "wss";
         }
         var wsUrl = getUrlParam("wsUrl");
+        var duration = parseInt(getUrlParam('duration'), 10);
         var ws = null;
         var order = {
             biz: 'realtime',
@@ -57,7 +58,7 @@
             comId: parseInt(getUrlParam('comId'), 10),
             // comName: decodeURI(getUrlParam('comName')),
             interval: parseInt(getUrlParam('interval'), 10),
-            duration: parseInt(getUrlParam('duration'), 10),
+            duration: duration,
             token: generateUUID()
         };
         var orderText = JSON.stringify(order);
@@ -75,16 +76,12 @@
             ws.send(orderText);
         };
         ws.onmessage = function(event) {
-            if (window.console) console.log("websocket receive message");
             var receive = event.data;
             if (isNull(receive)) {
                 return;
             }
             if (receive == "timeout") { // 监控超时
-                if (window.console) console.log("monitor timeout");
-                layer.msg('实时监控结束！', {icon: 0}, function() {
-                    parent.layer.close(index);
-                });
+                dealTimeout();
             } else if (receive == "conn_error") { // 连接失败
                 if (window.console) console.log("request error");
                 layer.confirm('请求监控车辆数据异常，是否重新请求？', {
@@ -142,15 +139,28 @@
             if (window.console) console.log("websocket error");
         };
         ws.onclose = function(event) {
-            if (window.console) console.log("websocket closed： " + event);
+            if (window.console) console.log("websocket closed");
         };
+
+        setTimeout(dealTimeout, duration * 60000);
+
+        function dealTimeout() {
+            if (window.console) console.log("monitor timeout");
+            layer.msg('实时监控结束！', {icon: 0}, function() {
+                parent.layer.close(index);
+            });
+        }
 
         var carMarker = null;
 
         var alarm_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-红.png', new BMap.Size(32, 15));
         var normal_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-黄.png', new BMap.Size(32, 15));
+        var invalid_car_icon = new BMap.Icon('../../../resources/images/marker/车辆图标-32-灰.png', new BMap.Size(32, 15));
 
-        function initCarIcon(alarm) {
+        function initCarIcon(gpsValid, alarm) {
+            if (!gpsValid) {
+                return invalid_car_icon;
+            }
             if (alarm == "是") {
                 return alarm_car_icon;
             }
@@ -159,14 +169,18 @@
 
         function reFreshPage(track) {
             // online: 0 离线，1 在线
-            if (track.online == 0) {
+            if (track.online != undefined && track.online == 0) {
                 if (window.console) console.log("car offline");
                 map.removeOverlay(carMarker);
-                layer.msg(track.carNumber + '离线！', {
-                    icon: 5,
-                    time: 1000
+                layer.alert(track.carNumber + '离线！', { icon: 5 }, function (layero) {
+                    layer.close(layero);
+                    parent.layer.close(index);
                 });
-                // parent.layer.close(index);
+                return;
+            }
+            var gpsValid = track.gpsValid;
+            if (!gpsValid && (track.longitude == 0 && track.latitude == 0)) {
+                if (window.console) console.log("invalid coordinate (0, 0)");
                 return;
             }
             if (!isNull(carMarker)) {
@@ -186,11 +200,13 @@
                 fontFamily: "微软雅黑"
             });
             carMarker = new BMap.Marker(point, {
-                icon: initCarIcon(track.alarm),
+                icon: initCarIcon(gpsValid, track.alarm),
                 rotation: track.angle - 90
             });
             carMarker.setLabel(carLabel);
             map.addOverlay(carMarker);
+            // 图随点移
+            map.panTo(point);
         }
     });
 </script>

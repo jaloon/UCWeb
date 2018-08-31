@@ -34,12 +34,17 @@ $(function() {
 
     $.getJSON("../../manage/handset/getGasStationList.do",
         function(data) {
-            var gasStations = eval(data);
-            var len = gasStations.length;
-            for (var i = 0; i < len; i++) {
-                var gasStation = gasStations[i];
-                $("#search_text").append("<option value=" + gasStation.id + ">" + gasStation.name + "</option>");
+            if (data == null || data == undefined || data.length == 0) {
+                $("#search_text").replaceWith("<input type='text' class='search-text' id='search_text' style='color: #d80e0e;' value='无加油站信息' readonly>");
+                return;
             }
+            var len = data.length;
+            var stationHtml = "";
+            for (var i = 0; i < len; i++) {
+                var gasStation = data[i];
+                stationHtml += "<option value=" + gasStation.id + ">" + gasStation.name + "</option>";
+            }
+            $("#search_text").append(stationHtml);
         }
     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
         if (XMLHttpRequest.readyState == 4) {

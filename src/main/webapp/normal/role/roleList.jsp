@@ -85,27 +85,24 @@
     function showList(name, pageId) {
         var rows = $("#page_size").val();
         var startRow = (pageId - 1) * rows;
-
+        var loadLayer = layer.load();
         $.post(
             "../../manage/role/ajaxFindForPage.do",
             encodeURI("name=" + name + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(data) {
-                var gridPage = eval(data);
-
-                var maxIndex = $("#page_id option:last").index(); //获取Select最大的索引值
-                var len = maxIndex + 1 - gridPage.total;
-                if (len > 0) {
-                    for (var i = gridPage.total > 0 ? gridPage.total : 1; i < maxIndex + 1; i++) {
-                        $("#page_id option:last").remove(); //删除Select中索引值最大Option(最后一个)
+            function(gridPage) {
+                layer.close(loadLayer);
+                var pageCount = gridPage.total;
+                if (pageCount > 1) {
+                    var pageOpts = "";
+                    for (var i = 1; i <= pageCount; i++) {
+                        pageOpts += "<option value=" + i + ">" + i + "</option>";
                     }
-                } else if (len < 0) {
-                    for (var i = maxIndex + 2; i <= gridPage.total; i++) {
-                        $("#page_id").append("<option value=" + i + ">" + i + "</option>"); //为Select追加一个Option下拉项
-                    }
+                    $("#page_id").html(pageOpts);
+                    $("#page_id").val(gridPage.page);
+                } else {
+                    $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_id").val(gridPage.page);
-
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
+                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#rname").val(gridPage.t.name);
                 $(".table-body").html("");
                 var roles = gridPage.dataList;
@@ -140,6 +137,7 @@
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {

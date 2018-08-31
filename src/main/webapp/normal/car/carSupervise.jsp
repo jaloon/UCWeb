@@ -26,7 +26,8 @@
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/js/base.js"></script>
     <!--加载百度地图api-->
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt&s=1"></script>
+    <script type="text/javascript"
+            src="https://api.map.baidu.com/api?v=3.0&ak=yMyX3teIjmYDWDceyUFTzikOLBOSClCt&s=1"></script>
     <!--<script src="../../resources/plugins/BMapLib/TextIconOverlay.min.js"></script>-->
     <!--<script src="../../resources/plugins/BMapLib/MarkerClusterer.js"></script>-->
     <script src="../../resources/plugins/BMapLib/mapv.min.js"></script>
@@ -94,11 +95,21 @@
                             <pop:Permission ename="quitGasstation">
                                 <li id="quit_gasstation">出加油站</li>
                             </pop:Permission>
-                            <li id="into_urgent">进入应急</li>
-                            <li id="quit_urgent">取消应急</li>
-                            <li id="wait_oildom">待进油区</li>
-                            <li id="into_oildom">进油区</li>
-                            <li id="quit_oildom">出油区</li>
+                            <pop:Permission ename="intoUrgent">
+                                <li id="into_urgent">进入应急</li>
+                            </pop:Permission>
+                            <pop:Permission ename="quitUrgent">
+                                <li id="quit_urgent">取消应急</li>
+                            </pop:Permission>
+                            <pop:Permission ename="waitOildom">
+                                <li id="wait_oildom">待进油区</li>
+                            </pop:Permission>
+                            <pop:Permission ename="intoOildom">
+                                <li id="into_oildom">进油区</li>
+                            </pop:Permission>
+                            <pop:Permission ename="quitOildom">
+                                <li id="quit_oildom">出油区</li>
+                            </pop:Permission>
                             <pop:Permission ename="alterStatus">
                                 <li id="alter_status">状态变更</li>
                             </pop:Permission>
@@ -123,7 +134,7 @@
             var map = new BMap.Map("bmap"); // 创建Map实例
             var localCity = new BMap.LocalCity();
             localCity.get(function (localCityResult) {
-                if (isInitMap)  {
+                if (isInitMap) {
                     console.log("track point")
                     return;
                 }
@@ -135,6 +146,7 @@
                 // console.log(localCityResult.center)
                 isInitMap = true;
             });
+
             function initMap(centerPoint, zoom) {
                 map.centerAndZoom(centerPoint, zoom);
                 map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
@@ -159,9 +171,13 @@
                                         <th class="car-num">车牌号码</th>
                                         <th class="car-company">所属公司</th>
                                         <!--<th class="car-type">车辆类型</th>-->
+                                        <th class="car-gps">GPS有效性</th>
                                         <th class="car-coordinate">经纬度</th>
                                         <th class="car-velocity">速度</th>
                                         <th class="car-aspect">方向</th>
+                                        <th class="car-lastcoord">最后有效坐标</th>
+                                        <th class="car-lastspeed">最后有效速度</th>
+                                        <th class="car-lastaspect">最后有效方向</th>
                                         <th class="car-status">车辆状态</th>
                                         <!--<th class="car-lock">锁状态</th>-->
                                         <th class="car-alarm">报警</th>
@@ -203,11 +219,11 @@
                 <tr>
                     <td id="select_name">车牌号</td>
                     <td>
-                        <!--<input type="text" class="editInfo" id="carcom">-->
-                        <select class="editInfo" id="carno">
-                            <option value="">车牌号</option>
-                        </select>
-                        <select class="editInfo" id="company" style="display: none;"></select>
+                        <input type="text" class="editInfo" id="carno" style="background: #e6e7e9;" readonly>
+                        <%--<select class="editInfo" id="carno">--%>
+                        <%--<option value="">车牌号</option>--%>
+                        <%--</select>--%>
+                        <%--<select class="editInfo" id="company" style="display: none;"></select>--%>
                     </td>
                 </tr>
                 <tr>

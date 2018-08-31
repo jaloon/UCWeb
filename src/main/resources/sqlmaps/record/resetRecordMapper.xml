@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tipray.dao.UnlockResetRecordDao">
+    <resultMap id="fullResultMap" type="com.tipray.bean.record.UnlockResetRecord">
+        <id column="id" property="id"/>
+        <result column="vehicle_number" property="carNumber"/>
+        <result column="lock_device_id" property="lockId"/>
+        <result column="store_id" property="storeId"/>
+        <result column="seat" property="seat"/>
+        <result column="seat_name" property="seatName"/>
+        <result column="seat_index" property="seatIndex"/>
+        <result column="status" property="status"/>
+        <result column="trigger_type" property="authtype"/>
+        <result column="trigger_id" property="authid"/>
+        <result column="station" property="station"/>
+        <result column="vehicle_track_id" property="trackId"/>
+        <result column="is_app" property="isApp"/>
+        <result column="reset_time" property="createDate"/>
+        <result column="reset_report_time" property="resetReportTime"/>
+    </resultMap>
+
+    <sql id="select_columns">
+        r.id,
+        v.vehicle_number,
+        r.store_id,
+        r.seat,
+        fn_type2name('lockSeat', r.seat) seat_name,
+        r.seat_index,
+        r.lock_device_id,
+        r.trigger_type,
+        r.trigger_id,
+        fn_get_station(r.station_type, r.station_id) station,
+        r.vehicle_track_id,
+        r.is_app,
+        r.reset_time,
+        DATE_FORMAT(r.reset_report_time, '%Y-%m-%d %H:%i:%s') reset_report_time,
+        r.`status`
+    </sql>
+
+    <select id="findAll" resultMap="fullResultMap">
+        SELECT
+	        <include refid="select_columns"></include>
+        FROM
+            tbl_unlock_reset r,
+            tbl_vehicle v
+        WHERE
+            r.vehicle_id = v.id
+    </select>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+        SELECT
+            <include refid="select_columns"></include>
+        FROM
+            tbl_unlock_reset r,
+            tbl_vehicle v
+        WHERE
+            r.vehicle_id = v.id
+            AND r.id = #{id}
+    </select>
+
+    <select id="count" parameterType="com.tipray.bean.record.TerminalEventRecord" resultType="java.lang.Long">
+        SELECT count(*) FROM
+            tbl_unlock_reset r,
+            tbl_vehicle v
+        WHERE r.vehicle_id = v.id
+        <if test="begin != null and begin != '' and end != null and end != ''">
+            AND r.reset_report_time BETWEEN #{begin} AND #{end}
+        </if>
+        <if test="status != null and status != -2">
+            AND r.`status` = #{status}
+        </if>
+        <if test="carNumber != null and carNumber != ''">
+            AND v.vehicle_number LIKE CONCAT('%',#{carNumber},'%')
+        </if>
+    </select>
+
+    <select id="findByPage" resultMap="fullResultMap">
+        SELECT
+            <include refid="select_columns"></include>
+        FROM
+            tbl_unlock_reset r,
+            tbl_vehicle v
+        WHERE r.vehicle_id = v.id
+        <if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
+            AND r.reset_report_time BETWEEN #{entity.begin} AND #{entity.end}
+        </if>
+        <if test="entity.status != null and entity.status != -2">
+            AND r.`status` = #{entity.status}
+        </if>
+        <if test="entity.carNumber != null and entity.carNumber != ''">
+            AND v.vehicle_number LIKE CONCAT('%',#{entity.carNumber},'%')
+        </if>
+        ORDER BY r.id DESC
+        LIMIT #{page.startRow}, #{page.rows}
+    </select>
+</mapper>

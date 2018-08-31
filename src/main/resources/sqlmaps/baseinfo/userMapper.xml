@@ -22,7 +22,7 @@
         <result column="app_permissions" property="appRole.permissionIds"/>
     </resultMap>
 
-    <sql id="select_colums">
+    <sql id="select_columns">
     	u.*,
     	c.`name`          `com_name`,
     	r.`name`          `role_name`,
@@ -34,7 +34,7 @@
 
     <select id="findAll" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`
@@ -95,7 +95,7 @@
 
     <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         SELECT
-          <include refid="select_colums"></include>
+          <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`
@@ -109,7 +109,7 @@
 
     <select id="getByAccount" parameterType="java.lang.String" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`
@@ -123,7 +123,7 @@
 
     <select id="getByIDCard" parameterType="java.lang.String" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`
@@ -138,7 +138,7 @@
 
     <select id="findByAccount" parameterType="java.lang.String" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`
@@ -153,7 +153,7 @@
 
     <select id="findByName" parameterType="java.lang.String" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`
@@ -204,7 +204,7 @@
     </sql>
     <select id="findByPage" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             `tbl_user` u
             LEFT JOIN `tbl_trans_company` c ON u.`trans_company_id` = c.`id`

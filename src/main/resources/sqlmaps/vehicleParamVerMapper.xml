@@ -7,13 +7,13 @@
         <result column="param_name" property="param" />
         <result column="version" property="ver" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		*
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from 
 			tbl_vehicle_common_param_version
 	</select>
@@ -44,14 +44,14 @@
 	</delete>
 	
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from 
 			tbl_vehicle_common_param_version
 		where id=#{id}
 	</select>
 	
 	<select id="getByParam" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from 
 			tbl_vehicle_common_param_version
 		where param_name=#{param}

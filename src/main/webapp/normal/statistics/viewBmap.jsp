@@ -31,7 +31,8 @@
 <script type="text/javascript">
     // 百度地图API功能
     var map = new BMap.Map("bmap"); // 创建Map实例
-    var poi = new BMap.Point(${record.longitude}, ${record.latitude}); //以指定的经度和纬度创建一个地理点坐标
+    var bd09 = wgs84tobd09(${record.longitude}, ${record.latitude});
+    var poi = new BMap.Point(bd09[0], bd09[1]); //以指定的经度和纬度创建一个地理点坐标
     map.centerAndZoom(poi, 16); // 初始化地图,设置中心点坐标和地图级别
     map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
     map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
@@ -41,9 +42,27 @@
     map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
     var carIcon = new BMap.Icon(
         <c:choose>
-        <c:when test="${(mode=='alarm' && record.status == '未消除报警') || (mode!='alarm' && mode!='remote' && fn:contains(record.alarm, '报警'))}">
+        <c:when test="${mode == 'alarm' && record.status == '未消除报警'}">
         '../../resources/images/marker/车辆图标-64-红.png', //图像地址
         </c:when>
+        <%--<c:when test="${mode == 'remote'}">--%>
+        <%--'../../resources/images/marker/车辆图标-64-黄.png',--%>
+        <%--</c:when>--%>
+        <c:when test="${mode == 'lock' && record.alarm != '无报警'}">
+        '../../resources/images/marker/车辆图标-64-红.png',
+        </c:when>
+        <c:when test="${mode == 'seal' && record.alarm == '是'}">
+        '../../resources/images/marker/车辆图标-64-红.png',
+        </c:when>
+        <c:when test="${mode == 'usage' && record.alarm == '是'}">
+        '../../resources/images/marker/车辆图标-64-红.png',
+        </c:when>
+        <c:when test="${mode == 'event' && record.alarm == '是'}">
+        '../../resources/images/marker/车辆图标-64-红.png',
+        </c:when>
+        <%--<c:when test="${(mode=='alarm' && record.status == '未消除报警') || (mode!='alarm' && mode!='remote' && fn:contains(record.alarm, '报警'))}">--%>
+        <%--'../../resources/images/marker/车辆图标-64-红.png', //图像地址--%>
+        <%--</c:when>--%>
         <c:otherwise>
         '../../resources/images/marker/车辆图标-64-黄.png',
         </c:otherwise>
@@ -83,7 +102,7 @@
     //信息窗内容
     var content = "<div style='margin:0;line-height:20px;padding:2px;'><table>"
         + "<tr><td>车牌号：</td><td>${record.carNumber}</td></tr>"
-        + "<tr><td>时间：</td><td>${record.recordTime}</td></tr>"
+        + "<tr><td>GPS有效性：</td><td>" + parseGpsValid(${record.coorValid}) + "</td></tr>"
         + "<tr><td>经度：</td><td>${record.longitude}</td></tr>"
         + "<tr><td>纬度：</td><td>${record.latitude}</td></tr>"
         <c:if test="${mode!='remote'}">
@@ -91,24 +110,31 @@
         + "<tr><td>方向：</td><td>" + angle2aspect(${record.angle}) + "</td></tr>"
         </c:if>
         <c:if test="${mode=='remote'}">
+        + "<tr><td>操作时间：</td><td>${record.recordTime}</td></tr>"
         + "<tr><td>操作类型：</td><td>${record.typeName}</td></tr>"
         + "<tr><td>操作结果：</td><td>${record.statusName}</td></tr>"
         + "<tr><td>操作员：</td><td>${record.user.name}</td></tr>"
         </c:if>
         <c:if test="${mode=='alarm'}">
+        + "<tr><td>报警时间：</td><td>${record.recordTime}</td></tr>"
+        + "<tr><td>上报时间：</td><td>${record.alarmReportTime}</td></tr>"
         + "<tr><td>报警类型：</td><td>${record.typeName}</td></tr>"
         + "<tr><td>报警状态：</td><td>${record.status}</td></tr>"
         + "<tr><td style='vertical-align: top;'>锁状态：</td><td>${record.lockStatus}</td></tr>"
         </c:if>
         <c:if test="${mode=='lock'}">
         + "<tr><td>锁设备ID：</td><td>${record.lockId}</td></tr>"
-        + "<tr><td>仓号：</td><td>${record.storeId}</td></tr>"
-        + "<tr><td>仓位：</td><td>${record.seatName}</td></tr>"
-        + "<tr><td>同仓位锁序号：</td><td>${record.seatIndex}</td></tr>"
+        + "<tr><td>锁位置：</td><td>仓${record.storeId}-${record.seatName}-${record.seatIndex}</td></tr>"
+        <%--+ "<tr><td>仓号：</td><td>${record.storeId}</td></tr>"--%>
+        <%--+ "<tr><td>仓位：</td><td>${record.seatName}</td></tr>"--%>
+        <%--+ "<tr><td>同仓位锁序号：</td><td>${record.seatIndex}</td></tr>"--%>
+        + "<tr><td>动作时间：</td><td>${record.recordTime}</td></tr>"
+        + "<tr><td>上报时间：</td><td>${record.changeReportTime}</td></tr>"
         + "<tr><td>锁动作：</td><td>${record.statusName}</td></tr>"
         + "<tr><td>报警类型：</td><td>${record.alarm}</td></tr>"
         </c:if>
-        <c:if test="${mode=='inout'}">
+        <c:if test="${mode=='seal'}">
+        + "<tr><td>施解封时间：</td><td>${record.recordTime}</td></tr>"
         + "<tr><td>施解封类型：</td><td>" + parseSealType(${record.type}) + "</td></tr>"
         + "<tr><td>是否报警：</td><td>${record.alarm}</td></tr>"
         <c:if test="${record.alarm=='是'}">
@@ -116,9 +142,29 @@
         </c:if>
         + "<tr><td style='vertical-align: top;'>锁状态：</td><td>${record.lockStatus}</td></tr>"
         </c:if>
-        <c:if test="${mode=='use'}">
+        <c:if test="${mode=='usage'}">
+        + "<tr><td>时间：</td><td>${record.recordTime}</td></tr>"
         + "<tr><td>卡或设备类型：</td><td>${record.typeName}</td></tr>"
         + "<tr><td>卡或设备ID：</td><td>${record.devId}</td></tr>"
+        + "<tr><td>是否报警：</td><td>${record.alarm}</td></tr>"
+        <c:if test="${record.alarm=='是'}">
+        + "<tr><td style='vertical-align: top;'>报警类型：</td><td>${record.alarmType}</td></tr>"
+        </c:if>
+        + "<tr><td style='vertical-align: top;'>锁状态：</td><td>${record.lockStatus}</td></tr>"
+        </c:if>
+        <c:if test="${mode=='reset'}">
+        + "<tr><td>锁设备ID：</td><td>${record.lockId}</td></tr>"
+        + "<tr><td>锁位置：</td><td>仓${record.storeId}-${record.seatName}-${record.seatIndex}</td></tr>"
+        <%--+ "<tr><td>仓号：</td><td>${record.storeId}</td></tr>"--%>
+        <%--+ "<tr><td>仓位：</td><td>${record.seatName}</td></tr>"--%>
+        <%--+ "<tr><td>同仓位锁序号：</td><td>${record.seatIndex}</td></tr>"--%>
+        + "<tr><td>重置时间：</td><td>${record.recordTime}</td></tr>"
+        + "<tr><td>上报时间：</td><td>${record.resetReportTime}</td></tr>"
+        + "<tr><td>重置状态：</td><td>" + parseResetStatus(${record.seatIndex}) + "</td></tr>"
+        </c:if>
+        <c:if test="${mode=='event'}">
+        + "<tr><td>终端编号：</td><td>${record.terminalId}</td></tr>"
+        + "<tr><td>事件类型：</td><td>" + parseEventType(${record.type}) +"</td></tr>"
         + "<tr><td>是否报警：</td><td>${record.alarm}</td></tr>"
         <c:if test="${record.alarm=='是'}">
         + "<tr><td style='vertical-align: top;'>报警类型：</td><td>${record.alarmType}</td></tr>"
@@ -144,6 +190,48 @@
         searchInfoWindow.open(carMarker);
     });
     map.addOverlay(carMarker); //向地图上添加车辆标注
+
+    function parseGpsValid(gpsValid) {
+        if (gpsValid == undefined || gpsValid == null) {
+            return "数据异常";
+        }
+        if (gpsValid) {
+            return "有效";
+        }
+        return "无效";
+    }
+
+    /**
+     * 开锁重置状态
+     * @param {number} status 状态值
+     * @returns {string} 重置状态
+     */
+    function parseResetStatus(status) {
+        switch (status) {
+            case 0:
+                return "未完成";
+            case 1:
+                return "远程操作请求中";
+            case 2:
+                return "远程操作完成";
+            case 3:
+                return "车台主动重置完成";
+            default:
+                return "未知状态[" + status + "]";
+        }
+    }
+
+    /**
+     * 车台事件
+     * @param {number} type 事件类型值
+     * @returns {string} 事件类型
+     */
+    function parseEventType(type) {
+        if (type == 1) {
+            return "终端断电";
+        }
+        return "未知类型[" + type + "]";
+    }
 
     /**
      * 施解封类型

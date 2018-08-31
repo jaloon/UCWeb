@@ -25,25 +25,30 @@ public class CenterVariableConfig {
     private static boolean validateAppdev;
     private static boolean validateAppver;
 
+    private static boolean emailSqlite;
 
-    public static final synchronized boolean isRc4Net() {
+    public static synchronized boolean isRc4Net() {
         return rc4Net;
     }
 
-    public static final synchronized String getRc4Key() {
+    public static synchronized String getRc4Key() {
         return rc4Key;
     }
 
-    public static final synchronized boolean isValidateLocal() {
+    public static synchronized boolean isValidateLocal() {
         return validateLocal;
     }
 
-    public static final synchronized boolean isValidateAppdev() {
+    public static synchronized boolean isValidateAppdev() {
         return validateAppdev;
     }
 
-    public static final synchronized boolean isValidateAppver() {
+    public static synchronized boolean isValidateAppver() {
         return validateAppver;
+    }
+
+    public static boolean isEmailSqlite() {
+        return emailSqlite;
     }
 
     /**
@@ -87,6 +92,13 @@ public class CenterVariableConfig {
                 validateAppver = false;
             } else {
                 validateAppver = validateAppverStr.equals("1");
+            }
+
+            String eamilSqliteStr = properties.getProperty("email.sqlite");
+            if (eamilSqliteStr == null) {
+                emailSqlite = false;
+            } else {
+                emailSqlite = eamilSqliteStr.equals("1");
             }
 
         } catch (IOException e) {

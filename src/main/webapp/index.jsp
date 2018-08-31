@@ -131,7 +131,7 @@
                     <pop:Permission ename="lockStatusModule">
                         <dd><a name="normal/statistics/lockstatusList.html">锁动作记录查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="inAndOutRecordModule">
+                    <pop:Permission ename="sealRecordModule">
                         <dd><a name="normal/statistics/sealList.html">施解封记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="transRecordModule">
@@ -140,8 +140,14 @@
                     <pop:Permission ename="changeRecordModule">
                         <dd><a name="normal/statistics/changeList.html">远程换站记录查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="cardUseRecordModule">
-                        <dd><a name="normal/statistics/deviceuseList.html">卡及设备使用记录查询</a></dd>
+                    <pop:Permission ename="usageRecordModule">
+                        <dd><a name="normal/statistics/usageList.html">卡及设备使用记录查询</a></dd>
+                    </pop:Permission>
+                    <pop:Permission ename="resetRecordModule">
+                        <dd><a name="normal/statistics/resetList.html">开锁重置记录查询</a></dd>
+                    </pop:Permission>
+                    <pop:Permission ename="eventRecordModule">
+                        <dd><a name="normal/statistics/eventList.html">车载终端事件记录查询</a></dd>
                     </pop:Permission>
                 </dl>
             </pop:Permission>

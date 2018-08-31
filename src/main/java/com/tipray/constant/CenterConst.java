@@ -75,8 +75,10 @@ public class CenterConst extends CenterConstantConfig {
 	public static final Integer WEBSERVICE_PORT = CenterConstantConfig.getWebServicePort();
     /** WebService路径 */
 	public static final String WEBSERVICE_PATH = CenterConstantConfig.getWebServicePath();
-    /** WebService地址 */
-	public static final String WEBSERVICE_ADDR = CenterConstantConfig.getWebServiceAddr();
+    /** WebService真实地址 */
+	public static final String WEBSERVICE_REAL_ADDR = CenterConstantConfig.getWebServiceRealAddr();
+    /** WebService发布地址 */
+	public static final String WEBSERVICE_PUBLISH_ADDR = CenterConstantConfig.getWebServicePublishAddr();
 	/** WebService是否转发配送信息 */
 	public static final Boolean WEBSERVICE_FORWORD = CenterConstantConfig.getWebServiceForword();
 	/** 瑞通系统WebService地址（http://服务器地址:端口号/Elock_Service.asmx） */

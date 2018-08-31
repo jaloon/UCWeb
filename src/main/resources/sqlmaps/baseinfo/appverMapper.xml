@@ -11,7 +11,7 @@
         <result column="min_webapp_version" property="minVer"/>
     </resultMap>
 
-    <sql id="select_colums">
+    <sql id="select_columns">
         a.id,
     	a.center_id,
         c.`name` center_name,
@@ -22,7 +22,7 @@
 
     <select id="findAll" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_webapp_version a,
         tbl_center c
@@ -57,7 +57,7 @@
 
     <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_webapp_version a,
         tbl_center c
@@ -84,7 +84,7 @@
 
     <select id="findByPage" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_webapp_version a,
         tbl_center c

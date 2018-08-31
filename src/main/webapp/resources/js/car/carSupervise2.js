@@ -548,7 +548,7 @@ $(function () {
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
-            content: 'conf/softUpgrade2.html'
+            content: 'conf/softUpgrade.html'
         });
     });
 

@@ -71,7 +71,8 @@
     });
 
     var map = new BMap.Map("bmap"); // 创建Map实例
-    var poi = new BMap.Point(record.longitude, record.latitude); //以指定的经度和纬度创建一个地理点坐标
+    var bd09 = wgs84tobd09(record.longitude, record.latitude);
+    var poi = new BMap.Point(bd09[0], bd09[1]); //以指定的经度和纬度创建一个地理点坐标
     map.centerAndZoom(poi, 12); // 初始化地图,设置中心点坐标和地图级别
     map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
     map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
@@ -118,18 +119,20 @@
         fontFamily: "微软雅黑"
     });
     //信息窗内容
-    var content = "<div style='margin:0;line-height:20px;padding:2px;'>" +
-        "车牌号：&emsp;" + record.carNumber +
-        "<br> 时间：&emsp;&emsp;" + record.alarmTime +
-        "<br> 经度：&emsp;&emsp;" + (record.longitude == undefined ? "数据异常" : record.longitude) +
-        "<br> 纬度：&emsp;&emsp;" + (record.velocity == undefined ? "数据异常" : record.velocity) +
-        "<br> 速度：&emsp;&emsp;" + (record.velocity == undefined ? "数据异常" : record.velocity) +
-        "<br> 方向：&emsp;&emsp;" + angle2aspect(record.angle) +
-        "<br> 报警设备：" + (record.deviceType == 1 ? "车载终端（" : "锁（") + record.deviceId + "）" +
-        "<br> 报警类型：" + record.typeName +
-        "<br> 报警状态：" + record.status + "&emsp;&emsp;<button class='button' onclick='eliminateAlarm()'>消除报警</button>" +
-        "<br> 锁状态：&emsp;" + (record.lockStatus == undefined ? "数据异常" : record.lockStatus) +
-        "</div>";
+    var content = "<div style='margin:0;line-height:20px;padding:2px;'><table>"
+        + "<tr><td>车牌号：</td><td>" + record.carNumber + "</td></tr>"
+        + "<tr><td>报警时间：</td><td>" + record.alarmTime + "</td></tr>"
+        + "<tr><td>上报时间：</td><td>" + record.alarmReportTime + "</td></tr>"
+        + "<tr><td>GPS有效性：</td><td>" + parseGpsValid(record.coorValid) + "</td></tr>"
+        + "<tr><td>经度：</td><td>" + dataWrapper(record.longitude) + "</td></tr>"
+        + "<tr><td>纬度：</td><td>" + dataWrapper(record.latitude) + "</td></tr>"
+        + "<tr><td>速度：</td><td>" + dataWrapper(record.velocity) + "</td></tr>"
+        + "<tr><td>方向：</td><td>" + angle2aspect(record.angle) + "</td></tr>"
+        + "<tr><td>报警设备：</td><td>" + parseDevType(record.deviceType) + "（" + record.deviceId + "）</td></tr>"
+        + "<tr><td>报警类型：</td><td>" + record.typeName + "</td></tr>"
+        + "<tr><td>报警状态：</td><td>" + record.status + "&emsp;&emsp;<button class='button' onclick='eliminateAlarm()'>消除报警</button>" + "</td></tr>"
+        + "<tr><td style='vertical-align: top;'>锁状态：</td><td>" + dataWrapper(record.lockStatus) + "</td></tr>"
+        + "</table></div>";
     //创建检索信息窗口对象
     var searchInfoWindow = new BMapLib.SearchInfoWindow(map, content, {
         title: "报警信息", //标题
@@ -148,6 +151,34 @@
         searchInfoWindow.open(carMarker);
     });
     map.addOverlay(carMarker); //在地图中添加marker
+
+    function parseDevType(devType) {
+        switch (devType) {
+            case 1:
+                return "车载终端";
+            case 2:
+                return "车载终端";
+            default:
+                return "未知设备类型[" + devType + "]";
+        }
+    }
+
+    function parseGpsValid(gpsValid) {
+        if (gpsValid == undefined || gpsValid == null) {
+            return "数据异常";
+        }
+        if (gpsValid) {
+            return "有效";
+        }
+        return "无效";
+    }
+
+    function dataWrapper(data) {
+        if (data == undefined || data == null) {
+            return "数据异常";
+        }
+        return data;
+    }
 
     function eliminateAlarm() {
         $.post("../../manage/remote/asyn_alarm_eliminate_request",
@@ -178,7 +209,7 @@
                     if (textStatus == "parsererror") {
                         layer.alert("应答数据格式解析错误！")
                     } else {
-                       layer.alert("http response error: " + textStatus)
+                        layer.alert("http response error: " + textStatus)
                     }
                 } else {
                     layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)

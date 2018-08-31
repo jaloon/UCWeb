@@ -14,7 +14,7 @@ function isNull(obj) {
     if (obj == null || obj == undefined) {
         return true;
     }
-    if (obj instanceof String && obj === "") {
+    if (typeof(obj) == "string" && obj === "") {
         return true;
     }
     return false;

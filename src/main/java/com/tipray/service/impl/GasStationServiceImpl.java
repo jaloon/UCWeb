@@ -28,7 +28,6 @@ import java.util.Map;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("gasStationService")
 public class GasStationServiceImpl implements GasStationService {
 	@Resource
@@ -38,13 +37,15 @@ public class GasStationServiceImpl implements GasStationService {
 	@Resource
 	private VehicleParamVerDao vehicleParamVerDao;
 
+	@Transactional
 	@Override
 	public void addGasStations(List<GasStation> gasStations) {
 		gasStations.parallelStream().forEach(station -> setCover(station));
 		gasStationDao.addGasStations(gasStations);
         setVer(SqliteFileConst.GAS_STATION);
 	}
-	
+
+    @Transactional
 	@Override
 	public GasStation addGasStation(GasStation gasStation) {
 		if (gasStation != null) {
@@ -81,6 +82,7 @@ public class GasStationServiceImpl implements GasStationService {
 		return gasStation;
 	}
 
+    @Transactional
 	@Override
 	public GasStation updateGasStation(GasStation gasStation, Integer handsetId, String cardIds) {
 		if (gasStation != null) {
@@ -111,6 +113,7 @@ public class GasStationServiceImpl implements GasStationService {
 		return gasStation;
 	}
 
+    @Transactional
 	@Override
 	public void deleteGasStationById(Long id) {
 		gasStationDao.delete(id);
@@ -194,5 +197,4 @@ public class GasStationServiceImpl implements GasStationService {
 	public List<Map<String, Object>> getIdAndNameOfAllGasStations() {
 		return gasStationDao.findIdAndNameOfAllGasStations();
 	}
-
 }

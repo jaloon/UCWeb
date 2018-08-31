@@ -8,7 +8,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="../../../resources/css/base.css ">
     <link rel="stylesheet" href="../../../resources/css/cfgEdit.css ">
-    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
+    <!--<link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">-->
     <style type="text/css">
         select.editInfo {
             width: 398px;
@@ -79,7 +79,7 @@
         }
     </style>
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
+    <!--<script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>-->
     <script src="../../../resources/plugins/layer/layer.js"></script>
     <script src="../../../resources/plugins/verify.js"></script>
     <script src="../../../resources/js/base.js"></script>
@@ -96,10 +96,10 @@
                 <tr>
                     <td>车牌号</td>
                     <td>
-                        <!--<input type="text" class="editInfo" id="carno">-->
-                        <select class="editInfo" id="carno">
-                            <option value="">车牌号</option>
-                        </select>
+                        <input type="text" class="editInfo" id="carno" readonly>
+                        <!--<select class="editInfo" id="carno">-->
+                            <!--<option value="">车牌号</option>-->
+                        <!--</select>-->
                     </td>
                 </tr>
                 <tr>
@@ -138,72 +138,68 @@
 
     $(function () {
         var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
-
-        $.getJSON("../../../manage/car/selectCars.do", "scope=2",
-            function (data, textStatus, jqXHR) {
-                var cars = data.car;
-                var len = cars.length;
-                if (len == 0) {
-                    layer.msg('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
-                        layer.close(index2);
-                        parent.layer.close(index);
-                    });
-                    return;
-                }
-                var selectObj = $('#carno');
-                selectObj.append(data.com);
-                var groupObj;
-                for (var i = 0; i < len; i++) {
-                    var car = cars[i];
-                    groupObj = $("#com_" + car.comId);
-                    groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
-                }
-                selectObj.comboSelect();
-                selectObj.hide();
-                selectObj.closest(".combo-select").css({
-                    width: '396px',
-                    height: '28px',
-                    "margin-bottom": "0px"
-                });
-                selectObj.siblings(".combo-dropdown").css("max-height", "250px");
-                selectObj.siblings(".combo-input").height(2);
-            }
-        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4) {
-                var http_status = XMLHttpRequest.status;
-                if (http_status == 0 || http_status > 600) {
-                    location.reload(true);
-                } else if (http_status == 200) {
-                    if (textStatus == "parsererror") {
-                        layer.alert("应答数据格式解析错误！")
-                    } else {
-                        layer.alert("http response error: " + textStatus)
-                    }
-                } else {
-                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
-                }
-            }
-        });
+        var carNumber = getUrlParam("carNumber");
+        $("#carno").val(carNumber);
+        getWaitResetLocks(carNumber);
+        // $.getJSON("../../../manage/car/selectCars.do", "scope=2",
+        //     function (data, textStatus, jqXHR) {
+        //         var cars = data.car;
+        //         var len = cars.length;
+        //         if (len == 0) {
+        //             layer.msg('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+        //                 layer.close(index2);
+        //                 parent.layer.close(index);
+        //             });
+        //             return;
+        //         }
+        //         var selectObj = $('#carno');
+        //         selectObj.append(data.com);
+        //         var groupObj;
+        //         for (var i = 0; i < len; i++) {
+        //             var car = cars[i];
+        //             groupObj = $("#com_" + car.comId);
+        //             groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+        //         }
+        //         selectObj.comboSelect();
+        //         selectObj.hide();
+        //         selectObj.closest(".combo-select").css({
+        //             width: '396px',
+        //             height: '28px',
+        //             "margin-bottom": "0px"
+        //         });
+        //         selectObj.siblings(".combo-dropdown").css("max-height", "250px");
+        //         selectObj.siblings(".combo-input").height(2);
+        //     }
+        // ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        //     if (XMLHttpRequest.readyState == 4) {
+        //         var http_status = XMLHttpRequest.status;
+        //         if (http_status == 0 || http_status > 600) {
+        //             location.reload(true);
+        //         } else if (http_status == 200) {
+        //             if (textStatus == "parsererror") {
+        //                 layer.alert("应答数据格式解析错误！")
+        //             } else {
+        //                 layer.alert("http response error: " + textStatus)
+        //             }
+        //         } else {
+        //             layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+        //         }
+        //     }
+        // });
 
         function parseLock(lock) {
             return "仓" + lock.store_id + "-" + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index;
         }
 
-        $("#carno").change(function () {
-            var carno = $("#carno").val();
-            if (carno.length == 0) {
-                $("#locks").html("");
-                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {icon: 2}, function (index2) {
-                    layer.close(index2);
-                    $("#carno").select();
-                });
-                return;
-            }
-            $.getJSON("../../../manage/car/findlocksByCarNo.do", "carNumber=" + encodeURIComponent(carno),
+        function getWaitResetLocks(carNumber) {
+            $.getJSON("../../../manage/car/findlocksByCarNo.do", "carNumber=" + encodeURIComponent(carNumber),
                 function (data, textStatus, jqXHR) {
                     if (data == null || data.length == 0) {
                         $("#locks").html("");
-                        layer.msg('车辆' + carno + '无可重置的锁！', {icon: 0});
+                        layer.alert('车辆' + carNumber + '无可重置的锁！', {icon: 0}, function (layero) {
+                            layer.close(layero);
+                            parent.layer.close(index);
+                        });
                         return;
                     }
                     var liHtml = "";
@@ -214,7 +210,10 @@
                         }
                     });
                     if (liHtml.length == 0) {
-                        layer.msg('车辆' + carno + '无可重置的锁！', {icon: 0});
+                        layer.alert('车辆' + carNumber + '无可重置的锁！', {icon: 0}, function (layero) {
+                            layer.close(layero);
+                            parent.layer.close(index);
+                        });
                     }
                     $("#locks").html(liHtml);
 
@@ -235,7 +234,19 @@
                     }
                 }
             });
+        }
 
+        $("#carno").change(function () {
+            var carno = $("#carno").val();
+            if (carno.length == 0) {
+                $("#locks").html("");
+                layer.alert('车牌号不正确，请输入一个完整的车牌号！', {icon: 2}, function (index2) {
+                    layer.close(index2);
+                    $("#carno").select();
+                });
+                return;
+            }
+            getWaitResetLocks(carno);
         });
 
         $("#cancel").click(function () {
@@ -285,6 +296,7 @@
                 },
                 "json"
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.close(loadIndex);
                 if (XMLHttpRequest.readyState == 4) {
                     var http_status = XMLHttpRequest.status;
                     if (http_status == 0 || http_status > 600) {

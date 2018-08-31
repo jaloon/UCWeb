@@ -13,26 +13,28 @@
 		<result column="seat_index" property="seatIndex" />
         <result column="lock_status" property="statusName" />
         <result column="change_time" property="createDate" />
+        <result column="change_report_time" property="changeReportTime" />
         <result column="station" property="station" />
 		<result column="track_id" property="trackId" />
     </resultMap>
-	<sql id="select_colums">
-		l.id											id,
-		v.vehicle_number								vehicle_number,
-		l.store_id										store_id,
-		fn_type2name('lockSeat', l.seat)				seat_name,
-		l.seat_index									seat_index,
-		l.lock_device_id								lock_device_id,
-        tl.lock_index                                   lock_index,
-		fn_type2name('lockStatus', l.`status`)			lock_status,
-		fn_get_station(l.station_type, l.station_id)	station,
-		l.vehicle_track_id								track_id,
-		l.change_time									change_time
+	<sql id="select_columns">
+		l.id													id,
+		v.vehicle_number										vehicle_number,
+		l.store_id												store_id,
+		fn_type2name('lockSeat', l.seat)						seat_name,
+		l.seat_index											seat_index,
+		l.lock_device_id										lock_device_id,
+        tl.lock_index                                   		lock_index,
+		fn_type2name('lockStatus', l.`status`)					lock_status,
+		fn_get_station(l.station_type, l.station_id)			station,
+		l.vehicle_track_id										track_id,
+		l.change_time											change_time,
+		DATE_FORMAT(l.change_report_time, '%Y-%m-%d %H:%i:%s' )	change_report_time
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		SELECT
-		    <include refid="select_colums"></include>
+		    <include refid="select_columns"></include>
 		FROM
             tbl_lock_status l,
             tbl_vehicle v,
@@ -47,7 +49,7 @@
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		SELECT
-		    <include refid="select_colums"></include>
+		    <include refid="select_columns"></include>
 		FROM
 			tbl_lock_status l,
             tbl_vehicle v,
@@ -67,7 +69,7 @@
             tbl_vehicle v
 		WHERE l.vehicle_id = v.id
 		<if test="begin != null and begin != '' and end != null and end != ''">
-			AND l.change_time BETWEEN #{begin} AND #{end}
+			AND l.change_report_time BETWEEN #{begin} AND #{end}
 		</if>
 		<if test="status != null and status != -2">
 			AND l.status = #{status}
@@ -79,7 +81,7 @@
 	
 	<select id="findByPage" resultMap="fullResultMap">
 		SELECT
-		  <include refid="select_colums"></include>
+		  <include refid="select_columns"></include>
 		FROM
 			tbl_lock_status l,
             tbl_vehicle v,
@@ -91,7 +93,7 @@
             AND l.seat = tl.seat
             AND l.seat_index = tl.seat_index
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
-			AND l.change_time BETWEEN #{entity.begin} AND #{entity.end}
+			AND l.change_report_time BETWEEN #{entity.begin} AND #{entity.end}
 		</if>
 		<if test="entity.status != null and entity.status != -2">
 			AND l.status = #{entity.status}

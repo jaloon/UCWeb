@@ -12,7 +12,6 @@ import com.tipray.util.EmptyObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.Map;
  * @author chenlong
  * @version 1.0 2017-12-22
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("remoteRecordService")
 public class RemoteRecordServiceImpl implements RemoteRecordService {
     private static final Logger logger = LoggerFactory.getLogger(RemoteRecordServiceImpl.class);
@@ -67,24 +65,32 @@ public class RemoteRecordServiceImpl implements RemoteRecordService {
         List<RemoteRecord> list = remoteRecordDao.findByPage(record, page);
         if (!EmptyObjectUtil.isEmptyList(list)) {
             StringBuffer trackIds = new StringBuffer();
-            list.forEach(remoteRecord -> trackIds.append(',').append(remoteRecord.getTrackId()));
-            trackIds.deleteCharAt(0);
-            try {
-                Map<Long, TrackInfo> trackInfoMap = trackDao.findTrackMapByTrackIds(trackIds.toString());
-                list.forEach(remoteRecord -> {
-                    TrackInfo trackInfo = trackInfoMap.get(remoteRecord.getTrackId());
-                    if (trackInfo != null) {
-                        setTrackForRecord(remoteRecord, trackInfo);
-                    }
-                });
-            } catch (Exception e) {
-                logger.error("轨迹数据异常！", e);
+            list.parallelStream()
+                    .filter(remoteRecord -> remoteRecord.getTrackId() != null)
+                    .forEach(remoteRecord -> trackIds.append(',').append(remoteRecord.getTrackId()));
+            if (trackIds.length() > 0) {
+                trackIds.deleteCharAt(0);
+                try {
+                    Map<Long, TrackInfo> trackInfoMap = trackDao.findTrackMapByTrackIds(trackIds.toString());
+                    list.forEach(remoteRecord -> {
+                        Long trackId = remoteRecord.getTrackId();
+                        if (trackId != null) {
+                            TrackInfo trackInfo = trackInfoMap.get(trackId);
+                            if (trackInfo != null) {
+                                setTrackForRecord(remoteRecord, trackInfo);
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    logger.error("轨迹数据异常！{}", e.toString());
+                }
             }
         }
         return list;
     }
 
     private RemoteRecord setTrackForRecord(RemoteRecord remoteRecord, TrackInfo trackInfo) {
+        remoteRecord.setCoorValid(trackInfo.getCoorValid());
         remoteRecord.setLongitude(trackInfo.getLongitude());
         remoteRecord.setLatitude(trackInfo.getLatitude());
         remoteRecord.setAngle(trackInfo.getAngle());
@@ -98,5 +104,4 @@ public class RemoteRecordServiceImpl implements RemoteRecordService {
         List<RemoteRecord> list = findByPage(record, page);
         return new GridPage<RemoteRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
     }
-
 }

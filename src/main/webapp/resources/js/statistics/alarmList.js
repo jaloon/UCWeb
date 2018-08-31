@@ -58,13 +58,13 @@ $(function () {
         $("#text_type").append("<option value=''>所有报警</option>");
         var dev = $("#text_dev").val();
         if (dev == 1) {
-            $("#text_type").append("<option value=1>未施封越界</option>");
-            $("#text_type").append("<option value=2>时钟电池报警</option>");
+            $("#text_type").append("<option value=1>未施封越界</option><option value=2>时钟电池报警</option>");
         } else if (dev == 2) {
-            $("#text_type").append("<option value=1>通讯异常报警</option>");
-            $("#text_type").append("<option value=2>电池低电压报警</option>");
-            $("#text_type").append("<option value=3>异常开锁报警</option>");
-            $("#text_type").append("<option value=4>进入应急</option>");
+            $("#text_type").append("<option value=1>通讯异常报警</option>" +
+                "<option value=2>电池低电压报警</option>" +
+                "<option value=3>异常开锁报警</option>" +
+                "<option value=4>进入应急</option>" +
+                "<option value=5>异常移动报警</option>");
         }
     });
 
@@ -87,27 +87,24 @@ $(function () {
     function showList(carNumber, dev, type, begin, end, pageId) {
         var rows = $("#page_size").val();
         var startRow = (pageId - 1) * rows;
-
+        var loadLayer = layer.load();
         $.post(
             "../../manage/statistics/findAlarmRecordsForPage.do",
             encodeURI("carNumber=" + carNumber + "&deviceType=" + dev + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function (data) {
-                var gridPage = eval(data);
-
-                var maxIndex = $("#page_id option:last").index(); //获取Select最大的索引值
-                var len = maxIndex + 1 - gridPage.total;
-                if (len > 0) {
-                    for (var i = gridPage.total > 0 ? gridPage.total : 1; i < maxIndex + 1; i++) {
-                        $("#page_id option:last").remove(); //删除Select中索引值最大Option(最后一个)
+            function(gridPage) {
+                layer.close(loadLayer);
+                var pageCount = gridPage.total;
+                if (pageCount > 1) {
+                    var pageOpts = "";
+                    for (var i = 1; i <= pageCount; i++) {
+                        pageOpts += "<option value=" + i + ">" + i + "</option>";
                     }
-                } else if (len < 0) {
-                    for (var i = maxIndex + 2; i <= gridPage.total; i++) {
-                        $("#page_id").append("<option value=" + i + ">" + i + "</option>"); //为Select追加一个Option下拉项
-                    }
+                    $("#page_id").html(pageOpts);
+                    $("#page_id").val(gridPage.page);
+                } else {
+                    $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_id").val(gridPage.page);
-
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
+                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#qcar").val(gridPage.t.carNumber);
                 $("#qdev").val(gridPage.t.deviceType);
                 $("#qtype").val(gridPage.t.type);
@@ -122,19 +119,22 @@ $(function () {
                     tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + alarm.id + ")\">") +
                         "<td class=\"alarm-id\">" + alarm.id + "</td>" +
                         "<td class=\"alarm-car\">" + alarm.carNumber + "</td>" +
-                        "<td class=\"alarm-time\">" + alarm.alarmTime + "</td>" +
                         "<td class=\"alarm-station\">" + alarm.station + "</td>";
                     if (coordFlag) {
-                        tableData += "<td class=\"alarm-coordinate\">数据库记录异常</td>";
+                        tableData += "<td class='alarm-gps'>数据库记录异常</td>" +
+                            "<td class=\"alarm-coordinate\">数据库记录异常</td>";
                     } else {
-                        tableData += "<td class=\"alarm-coordinate\"><a href=\"javascript:showBMap(" + alarm.id + ")\">("
-                            + alarm.longitude + ", " + alarm.latitude + ")</a></td>";
+                        tableData += "<td class='alarm-gps'>" + (alarm.coorValid ? "有效" : "无效") + "</td>" +
+                            "<td class=\"alarm-coordinate\"><a href=\"javascript:showBMap(" + alarm.id + ")\">(" +
+                            alarm.longitude + ", " + alarm.latitude + ")</a></td>";
                     }
                     tableData += "<td class=\"alarm-velocity\">" + (alarm.velocity == undefined ? "数据库记录异常" : alarm.velocity) + "</td>" +
                         "<td class=\"alarm-aspect\">" + angle2aspect(alarm.angle) + "</td>" +
+                        "<td class=\"alarm-time\">" + alarm.alarmTime + "</td>" +
                         "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端（" : "锁（") + alarm.deviceId + "）</td>" +
                         "<td class=\"alarm-type\">" + alarm.typeName + "</td>" +
                         "<td class=\"alarm-status\">" + (alarm.status == undefined ? "数据库记录异常" : alarm.status) + "</td>" +
+                        "<td class=\"alarm-report\">" + alarm.alarmReportTime + "</td>" +
                         // "<td class=\"alarm-lock\">" + (alarm.lockStatus == undefined ? "数据库记录异常" : alarm.lockStatus) + "</td>" +
                         "</tr>";
                 }
@@ -144,6 +144,7 @@ $(function () {
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {

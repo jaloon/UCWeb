@@ -15,7 +15,7 @@
         <result column="log_time" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		vl.id,
 		vl.user_id,
 		vl.type,
@@ -31,7 +31,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_vehicle_manage_log vl,tbl_user u
 		where vl.user_id=u.id
 	</select>
@@ -79,13 +79,13 @@
 	</update>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_vehicle_manage_log vl,tbl_user u
 		where vl.user_id=u.id and vl.id=#{id}
 	</select>
 	
 	<select id="findByUser" parameterType="com.tipray.bean.baseinfo.User" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_vehicle_manage_log vl,tbl_user u
 		where vl.user_id=u.id
 		<if test="user!=null">
@@ -102,7 +102,7 @@
 	</select>
 	
 	<select id="findByType" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_vehicle_manage_log vl,tbl_user u
 		where vl.user_id=u.id and vl.type=#{type}
 	</select>
@@ -130,7 +130,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_vehicle_manage_log vl,tbl_user u
 		where vl.user_id=u.id
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">

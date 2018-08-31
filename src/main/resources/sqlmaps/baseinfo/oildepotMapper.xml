@@ -19,13 +19,13 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		o.*
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_oildepot o
 		where o.is_invalid=0
 	</select>
@@ -97,7 +97,7 @@
     </delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_oildepot o
 		where o.is_invalid=0 and o.id=#{id}
 	</select>
@@ -107,24 +107,24 @@
 		where o.is_invalid=0 and o.official_id=#{officialId}
 	</select>
 	<select id="getByOfficialId" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_oildepot o
 		where o.is_invalid=0 and o.official_id=#{officialId}
 	</select>
 	<select id="getByName" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_oildepot o
 		where o.is_invalid=0 and o.name=#{oildepotName}
 	</select>
 	
 	<select id="findByName" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_oildepot o
 		where o.is_invalid=0 and o.name like CONCAT('%',#{oildepotName},'%')
 	</select>
 	
 	<select id="findOilDepotsByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_oildepot o, tbl_oildepot_card co
 		where o.is_invalid=0 and o.id= co.oildepot_id and co.card_id = #{cardId}
 	</select>
@@ -137,7 +137,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_oildepot o
 		where o.is_invalid=0 
 		<if test="entity.name != null and entity.name != ''">

@@ -14,12 +14,12 @@ import javax.annotation.Resource;
  * @author chenlong
  * @version 1.0 2018-07-12
  */
-@Transactional
 @Service("authorizedRecordService")
 public class AuthorizedRecordServiceImpl implements AuthorizedRecordService {
     @Resource
     private AuthorizedRecordDao authorizedRecordDao;
 
+    @Transactional
     @Override
     public void addAuthorizedRecord(AuthorizedRecord authorizedRecord) {
         authorizedRecordDao.add(authorizedRecord);

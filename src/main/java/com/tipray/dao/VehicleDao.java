@@ -123,6 +123,14 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     Long getIdByCarNo(String carNo);
 
     /**
+     * 根据车牌号获取车载终端设备ID
+     *
+     * @param carNo {@link String} 车牌号
+     * @return {@link Integer} 车载终端设备ID
+     */
+    Integer getTerminalIdByCarNo(String carNo);
+
+    /**
      * 根据车牌号获取仓数
      * @param carNo 车牌号
      * @return 仓数
@@ -153,7 +161,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     List<Device> findUnusedTerminal();
 
     /**
-     * 轨迹车载终端设备ID获取车牌号
+     * 根据车载终端设备ID获取车牌号
      *
      * @param terminalId {@link Integer} 车载终端设备ID
      * @return {@link String} 车牌号
@@ -251,6 +259,14 @@ public interface VehicleDao extends BaseDao<Vehicle> {
      * @return GPS配置信息
      */
     VehicleTerminalConfig getGpsConfByTerminalId(Integer terminalId);
+
+    /**
+     * 根据车辆ID获取GPS配置信息
+     * @param carId 车辆ID
+     * @return GPS配置信息
+     */
+    List<VehicleTerminalConfig> getGpsConfByCarId(Long carId);
+
     /**
      * 根据车牌号获取GPS配置信息
      * @param carNumber 车牌号

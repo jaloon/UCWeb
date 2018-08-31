@@ -28,7 +28,6 @@ import java.util.Map;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("transportCardService")
 public class TransportCardServiceImpl implements TransportCardService {
 	private final Logger logger = LoggerFactory.getLogger(TransportCardServiceImpl.class);
@@ -37,6 +36,7 @@ public class TransportCardServiceImpl implements TransportCardService {
 	@Resource
 	private NioUdpServer udpServer;
 
+	@Transactional
 	@Override
 	public TransportCard addTransportCard(TransportCard transportCard) {
 		if (transportCard != null) {
@@ -57,6 +57,7 @@ public class TransportCardServiceImpl implements TransportCardService {
 		return transportCard;
 	}
 
+    @Transactional
 	@Override
 	public TransportCard updateTransportCard(TransportCard transportCard) {
 		if (transportCard != null) {
@@ -65,6 +66,7 @@ public class TransportCardServiceImpl implements TransportCardService {
 		return transportCard;
 	}
 
+    @Transactional
 	@Override
 	public void deleteTransportCardById(Long id) {
 		Integer terminalId = transportCardDao.getTerminalIdById(id);

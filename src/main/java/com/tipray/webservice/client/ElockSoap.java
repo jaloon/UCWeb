@@ -23,6 +23,6 @@ public interface ElockSoap {
 	 */
 	@WebMethod(operationName = "SetPlan")
 	@WebResult(name = "SetPlanResult", targetNamespace = "http://www.cnpc.com/")
-    String SetPlan(@WebParam(name = "txt", targetNamespace = "http://www.cnpc.com/") String txt);
+    String setPlan(@WebParam(name = "txt", targetNamespace = "http://www.cnpc.com/") String txt);
 
 }

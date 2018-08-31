@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.SqliteSyncDao">
+
+    <select id="findUrgentCard" resultType="com.tipray.bean.sqlite.UrgentCard">
+        SELECT
+            `card_id` `cardId`,
+            `director` `ownerName`
+        FROM
+            `tbl_card`
+        WHERE
+            `type` = 1
+        ORDER BY
+            `card_id`
+    </select>
+
+    <select id="findManageCard" resultType="com.tipray.bean.sqlite.ManageCard">
+        SELECT
+            `card_id` `cardId`,
+            `director` `ownerName`
+        FROM
+            `tbl_card`
+        WHERE
+            `type` = 6
+        ORDER BY
+            `card_id`
+    </select>
+
+    <select id="findInOutCard" resultType="com.tipray.bean.sqlite.InOutCard">
+        SELECT
+            o.`card_id` `cardId`,
+            c.`type`,
+            o.`oildepot_id` `stationId`
+        FROM
+            `tbl_oildepot_card` o,
+            `tbl_card` c
+        WHERE
+            o.`card_id` = c.`card_id`
+            AND c.`type` IN ( 2, 3, 4 )
+        ORDER BY
+            c.`card_id`
+    </select>
+
+    <select id="findInOutDev" resultType="com.tipray.bean.sqlite.InOutDev">
+        SELECT
+            `device_id` `devId`,
+            `reader_type` `type`,
+            `oildepot_id` `stationId`
+        FROM
+            `tbl_oildepot_device`
+        ORDER BY
+            `device_id`
+    </select>
+
+    <select id="findOildepot" resultType="com.tipray.bean.sqlite.OildepotInfo">
+        SELECT
+            `id`,
+            `short_name` `name`,
+            `longitude`,
+            `latitude`,
+            `cover_radius` `radius`,
+            `cover_lonlatlist_region` `cover`
+        FROM
+            `tbl_oildepot`
+        WHERE
+            `is_invalid` = 0
+        ORDER BY
+            `id`
+    </select>
+
+    <select id="getVersion" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT
+            `version`
+        FROM
+            `tbl_vehicle_common_param_version`
+        WHERE
+            `param_name` = #{paramName}
+    </select>
+
+</mapper>

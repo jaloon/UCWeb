@@ -1,19 +1,16 @@
 package com.tipray.service.impl;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Driver;
 import com.tipray.bean.baseinfo.TransCompany;
-import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.DriverDao;
 import com.tipray.service.DriverService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 司机管理业务层
@@ -22,12 +19,12 @@ import com.tipray.service.DriverService;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("driverService")
 public class DriverServiceImpl implements DriverService {
 	@Resource
 	private DriverDao driverDao;
 
+	@Transactional
 	@Override
 	public Driver addDriver(Driver driver) {
 		if (driver != null) {
@@ -36,6 +33,7 @@ public class DriverServiceImpl implements DriverService {
 		return driver;
 	}
 
+	@Transactional
 	@Override
 	public Driver updateDriver(Driver driver) {
 		if (driver != null) {
@@ -44,6 +42,7 @@ public class DriverServiceImpl implements DriverService {
 		return driver;
 	}
 
+    @Transactional
 	@Override
 	public void deleteDriverById(Long id) {
 		driverDao.delete(id);

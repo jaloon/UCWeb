@@ -41,9 +41,9 @@
                     </select>
                 </td>
                 <td><label for="text_begin" class="search-type" id="type_begin">开始时间</label></td>
-                <td><input type="text" class="search-text" id="text_begin" readonly></td>
+                <td><input type="text" class="search-text" id="text_begin" ></td>
                 <td><label for="text_end" class="search-type" id="type_end">结束时间</label></td>
-                <td><input type="text" class="search-text" id="text_end" readonly></td>
+                <td><input type="text" class="search-text" id="text_end" ></td>
                 <td><label for="text_interval" class="search-type" id="type_interval">回放速度</label></td>
                 <td><input type="hidden" class="search-text" id="text_interval" value="300"/></td>
                 <td><input type="button" class="search-btn" id="btn_gps" value="查询轨迹"></td>
@@ -67,7 +67,15 @@
         <label class="filter-type" for="filter_lat">纬度</label>
         <input type="text" class="filter-text" id="filter_lat">
         <input type="button" class="filter-btn" id="filter_btn" value="筛选">
-        <!--<input type="button" class="filter-btn" id="doubtable_btn" value="筛选">-->
+        <span class="doubtable-text">显示可疑停车地点</span>
+        <div class="toggle-button-wrapper">
+            <input type="checkbox" id="toggle_button" name="switch">
+            <label for="toggle_button" class="toggle-button-label">
+                <span class="toggle-circle"></span>
+                <span class="toggle-text toggle-on">ON</span>
+                <span class="toggle-text toggle-off">OFF</span>
+            </label>
+        </div>
     </div>
     <div class="table-zone">
         <table id="track_tbl" width="100%">

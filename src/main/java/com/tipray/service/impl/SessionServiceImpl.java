@@ -25,7 +25,6 @@ import java.util.Map;
 /**
  * @author chends
  */
-@Transactional(rollbackForClassName = {"LoginException", "Exception"})
 @Service("sessionService")
 public class SessionServiceImpl implements SessionService {
     @Autowired
@@ -34,11 +33,14 @@ public class SessionServiceImpl implements SessionService {
     private SessionDao sessionDao;
 
     @Override
-    public Session getSessionByUser(Long userId) {
+    public Session getSessionByUser(Long userId, Integer isApp) {
         if (userId == null) {
             return null;
         }
-        List<Session> sessions = sessionDao.getByUser(userId);
+        if (isApp == null) {
+            isApp = 0;
+        }
+        List<Session> sessions = sessionDao.getByUser(userId, isApp);
         if (sessions == null) {
             return null;
         }
@@ -68,6 +70,7 @@ public class SessionServiceImpl implements SessionService {
         return sessionDao.getByOldUUID(uuid);
     }
 
+    @Transactional
     @Override
     public void deleteSessionByUUID(String uuid) {
         if (StringUtil.isEmpty(uuid)) {
@@ -76,6 +79,7 @@ public class SessionServiceImpl implements SessionService {
         sessionDao.deleteByUUID(uuid);
     }
 
+    @Transactional
     @Override
     public void updateOperateDate(String uuid) {
         if (StringUtil.isEmpty(uuid)) {
@@ -87,6 +91,7 @@ public class SessionServiceImpl implements SessionService {
         sessionDao.updateOperateDate(session);
     }
 
+    @Transactional
     @Override
     public void updateSession(Session session) {
         if (session == null) {
@@ -95,12 +100,13 @@ public class SessionServiceImpl implements SessionService {
         sessionDao.update(session);
     }
 
+    @Transactional
     @Override
     public void addSession(Session session) {
         if (session == null) {
             return;
         }
-        Session oldSession = getSessionByUser(session.getUser().getId());
+        Session oldSession = getSessionByUser(session.getUser().getId(), session.getIsApp());
         if (oldSession == null) {
             sessionDao.add(session);
         } else {
@@ -109,6 +115,7 @@ public class SessionServiceImpl implements SessionService {
         }
     }
 
+    @Transactional
     @Override
     public void deleteSessionByUser(Long userId) {
         if (userId != null) {
@@ -116,6 +123,7 @@ public class SessionServiceImpl implements SessionService {
         }
     }
 
+    @Transactional
     @Override
     public Session login(User user, Session session, Integer isApp) throws LoginException, PermissionException {
         User userDb = userCheck(user, isApp);
@@ -154,11 +162,13 @@ public class SessionServiceImpl implements SessionService {
         return userDb;
     }
 
+    @Transactional
     @Override
     public void logout(HttpServletRequest request) {
         SessionUtil.removeSession(request);
     }
 
+    @Transactional
     @Override
     public void deleteTimeOutSession(Date timeoutDate) {
         sessionDao.deleteTimeOutSession(timeoutDate);

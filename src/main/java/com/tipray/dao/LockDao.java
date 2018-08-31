@@ -122,4 +122,19 @@ public interface LockDao extends BaseDao<Lock> {
      * @param locks
      */
     void updateLockRemarks(List<Lock> locks);
+
+    /**
+     * 根据锁记录ID获取锁设备ID
+     * @param id 锁记录ID
+     * @return 锁设备ID
+     */
+    Integer getLockDeviceIdById(Integer id);
+
+    /**
+     * 根据锁设备ID和车辆ID获取锁记录ID
+     * @param carId 车辆ID
+     * @param devIds 锁设备ID，逗号分隔
+     * @return 锁记录ID
+     */
+    List<Lock> findIdsByDevIds(@Param("carId") Long carId, @Param("devIds") String devIds);
 }

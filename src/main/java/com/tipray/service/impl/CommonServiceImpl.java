@@ -1,20 +1,18 @@
 package com.tipray.service.impl;
 
+import com.tipray.dao.CommonDao;
+import com.tipray.service.CommonService;
+import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.tipray.dao.CommonDao;
-import com.tipray.service.CommonService;
-import com.tipray.util.StringUtil;
 
 /**
  * 数据库操作业务层
@@ -23,7 +21,6 @@ import com.tipray.util.StringUtil;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("commonService")
 public class CommonServiceImpl implements CommonService {
 
@@ -62,6 +59,7 @@ public class CommonServiceImpl implements CommonService {
 		return list;
 	}
 
+	@Transactional
 	@Override
 	public boolean removeTable(String table) {
 		if (StringUtil.isEmpty(table)) {
@@ -71,6 +69,7 @@ public class CommonServiceImpl implements CommonService {
 		return true;
 	}
 
+	@Transactional
 	@Override
 	public void executeUpdate(String sql) {
 		if (StringUtil.isEmpty(sql)) {
@@ -79,6 +78,7 @@ public class CommonServiceImpl implements CommonService {
 		commonDao.executeUpdate(sql);
 	}
 
+	@Transactional
 	@Override
 	public void backupTable(String table, String outFile, String ids) {
 		if (StringUtil.isEmpty(table)) {
@@ -93,6 +93,7 @@ public class CommonServiceImpl implements CommonService {
 		}
 	}
 
+	@Transactional
 	@Override
 	public void clearTable(String... tables) {
 		if (tables == null || tables.length == 0) {

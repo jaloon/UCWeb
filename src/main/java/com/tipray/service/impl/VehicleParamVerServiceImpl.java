@@ -1,14 +1,12 @@
 package com.tipray.service.impl;
 
-import javax.annotation.Resource;
-
+import com.tipray.bean.VehicleParamVer;
+import com.tipray.dao.VehicleParamVerDao;
+import com.tipray.service.VehicleParamVerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tipray.bean.VehicleParamVer;
-import com.tipray.core.exception.ServiceException;
-import com.tipray.dao.VehicleParamVerDao;
-import com.tipray.service.VehicleParamVerService;
+import javax.annotation.Resource;
 
 /**
  * 车辆参数版本业务层
@@ -17,12 +15,12 @@ import com.tipray.service.VehicleParamVerService;
  * @version 1.0 2018-01-15
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("carParamVerService")
 public class VehicleParamVerServiceImpl implements VehicleParamVerService {
 	@Resource
 	private VehicleParamVerDao vehicleParamVerDao;
 
+	@Transactional
 	@Override
 	public VehicleParamVer addCarParamVer(VehicleParamVer carParamVer) {
 		if (carParamVer != null) {
@@ -31,6 +29,7 @@ public class VehicleParamVerServiceImpl implements VehicleParamVerService {
 		return carParamVer;
 	}
 
+    @Transactional
 	@Override
 	public VehicleParamVer updateCarParamVer(VehicleParamVer carParamVer) {
 		if (carParamVer != null) {
@@ -39,6 +38,7 @@ public class VehicleParamVerServiceImpl implements VehicleParamVerService {
 		return carParamVer;
 	}
 
+    @Transactional
 	@Override
 	public void deleteCarParamVersById(Long id) {
 		vehicleParamVerDao.delete(id);
@@ -54,14 +54,15 @@ public class VehicleParamVerServiceImpl implements VehicleParamVerService {
 		return vehicleParamVerDao.getByParam(param);
 	}
 
+    @Transactional
 	@Override
 	public void deleteByParam(String param) {
 		vehicleParamVerDao.deleteByParam(param);
 	}
 
+    @Transactional
 	@Override
 	public void updateVerByParam(String param, Long ver) {
 		vehicleParamVerDao.updateVerByParam(param, ver);		
 	}
-
 }

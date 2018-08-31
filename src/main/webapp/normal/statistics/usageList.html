@@ -9,14 +9,14 @@
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
-    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
+    <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
+    <script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../resources/plugins/laydate/laydate.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/normal.js"></script>
-    <script src="../../resources/js/statistics/duseList.js"></script>
+    <script src="../../resources/js/statistics/usageList.js"></script>
     <style type="text/css">
         #type_type,
         #type_begin,
@@ -24,39 +24,39 @@
             left: 40px;
         }
         
-        /*.duse-id {*/
+        /*.usage-id {*/
             /*width: 100px;*/
         /*}*/
         
-        /*.duse-car {*/
+        /*.usage-car {*/
             /*width: 160px;*/
         /*}*/
         
-        /*.duse-time {*/
+        /*.usage-time {*/
             /*width: 160px;*/
         /*}*/
         
-        /*.duse-coordinate {*/
+        /*.usage-coordinate {*/
             /*width: 200px;*/
         /*}*/
         
-        /*.duse-velocity {*/
+        /*.usage-velocity {*/
             /*width: 120px;*/
         /*}*/
         
-        /*.duse-aspect {*/
+        /*.usage-aspect {*/
             /*width: 160px;*/
         /*}*/
         
-        /*.duse-dev {*/
+        /*.usage-dev {*/
             /*width: 120px;*/
         /*}*/
         
-        /*.duse-type {*/
+        /*.usage-type {*/
             /*width: 160px;*/
         /*}*/
         
-        /*.duse-alarm {*/
+        /*.usage-alarm {*/
             /*width: 120px;*/
         /*}*/
         
@@ -95,15 +95,16 @@
                 <table class="table-cont" width="100%">
                     <thead class="table-head">
                         <tr>
-                            <th class="duse-id">序号</th>
-                            <th class="duse-car">车牌号</th>
-                            <th class="duse-time">时间</th>
-                            <th class="duse-coordinate">位置（经纬度）</th>
-                            <th class="duse-velocity">速度（km/h）</th>
-                            <th class="duse-aspect">方向</th>
-                            <th class="duse-type">卡或设备类型</th>
-                            <th class="duse-dev">卡或设备ID</th>
-                            <th class="duse-alarm">是否报警</th>
+                            <th class="usage-id">序号</th>
+                            <th class="usage-car">车牌号</th>
+                            <th class="usage-time">时间</th>
+                            <th class="usage-gps">GPS有效性</th>
+                            <th class="usage-coordinate">位置（经纬度）</th>
+                            <th class="usage-velocity">速度（km/h）</th>
+                            <th class="usage-aspect">方向</th>
+                            <th class="usage-type">卡或设备类型</th>
+                            <th class="usage-dev">卡或设备ID</th>
+                            <th class="usage-alarm">是否报警</th>
                         </tr>
                     </thead>
                     <tbody class="table-body"></tbody>

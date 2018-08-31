@@ -35,7 +35,7 @@
 				<permission cname="同步设备" ename="syncDevice" permissionType="0" description="" />
 				<permission cname="查看设备" ename="viewDevice" permissionType="0" description="" />
 			</permission>
-			<permission cname="油库信息管理" ename="oildepotModule" permissionType="1" gridUrl="normal/oildepot/oildepotList.jsp">
+			<permission cname="油库信息管理" ename="oildepotModule" permissionType="1" gridUrl="normal/oildepotInfo/oildepotList.jsp">
 				<permission cname="编辑油库" ename="editOildepot" permissionType="0" description="" />
 				<permission cname="查看油库" ename="viewOildepot" permissionType="0" description="" />
 			</permission>
@@ -83,6 +83,11 @@
 				<permission cname="出油库" ename="quitOildepot" permissionType="0" description="" />
 				<permission cname="进加油站" ename="intoGasstation" permissionType="0" description="" />
 				<permission cname="出加油站" ename="quitGasstation" permissionType="0" description="" />
+				<permission cname="进入应急" ename="intoUrgent" permissionType="0" description="" />
+				<permission cname="取消应急" ename="quitUrgent" permissionType="0" description="" />
+				<permission cname="待进油区" ename="waitOildom" permissionType="0" description="" />
+				<permission cname="进油区" ename="intoOildom" permissionType="0" description="" />
+				<permission cname="出油区" ename="quitOildom" permissionType="0" description="" />
 				<permission cname="状态变更" ename="alterStatus" permissionType="0" description="" />
 				<permission cname="开锁重置" ename="unlockReset" permissionType="0" description="" />
 			</permission>
@@ -111,8 +116,8 @@
 			<permission cname="锁动作记录查询" ename="lockStatusModule" permissionType="1" gridUrl="normal/statistics/lockstatusList.jsp">
 				<permission cname="查看锁动作记录" ename="viewLockStatus" permissionType="0" description="" />
 			</permission>
-			<permission cname="车辆进出记录查询" ename="inAndOutRecordModule" permissionType="1" gridUrl="normal/statistics/inandoutList.jsp">
-				<permission cname="查看车辆进出记录" ename="viewInAndOutRecord" permissionType="0" description="" />
+			<permission cname="施解封记录查询" ename="sealRecordModule" permissionType="1" gridUrl="normal/statistics/sealList.jsp">
+				<permission cname="查看施解封记录" ename="viewSealRecord" permissionType="0" description="" />
 			</permission>
 			<permission cname="配送信息查询" ename="transRecordModule" permissionType="1" gridUrl="normal/statistics/transportList.jsp">
 				<permission cname="查看配送信息" ename="viewTransRecord" permissionType="0" description="" />
@@ -120,8 +125,14 @@
 			<permission cname="远程换站记录查询" ename="changeRecordModule" permissionType="1" gridUrl="normal/statistics/changeList.jsp">
 				<permission cname="查看远程换站记录" ename="viewChangeRecord" permissionType="0" description="" />
 			</permission>
-			<permission cname="卡及设备使用记录查询" ename="cardUseRecordModule" permissionType="1" gridUrl="normal/statistics/deviceuseList.jsp">
-				<permission cname="查看卡及设备使用记录" ename="viewCardUseRecord" permissionType="0" description="" />
+			<permission cname="卡及设备使用记录查询" ename="usageRecordModule" permissionType="1" gridUrl="normal/statistics/usageList.jsp">
+				<permission cname="查看卡及设备使用记录" ename="viewUsageRecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="开锁重置记录查询" ename="resetRecordModule" permissionType="1" gridUrl="normal/statistics/resetList.jsp">
+				<permission cname="查看开锁重置记录" ename="viewResetRecord" permissionType="0" description="" />
+			</permission>
+			<permission cname="车台事件记录查询" ename="eventRecordModule" permissionType="1" gridUrl="normal/statistics/eventList.jsp">
+				<permission cname="查看车台事件记录记录" ename="viewEventRecord" permissionType="0" description="" />
 			</permission>
 			<permission cname="施解封状态查询" ename="sealStatusModule" permissionType="0" description="">
 				<permission cname="查看施解封状态" ename="viewSealStatus" permissionType="0" description="" />

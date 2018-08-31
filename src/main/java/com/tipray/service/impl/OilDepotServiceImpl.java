@@ -10,17 +10,27 @@ import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
 import com.tipray.constant.CardTypeConst;
-import com.tipray.constant.DatabaseOperateTypeEnum;
 import com.tipray.constant.SqliteFileConst;
+import com.tipray.constant.SqliteSqlConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
 import com.tipray.core.exception.ServiceException;
-import com.tipray.dao.*;
+import com.tipray.dao.CardDao;
+import com.tipray.dao.DeviceDao;
+import com.tipray.dao.GasStationDao;
+import com.tipray.dao.InOutReaderDao;
+import com.tipray.dao.OilDepotDao;
+import com.tipray.dao.VehicleParamVerDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.OilDepotService;
-import com.tipray.util.*;
+import com.tipray.util.CoverRegionUtil;
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.FtpUtil;
+import com.tipray.util.JDBCUtil;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,7 +40,11 @@ import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 油库管理业务层
@@ -38,26 +52,11 @@ import java.util.*;
  * @author chenlong
  * @version 1.0 2017-12-22
  */
-@Transactional(rollbackForClassName = {"ServiceException", "SQLException", "Exception"})
 @Service("oilDepotService")
 public class OilDepotServiceImpl implements OilDepotService {
     private static final Logger logger = LoggerFactory.getLogger(OilDepotServiceImpl.class);
-    /**
-     * 操作sqlite油库信息
-     */
-    private static final JDBCUtil JDBC_UTIL_OIL = new JDBCUtil();
-    /**
-     * 操作sqlite出入库卡信息
-     */
-    private static final JDBCUtil JDBC_UTIL_CARD = new JDBCUtil();
-    /**
-     * 操作sqlite出入库读卡器信息
-     */
-    private static final JDBCUtil JDBC_UTIL_DEV = new JDBCUtil();
-
     @Resource
     private NioUdpServer udpServer;
-
     @Resource
     private OilDepotDao oilDepotDao;
     @Resource
@@ -71,82 +70,99 @@ public class OilDepotServiceImpl implements OilDepotService {
     @Resource
     private GasStationDao gasStationDao;
 
+    @Transactional
     @Override
     public void addOilDepots(List<OilDepot> oilDepots) throws ServiceException {
         oilDepots.parallelStream().forEach(depot -> setCover(depot));
         oilDepotDao.addOilDepots(oilDepots);
         List<OilDepot> list = oilDepotDao.findRecentOilDepotsBySize(oilDepots.size());
-        JDBC_UTIL_OIL.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
-        String sql = "INSERT INTO tbl_oildepot(official_id,name,longitude,latitude,radius,cover) VALUES(?,?,?,?,?,?)";
-        JDBC_UTIL_OIL.createPrepareStatement(sql);
+        JDBCUtil jdbcUtil = new JDBCUtil();
         try {
+            jdbcUtil.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
+            jdbcUtil.createPrepareStatement(SqliteSqlConst.INSERT_OIL_DEPOT_SQL);
             for (OilDepot oilDepot : list) {
-                JDBC_UTIL_OIL.setLong(1, oilDepot.getId());
-                JDBC_UTIL_OIL.setString(2, oilDepot.getAbbr());
-                JDBC_UTIL_OIL.setFloat(3, oilDepot.getLongitude());
-                JDBC_UTIL_OIL.setFloat(4, oilDepot.getLatitude());
-                JDBC_UTIL_OIL.setInt(5, oilDepot.getRadius());
-                JDBC_UTIL_OIL.setBytes(6, oilDepot.getCover());
-                JDBC_UTIL_OIL.executeUpdate();
+                setSqliteOilDepotInsertParams(jdbcUtil, oilDepot);
             }
-            setParamVer(JDBC_UTIL_OIL, SqliteFileConst.OIL_DEPOT);
+            setParamVer(jdbcUtil, SqliteFileConst.OIL_DEPOT);
+            jdbcUtil.commit();
         } catch (SQLException e) {
-            JDBC_UTIL_OIL.rollback();
+            jdbcUtil.rollback();
             throw new ServiceException("批量导入：sqlite批量添加油库异常！", e);
         } finally {
-            JDBC_UTIL_OIL.close();
+            jdbcUtil.close();
         }
         FtpUtil.upload(SqliteFileConst.OIL_DEPOT_DB_FILE);
         executeAsynUdp(TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT);
     }
 
+    @Transactional
     @Override
     public OilDepot addOilDepot(OilDepot oilDepot) throws ServiceException {
         if (oilDepot != null) {
+            String officialId = oilDepot.getOfficialId();
+            if (StringUtil.isEmpty(officialId)) {
+                throw new IllegalArgumentException("油库编号为空！");
+            }
+            String name = oilDepot.getName();
+            if (StringUtil.isEmpty(name)) {
+                throw new IllegalArgumentException("油库名称为空！");
+            }
+            String abbr = oilDepot.getAbbr();
+            if (StringUtil.isEmpty(abbr)) {
+                throw new IllegalArgumentException("油库简称为空！");
+            }
+            if (isOilDepotExist(oilDepot)) {
+                throw new IllegalArgumentException("油库已存在！");
+            }
+            setCover(oilDepot);
+            List<Long> invalidIds = oilDepotDao.findInvalidOilDepot(oilDepot);
+            int size = invalidIds.size();
+            if (size == 0) {
+                oilDepotDao.add(oilDepot);
+            } else if (size == 1) {
+                oilDepot.setId(invalidIds.get(0));
+                oilDepotDao.update(oilDepot);
+            } else {
+                oilDepotDao.deleteByIds(invalidIds);
+                oilDepotDao.add(oilDepot);
+            }
+            JDBCUtil jdbcUtil = new JDBCUtil();
             try {
-                String officialId = oilDepot.getOfficialId();
-                if (StringUtil.isEmpty(officialId)) {
-                    throw new IllegalArgumentException("油库编号为空！");
-                }
-                String name = oilDepot.getName();
-                if (StringUtil.isEmpty(name)) {
-                    throw new IllegalArgumentException("油库名称为空！");
-                }
-                String abbr = oilDepot.getAbbr();
-                if (StringUtil.isEmpty(abbr)) {
-                    throw new IllegalArgumentException("油库简称为空！");
-                }
-                if (isOilDepotExist(oilDepot)) {
-                    throw new IllegalArgumentException("油库已存在！");
-                }
-                setCover(oilDepot);
-                List<Long> invalidIds = oilDepotDao.findInvalidOilDepot(oilDepot);
-                int size = invalidIds.size();
-                if (size == 0) {
-                    oilDepotDao.add(oilDepot);
-                } else if (size == 1) {
-                    oilDepot.setId(invalidIds.get(0));
-                    oilDepotDao.update(oilDepot);
-                } else {
-                    oilDepotDao.deleteByIds(invalidIds);
-                    oilDepotDao.add(oilDepot);
-                }
-
-                // oilDepot.setId(oilDepotDao.getIdByOfficialId(oilDepot.getOfficialId()));
-                String sql = "INSERT INTO tbl_oildepot(official_id,name,longitude,latitude,radius,cover) VALUES(?,?,?,?,?,?)";
-                setOilDepot(sql, oilDepot, DatabaseOperateTypeEnum.INSERT);
+                jdbcUtil.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
+                jdbcUtil.createPrepareStatement(SqliteSqlConst.INSERT_OIL_DEPOT_SQL);
+                setSqliteOilDepotInsertParams(jdbcUtil, oilDepot);
+                setParamVer(jdbcUtil, SqliteFileConst.OIL_DEPOT);
+                jdbcUtil.commit();
                 FtpUtil.upload(SqliteFileConst.OIL_DEPOT_DB_FILE);
                 executeAsynUdp(TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT);
             } catch (SQLException e) {
-                JDBC_UTIL_OIL.rollback();
+                jdbcUtil.rollback();
                 throw new ServiceException("sqlite添加油库信息异常！", e);
             } finally {
-                JDBC_UTIL_OIL.close();
+                jdbcUtil.close();
             }
         }
         return oilDepot;
     }
 
+    /**
+     * 设置sqlite中新增油库的参数
+     *
+     * @param jdbcUtil JDBCUtil
+     * @param oilDepot 油库信息
+     * @throws SQLException
+     */
+    private void setSqliteOilDepotInsertParams(JDBCUtil jdbcUtil, OilDepot oilDepot) throws SQLException {
+        jdbcUtil.setLong(1, oilDepot.getId());
+        jdbcUtil.setString(2, oilDepot.getAbbr());
+        jdbcUtil.setFloat(3, oilDepot.getLongitude());
+        jdbcUtil.setFloat(4, oilDepot.getLatitude());
+        jdbcUtil.setInt(5, oilDepot.getRadius());
+        jdbcUtil.setBytes(6, oilDepot.getCover());
+        jdbcUtil.executeUpdate();
+    }
+
+    @Transactional
     @Override
     public OilDepot updateOilDepot(OilDepot oilDepot, String readersJson, String cardIds) throws Exception {
         if (oilDepot != null) {
@@ -232,22 +248,24 @@ public class OilDepotServiceImpl implements OilDepotService {
             }
 
             byte commonConfig = 0;
-            if (isUpdateOfSqliteOilDepot) {
-                try {
-                    String sql = "UPDATE tbl_oildepot SET longitude = ?,latitude = ?,radius = ?,cover = ? WHERE official_id = ?";
-                    setOilDepot(sql, oilDepot, DatabaseOperateTypeEnum.UPDATE);
-                    FtpUtil.upload(SqliteFileConst.OIL_DEPOT_DB_FILE);
-                    commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT;
-                } catch (SQLException e) {
-                    JDBC_UTIL_OIL.rollback();
-                    throw new ServiceException("sqlite更新油库信息异常！", e);
-                } finally {
-                    JDBC_UTIL_OIL.close();
+            JDBCUtil jdbcUtilOil = null;
+            JDBCUtil jdbcUtilCard = null;
+            JDBCUtil jdbcUtilDev = null;
+            try {
+                if (isUpdateOfSqliteOilDepot) {
+                    jdbcUtilOil = new JDBCUtil();
+                    jdbcUtilOil.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
+                    jdbcUtilOil.createPrepareStatement(SqliteSqlConst.UPDATE_OIL_DEPOT_SQL);
+                    jdbcUtilOil.setFloat(1, oilDepot.getLongitude());
+                    jdbcUtilOil.setFloat(2, oilDepot.getLatitude());
+                    jdbcUtilOil.setInt(3, oilDepot.getRadius());
+                    jdbcUtilOil.setBytes(4, oilDepot.getCover());
+                    jdbcUtilOil.setLong(5, oilDepot.getId());
+                    jdbcUtilOil.executeUpdate();
+                    setParamVer(jdbcUtilOil, SqliteFileConst.OIL_DEPOT);
                 }
-            }
 
-            if (isUpdateOfInOutDev) {
-                try {
+                if (isUpdateOfInOutDev) {
                     if (dbReaderNum > 0) {
                         StringBuffer dbReaderIds = new StringBuffer();
                         for (InOutReader reader : inOutReadersInDb) {
@@ -266,27 +284,50 @@ public class OilDepotServiceImpl implements OilDepotService {
                         inOutReaderDao.addReaderList(inOutReadersOfWeb);
                         deviceDao.updateDevicesUse(webReaderIds.toString(), 1);
                     }
-                    setInOutDev(oilDepot, inOutReadersOfWeb);
+                    setInOutDev(jdbcUtilDev, oilDepot, inOutReadersOfWeb);
+                }
+
+                if (isUpdateOfInOutCard) {
+                    setInOutCard(jdbcUtilCard, oilDepot, inOutCardsOfWeb);
+                }
+
+                // 提交
+                if (isUpdateOfSqliteOilDepot) {
+                    jdbcUtilOil.commit();
+                    FtpUtil.upload(SqliteFileConst.OIL_DEPOT_DB_FILE);
+                    commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT;
+                }
+                if (isUpdateOfInOutDev) {
+                    jdbcUtilDev.commit();
                     FtpUtil.upload(SqliteFileConst.IN_OUT_DEV_DB_FILE);
                     commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_4_IN_OUT_DEV;
-                } catch (SQLException e) {
-                    JDBC_UTIL_DEV.rollback();
-                    throw new ServiceException("sqlite更新油库设备异常！", e);
-                } finally {
-                    JDBC_UTIL_DEV.close();
                 }
-            }
-
-            if (isUpdateOfInOutCard) {
-                try {
-                    setInOutCard(oilDepot, inOutCardsOfWeb);
+                if (isUpdateOfInOutCard) {
+                    jdbcUtilCard.commit();
                     FtpUtil.upload(SqliteFileConst.IN_OUT_CARD_DB_FILE);
                     commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_3_IN_OUT_CARD;
-                } catch (SQLException e) {
-                    JDBC_UTIL_CARD.rollback();
-                    throw new ServiceException("sqlite更新出入库卡信息异常！", e);
-                } finally {
-                    JDBC_UTIL_CARD.close();
+                }
+
+            } catch (Exception e) {
+                if (jdbcUtilOil != null) {
+                    jdbcUtilOil.rollback();
+                }
+                if (jdbcUtilCard != null) {
+                    jdbcUtilCard.rollback();
+                }
+                if (jdbcUtilDev != null) {
+                    jdbcUtilDev.rollback();
+                }
+                throw new ServiceException(e);
+            } finally {
+                if (jdbcUtilOil != null) {
+                    jdbcUtilOil.close();
+                }
+                if (jdbcUtilCard != null) {
+                    jdbcUtilCard.close();
+                }
+                if (jdbcUtilDev != null) {
+                    jdbcUtilDev.close();
                 }
             }
             executeAsynUdp(commonConfig);
@@ -294,6 +335,7 @@ public class OilDepotServiceImpl implements OilDepotService {
         return oilDepot;
     }
 
+    @Transactional
     @Override
     public void deleteOilDepotById(Long id) throws ServiceException {
         OilDepot oilDepot = new OilDepot();
@@ -312,42 +354,61 @@ public class OilDepotServiceImpl implements OilDepotService {
             inOutReaderDao.deleteByOilDepotId(id);
             deviceDao.updateDevicesUse(readerIds.deleteCharAt(0).toString(), 0);
         }
+        JDBCUtil jdbcUtilOil = null;
+        JDBCUtil jdbcUtilCard = null;
+        JDBCUtil jdbcUtilDev = null;
         try {
-            String sql = "DELETE FROM tbl_oildepot WHERE official_id = ?";
-            setOilDepot(sql, oilDepot, DatabaseOperateTypeEnum.DELETE);
-            byte commonConfig = 0;
+            jdbcUtilOil = new JDBCUtil();
+            jdbcUtilOil.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
+            jdbcUtilOil.createPrepareStatement(SqliteSqlConst.DELETE_OIL_DEPOT_BY_MYSQL_ID_SQL);
+            jdbcUtilOil.setLong(1, oilDepot.getId());
+            jdbcUtilOil.executeUpdate();
+            setParamVer(jdbcUtilOil, SqliteFileConst.OIL_DEPOT);
+
+            byte commonConfig = TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT;
+
             if (cardNum != null && cardNum > 0) {
-                try {
-                    setInOutDev(oilDepot, null);
-                    FtpUtil.upload(SqliteFileConst.IN_OUT_DEV_DB_FILE);
-                    commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_4_IN_OUT_DEV;
-                } catch (SQLException e) {
-                    JDBC_UTIL_DEV.rollback();
-                    throw new ServiceException("sqlite删除油库设备异常！", e);
-                } finally {
-                    JDBC_UTIL_DEV.close();
-                }
+                setInOutDev(jdbcUtilCard, oilDepot, null);
             }
             if (!EmptyObjectUtil.isEmptyList(readerIdList)) {
-                try {
-                    setInOutCard(oilDepot, null);
-                    FtpUtil.upload(SqliteFileConst.IN_OUT_CARD_DB_FILE);
-                    commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_3_IN_OUT_CARD;
-                } catch (SQLException e) {
-                    JDBC_UTIL_CARD.rollback();
-                    throw new ServiceException("sqlite删除出入库卡异常！", e);
-                } finally {
-                    JDBC_UTIL_CARD.close();
-                }
+                setInOutCard(jdbcUtilDev, oilDepot, null);
             }
+
+            // 提交
+            if (jdbcUtilDev != null) {
+                jdbcUtilDev.commit();
+                FtpUtil.upload(SqliteFileConst.IN_OUT_DEV_DB_FILE);
+                commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_4_IN_OUT_DEV;
+            }
+            if (jdbcUtilCard != null) {
+                jdbcUtilCard.commit();
+                FtpUtil.upload(SqliteFileConst.IN_OUT_CARD_DB_FILE);
+                commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_3_IN_OUT_CARD;
+            }
+            jdbcUtilOil.commit();
             FtpUtil.upload(SqliteFileConst.OIL_DEPOT_DB_FILE);
-            commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT;
             executeAsynUdp(commonConfig);
-        } catch (SQLException e) {
-            JDBC_UTIL_OIL.rollback();
-            throw new ServiceException("sqlite删除油库信息异常！", e);
+        } catch (Exception e) {
+            if (jdbcUtilOil != null) {
+                jdbcUtilOil.rollback();
+            }
+            if (jdbcUtilCard != null) {
+                jdbcUtilCard.rollback();
+            }
+            if (jdbcUtilDev != null) {
+                jdbcUtilDev.rollback();
+            }
+            throw new ServiceException(e);
         } finally {
-            JDBC_UTIL_OIL.close();
+            if (jdbcUtilOil != null) {
+                jdbcUtilOil.close();
+            }
+            if (jdbcUtilCard != null) {
+                jdbcUtilCard.close();
+            }
+            if (jdbcUtilDev != null) {
+                jdbcUtilDev.close();
+            }
         }
     }
 
@@ -431,92 +492,59 @@ public class OilDepotServiceImpl implements OilDepotService {
     }
 
     /**
-     * 设置sqlite油库信息
-     *
-     * @param sql      增删sqlite油库信息SQL语句
-     * @param oilDepot 油库信息
-     * @param sqlType  数据库操作类型（增删改）
-     * @throws SQLException
-     */
-    private void setOilDepot(String sql, OilDepot oilDepot, DatabaseOperateTypeEnum sqlType) throws SQLException {
-        JDBC_UTIL_OIL.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
-        JDBC_UTIL_OIL.createPrepareStatement(sql);
-        switch (sqlType) {
-            case INSERT:
-                JDBC_UTIL_OIL.setLong(1, oilDepot.getId());
-                JDBC_UTIL_OIL.setString(2, oilDepot.getAbbr());
-                JDBC_UTIL_OIL.setFloat(3, oilDepot.getLongitude());
-                JDBC_UTIL_OIL.setFloat(4, oilDepot.getLatitude());
-                JDBC_UTIL_OIL.setInt(5, oilDepot.getRadius());
-                JDBC_UTIL_OIL.setBytes(6, oilDepot.getCover());
-                break;
-            case UPDATE:
-                JDBC_UTIL_OIL.setFloat(1, oilDepot.getLongitude());
-                JDBC_UTIL_OIL.setFloat(2, oilDepot.getLatitude());
-                JDBC_UTIL_OIL.setInt(3, oilDepot.getRadius());
-                JDBC_UTIL_OIL.setBytes(4, oilDepot.getCover());
-                JDBC_UTIL_OIL.setLong(5, oilDepot.getId());
-                break;
-            case DELETE:
-                JDBC_UTIL_OIL.setLong(1, oilDepot.getId());
-                break;
-            default:
-                break;
-        }
-        JDBC_UTIL_OIL.executeUpdate();
-        setParamVer(JDBC_UTIL_OIL, SqliteFileConst.OIL_DEPOT);
-    }
-
-    /**
      * 设置sqlite出入库读卡器信息
      *
+     * @param jdbcUtil          JDBCUtil
      * @param oilDepot          油库信息
      * @param inOutReadersOfWeb Web页面传递的出入库读卡器列表
      * @throws SQLException
      */
-    private void setInOutDev(OilDepot oilDepot, List<InOutReader> inOutReadersOfWeb) throws SQLException {
-        JDBC_UTIL_DEV.createSqliteConnection(SqliteFileConst.IN_OUT_DEV);
-        String sql1 = "DELETE FROM tbl_in_out_dev WHERE station_id = ?";
-        JDBC_UTIL_DEV.createPrepareStatement(sql1);
-        JDBC_UTIL_DEV.setLong(1, oilDepot.getId());
-        JDBC_UTIL_DEV.executeUpdate();
+    private void setInOutDev(JDBCUtil jdbcUtil, OilDepot oilDepot, List<InOutReader> inOutReadersOfWeb) throws SQLException {
+        if (jdbcUtil == null) {
+            jdbcUtil = new JDBCUtil();
+        }
+        jdbcUtil.createSqliteConnection(SqliteFileConst.IN_OUT_DEV);
+        jdbcUtil.createPrepareStatement(SqliteSqlConst.DELETE_IN_OUT_DEV_BY_STATION_ID_SQL);
+        jdbcUtil.setLong(1, oilDepot.getId());
+        jdbcUtil.executeUpdate();
         if (!EmptyObjectUtil.isEmptyList(inOutReadersOfWeb)) {
-            String sql2 = "INSERT INTO tbl_in_out_dev(dev_id, type, station_id) VALUES(?, ?, ?)";
+            jdbcUtil.createPrepareStatement(SqliteSqlConst.INSERT_IN_OUT_DEV_SQL);
             for (InOutReader inOutReader : inOutReadersOfWeb) {
-                JDBC_UTIL_DEV.createPrepareStatement(sql2);
-                JDBC_UTIL_DEV.setInt(1, inOutReader.getDevId());
-                JDBC_UTIL_DEV.setInt(2, inOutReader.getType());
-                JDBC_UTIL_DEV.setLong(3, oilDepot.getId());
-                JDBC_UTIL_DEV.executeUpdate();
+                jdbcUtil.setInt(1, inOutReader.getDevId());
+                jdbcUtil.setInt(2, inOutReader.getType());
+                jdbcUtil.setLong(3, oilDepot.getId());
+                jdbcUtil.executeUpdate();
             }
         }
-        setParamVer(JDBC_UTIL_DEV, SqliteFileConst.IN_OUT_DEV);
+        setParamVer(jdbcUtil, SqliteFileConst.IN_OUT_DEV);
     }
 
     /**
      * 设置sqlite出入库卡信息
      *
+     * @param jdbcUtil       JDBCUtil
      * @param oilDepot       油库信息
      * @param inOutCardOfWeb Web页面传递的出入库卡列表
      * @throws SQLException
      */
-    private void setInOutCard(OilDepot oilDepot, List<Card> inOutCardOfWeb) throws SQLException {
-        JDBC_UTIL_CARD.createSqliteConnection(SqliteFileConst.IN_OUT_CARD);
-        String sql1 = "DELETE FROM tbl_in_out_card WHERE station_id = ?";
-        JDBC_UTIL_CARD.createPrepareStatement(sql1);
-        JDBC_UTIL_CARD.setLong(1, oilDepot.getId());
-        JDBC_UTIL_CARD.executeUpdate();
+    private void setInOutCard(JDBCUtil jdbcUtil, OilDepot oilDepot, List<Card> inOutCardOfWeb) throws SQLException {
+        if (jdbcUtil == null) {
+            jdbcUtil = new JDBCUtil();
+        }
+        jdbcUtil.createSqliteConnection(SqliteFileConst.IN_OUT_CARD);
+        jdbcUtil.createPrepareStatement(SqliteSqlConst.DELETE_IN_OUT_CARD_BY_STATION_ID_SQL);
+        jdbcUtil.setLong(1, oilDepot.getId());
+        jdbcUtil.executeUpdate();
         if (!EmptyObjectUtil.isEmptyList(inOutCardOfWeb)) {
-            String sql2 = "INSERT INTO tbl_in_out_card(card_id,type,station_id) VALUES(?,?,?)";
+            jdbcUtil.createPrepareStatement(SqliteSqlConst.INSERT_IN_OUT_CARD_SQL);
             for (Card card : inOutCardOfWeb) {
-                JDBC_UTIL_CARD.createPrepareStatement(sql2);
-                JDBC_UTIL_CARD.setLong(1, card.getCardId());
-                JDBC_UTIL_CARD.setInt(2, card.getType());
-                JDBC_UTIL_CARD.setLong(3, oilDepot.getId());
-                JDBC_UTIL_CARD.executeUpdate();
+                jdbcUtil.setLong(1, card.getCardId());
+                jdbcUtil.setInt(2, card.getType());
+                jdbcUtil.setLong(3, oilDepot.getId());
+                jdbcUtil.executeUpdate();
             }
         }
-        setParamVer(JDBC_UTIL_CARD, SqliteFileConst.IN_OUT_CARD);
+        setParamVer(jdbcUtil, SqliteFileConst.IN_OUT_CARD);
     }
 
     /**
@@ -528,11 +556,9 @@ public class OilDepotServiceImpl implements OilDepotService {
      */
     private void setParamVer(JDBCUtil jdbcUtil, String param) throws SQLException {
         long ver = System.currentTimeMillis();
-        String sql = "UPDATE tbl_version SET version = ?";
-        jdbcUtil.createPrepareStatement(sql);
+        jdbcUtil.createPrepareStatement(SqliteSqlConst.UPDATE_VERSION_SQL);
         jdbcUtil.setLong(1, ver);
         jdbcUtil.executeUpdate();
-        jdbcUtil.commit();
         VehicleParamVer vehicleParamVer = vehicleParamVerDao.getByParam(param);
         if (vehicleParamVer == null) {
             vehicleParamVer = new VehicleParamVer();

@@ -13,13 +13,13 @@
         <result column="gmt_create" property="createDate"/>
         <result column="gmt_modified" property="modifyDate"/>
     </resultMap>
-    <sql id="select_colums">
+    <sql id="select_columns">
 		c.*,fn_type2name("cardType",type) typeName
 	</sql>
 
     <select id="findAll" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c
         where c.is_invalid=0
     </select>
@@ -57,13 +57,13 @@
 
     <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c
         where c.is_invalid=0 and c.id=#{id}
     </select>
     <select id="getByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c
         where c.is_invalid=0 and c.card_id=#{cardId}
     </select>
@@ -83,14 +83,14 @@
 
     <select id="findByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c, tbl_oildepot_card co
         where c.is_invalid=0 and c.card_id = co.card_id and co.oildepot_id=#{oilDepotId}
     </select>
 
     <select id="findInOutCardsByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c, tbl_oildepot_card co
         where c.is_invalid=0 and c.card_id = co.card_id and c.type in (2,3,4)
         and co.oildepot_id=#{oilDepotId}
@@ -115,7 +115,7 @@
 
     <select id="findByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c, tbl_gasstation_card cg
         where c.is_invalid=0 and c.card_id = cg.card_id and cg.gasstation_id=#{gasStationId}
     </select>
@@ -129,7 +129,7 @@
 
     <select id="findByPage" resultMap="fullResultMap">
         select
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         from tbl_card c
         where c.is_invalid=0
         <if test="entity.type != null and entity.type != -2">

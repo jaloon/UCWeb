@@ -25,8 +25,8 @@ public class WebServiceListener  implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce.getServletContext());
         ElockWebService elockWebService = (ElockWebService) ctx.getBean("elockWebService");
-        endpoint = Endpoint.publish(CenterConst.WEBSERVICE_ADDR, elockWebService);
-        logger.info("WebService [{}] started.", CenterConst.WEBSERVICE_ADDR);
+        endpoint = Endpoint.publish(CenterConst.WEBSERVICE_PUBLISH_ADDR, elockWebService);
+        logger.info("WebService [{}] started.", CenterConst.WEBSERVICE_REAL_ADDR);
     }
 
     @Override

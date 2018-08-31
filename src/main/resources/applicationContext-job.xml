@@ -27,10 +27,12 @@
         <!--APP设备和版本信息定时同步任务，每隔10分钟执行一次-->
         <task:scheduled ref="scheduledJob" method="executeAppSync" cron="0 */10 * * * ?"/>
         <!--最新报警信息更新任务，每隔10分钟执行一次-->
-        <task:scheduled ref="scheduledJob" method="executeAppSync" cron="0 */30 * * * ?"/>
+        <task:scheduled ref="scheduledJob" method="executeAlarmInfoUpdate" cron="0 */30 * * * ?"/>
         <!--车辆在线状态监测任务，每隔15秒执行一次-->
         <task:scheduled ref="scheduledJob" method="executeVehicleOnlineMonitor" cron="*/15 * * * * ?"/>
         <!--最新车辆轨迹推送任务，每隔5秒执行一次-->
         <task:scheduled ref="scheduledJob" method="executeLastTtracksQuery" cron="*/5 * * * * ?"/>
+        <!--车辆基础配置信息sqlite文件同步任务，每天22点半执行一次-->
+        <task:scheduled ref="scheduledJob" method="executeSqliteSync" cron="0 30 22 * * ?"/>
     </task:scheduled-tasks>
 </beans>

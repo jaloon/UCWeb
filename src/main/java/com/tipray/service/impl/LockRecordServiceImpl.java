@@ -13,7 +13,6 @@ import com.tipray.util.VehicleAlarmUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Map;
  * @author chenlong
  * @version 1.0 2017-12-22
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("lockRecordService")
 public class LockRecordServiceImpl implements LockRecordService {
     private static final Logger logger = LoggerFactory.getLogger(LockRecordServiceImpl.class);
@@ -82,13 +80,14 @@ public class LockRecordServiceImpl implements LockRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常：{}", e.toString());
+                logger.warn("轨迹数据异常！{}", e.toString());
             }
         }
         return list;
     }
 
     private LockRecord setTrackForRecord(LockRecord lockRecord, TrackInfo trackInfo) {
+        lockRecord.setCoorValid(trackInfo.getCoorValid());
         lockRecord.setLongitude(trackInfo.getLongitude());
         lockRecord.setLatitude(trackInfo.getLatitude());
         lockRecord.setAngle(trackInfo.getAngle());

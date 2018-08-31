@@ -11,14 +11,14 @@
         <result column="description" property="description" />
         <result column="log_time" property="createDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		<!-- ol.*,fn_type2name("logType",ol.type) typeName,u.account user_account,u.name user_name -->
 		ol.*,hex(ol.type) typeName,u.account user_account,u.name user_name
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_base_info_manage_log ol,tbl_user u
 		where ol.user_id=u.id
 	</select>
@@ -30,13 +30,13 @@
 	</insert>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_base_info_manage_log ol,tbl_user u
 		where ol.user_id=u.id and ol.id=#{id}
 	</select>
 	
 	<select id="findByUser" parameterType="com.tipray.bean.baseinfo.User" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_base_info_manage_log ol,tbl_user u
 		where ol.user_id=u.id
 		<if test="user!=null">
@@ -53,7 +53,7 @@
 	</select>
 	
 	<select id="findByType" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_base_info_manage_log ol,tbl_user u
 		where ol.user_id=u.id and ol.type=#{type}
 	</select>
@@ -81,7 +81,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_base_info_manage_log ol,tbl_user u
 		where ol.user_id=u.id
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">

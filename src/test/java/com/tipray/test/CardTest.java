@@ -1,6 +1,7 @@
 package com.tipray.test;
 
 import com.tipray.service.CardService;
+import com.tipray.service.SqliteSyncService;
 import com.tipray.service.TransportCardService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,13 @@ public class CardTest {
 	private CardService cardService;
 	@Resource
 	private TransportCardService transportCardService;
+	@Resource
+	private SqliteSyncService sqliteSyncService;
+
+	@Test
+	public void executeSqliteSync() {
+		sqliteSyncService.syncSqliteFile();
+	}
 
 	@Test
     public void testT() {

@@ -14,7 +14,7 @@
         <result column="latitude" property="latitude"/>
         <result column="gmt_create" property="reportTime"/>
     </resultMap>
-    <sql id="select_colums">
+    <sql id="select_columns">
 		a.id,
 		a.user_id,
 		u.`name` user_name,
@@ -26,9 +26,9 @@
 		a.gmt_create
 	</sql>
 
-    <select id="findAll" resultMap="fullResultMap">
+    <!--<select id="findAll" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_authorized a
         LEFT JOIN tbl_user u ON a.user_id = u.id
@@ -36,13 +36,13 @@
 
     <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_authorized a
         LEFT JOIN tbl_user u ON a.user_id = u.id
         WHERE
         a.id = #{id}
-    </select>
+    </select>-->
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.record.AuthorizedRecord">
 		INSERT INTO tbl_authorized ( user_id, uuid, auth_code, auth_time, is_app, is_lnglat_valid, longitude, latitude )

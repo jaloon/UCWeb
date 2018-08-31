@@ -20,12 +20,12 @@ import java.util.List;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("deviceService")
 public class DeviceServiceImpl implements DeviceService {
 	@Resource
 	private DeviceDao deviceDao;
 
+	@Transactional
 	@Override
 	public Device addDevice(Device device) {
 		if (device != null) {
@@ -34,6 +34,7 @@ public class DeviceServiceImpl implements DeviceService {
 		return device;
 	}
 
+    @Transactional
 	@Override
 	public Device updateDevice(Device device) {
 		if (device != null) {
@@ -42,6 +43,7 @@ public class DeviceServiceImpl implements DeviceService {
 		return device;
 	}
 
+    @Transactional
 	@Override
 	public void deleteDeviceById(Long id) {
 		deviceDao.delete(id);
@@ -94,6 +96,7 @@ public class DeviceServiceImpl implements DeviceService {
 		return deviceDao.getByDeviceId(deviceId);
 	}
 
+    @Transactional
 	@Override
 	public List<Device> sync(List<Device> devices) {
 		if (!EmptyObjectUtil.isEmptyList(devices)) {
@@ -125,5 +128,4 @@ public class DeviceServiceImpl implements DeviceService {
 		}
 		return devices;
 	}
-
 }

@@ -12,7 +12,7 @@
         <result column="model" property="model" />
         <result column="oildepot_id" property="oilDepotId" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		od.*,
 		fn_type2name('readerType',od.reader_type) type_name,
 		fn_type2name('barrierType',od.is_barrier_gate_type) barrier_name,
@@ -21,7 +21,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from 
 			tbl_oildepot_device od,tbl_device d
 		where od.device_id=d.device_id
@@ -55,14 +55,14 @@
 	</delete>
 	
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from 
 			tbl_oildepot_device od,tbl_device d
 		where od.device_id=d.device_id and od.id=#{id}
 	</select>
 	
 	<select id="findByOilDepotId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from 
 			tbl_oildepot_device od,tbl_device d
 		where od.device_id=d.device_id and od.oildepot_id=#{oilDepotId}
@@ -73,7 +73,7 @@
 	</select>
 
 	<select id="getByDevId" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from 
 			tbl_oildepot_device od,tbl_device d
 		where od.device_id=d.device_id and od.device_id=#{devId}

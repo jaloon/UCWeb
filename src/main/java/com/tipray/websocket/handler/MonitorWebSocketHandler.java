@@ -1,6 +1,7 @@
 package com.tipray.websocket.handler;
 
 import com.tipray.bean.VehicleRealtimeStatus;
+import com.tipray.bean.VehicleTerminalConfig;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.baseinfo.Vehicle;
@@ -66,7 +67,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     /**
      * 轨迹缓存
      */
-    private static final TrackCache TRACK_CACHE = new TrackCache();
+    private static final TrackCache TRACK_CACHE = TrackCache.INSTANCE;
     /**
      * 在线车辆缓存
      */
@@ -956,9 +957,19 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             sendToRealtimePage(carId, track);
             return;
         }
+        long duration = 5000L;
+        VehicleTerminalConfig conf = vehicleService.getGpsConfByCarId(carId);
+        if (conf != null) {
+            duration = conf.getScanInterval().longValue() * 1000L;
+        }
         for (int i = 0; i < size; i++) {
             String track = trackList.get(i);
             sendToFocusPage(carId, track);
+            try {
+                Thread.sleep(duration);
+            } catch (InterruptedException e) {
+                // no interrupt expect
+            }
             // // 轨迹缓存只保留最后一条轨迹
             // if (i == size - 1) {
             //     CAR_TRACKS.put(carId, track);

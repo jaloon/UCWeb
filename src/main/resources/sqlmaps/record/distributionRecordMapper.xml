@@ -14,7 +14,7 @@
         <result column="status_name" property="statusName" />
         <result column="issue_time" property="createDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		t.*,
 		c.vehicle_number							vehicle_number,
 		o.name										oildepot_name,
@@ -24,13 +24,13 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_transport t,tbl_vehicle c,tbl_oildepot o,tbl_gasstation g
 		where t.vehicle_id=c.id and t.oildepot_id=o.id and t.gasstation_id=g.id
 	</select>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_transport t,tbl_vehicle c,tbl_oildepot o,tbl_gasstation g
 		where t.vehicle_id=c.id and t.oildepot_id=o.id and t.gasstation_id=g.id
 		and t.id=#{id}
@@ -51,7 +51,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_transport t,tbl_vehicle c,tbl_oildepot o,tbl_gasstation g
 		where t.vehicle_id=c.id and t.oildepot_id=o.id and t.gasstation_id=g.id
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
@@ -69,7 +69,7 @@
 	
 	<select id="getRecentTransportIdByInvoice" parameterType="java.lang.String" resultType="java.lang.Long">
 		<!-- 方法一：按时间倒序，取第一条数据 -->
-		select id from tbl_transport where distribute_id=#{invoice}
+		select id from tbl_transport where distribute_id=#{invoice} and `status` = 1
 		ORDER BY issue_time DESC LIMIT 1
 		<!-- 方法二：先查询出最近的时间，再按时间查询 -->
 		<!-- select id from tbl_transport where distribute_id=#{invoice}
@@ -105,26 +105,31 @@
 	
 	<insert id="addByChangeInfo" useGeneratedKeys="true" keyProperty="changedTransportId" parameterType="com.tipray.bean.ChangeInfo">
 		insert into
-		tbl_transport(distribute_id,vehicle_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
-		values(#{invoice},#{carId},#{storeId},#{oildepotId},#{changedGasstationId},5,6,0)
+		tbl_transport(distribute_id,vehicle_id,device_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
+		values(#{invoice},#{carId},IFNULL(#{terminalId}, 0),#{storeId},#{oildepotId},#{changedGasstationId},5,6,0)
 	</insert>
 	
 	<insert id="addByDistributionMap" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
 		insert into
-		tbl_transport(distribute_id,vehicle_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
+		tbl_transport(distribute_id,vehicle_id,device_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
 		values(
 			#{distributNO},
 			#{carId}, 
+			IFNULL(#{terminalId}, 0),
 			#{binNum},
 			(select o.id from tbl_oildepot o where o.official_id=#{depotNo}),
 			(select g.id from tbl_gasstation g where g.official_id=#{deptId}),
 			1,0,0)
 	</insert>
 	
-	<select id="countByInvoice" parameterType="java.lang.String" resultType="java.lang.Integer">
+	<select id="countInvoice" parameterType="java.lang.String" resultType="java.lang.Integer">
 		select count(*) from tbl_transport where distribute_id = #{invoice}
 	</select>
-	
+
+	<select id="countWaitInvoice" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(*) from tbl_transport where distribute_id = #{invoice} and `status` = 1
+	</select>
+
 	<update id="checkDistribute">
 		<![CDATA[
 			UPDATE tbl_transport t1 SET

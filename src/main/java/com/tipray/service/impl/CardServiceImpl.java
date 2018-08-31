@@ -11,6 +11,7 @@ import com.tipray.cache.SerialNumberCache;
 import com.tipray.constant.CardTypeConst;
 import com.tipray.constant.DatabaseOperateTypeEnum;
 import com.tipray.constant.SqliteFileConst;
+import com.tipray.constant.SqliteSqlConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
 import com.tipray.dao.CardDao;
 import com.tipray.dao.GasStationDao;
@@ -42,20 +43,11 @@ import java.util.Map;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "SQLException", "Exception" })
 @Service("cardService")
 public class CardServiceImpl implements CardService {
 	private static Logger logger = LoggerFactory.getLogger(CardServiceImpl.class);
-	/** 操作sqlite应急卡信息 */
-	private static final JDBCUtil JDBC_UTIL_URGENT = new JDBCUtil();
-	/** 操作sqlite管理卡信息 */
-	private static final JDBCUtil JDBC_UTIL_MANAGE = new JDBCUtil();
-	/** 操作sqlite出入库卡信息 */
-	private static final JDBCUtil JDBC_UTIL_IN_OUT = new JDBCUtil();
-
 	@Resource
 	private NioUdpServer udpServer;
-	
 	@Resource
 	private CardDao cardDao;
 	@Resource
@@ -65,8 +57,9 @@ public class CardServiceImpl implements CardService {
 	@Resource
 	private VehicleParamVerDao vehicleParamVerDao;
 
+    @Transactional
 	@Override
-	public Card addCard(Card card) {
+	public Card addCard(Card card) throws SQLException {
 		if (card != null) {
             Long cardId = card.getCardId();
             if (cardId == null) {
@@ -86,8 +79,9 @@ public class CardServiceImpl implements CardService {
 		return card;
 	}
 
+    @Transactional
 	@Override
-	public Card updateCard(Card card) {
+	public Card updateCard(Card card) throws SQLException {
 		if (card != null) {
 			Card cardInDb = new Card();
 			int cardType = card.getType();
@@ -102,8 +96,9 @@ public class CardServiceImpl implements CardService {
 		return card;
 	}
 
+    @Transactional
 	@Override
-	public void deleteCardById(Long id) {
+	public void deleteCardById(Long id) throws SQLException {
 		Card card = cardDao.getById(id);
 		Long cardId = card.getCardId();
 		cardDao.delete(id);
@@ -180,47 +175,48 @@ public class CardServiceImpl implements CardService {
 	 * @param sqlType
 	 *            数据库操作类型（增删改）
 	 */
-	private void setCardInSqliteDb(Card card, DatabaseOperateTypeEnum sqlType) {
+	private void setCardInSqliteDb(Card card, DatabaseOperateTypeEnum sqlType) throws SQLException {
+		JDBCUtil jdbcUtil = new JDBCUtil();
 		Integer cardType = card.getType();
 		try {
 			String sql = null;
 			byte commonConfig = 0;
 			if (cardType == CardTypeConst.CARD_TYPE_1_URGENT) {
-				JDBC_UTIL_URGENT.createSqliteConnection(SqliteFileConst.URGENT_CARD);
+                jdbcUtil.createSqliteConnection(SqliteFileConst.URGENT_CARD);
 				switch (sqlType) {
 				case INSERT:
-					sql = "INSERT INTO tbl_emergency_card(owner_name, card_id) VALUES(?, ?)";
+					sql = SqliteSqlConst.INSERT_URGENT_CARD_SQL;
 					break;
 				case UPDATE:
-					sql = "UPDATE tbl_emergency_card SET owner_name = ? WHERE card_id = ?";
+					sql = SqliteSqlConst.UPDATE_URGENT_CARD_SQL;
 					break;
 				case DELETE:
-					sql = "DELETE FROM tbl_emergency_card WHERE card_id = ?";
+					sql = SqliteSqlConst.DELETE_URGENT_CARD_BY_CARD_ID_SQL;
 					break;
 				default:
 					break;
 				}
-				statementExecute(JDBC_UTIL_URGENT, sql, card, sqlType);
-				setParamVer(JDBC_UTIL_URGENT, SqliteFileConst.URGENT_CARD);
+				statementExecute(jdbcUtil, sql, card, sqlType);
+				setParamVer(jdbcUtil, SqliteFileConst.URGENT_CARD);
 				FtpUtil.upload(SqliteFileConst.URGENT_CARD_DB_FILE);
 				commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_1_URGENT_CARD;
 			} else if (cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
-				JDBC_UTIL_MANAGE.createSqliteConnection(SqliteFileConst.MANAGE_CARD);
+                jdbcUtil.createSqliteConnection(SqliteFileConst.MANAGE_CARD);
 				switch (sqlType) {
 				case INSERT:
-					sql = "INSERT INTO tbl_management_card(owner_name, card_id) VALUES(?, ?)";
-					break;
+                    sql = SqliteSqlConst.INSERT_MANAGE_CARD_SQL;
+                    break;
 				case UPDATE:
-					sql = "UPDATE tbl_management_card SET owner_name = ? WHERE card_id = ?";
+					sql = SqliteSqlConst.UPDATE_MANAGE_CARD_SQL;
 					break;
 				case DELETE:
-					sql = "DELETE FROM tbl_management_card WHERE card_id = ?";
+					sql = SqliteSqlConst.DELETE_MANAGE_CARD_BY_CARD_ID_SQL;
 					break;
 				default:
 					break;
 				}
-				statementExecute(JDBC_UTIL_MANAGE, sql, card, sqlType);
-				setParamVer(JDBC_UTIL_MANAGE, SqliteFileConst.MANAGE_CARD);
+				statementExecute(jdbcUtil, sql, card, sqlType);
+				setParamVer(jdbcUtil, SqliteFileConst.MANAGE_CARD);
 				FtpUtil.upload(SqliteFileConst.MANAGE_CARD_DB_FILE);
 				commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_2_MANAGE_CARD;
 			} else {
@@ -228,12 +224,12 @@ public class CardServiceImpl implements CardService {
                         || cardType == CardTypeConst.CARD_TYPE_3_OUT
                         || cardType == CardTypeConst.CARD_TYPE_4_INOUT;
 				if (belongInOut) {
-					JDBC_UTIL_IN_OUT.createSqliteConnection(SqliteFileConst.IN_OUT_CARD);
+                    jdbcUtil.createSqliteConnection(SqliteFileConst.IN_OUT_CARD);
 					if (sqlType.equals(DatabaseOperateTypeEnum.DELETE)) {
-						sql = "DELETE FROM tbl_in_out_card WHERE card_id = ?";
-						int i = statementExecute(JDBC_UTIL_IN_OUT, sql, card, sqlType);
+						sql = SqliteSqlConst.DELETE_IN_OUT_CARD_BY_CARD_ID_SQL;
+						int i = statementExecute(jdbcUtil, sql, card, sqlType);
 						if (i > 0) {
-							setParamVer(JDBC_UTIL_IN_OUT, SqliteFileConst.IN_OUT_CARD);
+							setParamVer(jdbcUtil, SqliteFileConst.IN_OUT_CARD);
 							FtpUtil.upload(SqliteFileConst.IN_OUT_CARD_DB_FILE);
 							commonConfig |= TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_3_IN_OUT_CARD;
 						}
@@ -242,10 +238,10 @@ public class CardServiceImpl implements CardService {
 			}
 			executeAsynUdp(commonConfig);
 		} catch (SQLException e) {
-			logger.error("sqlite更新卡相关数据库文件异常！", e);
-			rollback(cardType);
+			jdbcUtil.rollback();
+			throw new SQLException("sqlite更新卡相关数据库文件异常！", e);
 		} finally {
-			close(cardType);
+		    jdbcUtil.close();
 		}
 	}
 
@@ -285,8 +281,7 @@ public class CardServiceImpl implements CardService {
 	 */
 	private void setParamVer(JDBCUtil jdbcUtil, String param) throws SQLException {
 		long ver = System.currentTimeMillis();
-		String sql = "UPDATE tbl_version SET version = ?";
-		jdbcUtil.createPrepareStatement(sql);
+		jdbcUtil.createPrepareStatement(SqliteSqlConst.UPDATE_VERSION_SQL);
 		jdbcUtil.setLong(1, ver);
 		jdbcUtil.executeUpdate();
 		jdbcUtil.commit();
@@ -301,38 +296,6 @@ public class CardServiceImpl implements CardService {
         }
 	}
 
-	/**
-	 * 数据回滚
-	 * 
-	 * @param cardType
-	 *            卡类型
-	 */
-	private void rollback(Integer cardType) {
-		if (cardType == CardTypeConst.CARD_TYPE_1_URGENT) {
-			JDBC_UTIL_URGENT.rollback();
-		} else if (cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
-			JDBC_UTIL_MANAGE.rollback();
-		} else {
-			JDBC_UTIL_IN_OUT.rollback();
-		}
-	}
-
-	/**
-	 * 关闭资源
-	 * 
-	 * @param cardType
-	 *            卡类型
-	 */
-	private void close(Integer cardType) {
-		if (cardType == CardTypeConst.CARD_TYPE_1_URGENT) {
-			JDBC_UTIL_URGENT.close();
-		} else if (cardType == CardTypeConst.CARD_TYPE_6_MANAGE) {
-			JDBC_UTIL_MANAGE.close();
-		} else {
-			JDBC_UTIL_IN_OUT.close();
-		}
-	}
-	
 	/**
 	 * 执行UDP通信
 	 * 
@@ -366,5 +329,4 @@ public class CardServiceImpl implements CardService {
 		int cacheId = AsynUdpCommCache.buildCacheId(UdpBizId.TERMINAL_COMMON_CONFIG_UPDATE_REQUEST, serialNo);
 		new TimeOutTask(src, cacheId).executeInfoIssueTask();
 	}
-
 }

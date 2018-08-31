@@ -23,6 +23,10 @@ public class ChangeInfo implements Serializable {
      */
     private Long carId;
     /**
+     * 车台设备ID
+     */
+    private Integer terminalId;
+    /**
      * 车牌号
      */
     private String carNumber;
@@ -97,6 +101,14 @@ public class ChangeInfo implements Serializable {
 
     public void setCarId(Long carId) {
         this.carId = carId;
+    }
+
+    public Integer getTerminalId() {
+        return terminalId;
+    }
+
+    public void setTerminalId(Integer terminalId) {
+        this.terminalId = terminalId;
     }
 
     public String getCarNumber() {
@@ -214,6 +226,9 @@ public class ChangeInfo implements Serializable {
         }
         if (carId != null) {
             sb.append(", carId=").append(carId);
+        }
+        if (terminalId != null) {
+            sb.append(", terminalId=").append(terminalId);
         }
         if (carNumber != null) {
             sb.append(", carNumber='").append(carNumber).append('\'');

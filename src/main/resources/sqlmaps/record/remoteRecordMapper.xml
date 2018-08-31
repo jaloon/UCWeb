@@ -17,7 +17,7 @@
 		<result column="is_app" property="isApp" />
 		<result column="track_id" property="trackId" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		r.id,
 		r.happen_time,
 		r.is_app,
@@ -34,7 +34,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from
             tbl_remote_control r
             left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id
@@ -45,7 +45,7 @@
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from
             tbl_remote_control r
             left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id
@@ -72,7 +72,7 @@
 	
 	<select id="findByPage" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from
 			tbl_remote_control r
             left join tbl_vehicle_seal_status s on r.vehicle_seal_status_id = s.id

@@ -31,7 +31,14 @@ public interface DistributionRecordService extends RecordService<DistributionRec
 	 * @param invoice
 	 *            配送单号
 	 */
-    Integer countByInvoice(String invoice);
+    Integer countInvoice(String invoice);
+	/**
+	 * 根据配送单号统计配送记录数量
+	 *
+	 * @param invoice
+	 *            配送单号
+	 */
+    Integer countWaitInvoice(String invoice);
 
 	/**
 	 * 根据加油站ID获取未完成配送信息

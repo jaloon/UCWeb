@@ -15,7 +15,7 @@
         <result column="trigger_time" property="createDate" />
 		<result column="track_id" property="trackId" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		s.id,
 		s.vehicle_id,
         s.status_incident,
@@ -31,7 +31,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
         SELECT
-		    <include refid="select_colums"></include>
+		    <include refid="select_columns"></include>
         FROM
             tbl_vehicle_seal_status s,
             tbl_vehicle v
@@ -41,7 +41,7 @@
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             tbl_vehicle_seal_status s,
             tbl_vehicle v
@@ -66,7 +66,7 @@
 	
 	<select id="findByPage" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             tbl_vehicle_seal_status s,
             tbl_vehicle v

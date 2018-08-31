@@ -43,6 +43,10 @@ public class LockRecord extends Record {
      */
     private String statusName;
     /**
+     * 锁开关上报时间
+     */
+    private String changeReportTime;
+    /**
      * 报警类型
      */
     private String alarm;
@@ -111,6 +115,14 @@ public class LockRecord extends Record {
         this.statusName = statusName;
     }
 
+    public String getChangeReportTime() {
+        return changeReportTime;
+    }
+
+    public void setChangeReportTime(String changeReportTime) {
+        this.changeReportTime = changeReportTime;
+    }
+
     public String getAlarm() {
         return alarm;
     }
@@ -151,6 +163,9 @@ public class LockRecord extends Record {
         }
         if (statusName != null) {
             sb.append(", statusName='").append(statusName).append('\'');
+        }
+        if (changeReportTime != null) {
+            sb.append(", changeReportTime='").append(changeReportTime).append('\'');
         }
         if (alarm != null) {
             sb.append(", alarm='").append(alarm).append('\'');

@@ -186,7 +186,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
     /**
      * 更新报警信息
      */
-    public void upAlarmInfos() {
+    private void upAlarmInfos() {
         List<AlarmInfo> alarmInfos = alarmRecordService.findNotElimitedAlarmInfo();
         pushAlarmIfos(alarmInfos);
     }

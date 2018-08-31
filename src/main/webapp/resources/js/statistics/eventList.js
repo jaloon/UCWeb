@@ -1,13 +1,26 @@
+/**
+ * 车台事件
+ * @param {number} type 事件类型值
+ * @returns {string} 事件类型
+ */
+function parseEventType(type) {
+    if (type == 1) {
+        return "终端断电";
+    }
+    return "未知类型[" + type + "]";
+}
+
 function showBMap(id) {
     layer.open({
         type: 2,
-        title: ['卡及设备使用记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        title: ['车载终端事件记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
         // shadeClose: true,
         shade: 0.6,
         area: ['800px', '560px'],
-        content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=use&id=' + id)
+        content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=event&id=' + id)
     });
 }
+
 $(function() {
     $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
@@ -71,52 +84,51 @@ $(function() {
     function showList(carNumber, type, begin, end, pageId) {
         var rows = $("#page_size").val();
         var startRow = (pageId - 1) * rows;
-
+        var loadLayer = layer.load();
         $.post(
-            "../../manage/statistics/findDeviceRecordsForPage.do",
+            "../../manage/statistics/findEventRecordsForPage.do",
             encodeURI("carNumber=" + carNumber + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(data) {
-                var gridPage = eval(data);
-
-                var maxIndex = $("#page_id option:last").index(); //获取Select最大的索引值
-                var len = maxIndex + 1 - gridPage.total;
-                if (len > 0) {
-                    for (var i = gridPage.total > 0 ? gridPage.total : 1; i < maxIndex + 1; i++) {
-                        $("#page_id option:last").remove(); //删除Select中索引值最大Option(最后一个)
+            function(gridPage) {
+                layer.close(loadLayer);
+                var pageCount = gridPage.total;
+                if (pageCount > 1) {
+                    var pageOpts = "";
+                    for (var i = 1; i <= pageCount; i++) {
+                        pageOpts += "<option value=" + i + ">" + i + "</option>";
                     }
-                } else if (len < 0) {
-                    for (var i = maxIndex + 2; i <= gridPage.total; i++) {
-                        $("#page_id").append("<option value=" + i + ">" + i + "</option>"); //为Select追加一个Option下拉项
-                    }
+                    $("#page_id").html(pageOpts);
+                    $("#page_id").val(gridPage.page);
+                } else {
+                    $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_id").val(gridPage.page);
-
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
+                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#qcar").val(gridPage.t.carNumber);
                 $("#qtype").val(gridPage.t.type);
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
                 $(".table-body").html("");
-                var duses = gridPage.dataList;
+                var events = gridPage.dataList;
                 var tableData = "<table width='100%'>";
                 for (var i = 0; i < gridPage.currentRows; i++) {
-                    var duse = duses[i];
-                    var coordFlag = duse.longitude == undefined || duse.latitude == undefined;
-                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + duse.id + ")\">") +
-                        "<td class=\"duse-id\">" + duse.id + "</td>" +
-                        "<td class=\"duse-car\">" + duse.carNumber + "</td>" +
-                        "<td class=\"duse-time\">" + duse.createDate + "</td>";
+                    var event = events[i];
+                    var coordFlag = event.longitude == undefined || event.latitude == undefined;
+                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + event.id + ")\">") +
+                        "<td class=\"event-id\">" + event.id + "</td>" +
+                        "<td class=\"event-car\">" + event.carNumber + "</td>" +
+                        "<td class=\"event-time\">" + event.createDate + "</td>";
                     if (coordFlag) {
-                        tableData += "<td class=\"duse-coordinate\">数据库记录异常</td>";
+                        tableData += "<td class=\"event-gps\">数据库记录异常</td>";
+                        tableData += "<td class=\"event-coordinate\">数据库记录异常</td>";
                     } else {
-                        tableData += "<td class=\"duse-coordinate\"><a href=\"javascript:showBMap(" + duse.id + ")\">("
-                            + duse.longitude + ", " + duse.latitude + ")</a></td>";
+                        tableData += "<td class=\"event-gps\">" + (event.coorValid ? "有效" : "无效") + "</td>";
+                        tableData += "<td class=\"event-coordinate\"><a href=\"javascript:showBMap(" + event.id + ")\">("
+                            + event.longitude + ", " + event.latitude + ")</a></td>";
                     }
-                    tableData += "<td class=\"duse-velocity\">" + (duse.velocity == undefined ? "数据库记录异常" : duse.velocity) + "</td>" +
-                        "<td class=\"duse-aspect\">" + angle2aspect(duse.angle) + "</td>" +
-                        "<td class=\"duse-type\">" + duse.typeName + "</td>" +
-                        "<td class=\"duse-dev\">" + duse.devId + "</td>" +
-                        "<td class=\"duse-alarm\">" + (duse.alarm == undefined ? "数据库记录异常" : duse.alarm) + "</td>" +
+                    tableData += "<td class=\"event-velocity\">" + (event.velocity == undefined ? "数据库记录异常" : event.velocity) + "</td>" +
+                        "<td class=\"event-aspect\">" + angle2aspect(event.angle) + "</td>" +
+                        "<td class=\"event-type\">" + parseEventType(event.type) + "</td>" +
+                        "<td class=\"event-terminal\">" + event.terminalId + "</td>" +
+                        "<td class=\"event-alarm\">" + (event.alarm == undefined ? "数据库记录异常" : event.alarm) + "</td>" +
                         "</tr>";
                 }
                 tableData += "</table>";
@@ -125,6 +137,7 @@ $(function() {
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {
@@ -140,24 +153,6 @@ $(function() {
                 }
             }
         });
-    }
-
-    function getHexId(id, type) {
-        var hexId = id.toString(16).toUpperCase();
-        if (type == 1 || type == 3) { // 设备ID 4个字节
-            if (hexId.length < 8) {
-                for (var i = 0, len = 8 - hexId.length; i < len; i++) {
-                    hexId = "0" + hexId;
-                }
-            }
-        } else { // 卡ID 8个字节
-            if (hexId.length < 16) {
-                for (var i = 0, len = 16 - hexId.length; i < len; i++) {
-                    hexId = "0" + hexId;
-                }
-            }
-        }
-        return hexId;
     }
 
     showList("", "", "", "", 1);

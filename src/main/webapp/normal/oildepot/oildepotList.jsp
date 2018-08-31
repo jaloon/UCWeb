@@ -129,27 +129,24 @@
     function showList(oildepotName, pageId) {
         var rows = $("#page_size").val();
         var startRow = (pageId - 1) * rows;
-
+        var loadLayer = layer.load();
         $.post(
             "../../manage/oildepot/ajaxFindForPage.do",
             encodeURI("name=" + oildepotName + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(data) {
-                var gridPage = eval(data);
-
-                var maxIndex = $("#page_id option:last").index(); //获取Select最大的索引值
-                var len = maxIndex + 1 - gridPage.total;
-                if (len > 0) {
-                    for (var i = gridPage.total > 0 ? gridPage.total : 1; i < maxIndex + 1; i++) {
-                        $("#page_id option:last").remove(); //删除Select中索引值最大Option(最后一个)
+            function(gridPage) {
+                layer.close(loadLayer);
+                var pageCount = gridPage.total;
+                if (pageCount > 1) {
+                    var pageOpts = "";
+                    for (var i = 1; i <= pageCount; i++) {
+                        pageOpts += "<option value=" + i + ">" + i + "</option>";
                     }
-                } else if (len < 0) {
-                    for (var i = maxIndex + 2; i <= gridPage.total; i++) {
-                        $("#page_id").append("<option value=" + i + ">" + i + "</option>"); //为Select追加一个Option下拉项
-                    }
+                    $("#page_id").html(pageOpts);
+                    $("#page_id").val(gridPage.page);
+                } else {
+                    $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_id").val(gridPage.page);
-
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + gridPage.total + "页(共" + gridPage.records + "条数据)");
+                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#odname").val(gridPage.t.name);
                 $(".table-body").html("");
                 var oildepots = gridPage.dataList;
@@ -182,6 +179,7 @@
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {
@@ -261,7 +259,24 @@
 		                } else {
 		                    layer.msg('批量导入油库失败！', { icon: 2, time: 500 });
 		                }
-		            }
+		            },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                        layer.close(index);
+                        if (XMLHttpRequest.readyState == 4) {
+                            var http_status = XMLHttpRequest.status;
+                            if (http_status == 0 || http_status > 600) {
+                                location.reload(true);
+                            } else if (http_status == 200) {
+                                if (textStatus == "parsererror") {
+                                    layer.alert("应答数据格式解析错误！")
+                                } else {
+                                    layer.alert("http response error: " + textStatus)
+                                }
+                            } else {
+                                layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                            }
+                        }
+                    }
 		        });
 		    }
 		    customUpload.config({

@@ -60,6 +60,8 @@ var alarm_car_img = new Image();
 alarm_car_img.src = '../../resources/images/marker/车辆图标-32-红.png';
 var normal_car_img = new Image();
 normal_car_img.src = '../../resources/images/marker/车辆图标-32-黄.png';
+var invalid_car_img = new Image();
+invalid_car_img.src = '../../resources/images/marker/车辆图标-32-灰.png';
 
 function openFocusLayer(item) {
     if (item != null) {
@@ -172,7 +174,10 @@ function show(point_data, icon_data, text_data) {
 var onlineCarIds = [];
 var $tbody = $(".table-body");
 
-function getCarIcon(alarm) {
+function getCarIcon(gpsValid, alarm) {
+    if (!gpsValid) {
+        return invalid_car_img;
+    }
     if (alarm == "是") {
         return alarm_car_img;
     }
@@ -194,12 +199,13 @@ function flushTrack(tracks) {
 
     tracks.forEach(function (track) {
         var carId = track.carId;
-        var lng = track.longitude;
-        var lat = track.latitude;
+        var lng = track.lastValidLongitude;
+        var lat = track.lastValidLatitude;
         // var pos = [lng, lat];
         var pos = wgs84tobd09(lng, lat);
-        var deg = track.angle - 90;
-        var img = getCarIcon(track.alarm);
+        var deg = track.lastValidAngle - 90;
+        var gpsValid = track.gpsValid;
+        var img = getCarIcon(gpsValid, track.alarm);
         var text = track.carNumber;
         if (pos[0] != 0 && pos[1] != 0) {
             car_pos_cache.set(carId, pos);
@@ -212,9 +218,13 @@ function flushTrack(tracks) {
             var carTr = "<tr id='car_" + carId + "'>" +
                 "<td class=\"car-num\">" + text + "</td>" +
                 "<td class=\"car-company\">" + track.carCom + "</td>" +
-                "<td class=\"car-coordinate\">(" + lng + ", " + lat + ")</td>" +
+                "<td class=\"car-gps\">" + (gpsValid ? "有效" : "无效") + "</td>" +
+                "<td class=\"car-coordinate\">(" + track.longitude + ", " + track.latitude + ")</td>" +
                 "<td class=\"car-velocity\">" + track.velocity + "</td>" +
                 "<td class=\"car-aspect\">" + angle2aspect(track.angle) + "</td>" +
+                "<td class=\"car-lastcoord\">(" + lng + ", " + lat + ")</td>" +
+                "<td class=\"car-lastspeed\">" + track.lastValidSpeed + "</td>" +
+                "<td class=\"car-lastaspect\">" + angle2aspect(track.lastValidAngle) + "</td>" +
                 "<td class=\"car-status\">" + track.carStatus + "</td>" +
                 "<td class=\"car-alarm\">" + track.alarm + "</td>" +
                 "<td class=\"car-online\">在线</td>" +
@@ -332,13 +342,13 @@ $(function () {
                     color: '#d80e0e'
                 });
                 $hiddenCar.val("当前账号权限下无可查询车辆！");
-                $("#search_btn").attr('disabled', true);
+                // $("#search_btn").attr('disabled', true);
                 layer.alert("当前账号权限下无可查询车辆！", {
                     icon: 0,
                     title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']
                 });
             }
-            var realtimeSelectObj = $("#carno");
+            // var realtimeSelectObj = $("#carno");
             selectObj.append(data.com);
             var groupObj;
             var carOpts = "";
@@ -349,7 +359,7 @@ $(function () {
                 carOpts += carOpt;
                 groupObj.append(carOpt);
             }
-            realtimeSelectObj.append(carOpts);
+            // realtimeSelectObj.append(carOpts);
             selectObj.comboSelect();
             selectObj.hide();
             $("#hidden_car").show();
@@ -365,16 +375,16 @@ $(function () {
             });
             selectObj.siblings(".combo-input").height(10);
 
-            realtimeSelectObj.comboSelect();
-            realtimeSelectObj.hide();
-            realtimeSelectObj.closest(".combo-select").css({
-                width: '346px',
-                height: '28px',
-                'z-index': 10000,
-                "margin-bottom": "0px"
-            });
-            realtimeSelectObj.siblings(".combo-dropdown").css("max-height", "180px");
-            realtimeSelectObj.siblings(".combo-input").height(2);
+            // realtimeSelectObj.comboSelect();
+            // realtimeSelectObj.hide();
+            // realtimeSelectObj.closest(".combo-select").css({
+            //     width: '346px',
+            //     height: '28px',
+            //     'z-index': 10000,
+            //     "margin-bottom": "0px"
+            // });
+            // realtimeSelectObj.siblings(".combo-dropdown").css("max-height", "180px");
+            // realtimeSelectObj.siblings(".combo-input").height(2);
         }
     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
         if (XMLHttpRequest.readyState == 4) {
@@ -455,7 +465,7 @@ $(function () {
                     var tracks = receiveObj.tracks;
                     if (!isInitMap) {
                         var track = tracks[0];
-                        var bd09 = wgs84tobd09(track.longitude, track.latitude);
+                        var bd09 = wgs84tobd09(track.lastValidLongitude, track.lastValidLatitude);
                         var centerPoint = new BMap.Point(bd09[0], bd09[1]);
                         initMap(centerPoint, 18);
                         isInitMap = true;
@@ -544,20 +554,12 @@ $(function () {
             layer.alert("当前账号权限下无可操作车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
             return;
         }
-        layer.open({
-            type: 2,
-            title: ['设备绑定', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            // shadeClose: true,
-            shade: 0.8,
-            resize: false,
-            area: ['540px', '435px'],
-            content: 'bind/carBind.html'
-        });
-    });
-    // 锁绑定
-    $("#bind_lock").click(function () {
-        if (validCarCount == 0) {
-            layer.alert("当前账号权限下无可操作车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
+        var carNumber = trimAll($("#search_text").val());
+        if (carNumber == "") {
+            layer.alert('未选择系统已有车辆！', {icon: 0}, function (index2) {
+                layer.close(index2);
+                $("#search_text").focus();
+            });
             return;
         }
         layer.open({
@@ -567,7 +569,31 @@ $(function () {
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
-            content: 'bind/lockBind.html'
+            content: 'bind/carBind.html?carNumber=' + encodeURI(carNumber)
+        });
+    });
+    // 锁绑定
+    $("#bind_lock").click(function () {
+        if (validCarCount == 0) {
+            layer.alert("当前账号权限下无可操作车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
+            return;
+        }
+        var carNumber = trimAll($("#search_text").val());
+        if (carNumber == "") {
+            layer.alert('未选择系统已有车辆！', {icon: 0}, function (index2) {
+                layer.close(index2);
+                $("#search_text").focus();
+            });
+            return;
+        }
+        layer.open({
+            type: 2,
+            title: ['设备绑定', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            // shadeClose: true,
+            shade: 0.8,
+            resize: false,
+            area: ['540px', '435px'],
+            content: 'bind/lockBind.html?carNumber=' + encodeURI(carNumber)
         });
     });
 
@@ -617,7 +643,7 @@ $(function () {
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
-            content: 'conf/softUpgrade2.html'
+            content: 'conf/softUpgrade.html'
         });
     });
 
@@ -714,6 +740,15 @@ $(function () {
             layer.alert("当前账号权限下无可操作车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
             return;
         }
+        var carNumber = trimAll($("#search_text").val());
+        if (carNumber == "") {
+            layer.alert('未选择系统已有车辆！', {icon: 0}, function (index2) {
+                layer.close(index2);
+                $("#search_text").focus();
+            });
+            return;
+        }
+        $("#carno").val(carNumber);
         realtimeLayer = layer.open({
             type: 1,
             title: ['车辆实时监控', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -900,14 +935,22 @@ $(function () {
             layer.alert("当前账号权限下无可操作车辆！", {icon: 0, title: ['警告', 'font-size:14px;color:#ffffff;background:#478de4;']});
             return;
         }
+        var carNumber = trimAll($("#search_text").val());
+        if (carNumber == "") {
+            layer.alert('未选择系统已有车辆！', {icon: 0}, function (index2) {
+                layer.close(index2);
+                $("#search_text").focus();
+            });
+            return;
+        }
         layer.open({
             type: 2,
-            title: ['车载终端配置', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            title: ['远程开锁重置', 'font-size:14px;color:#ffffff;background:#478de4;'],
             // shadeClose: true,
             shade: 0.8,
             resize: false,
             area: ['540px', '435px'],
-            content: 'remote/unlockReset.html'
+            content: 'remote/unlockReset.html?carNumber=' + encodeURI(carNumber)
         });
     });
 

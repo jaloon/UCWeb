@@ -18,12 +18,12 @@ import java.util.List;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("infoManageLogService")
 public class InfoManageLogServiceImpl implements InfoManageLogService {
 	@Resource
 	private InfoManageLogDao infoManageLogDao;
 
+	@Transactional
 	@Override
 	public InfoManageLog addInfoManageLog(InfoManageLog infoManageLog) {
 		if (infoManageLog != null) {
@@ -58,5 +58,4 @@ public class InfoManageLogServiceImpl implements InfoManageLogService {
 		List<InfoManageLog> list = findByPage(infoManageLog, page);
 		return new GridPage<InfoManageLog>(list, records, page.getPageId(), page.getRows(), list.size(), infoManageLog);
 	}
-
 }

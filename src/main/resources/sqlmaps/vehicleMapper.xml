@@ -17,7 +17,7 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		c.*,
 		d.model vehicle_device_model,
 		t.name trans_company_name,
@@ -26,7 +26,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
 			left join tbl_trans_company t on c.trans_company_id=t.id
@@ -97,7 +97,7 @@
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
 			left join tbl_trans_company t on c.trans_company_id=t.id
@@ -106,7 +106,7 @@
 	
 	<select id="getByCarNo" parameterType="java.lang.String" resultMap="fullResultMap">
 		select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
 			left join tbl_trans_company t on c.trans_company_id=t.id
@@ -115,7 +115,7 @@
 	
 	<select id="getCarByTerminalId" parameterType="java.lang.Integer" resultMap="fullResultMap">
 		select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
 			left join tbl_trans_company t on c.trans_company_id=t.id
@@ -124,7 +124,7 @@
 	
 	<select id="findByTransCompany" parameterType="com.tipray.bean.baseinfo.TransCompany" resultMap="fullResultMap">
 		select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
 			tbl_trans_company t
@@ -143,7 +143,7 @@
 	
 	<select id="findByPage" resultMap="fullResultMap">
 		select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
 			left join tbl_trans_company t on c.trans_company_id=t.id
@@ -168,7 +168,7 @@
 	
 	<select id="findBindedCars" resultMap="fullResultMap">
 	 	select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
 			tbl_trans_company t
@@ -178,7 +178,7 @@
 	
 	<select id="findUnbindedCars" resultMap="fullResultMap">
 	 	select
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		from 
 			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
 			tbl_trans_company t
@@ -391,6 +391,10 @@
         SELECT id FROM tbl_vehicle WHERE vehicle_number = #{carNo}
     </select>
 
+    <select id="getTerminalIdByCarNo" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT vehicle_device_id FROM tbl_vehicle WHERE vehicle_number = #{carNo}
+    </select>
+
     <select id="getStoreNumByCarNo" parameterType="java.lang.String" resultType="java.lang.Integer">
         SELECT store_num FROM tbl_vehicle WHERE vehicle_number = #{carNo}
     </select>
@@ -426,6 +430,19 @@
             LEFT JOIN tbl_vehicle_param_cfg t2 ON t1.vehicle_device_id = t2.vehicle_device_id AND t2.param_cfg_name = 'TrackSampleSpanSec'
             LEFT JOIN tbl_vehicle_param_cfg t3 ON t1.vehicle_device_id = t3.vehicle_device_id AND t3.param_cfg_name = 'TrackUploadSpanSec'
             LEFT JOIN tbl_vehicle_param_cfg t4 ON t1.vehicle_device_id = t4.vehicle_device_id AND t4.param_cfg_name = 'TrackUploadSpanMeter'
+    </select>
+
+    <select id="getGpsConfByCarId" parameterType="java.lang.Long" resultType="com.tipray.bean.VehicleTerminalConfig">
+        SELECT
+            vehicle_device_id terminalId,
+            param_cfg_value scanInterval
+        FROM
+            tbl_vehicle_param_cfg
+        WHERE
+            param_cfg_name = 'TrackSampleSpanSec'
+            AND (vehicle_device_id = 0 OR vehicle_device_id = (SELECT vehicle_device_id FROM tbl_vehicle WHERE id = #{carId}))
+        ORDER BY
+            vehicle_device_id ASC
     </select>
     
 	<select id="getGpsConfByCarNumber" parameterType="java.lang.String" resultType="com.tipray.bean.VehicleTerminalConfig">
@@ -465,14 +482,29 @@
 	
 	<insert id="addRemoteControlRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO 
-			tbl_remote_control(user_id, vehicle_id, `type`, station_type, station_id, lock_device_id_list, is_app, is_lnglat_valid, longitude, latitude)
+			tbl_remote_control(
+                user_id,
+                vehicle_id,
+                device_id,
+                `type`,
+                station_type,
+                station_id,
+                lock_id_list,
+                lock_device_id_list,
+                is_app,
+                is_lnglat_valid,
+                longitude,
+                latitude
+			)
 		VALUES(
 			#{userId},
-			#{carId}, 
+			#{carId},
+			IFNULL(#{terminalId}, 0),
 			#{type}, 
 			IFNULL(#{stationType}, 0),
 			IFNULL(#{stationId}, 0),
 			#{lockIds},
+			#{lockDevIds},
 		  	IFNULL(#{isApp}, 0),
 		  	IFNULL(#{isLocationValid}, 0),
 		  	IFNULL(#{longitude}, 0),
@@ -482,15 +514,31 @@
 
 	<insert id="addRemoteStatusAlterRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO
-			tbl_remote_control(user_id, vehicle_id, `type`, station_type, station_id, store_id_list, lock_device_id_list, is_app, is_lnglat_valid, longitude, latitude)
+			tbl_remote_control(
+                user_id,
+                vehicle_id,
+                device_id,
+                `type`,
+                station_type,
+                station_id,
+                store_id_list,
+                lock_id_list,
+                lock_device_id_list,
+                is_app,
+                is_lnglat_valid,
+                longitude,
+                latitude
+			)
 		VALUES(
 			#{userId},
 			#{carId},
+			IFNULL(#{terminalId}, 0),
 			#{type},
 			IFNULL(#{stationType}, 0),
 			IFNULL(#{stationId}, 0),
 			IFNULL(#{storeIds}, 0),
 			#{lockIds},
+			#{lockDevIds},
 		  	IFNULL(#{isApp}, 0),
 		  	IFNULL(#{isLocationValid}, 0),
 		  	IFNULL(#{longitude}, 0),
@@ -516,6 +564,7 @@
 	<insert id="addLockResetRecord" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO tbl_unlock_reset (
 			vehicle_id,
+			device_id,
 			lock_device_id,
 			trigger_type,
 			trigger_id,
@@ -534,6 +583,7 @@
 		SELECT * FROM (
 			(SELECT
 				#{carId} vehicle_id,
+				#{terminalId} device_id,
 				#{lockId} lock_device_id,
 				7 trigger_type,
 				#{userId} trigger_id,
@@ -541,7 +591,7 @@
 				IFNULL(#{isLocationValid}, 0) is_lnglat_valid,
 			  	IFNULL(#{longitude}, 0) longitude,
 			  	IFNULL(#{latitude}, 0) latitude,
-				NOW( ) reset_time,
+				NOW() reset_time,
 				0 station_type,
 				0 station_id,
 				0 vehicle_track_id

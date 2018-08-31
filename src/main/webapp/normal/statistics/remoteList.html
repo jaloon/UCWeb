@@ -9,9 +9,9 @@
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
-    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
+    <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
+    <script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../resources/plugins/laydate/laydate.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/js/base.js"></script>
@@ -71,13 +71,18 @@
                 <option value="">车牌号</option>
             </select>
             <label for="text_type" class="search-type" id="type_type">操作类型</label>
-            <select class="search-text" id="text_type"> 
-                <option value="">所有操作</option> 
+            <select class="search-text" id="text_type">
+                <option value="">所有操作</option>
                 <option value=1>进油库</option> 
                 <option value=2>出油库</option> 
                 <option value=3>进加油站</option> 
-                <option value=4>出加油站</option> 
-                <option value=5>远程状态变更</option> 
+                <option value=4>出加油站</option>
+                <option value=5>进入应急</option>
+                <option value=6>取消应急</option>
+                <option value=7>状态强制变更</option>
+                <option value=8>待进油区</option>
+                <option value=9>进油区</option>
+                <option value=10>出油区</option>
             </select>
             <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
             <input type="text" class="search-text" id="text_begin">
@@ -94,6 +99,7 @@
                             <th class="remote-id">序号</th>
                             <th class="remote-car">车牌号</th>
                             <th class="remote-time">时间</th>
+                            <th class="remote-gps">GPS有效性</th>
                             <th class="remote-coordinate">位置（经纬度）</th>
                             <th class="remote-type">操作类型</th>
                             <th class="remote-user">操作员（姓名(账号)）</th>

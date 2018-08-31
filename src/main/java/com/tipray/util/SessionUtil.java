@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,18 +29,18 @@ public class SessionUtil {
 	public static final long SESSION_TIMEOUT_MILLISECOND = 30 * 60 * 1000L;
 	public static final long WEBAPP_TIMEOUT_MILLISECOND = 6 * 60 * 1000L;
 
-	private static final Map<String, Session> SESSION_LIST = new ConcurrentHashMap<String, Session>();
+	private static final Map<String, Session> SESSION_CACHE_MAP = new ConcurrentHashMap<>();
 	private static final SessionService SESSION_SERVICE = SpringBeanUtil.getSessionService();
 
 	/**
-	 * 添加session到列表
+	 * 添加session到缓存列表
 	 * 
 	 * @param session
 	 * @return
 	 * @exception NullPointerException
 	 *                if session/sessionId is null.
 	 */
-	public static Session addSessionToList(Session session) {
+	public static Session addSessionToCache(Session session) {
 		if (session == null) {
 			throw new NullPointerException("session is null!");
 		}
@@ -47,22 +48,22 @@ public class SessionUtil {
 		if (sessionId == null) {
 			throw new NullPointerException("sessionId is null!");
 		}
-		return SESSION_LIST.put(sessionId, session);
+		return SESSION_CACHE_MAP.put(sessionId, session);
 	}
 
 	/**
-	 * 从列表移除session
+	 * 从缓存列表移除session
 	 * 
 	 * @param sessionId
 	 * @return
 	 * @exception NullPointerException
 	 *                if sessionId is null.
 	 */
-	public static Session removeSessionFromList(String sessionId) {
+	public static Session removeSessionFromCache(String sessionId) {
 		if (sessionId == null) {
 			throw new NullPointerException("sessionId is null!");
 		}
-		return SESSION_LIST.remove(sessionId);
+		return SESSION_CACHE_MAP.remove(sessionId);
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class SessionUtil {
 			// 避免浏览器禁用session，在request.session中也保存一份
 			request.getSession().setAttribute(LOGIN_SESSION_ID, session.getUuid());
 			CookieUtil.set(response, LOGIN_SESSION_ID, session.getUuid(), HttpServletUtil.isHttps(request));
-			addSessionToList(session);
+			addSessionToCache(session);
 		}
 	}
 
@@ -92,12 +93,13 @@ public class SessionUtil {
 
 	/**
 	 * 获取session
-	 * 
-	 * @param userId
+	 *
+     * @param userId 操作员ID
+     * @param isApp 是否手机登录
 	 * @return
 	 */
-	public static Session getSession(Long userId) {
-		return SESSION_SERVICE.getSessionByUser(userId);
+	public static Session getSession(Long userId, Integer isApp) {
+		return SESSION_SERVICE.getSessionByUser(userId, isApp);
 	}
 
 	/**
@@ -142,10 +144,11 @@ public class SessionUtil {
 		String sessionId = getSessionId(request,LOGIN_SESSION_ID);
 		if (sessionId == null) {
 			sessionId = UUIDUtil.getHexUUID();
-			synchronized (SESSION_LIST) {
-				SESSION_LIST.clear();
-				SESSION_LIST.putAll(SESSION_SERVICE.findSessions());
-				while (SESSION_LIST.keySet().contains(sessionId)) {
+			synchronized (SESSION_CACHE_MAP) {
+				SESSION_CACHE_MAP.clear();
+				SESSION_CACHE_MAP.putAll(SESSION_SERVICE.findSessions());
+                Set<String> sessionIdSet = SESSION_CACHE_MAP.keySet();
+				while (sessionIdSet.contains(sessionId)) {
 					sessionId = UUIDUtil.getHexUUID();
 				}
 			}
@@ -188,7 +191,7 @@ public class SessionUtil {
 	 */
 	public static void updateUser(User user) {
 		if (user != null) {
-			for (Session session : SESSION_LIST.values()) {
+			for (Session session : SESSION_CACHE_MAP.values()) {
 				if (session.getUser().getId() == user.getId()) {
 					session.setUser(user);
 				}
@@ -249,7 +252,7 @@ public class SessionUtil {
 	public static void removeSession(String sessionId) {
 		if (sessionId != null && !sessionId.trim().isEmpty()) {
 			SESSION_SERVICE.deleteSessionByUUID(sessionId);
-			removeSessionFromList(sessionId);
+			removeSessionFromCache(sessionId);
 		}
 	}
 
@@ -263,7 +266,7 @@ public class SessionUtil {
 			return;
 		}
 
-		for (Iterator<Session> it = SESSION_LIST.values().iterator(); it.hasNext();) {
+		for (Iterator<Session> it = SESSION_CACHE_MAP.values().iterator(); it.hasNext();) {
 			Session session = it.next();
 			if (session.getUser().getId() == userId) {
 				it.remove();

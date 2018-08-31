@@ -1290,6 +1290,7 @@ public class VehicleManageController {
                 return ResponseMsgUtil.error(RemoteChangeErrorEnum.VEHICLE_UNBINDED);
             }
             changeInfo.setUserId(user.getId());
+            changeInfo.setTerminalId(terminalId);
             changeInfo.setChangedGasstationId(changedStationId);
             changeInfo.setIsApp(isApp);
             changeInfo.setLongitude(longitude);
@@ -1411,9 +1412,10 @@ public class VehicleManageController {
             int num = alarmIdStrs.length;
             ByteBuffer alarmIdBuf = ByteBuffer.allocate(num * 4);
             for (int i = 0; i < num; i++) {
-                int alarmId = Integer.parseInt(alarmIdStrs[i], 10);
-                alarmIdList.addAll(alarmRecordService.findSameAlarmIdsById((long) alarmId));
-                alarmIdBuf.put(BytesConverterByLittleEndian.getBytes(alarmId));
+                long alarmId = Long.parseLong(alarmIdStrs[i], 10);
+                // alarmIdList.addAll(alarmRecordService.findSameAlarmIdsById(alarmId));
+                alarmIdList.add(alarmId);
+                alarmIdBuf.put(BytesConverterByLittleEndian.getBytes((int) alarmId));
             }
             List<AlarmRecord> alarmRecords = alarmRecordService.getAlarmRecordsByIdsAndCar(alarmIds, vehicleId);
             if (EmptyObjectUtil.isEmptyList(alarmRecords)) {
@@ -1436,13 +1438,12 @@ public class VehicleManageController {
                         RemoteEliminateAlarmErrorEnum.ALARM_ID_INVALID.code(),
                         "报警ID：" + invalidIds.toString() + "无效，报警记录不存在！");
             }
-            final String ALARM_STATUS_NOT_ELIMINATE = "未消除报警";
             StringBuffer eliminatedAlarm = new StringBuffer();
             byte alarmType = 0;
             for (AlarmRecord alarmRecord : alarmRecords) {
-                String alarmStatus = alarmRecord.getStatus();
-                if (!ALARM_STATUS_NOT_ELIMINATE.equals(alarmStatus)) {
-                    eliminatedAlarm.append("报警ID：").append(alarmRecord.getId()).append('，').append(alarmStatus).append('；');
+                if (alarmRecord.getStatusCode() > 0) {
+                    eliminatedAlarm.append("报警ID：").append(alarmRecord.getId()).append('，')
+                            .append("报警已消除（").append(alarmRecord.getStatus()).append("）；");
                 } else {
                     alarmType |= (byte) (1 << (alarmRecord.getType() - 1));
                 }
@@ -1456,7 +1457,7 @@ public class VehicleManageController {
                 isOk = true;
                 return ResponseMsgUtil.success(result);
             }
-            AlarmRecord alarmRecord = alarmRecordService.getRecordById(alarmIdList.get(0));
+            AlarmRecord alarmRecord = alarmRecordService.getAlarmForEliById(alarmIdList.get(0));
             int terminalId = alarmRecord.getTerminalId();
             byte deviceType = alarmRecord.getDeviceType().byteValue();
             int deviceId = alarmRecord.getDeviceId();
@@ -1464,6 +1465,7 @@ public class VehicleManageController {
             Map<String, Object> eAlarmMap = new HashMap<>();
             eAlarmMap.put("userId", user.getId());
             eAlarmMap.put("vehicleId", vehicleId);
+            eAlarmMap.put("terminalId", terminalId);
             eAlarmMap.put("alarmIds", alarmIdBuf.array());
             eAlarmMap.put("app", isApp);
             eAlarmMap.put("lnt", longitude);
@@ -1567,7 +1569,7 @@ public class VehicleManageController {
             }
             if (stationType == null) {
                 result = "失败，站点类型为空！";
-                logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_NULL);
+                logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_NULL);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_NULL);
             }
             switch (controlType) {
@@ -1575,7 +1577,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_IN_OIL_DEPOT;
                     if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1583,7 +1585,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_OUT_OIL_DEPOT;
                     if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1591,7 +1593,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_IN_GAS_STATION;
                     if (stationType != RemoteControlConst.STATION_TYPE_2_STATION) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1599,7 +1601,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_OUT_GAS_STATION;
                     if (stationType != RemoteControlConst.STATION_TYPE_2_STATION) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1608,7 +1610,7 @@ public class VehicleManageController {
                     if (stationType < RemoteControlConst.STATION_TYPE_1_DEPOT
                             || stationType > RemoteControlConst.STATION_TYPE_2_STATION) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1617,7 +1619,7 @@ public class VehicleManageController {
                     if (stationType < RemoteControlConst.STATION_TYPE_1_DEPOT
                             || stationType > RemoteControlConst.STATION_TYPE_2_STATION) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1625,7 +1627,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_WAIT_OILDOM;
                     if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1633,7 +1635,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_BARRIER_IN;
                     if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1641,7 +1643,7 @@ public class VehicleManageController {
                     type |= LogTypeConst.TYPE_BARRIER_OUT;
                     if (stationType != RemoteControlConst.STATION_TYPE_1_DEPOT) {
                         result = "失败，站点类型无效！";
-                        logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
+                        logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.STATION_TYPE_INVALID);
                         return ResponseMsgUtil.error(RemoteControlErrorEnum.STATION_TYPE_INVALID);
                     }
                     break;
@@ -1675,36 +1677,47 @@ public class VehicleManageController {
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.VEHICLE_UNBINDED);
             }
             int terminalId = vehicle.getVehicleDevice().getDeviceId();
-
+            Long carId = vehicle.getId();
             int lockNum = 0;
             byte[] lockIdBuf = null;
+            byte[] lockDevIdBuf = null;
             if (controlType == RemoteControlConst.REMOTE_TYPE_5_INTO_URGENT) {
                 if (lockIds == null) {
                     result = "失败，锁设备ID列表为空！";
-                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.LOCK_IDS_NULL);
+                    logger.error("远程车辆进出失败：{}", RemoteControlErrorEnum.LOCK_IDS_NULL);
                     return ResponseMsgUtil.error(RemoteControlErrorEnum.LOCK_IDS_NULL);
                 }
                 if (!lockIds.trim().isEmpty()) {
-                    String[] lockArr = lockIds.split(",");
-                    lockNum = lockArr.length;
+                    List<Lock> locks = vehicleService.findIdsByDevIds(carId, lockIds);
+                    lockNum = locks.size();
                     lockIdBuf = new byte[lockNum * 4];
+                    lockDevIdBuf = new byte[lockNum * 4];
                     for (int i = 0; i < lockNum; i++) {
-                        int lockId = Integer.parseInt(lockArr[i], 10);
-                        lockIdBuf[i * 4] = (byte) (lockId & 0xff);
-                        lockIdBuf[i * 4 + 1] = (byte) ((lockId >> 8) & 0xff);
-                        lockIdBuf[i * 4 + 2] = (byte) ((lockId >> 16) & 0xff);
-                        lockIdBuf[i * 4 + 3] = (byte) ((lockId >> 24) & 0xff);
+                        Lock lock = locks.get(i);
+                        int id = lock.getId().intValue();
+                        int devId = lock.getLockId();
+                        lockIdBuf[i * 4] = (byte) (id & 0xff);
+                        lockIdBuf[i * 4 + 1] = (byte) ((id >> 8) & 0xff);
+                        lockIdBuf[i * 4 + 2] = (byte) ((id >> 16) & 0xff);
+                        lockIdBuf[i * 4 + 3] = (byte) ((id >> 24) & 0xff);
+
+                        lockDevIdBuf[i * 4] = (byte) (devId & 0xff);
+                        lockDevIdBuf[i * 4 + 1] = (byte) ((devId >> 8) & 0xff);
+                        lockDevIdBuf[i * 4 + 2] = (byte) ((devId >> 16) & 0xff);
+                        lockDevIdBuf[i * 4 + 3] = (byte) ((devId >> 24) & 0xff);
                     }
                 }
             }
 
             Map<String, Object> map = new HashMap<>(16);
             map.put("userId", user.getId());
-            map.put("carId", vehicle.getId());
+            map.put("carId", carId);
+            map.put("terminalId", terminalId);
             map.put("type", controlType);
             map.put("stationType", stationType);
             map.put("stationId", stationId);
             map.put("lockIds", lockIdBuf);
+            map.put("lockDevIds", lockDevIdBuf);
             map.put("isApp", isApp);
             map.put("longitude", longitude);
             map.put("latitude", latitude);
@@ -1867,28 +1880,6 @@ public class VehicleManageController {
             } else {
                 storeIds = 0;
             }
-            int lockNum = 0;
-            byte[] lockIdBuf = null;
-            if (status == RemoteControlConst.VEHICLE_STATUS_5_URGENT) {
-                if (lockIds == null) {
-                    result = "失败，锁设备ID列表为空！";
-                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.LOCK_IDS_NULL);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.LOCK_IDS_NULL);
-                }
-                if (!lockIds.trim().isEmpty()) {
-                    String[] lockArr = lockIds.split(",");
-                    lockNum = lockArr.length;
-                    lockIdBuf = new byte[lockNum * 4];
-                    for (int i = 0; i < lockNum; i++) {
-                        int lockId = Integer.parseInt(lockArr[i], 10);
-                        lockIdBuf[i * 4] = (byte) (lockId & 0xff);
-                        lockIdBuf[i * 4 + 1] = (byte) ((lockId >> 8) & 0xff);
-                        lockIdBuf[i * 4 + 2] = (byte) ((lockId >> 16) & 0xff);
-                        lockIdBuf[i * 4 + 3] = (byte) ((lockId >> 24) & 0xff);
-                    }
-                }
-            }
-
             Vehicle vehicle = vehicleService.getByCarNo(carNumber);
             if (vehicle == null) {
                 result = "失败，车辆不存在！";
@@ -1900,15 +1891,61 @@ public class VehicleManageController {
                 logger.error("远程车辆状态强制变更失败：车辆{}未绑定车载终端！", carNumber);
                 return ResponseMsgUtil.error(RemoteControlErrorEnum.VEHICLE_UNBINDED);
             }
+            Long carId = vehicle.getId();
+            int lockNum = 0;
+            byte[] lockIdBuf = null;
+            byte[] lockDevIdBuf = null;
+            if (status == RemoteControlConst.VEHICLE_STATUS_5_URGENT) {
+                if (lockIds == null) {
+                    result = "失败，锁设备ID列表为空！";
+                    logger.error("远程车辆状态强制变更失败：{}", RemoteControlErrorEnum.LOCK_IDS_NULL);
+                    return ResponseMsgUtil.error(RemoteControlErrorEnum.LOCK_IDS_NULL);
+                }
+
+                if (!lockIds.trim().isEmpty()) {
+                    List<Lock> locks = vehicleService.findIdsByDevIds(carId, lockIds);
+                    lockNum = locks.size();
+                    lockIdBuf = new byte[lockNum * 4];
+                    lockDevIdBuf = new byte[lockNum * 4];
+                    for (int i = 0; i < lockNum; i++) {
+                        Lock lock = locks.get(i);
+                        int id = lock.getId().intValue();
+                        int devId = lock.getLockId();
+                        lockIdBuf[i * 4] = (byte) (id & 0xff);
+                        lockIdBuf[i * 4 + 1] = (byte) ((id >> 8) & 0xff);
+                        lockIdBuf[i * 4 + 2] = (byte) ((id >> 16) & 0xff);
+                        lockIdBuf[i * 4 + 3] = (byte) ((id >> 24) & 0xff);
+
+                        lockDevIdBuf[i * 4] = (byte) (devId & 0xff);
+                        lockDevIdBuf[i * 4 + 1] = (byte) ((devId >> 8) & 0xff);
+                        lockDevIdBuf[i * 4 + 2] = (byte) ((devId >> 16) & 0xff);
+                        lockDevIdBuf[i * 4 + 3] = (byte) ((devId >> 24) & 0xff);
+                    }
+                    // String[] lockArr = lockIds.split(",");
+                    // lockNum = lockArr.length;
+                    // lockDevIdBuf = new byte[lockNum * 4];
+                    // for (int i = 0; i < lockNum; i++) {
+                    //     int lockId = Integer.parseInt(lockArr[i], 10);
+                    //
+                    //     lockDevIdBuf[i * 4] = (byte) (lockId & 0xff);
+                    //     lockDevIdBuf[i * 4 + 1] = (byte) ((lockId >> 8) & 0xff);
+                    //     lockDevIdBuf[i * 4 + 2] = (byte) ((lockId >> 16) & 0xff);
+                    //     lockDevIdBuf[i * 4 + 3] = (byte) ((lockId >> 24) & 0xff);
+                    // }
+                }
+            }
+
             int terminalId = vehicle.getVehicleDevice().getDeviceId();
             Map<String, Object> map = new HashMap<>(16);
             map.put("userId", user.getId());
-            map.put("carId", vehicle.getId());
+            map.put("carId", carId);
+            map.put("terminalId", terminalId);
             map.put("type", RemoteControlConst.REMOTE_TYPE_7_ALTER_STATUS);
             map.put("stationType", stationType);
             map.put("stationId", stationId);
             map.put("storeIds", storeIds);
             map.put("lockIds", lockIdBuf);
+            map.put("lockDevIds", lockDevIdBuf);
             map.put("isApp", isApp);
             map.put("longitude", longitude);
             map.put("latitude", latitude);
@@ -1927,7 +1964,7 @@ public class VehicleManageController {
             ByteBuffer dataBuffer;
             if (lockNum > 0) {
                 dataBuffer = SendPacketBuilder.buildDataBufForCarStatusUrgent(remoteControlId,
-                        stationType, stationId, (byte) lockNum, lockIdBuf, userName);
+                        stationType, stationId, (byte) lockNum, lockDevIdBuf, userName);
             } else {
                 dataBuffer = SendPacketBuilder.buildDataBufForCarStatusAlter(remoteControlId,
                         status, stationType, stationId, storeIds.byteValue(), userName);
@@ -2017,7 +2054,13 @@ public class VehicleManageController {
                 logger.error("远程开锁重置失败：{}", RemoteLockResetErrorEnum.VEHICLE_INVALID);
                 return ResponseMsgUtil.error(RemoteLockResetErrorEnum.VEHICLE_INVALID);
             }
-            if (vehicle.getVehicleDevice() == null || vehicle.getVehicleDevice().getDeviceId() == 0) {
+            if (vehicle.getVehicleDevice() == null) {
+                result = "失败，车辆未绑定车台！";
+                logger.error("远程开锁重置失败：{}", RemoteLockResetErrorEnum.VEHICLE_UNBINDED);
+                return ResponseMsgUtil.error(RemoteLockResetErrorEnum.VEHICLE_UNBINDED);
+            }
+            Integer terminalId = vehicle.getVehicleDevice().getDeviceId();
+            if (terminalId == null || terminalId == 0) {
                 result = "失败，车辆未绑定车台！";
                 logger.error("远程开锁重置失败：{}", RemoteLockResetErrorEnum.VEHICLE_UNBINDED);
                 return ResponseMsgUtil.error(RemoteLockResetErrorEnum.VEHICLE_UNBINDED);
@@ -2031,6 +2074,7 @@ public class VehicleManageController {
                 int lockId = Integer.parseInt(lockIdStr, 10);
                 map = new HashMap<>();
                 map.put("carId", vehicle.getId());
+                map.put("terminalId", terminalId);
                 map.put("lockId", lockId);
                 map.put("userId", user.getId());
                 map.put("isApp", isApp);
@@ -2049,7 +2093,6 @@ public class VehicleManageController {
                 resetIds.append(resetId).append(',');
             }
             resetIds.deleteCharAt(resetIds.length() - 1);
-            int terminalId = vehicle.getVehicleDevice().getDeviceId();
 
             params.put("resetIds", resetIds.toString());
             cacheId = addCache(UdpBizId.LOCK_OPEN_RESET_REQUEST, logId, description, params);

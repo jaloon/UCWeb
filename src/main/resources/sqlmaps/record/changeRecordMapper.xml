@@ -20,7 +20,7 @@
         <result column="happen_time" property="createDate" />
         <result column="is_app" property="isApp" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		t.id									id,
 		c.vehicle_number						vehicle_number,
 		t.user_id								user_id,
@@ -55,7 +55,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		SELECT
-			<include refid="select_colums"></include> 
+			<include refid="select_columns"></include> 
 		FROM
 			<include refid="from_tables"></include> 
 		WHERE
@@ -64,7 +64,7 @@
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
 		SELECT
-			<include refid="select_colums"></include> 
+			<include refid="select_columns"></include> 
 		FROM
 			<include refid="from_tables"></include> 
 		WHERE
@@ -88,7 +88,7 @@
 	
 	<select id="findByPage" resultMap="fullResultMap">
 		SELECT
-			<include refid="select_colums"></include> 
+			<include refid="select_columns"></include> 
 		FROM
 			<include refid="from_tables"></include> 
 		WHERE
@@ -108,14 +108,14 @@
 	
 	<insert id="addByChangeInfo" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.ChangeInfo">
 		insert into
-		tbl_remote_change_gasstation(user_id,vehicle_id,transport_id,changed_transport_id,is_app,is_lnglat_valid,longitude,latitude)
-		values(#{userId},#{carId},#{transportId},#{changedTransportId},ifnull(#{isApp},0),ifnull(#{isLocationValid},0),ifnull(#{longitude},0),ifnull(#{latitude},0))
+		tbl_remote_change_gasstation(user_id,vehicle_id,device_id,transport_id,changed_transport_id,is_app,is_lnglat_valid,longitude,latitude)
+		values(#{userId},#{carId},IFNULL(#{terminalId}, 0),#{transportId},#{changedTransportId},ifnull(#{isApp},0),ifnull(#{isLocationValid},0),ifnull(#{longitude},0),ifnull(#{latitude},0))
 	</insert>
 	
 	<insert id="addByChangedDistribution" useGeneratedKeys="true" keyProperty="changeId" parameterType="java.util.Map">
 		insert into
-		tbl_remote_change_gasstation(user_id,vehicle_id,transport_id,changed_transport_id)
-		values(#{userId},#{carId}, #{transportId},#{changedTransportId})
+		tbl_remote_change_gasstation(user_id,vehicle_id,device_id,transport_id,changed_transport_id)
+		values(#{userId},#{carId},IFNULL(#{terminalId}, 0), #{transportId},#{changedTransportId})
 	</insert>
 	
 	<select id="getChangeIdByTransportIdAndChangedTransportId" resultType="java.lang.Long">

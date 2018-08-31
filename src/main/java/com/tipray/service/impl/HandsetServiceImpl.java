@@ -21,7 +21,6 @@ import java.util.List;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("handsetService")
 public class HandsetServiceImpl implements HandsetService {
 	@Resource
@@ -31,6 +30,7 @@ public class HandsetServiceImpl implements HandsetService {
 	@Resource
 	private GasStationDao gasStationDao;
 
+	@Transactional
 	@Override
 	public Handset addHandset(Handset handset) {
 		if (handset != null) {
@@ -50,6 +50,7 @@ public class HandsetServiceImpl implements HandsetService {
 		return handset;
 	}
 
+	@Transactional
 	@Override
 	public Handset updateHandset(Handset handset) {
 		if (handset != null) {
@@ -58,6 +59,7 @@ public class HandsetServiceImpl implements HandsetService {
 		return handset;
 	}
 
+    @Transactional
 	@Override
 	public void deleteHandsetById(Long id) {
         if (id == null) {
@@ -76,7 +78,6 @@ public class HandsetServiceImpl implements HandsetService {
 	@Override
 	public Handset getByGasStationId(Long gasStationId) {
 		return gasStationId == null ? null : handsetDao.getByGasStationId(gasStationId);
-
 	}
 
 	@Override
@@ -120,5 +121,4 @@ public class HandsetServiceImpl implements HandsetService {
 	public List<Integer> findUnusedHandset() {
 		return handsetDao.findUnusedHandset();
 	}
-
 }

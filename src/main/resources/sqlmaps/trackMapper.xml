@@ -101,6 +101,10 @@
         <result column="vehicle_alarm_status" property="terminalAlarm"/>
         <result column="angle" property="angle"/>
         <result column="speed" property="speed"/>
+        <result column="last_valid_longitude" property="lastValidLongitude"/>
+        <result column="last_valid_latitude" property="lastValidLatitude"/>
+        <result column="last_valid_angle" property="lastValidAngle"/>
+        <result column="last_valid_speed" property="lastValidSpeed"/>
         <result column="lock_status_info" property="lockStatusInfo"/>
         <result column="track_time" property="trackTime"/>
         <result column="gmt_modified" property="createTime"/>
@@ -110,12 +114,17 @@
         <![CDATA[
         SELECT
             t2.*,
+            t1.is_lnglat_valid,
             t1.longitude,
             t1.latitude,
             t1.vehicle_status,
             t1.vehicle_alarm_status,
             t1.angle,
             t1.speed,
+            t1.last_valid_longitude,
+            t1.last_valid_latitude,
+            t1.last_valid_angle,
+            t1.last_valid_speed,
             t1.lock_status_info,
             t1.track_time
         FROM
@@ -125,7 +134,7 @@
                 s.vehicle_id,
                 v.vehicle_number,
                 v.trans_company_id com_id,
-                IFNULL( c.NAME, '' ) com_name
+                IFNULL( c.`name`, '' ) com_name
             FROM
                 tbl_vehicle_realtime_status s,
                 tbl_vehicle v
@@ -137,7 +146,7 @@
             ) t2
         WHERE
             t1.vehicle_id = t2.vehicle_id
-            AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id );
+            AND t1.track_time = ( SELECT MAX( t3.track_time ) FROM tbl_vehicle_newest_track t3 WHERE t3.vehicle_id = t1.vehicle_id )
         ORDER BY t1.track_time
         ]]>
     </select>
@@ -160,7 +169,12 @@
             speed,
             HEX( lock_status_info ) lock_status_info,
             track_time,
-            UNIX_TIMESTAMP(track_time) timestamp
+            UNIX_TIMESTAMP(track_time) timestamp,
+            last_valid_longitude,
+            last_valid_latitude,
+            last_valid_angle,
+            last_valid_speed,
+            last_valid_track_time
         FROM
             tbl_vehicle_newest_track
         WHERE

@@ -1,9 +1,10 @@
 package com.tipray.service;
 
-import java.util.List;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.Record;
+
+import java.util.List;
 
 /**
  * RecordService
@@ -12,7 +13,7 @@ import com.tipray.bean.Page;
  * @version 1.0 2017-12-22
  *
  */
-public interface RecordService<T> {
+public interface RecordService<T extends Record> {
 	/**
 	 * 根据Id获取记录
 	 * 

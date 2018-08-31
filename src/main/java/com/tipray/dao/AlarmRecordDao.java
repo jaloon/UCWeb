@@ -19,6 +19,13 @@ import java.util.Map;
 @MyBatisAnno
 public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
     /**
+     * 为消除报警获取报警记录
+     * @param id 报警ID
+     * @return
+     */
+    AlarmRecord getAlarmForEliById(Long id);
+
+    /**
      * 根据报警ID集合获取报警记录
      *
      * @param ids       {@link String} 报警ID集合，英文“,”分隔
@@ -67,10 +74,10 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
 
     /**
      * 更新远程消除报警完成
-     *
+     * @param eliminateId {@link Integer} 报警消除ID
      * @param alarmIds    {@link String} 报警ID集合
      */
-    void updateEliminateAlarmDone(String alarmIds);
+    void updateEliminateAlarmDone(@Param("eliminateId") Integer eliminateId, @Param("alarmIds") String alarmIds);
 
     /**
      * 更新先前同位置设备同类型报警的报警状态为远程消除
@@ -112,5 +119,4 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
      * @return 未消除的报警信息
      */
     List<Map<String, Object>> findNotElimitedForApp();
-
 }

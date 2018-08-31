@@ -146,9 +146,6 @@ public class SealRecord extends Record {
         if (authid != null) {
             sb.append(", authid=").append(authid);
         }
-        if (getStation() != null) {
-            sb.append(", station='").append(getStation()).append('\'');
-        }
         if (alarm != null) {
             sb.append(", alarm='").append(alarm).append('\'');
         }

@@ -1,14 +1,13 @@
 package com.tipray.test;
 
-import javax.annotation.Resource;
-
+import com.tipray.bean.Session;
+import com.tipray.service.SessionService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.tipray.bean.Session;
-import com.tipray.service.SessionService;
+import javax.annotation.Resource;
 
 /**
  * session管理测试
@@ -25,7 +24,7 @@ public class SessionTest {
 
 	@Test
 	public void getSessionByUser() {
-		Session session = sessionService.getSessionByUser(5L);
+		Session session = sessionService.getSessionByUser(5L, 0);
 		System.out.println();
 		System.out.println(session);
 		System.out.println();

@@ -4,6 +4,7 @@ import com.tipray.bean.Session;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
@@ -66,10 +67,11 @@ public interface SessionDao extends BaseDao<Session> {
 	/**
 	 * 根据操作员ID获取session
 	 * 
-	 * @param userId
+	 * @param userId 操作员ID
+	 * @param isApp 是否手机登录
 	 * @return
 	 */
-    List<Session> getByUser(Long userId);
+    List<Session> getByUser(@Param("userId") Long userId, @Param("isApp") Integer isApp);
 
 	/**
 	 * 获取session列表

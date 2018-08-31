@@ -5,6 +5,7 @@ var trackLayer;
 var timer; //定时器
 var index = 0; //轨迹回放到第几个point
 var tracks = []; //轨迹点
+var prePoint; //前一个有效轨迹点
 
 var doubtableMarkers = [];
 
@@ -84,49 +85,49 @@ var opt_1 = {
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_2 = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_3 = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_4 = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_5 = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_6 = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_7 = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 var opt_else = {
     strokeColor: "green",
     strokeWeight: 3,
     strokeStyle: "dashed",
     strokeOpacity: 0.8
-}
+};
 
 $(function () {
     $(window).resize(function () {
@@ -277,7 +278,7 @@ $(function () {
                     + "<tr><td>GPS坐标：</td><td>" + track.longitude + ", " + track.latitude + "</td></tr>"
                     + "<tr><td>终端状态：</td><td>" + parseTerminalAlarm(track.terminalAlarm) + "</td></tr>"
                     + "<tr><td style='vertical-align: top;'>锁状态：</td><td>" + locks + "</td></tr>";
-                    + "</table>"
+                +"</table>"
                 var opts = {
                     // width : 200,     // 信息窗口宽度
                     // height: 100,     // 信息窗口高度
@@ -319,43 +320,42 @@ $(function () {
         var tr = $(trs[index]);
         tr.addClass("active replayed");
         $(".table-body").scrollTop(index * $(".table-body")[0].scrollHeight / len);
-        var bd09 = wgs84tobd09(tracks[index].longitude, tracks[index].latitude);
-        var point = new BMap.Point(bd09[0], bd09[1]);
-        // var point = new BMap.Point(tracks[index].longitude, tracks[index].latitude);
-        if (index > 0) {
-            var prebd09 = wgs84tobd09(tracks[index - 1].longitude, tracks[index - 1].latitude);
-            var prePoint = new BMap.Point(prebd09[0], prebd09[1]);
-            // var prePoint = new BMap.Point(tracks[index - 1].longitude, tracks[index - 1].latitude);
-            map.addOverlay(new BMap.Polyline([prePoint, point], getLineOpts(tracks[index].carStatus)));
+        if (tracks[index].coorValid) {
+            var bd09 = wgs84tobd09(tracks[index].longitude, tracks[index].latitude);
+            var point = new BMap.Point(bd09[0], bd09[1]);
+            // var point = new BMap.Point(tracks[index].longitude, tracks[index].latitude);
+            if (index > 0 && prePoint != undefined) {
+                map.addOverlay(new BMap.Polyline([prePoint, point], getLineOpts(tracks[index].carStatus)));
+            }
+            initCarIcon(tracks[index].alarm);
+            carMarker = new BMap.Marker(point, {
+                icon: carIcon,
+                rotation: -tracks[index].angle
+            });
+            // carLabel = new BMap.Label(tracks[index].carNumber + ", " + tracks[index].carStatus, {
+            //     position: point,
+            //     offset: new BMap.Size(-32, -18)
+            // });
+            carLabel = new BMap.Label(index + 1, {
+                position: point,
+                // offset: new BMap.Size(30, 0)
+            });
+            carLabel.setStyle({
+                color: "red",
+                fontSize: "10px",
+                minWidth: "16px",
+                height: "16px",
+                lineHeight: "16px",
+                fontFamily: "微软雅黑"
+            });
+            carLabel.setZIndex(10000 + index);
+            carMarker.setLabel(carLabel);
+            map.addOverlay(carMarker);
+            // 图随点移
+            map.panTo(point);
+            prePoint = point;
         }
-
-        initCarIcon(tracks[index].alarm);
-        carMarker = new BMap.Marker(point, {
-            icon: carIcon,
-            rotation: -tracks[index].angle
-        });
-        // carLabel = new BMap.Label(tracks[index].carNumber + ", " + tracks[index].carStatus, {
-        //     position: point,
-        //     offset: new BMap.Size(-32, -18)
-        // });
-        carLabel = new BMap.Label(index + 1, {
-            position: point,
-            // offset: new BMap.Size(30, 0)
-        });
-        carLabel.setStyle({
-            color: "red",
-            fontSize: "10px",
-            minWidth: "16px",
-            height: "16px",
-            lineHeight: "16px",
-            fontFamily: "微软雅黑"
-        });
-        carLabel.setZIndex(10000 + index);
-        carMarker.setLabel(carLabel);
-        map.addOverlay(carMarker);
         index++;
-        // 图随点移
-        map.panTo(point);
         if (index < tracks.length) {
             interval = $("#text_interval").val();
             timer = window.setTimeout(play, parseInt(interval));
@@ -456,43 +456,67 @@ $(function () {
                 if (trackLayer == undefined) {
                     trackLayer = layer.open({
                         type: 1,
-                        title: ['车辆轨迹回放', 'font-size:14px;color:#ffffff;background:#478de4;'],
+                        title: ['轨迹列表', 'font-size:14px;color:#ffffff;background:#478de4;'],
                         shade: 0,
                         area: '770px',
                         offset: 'r',
                         resize: false,
                         content: $('#tracks'),
+                        maxmin: true,
+                        full: function (layero) {
+                            layer.restore(trackLayer)
+                        },
+                        min: function (layero) {
+                            $(".layui-layer-max").show();
+                            setTimeout(function () {
+                                layero.css({
+                                    left: 'auto'
+                                    , right: 0
+                                    , bottom: 0
+                                });
+                            }, 0);
+                        },
+                        restore: function (layero) {
+                            $(".layui-layer-max").hide();
+                        },
                         end: function () {
                             stop();
                             btn_start.attr('disabled', true);
                             tracks.length = 0;
+                            doubtableMarkers.length = 0;
                             trackLayer = undefined;
                         }
                     });
+                    $(".layui-layer-max").hide();
                 }
                 stop();
+                doubtableMarkers.length = 0;
                 doubtable_points.forEach(function (item) {
                     var bd09 = wgs84tobd09(item.longitude, item.latitude);
                     var point = new BMap.Point(bd09[0], bd09[1]);
-                    var marker = new BMap.Marker(point, {
+                    var opts = {
                         // 初始化警告标志的symbol
-                        icon: new BMap.Symbol(BMap_Symbol_SHAPE_WARNING, {
-                            scale: 3,
-                            strokeWeight: 1,
-                            strokeColor: 'red'
-                        })
-                    });
+                        // icon: new BMap.Symbol(BMap_Symbol_SHAPE_WARNING, {
+                        //     scale: 2,
+                        //     strokeWeight: 1,
+                        //     strokeColor: 'red'
+                        // })
+                    };
+                    var marker = new BMap.Marker(point, opts);
                     marker.addEventListener("click", function () {
                         var infoWindow = new BMap.InfoWindow("坐标：" + item.longitude + ", " + item.latitude); // 创建信息窗口对象
                         map.openInfoWindow(infoWindow, point); //开启信息窗口
                         map.panTo(point);
                     });
+                    doubtableMarkers.push(marker);
                     map.addOverlay(marker);
+                    marker.hide();
                 });
                 tracks = retracks;
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {
@@ -510,6 +534,18 @@ $(function () {
         });
     }
 
+    function toggleDoubtableMarkers() {
+        if ($("#toggle_button").prop("checked")) {
+            doubtableMarkers.forEach(function (marker) {
+                marker.show();
+            });
+        } else {
+            doubtableMarkers.forEach(function (marker) {
+                marker.hide();
+            });
+        }
+    }
+
     function start() {
         map.clearOverlays(); //清除地图上所有覆盖物
         btn_gps.attr('disabled', true);
@@ -518,6 +554,7 @@ $(function () {
         btn_pause.attr('disabled', false);
         btn_go_on.attr('disabled', true);
         map.setZoom(18);
+        toggleDoubtableMarkers();
         play();
     }
 
@@ -532,6 +569,7 @@ $(function () {
             window.clearTimeout(timer);
         }
         map.clearOverlays(); //清除地图上所有覆盖物
+        $("#toggle_button").prop("checked", false);
         index = 0;
         // map.panTo(centerPoint);
     }
@@ -564,4 +602,6 @@ $(function () {
     btn_stop.click(stop);
     btn_pause.click(pause);
     btn_go_on.click(goOn);
+
+    $("#toggle_button").click(toggleDoubtableMarkers);
 });

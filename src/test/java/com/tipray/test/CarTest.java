@@ -148,7 +148,7 @@ public class CarTest {
         List<Long> alarmIds = new ArrayList<>();
         alarmIds.addAll(alarmRecordService.findSameAlarmIdsById(21l));
         alarmRecordDao.updateAlarmEliminated(68, alarmIds);
-        alarmRecordDao.updateEliminateAlarmDone("21");
+        alarmRecordDao.updateEliminateAlarmDone(1,"21");
     }
 
     @Test

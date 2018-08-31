@@ -18,12 +18,12 @@ import java.util.Map;
  * @author chenlong
  * @version 1.0 2018-04-10
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("vehicleManageLogService")
 public class VehicleManageLogServiceImpl implements VehicleManageLogService {
     @Resource
     private VehicleManageLogDao vehicleManageLogDao;
 
+    @Transactional
     @Override
     public VehicleManageLog addVehicleManageLog(VehicleManageLog vehicleManageLog) {
         if (vehicleManageLog != null) {
@@ -32,6 +32,7 @@ public class VehicleManageLogServiceImpl implements VehicleManageLogService {
         return vehicleManageLog;
     }
 
+    @Transactional
     @Override
     public VehicleManageLog updateVehicleManageLog(VehicleManageLog vehicleManageLog) {
         if (vehicleManageLog != null) {
@@ -77,5 +78,4 @@ public class VehicleManageLogServiceImpl implements VehicleManageLogService {
     public VehicleManageLog findUdpReplyLog(Map<String, Object> map) {
         return vehicleManageLogDao.findUdpReplyLog(map);
     }
-
 }

@@ -88,6 +88,7 @@ public interface DistributionRecordDao extends BaseDao<DistributionRecord> {
 	 * @param distributionMap
 	 *            {@link Map} 物流配送接口信息：<br>
 	 *            {@link Long} carId 车辆ID，<br>
+	 *            {@link Integer} terminalId 车台设备ID，<br>
 	 *            {@link String} distributNO 配送单号，<br>
 	 *            {@link String} effectDate 配送单据时间，<br>
 	 *            {@link String} vehicNo 车号，<br>
@@ -117,7 +118,15 @@ public interface DistributionRecordDao extends BaseDao<DistributionRecord> {
 	 * @param invoice
 	 *            {@link String} 配送单号
 	 */
-    Integer countByInvoice(String invoice);
+    Integer countInvoice(String invoice);
+
+    /**
+     * 根据配送单号统计待配送记录数量
+     *
+     * @param invoice
+     *            {@link String} 配送单号
+     */
+    Integer countWaitInvoice(String invoice);
 
 	/**
 	 * 根据车辆ID和仓号检查先前的配送记录，若有未完成或未知状态的记录，改为配送完成状态

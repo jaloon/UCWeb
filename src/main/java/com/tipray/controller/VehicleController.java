@@ -177,6 +177,18 @@ public class VehicleController extends BaseAction {
     }
 
     /**
+     * 根据车牌号获取车载终端设备ID
+     *
+     * @param carNo {@link String} 车牌号
+     * @return {@link Integer} 车载终端设备ID
+     */
+    @RequestMapping(value = "getTerminalIdByCarNo.do")
+    @ResponseBody
+    public Integer getTerminalIdByCarNo(String carNo) {
+        return vehicleService.getTerminalIdByCarNo(carNo);
+    }
+
+    /**
      * 根据车载终端ID获取车辆信息
      *
      * @param terminalId 车载终端ID

@@ -41,7 +41,7 @@ public class ElockClient {
 		// 例如<wsdl:port name="ElockSoap" binding="tns:ElockSoap">)
 		ElockSoap elockSoap = service.getPort(ElockSoap.class);
 		// 调用查询方法
-		String result = elockSoap.SetPlan(txt);
+		String result = elockSoap.setPlan(txt);
 		return result;
 	}
 

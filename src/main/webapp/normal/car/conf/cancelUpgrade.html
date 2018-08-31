@@ -105,7 +105,7 @@
 <div class="container">
     <div class="search-zone">
         <input type="text" id="carno" placeholder="请输入车牌号查询">
-        <input type="button" class="button" id="delete" value="删除">
+        <input type="button" class="button" id="delete" value="取消升级">
     </div>
     <div class="table-cont" id="cancel_box">
         <table width="100%">
@@ -209,6 +209,7 @@
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadIndex);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {

@@ -6,11 +6,11 @@ import com.tipray.bean.track.LastTrack;
 import com.tipray.cache.RC4KeyCache;
 import com.tipray.constant.CenterConst;
 import com.tipray.core.CenterVariableConfig;
-import com.tipray.dao.TrackDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.service.AppService;
+import com.tipray.service.SqliteSyncService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.JSONUtil;
 import com.tipray.util.OkHttpUtil;
@@ -42,7 +42,9 @@ public class ScheduledJob {
     @Resource
     private AlarmRecordService alarmRecordService;
     @Resource
-    private TrackDao trackDao;
+    private SqliteSyncService sqliteSyncService;
+    // @Resource
+    // private TrackDao trackDao;
     private AlarmWebSocketHandler alarmWebSocketHandler = new AlarmWebSocketHandler();
     private MonitorWebSocketHandler monitorWebSocketHandler = new MonitorWebSocketHandler();
     /**
@@ -109,5 +111,12 @@ public class ScheduledJob {
         if (lastTracks != null) {
             monitorWebSocketHandler.pushLastTracks(lastTracks);
         }
+    }
+
+    /**
+     * 车辆基础配置信息sqlite文件同步任务
+     */
+    public void executeSqliteSync() {
+        sqliteSyncService.syncSqliteFile();
     }
 }

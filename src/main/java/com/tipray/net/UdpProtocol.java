@@ -5,6 +5,7 @@ import com.tipray.bean.ResponseMsg;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.RC4KeyCache;
 import com.tipray.cache.VehicleCompanyRelationCache;
+import com.tipray.cache.VehicleTrackTimeCache;
 import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.mq.MyQueue;
@@ -12,14 +13,27 @@ import com.tipray.mq.MyQueueElement;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
 import com.tipray.net.constant.UdpReplyErrorTag;
-import com.tipray.util.*;
+import com.tipray.util.ArraysUtil;
+import com.tipray.util.BytesConverterByBigEndian;
+import com.tipray.util.BytesConverterByLittleEndian;
+import com.tipray.util.BytesUtil;
+import com.tipray.util.CRCUtil;
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.RC4Util;
+import com.tipray.util.ResponseMsgUtil;
+import com.tipray.websocket.handler.TrackCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * UDP协议
@@ -271,7 +285,9 @@ public class UdpProtocol {
         // 密钥版本号和加密数据通过 CRC校验算法得出CRC校验码
         byte crc = CRCUtil.getCRC(Arrays.copyOf(buffer.array(), capacity - 1));
         buffer.put(crc);
-        logger.debug("UDP Client send: byte{}", Arrays.toString(buffer.array()));
+        if (logger.isDebugEnabled()) {
+            logger.debug("UDP Client send: byte{}", Arrays.toString(buffer.array()));
+        }
         return buffer;
     }
 
@@ -529,7 +545,9 @@ public class UdpProtocol {
     public void dealProtocolOfReceive(MyQueueElement element) {
         InetSocketAddress clientAddr = element.getClientAddr();
         byte[] receiveBuf = element.getReceiveBuf();
-        logger.debug("UDP Server receive: {} ==> byte{}", clientAddr, Arrays.toString(receiveBuf));
+        if (logger.isDebugEnabled()) {
+            logger.debug("UDP Server receive: {} ==> byte{}", clientAddr, Arrays.toString(receiveBuf));
+        }
         // 接收数据是否为空
         if (EmptyObjectUtil.isEmptyArray(receiveBuf)) {
             logger.error("接收数据为空！");
@@ -570,7 +588,9 @@ public class UdpProtocol {
         byte[] bizIdWord = Arrays.copyOfRange(receiveBizBuf, 9, 11);
         short bizId = BytesConverterByLittleEndian.getShort(bizIdWord);
         String hexBizId = BytesUtil.bytesToHex(ArraysUtil.reverse(bizIdWord), false);
-        logger.debug("receive udp biz id: 0x{}", hexBizId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("receive udp biz id: 0x{}", hexBizId);
+        }
 
         if (bizId == UdpBizId.LINK_HEARTBEAT_DETECTION) {
             // 链路维护心跳业务
@@ -841,7 +861,7 @@ public class UdpProtocol {
         index += 4;
         long carId = intCarId;
         if (!UdpReceiveResultHandler.checkCarOnline(carId)) {
-            logger.debug("车辆【{}】已离线！", carId);
+            logger.warn("车辆【{}】已离线！", carId);
             return;
         }
         // 运输公司
@@ -857,13 +877,27 @@ public class UdpProtocol {
         byte trackNum = receiveDataBuf[index];
         index++;
         if (trackNum < 1) {
-            logger.error("无轨迹信息");
+            logger.warn("无轨迹信息");
             return;
         }
         List<String> trackList = new ArrayList<>();
         StringBuffer trackBuf = null;
         // 轨迹相关信息
         for (int i = 0; i < trackNum; i++) {
+            byte[] positionTimeDWord = Arrays.copyOfRange(receiveDataBuf, index + 13, index + 17);
+            int positonTimeSecond = BytesConverterByLittleEndian.getInt(positionTimeDWord);
+            boolean isUp = VehicleTrackTimeCache.isUpdate(intCarId, positonTimeSecond);
+            if (!isUp) {
+                // 轨迹时间太旧，抛掉
+                continue;
+            }
+            Long dbTrackMillis = TrackCache.INSTANCE.getTrackTimeMillis(carId);
+            if (dbTrackMillis != null && dbTrackMillis > positonTimeSecond * 1000L) {
+                // 数据库轨迹时间较新，使用数据库轨迹缓存
+                trackList.add(TrackCache.INSTANCE.cacheTrack(carId));
+                VehicleTrackTimeCache.updateTime(intCarId, (int) (dbTrackMillis / 1000));
+                continue;
+            }
             trackBuf = new StringBuffer();
             trackBuf.append('{');
             trackBuf.append("\"biz\":\"track\",");
@@ -872,8 +906,8 @@ public class UdpProtocol {
             trackBuf.append("\"carNumber\":\"").append(carNumber).append('\"').append(',');
             trackBuf.append("\"carCom\":\"").append(carCom).append('\"').append(',');
             // 经纬度是否有效
-            // byte isLocationValid = receiveDataBuf[index];
-            // trackBuf.append("\"coorValid\":").append(isLocationValid).append(',');
+            byte isLocationValid = receiveDataBuf[index];
+            trackBuf.append("\"gpsValid\":").append(isLocationValid).append(',');
             index++;
             // 经度
             byte[] longitudeDword = Arrays.copyOfRange(receiveDataBuf, index, index + 4);
@@ -918,14 +952,13 @@ public class UdpProtocol {
             // 是否报警
             char alarm = isAlarm(terminalAlarm, lockNum, lockAlarms);
             trackBuf.append("\"alarm\":\"").append(alarm).append('\"');
-            // trackBuf.append("\"alarm\":\"").append(alarm).append('\"').append(',');
-            // trackBuf.append("\"online\":1"); // online：0.离线；1.在线
             trackBuf.append('}');
             trackList.add(trackBuf.toString());
         }
-        UdpReceiveResultHandler.handleTrack(carId, trackList);
+        if (trackList.size() > 0) {
+            UdpReceiveResultHandler.handleTrack(carId, trackList);
+        }
     }
-
 
     /**
      * 车辆状态
@@ -980,7 +1013,7 @@ public class UdpProtocol {
         // --------------------------------------------------------------------------------------
         // |8 			|7			|6		|5		|4			|3 			|2 		|1			|
         // --------------------------------------------------------------------------------------
-        // |开关状态		|是否可用	|保留	|保留	|进入应急	|异常开锁	|低电压	|通讯异常	|
+        // |开关状态		|是否可用	|保留	|异常移动|进入应急	|异常开锁	|低电压	|通讯异常	|
         // --------------------------------------------------------------------------------------
         for (int i = 0; i < lockNum; i++) {
             byte lockAlarm = lockAlarms[i];
@@ -990,5 +1023,4 @@ public class UdpProtocol {
         }
         return '否';
     }
-
 }

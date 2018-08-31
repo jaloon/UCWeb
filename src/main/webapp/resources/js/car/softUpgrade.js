@@ -1,144 +1,50 @@
-var add = false;
+var carCount = 0;
+var upgradeIndex;
 var fileLayer;
-var liObj;
-var onlineCarCount = 0;
+var type;
 
-function openFileLayer() {
-    var title = "修改";
-    if (add) {
-        title = "添加";
+function openFileLayer(title) {
+    var height;
+    if (type == 1) {
+        height = '181px';
+    } else if (type == 2) {
+        height = '253px';
+    } else if (type == 3) {
+        height = '289px';
     }
     fileLayer = layer.open({
         type: 1,
-        title: [title + '升级文件', 'font-size:14px;color:#ffffff;background:#478de4;'],
-        area: ['500px', '263px'],
+        title: ['升级文件' + title, 'font-size:14px;color:#ffffff;background:#478de4;'],
+        area: ['500px', height],
         content: $('.file'),
-        end: clearFileDiv()
+        end: function () {
+            console.log('close file layer')
+        }
     });
 }
 
-function clearFileDiv() {
-    $("#file_type").val("");
-    $("#file_name").val("");
-    $("#file_size").val("");
-    $("#file_crc").val("");
-}
-
-function addFile() {
-    add = true;
-    openFileLayer();
-}
-
-function delFile(obj) {
-    $(obj).closest("li").remove();
-}
-
-function alterFile(obj) {
-    add = false;
-    liObj = $(obj).closest("li");
-    openFileLayer();
-    $("#file_type").val(liObj.children().eq(2).html());
-    $("#file_name").val(liObj.children().eq(1).html());
-    $("#file_size").val(liObj.children().eq(3).html());
-    $("#file_crc").val(liObj.children().eq(4).html());
-}
-
-function aDown(obj) {
-    $(obj).css({
-        "color": "#ff0000",
-        "border-bottom-color": "#ff0000"
-    });
-}
-
-function aUp(obj) {
-    $(obj).css({
-        "color": "#551A8B",
-        "border-bottom-color": "#551A8B"
-    });
+function parseFileType(type) {
+    switch (type) {
+        case 2:
+            return "内核";
+        case 3:
+            return "文件系统";
+        case 4:
+            return "设备树";
+        case 100:
+            return "APP";
+        default:
+            return "未知";
+    }
 }
 
 $(function () {
-    $("#add").click(addFile);
-
-    $("#file_cancel").click(function () {
-        layer.close(fileLayer);
-    });
-
-    $("#file_confirm").click(function () {
-        var file_type = $("#file_type").val();
-        var file_name = $("#file_name").val();
-        var file_size = $("#file_size").val();
-        var file_crc = $("#file_crc").val();
-        if (isNull(file_type)) {
-            layer.alert('文件类型不能为空！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_type").select();
-            });
-            return;
-        }
-        if (!isInteger(file_type)) {
-            layer.alert('文件类型必需为数字！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_type").select();
-            });
-            return;
-        }
-        if (isNull(file_name)) {
-            layer.alert('文件名不能为空！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_name").select();
-            });
-            return;
-        }
-        if (isNull(file_size)) {
-            layer.alert('文件大小不能为空！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_size").select();
-            });
-            return;
-        }
-        if (!isInteger(file_size)) {
-            layer.alert('文件大小必需为数字！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_size").select();
-            });
-            return;
-        }
-        if (isNull(file_crc)) {
-            layer.alert('文件CRC32不能为空！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_crc").select();
-            });
-            return;
-        }
-        if (!isHEX(file_crc, 8)) {
-            layer.alert('文件CRC32不是有效的CRC码，请查证！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#file_crc").select();
-            });
-            return;
-        }
-        var liHtml = "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delFile(this)\">\n" +
-            "<span class=\"fname\" onclick=\"alterFile(this)\" onmousedown=\"aDown(this)\" onmouseup=\"aUp(this)\">" + file_name + "</span>" +
-            "<span style=\"display: none;\">" + file_type + "</span>" +
-            "<span style=\"display: none;\">" + file_size + "</span>" +
-            "<span style=\"display: none;\">" + file_crc + "</span></li>";
-        if (add) {
-            $("#files li:eq(-1)").before(liHtml);
-            // 用js控制div的滚动条,让它在内容更新时自动滚动到底部
-            $(".file-box").scrollTop($(".file-box")[0].scrollHeight);
-        } else {
-            liObj.replaceWith(liHtml);
-        }
-        layer.close(fileLayer);
-    });
-
     $.getJSON("../../../manage/car/findBindedVehicleTree.do",
         function (data, textStatus, jqXHR) {
-            onlineCarCount += data.length;
+            carCount += data.length;
 
-            if (isNull(data) || onlineCarCount == 0) {
-                layer.alert('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+            if (isNull(data) || carCount == 0) {
+                layer.alert('车辆数据异常，当前无可用车辆，请稍后重试！', {icon: 0}, function (index2) {
                     layer.close(index2);
                     parent.layer.close(index);
                 });
@@ -175,11 +81,12 @@ $(function () {
             }
         }
     });
+
     var carLayer;
     var terminalIds;
     $("#cars").click(function () {
-        if (onlineCarCount == 0) {
-            layer.alert('当前无在线车辆，请稍后重试！', {icon: 0}, function (index2) {
+        if (carCount == 0) {
+            layer.alert('车辆数据异常，当前无可用车辆，请稍后重试！', {icon: 0}, function (index2) {
                 layer.close(index2);
                 parent.layer.close(index);
             });
@@ -222,16 +129,36 @@ $(function () {
         var nodes = treeObj.getCheckedNodes(true);
         var carnos = "";
         terminalIds = "";
+        var selectedCarCount = 0;
         nodes.forEach(function (el) {
             if (el.id >= 0x01000001) {
-                carnos += el.name + ", ";
-                terminalIds += el.id + ",";
+                carnos += ", " + el.name;
+                terminalIds += "," + el.id;
+                selectedCarCount++;
             }
         });
-        carnos = carnos.substring(0, carnos.length - 2);
-        terminalIds = terminalIds.substring(0, terminalIds.length - 1);
+        if (selectedCarCount > 25) {
+            layer.alert('一次最多升级25辆车！当前待升级车辆数目：' + selectedCarCount, {icon: 0}, function (index2) {
+                carnos = "";
+                terminalIds = "";
+                $("#cars").val(carnos);
+                treeObj.checkAllNodes(false);
+                layer.close(index2);
+            });
+            return;
+        }
+        carnos = carnos.slice(2);
+        terminalIds = terminalIds.slice(1);
         $("#cars").val(carnos);
         layer.close(carLayer);
+    });
+
+    $("#type").change(function () {
+        if ($("#type").val() == 2) {
+            $("#match").closest("td").html("<input type='text' class='editInfo' value='否' readonly><input type='hidden' id='match' value='0'>");
+        } else {
+            $("#match").closest("td").html("<select class='editInfo' id='match'><option value=1>是</option><option value=0>否</option></select>");
+        }
     });
 
     var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
@@ -243,6 +170,13 @@ $(function () {
         var path = $("#path").val();
         if (isNull(path)) {
             layer.alert('FTP路径不能为空！', {icon: 2}, function (index2) {
+                layer.close(index2);
+                $("#path").select();
+            });
+            return;
+        }
+        if (path.endsWith("/")) {
+            layer.alert('FTP路径不能以【 / 】结尾！', {icon: 2}, function (index2) {
                 layer.close(index2);
                 $("#path").select();
             });
@@ -262,44 +196,49 @@ $(function () {
             });
             return;
         }
-        var fileNum = $("#files").children().length - 1;
-        if (fileNum == 0) {
-            layer.alert('升级文件不能为空！', {icon: 2}, function (index2) {
-                layer.close(index2);
-                $("#add").click();
-            });
-            return;
-        }
-        var files = [];
-        for (var i = 0; i < fileNum; i++) {
-            var li = $("#files").children().eq(i);
-            files.push({
-                type: parseInt(li.children().eq(2).html(), 10),
-                name: li.children().eq(1).html(),
-                size: parseInt(li.children().eq(3).html(), 10),
-                crc32: li.children().eq(4).html()
-            });
-        }
-        var upgrade_files = encodeURIComponent(JSON.stringify(files));
+
+        type = $("#type").val();
+        var match = $("#match").val();
+
         var loadIndex = layer.load();
-        $.post("../../../manage/remote/asyn_terminal_upgrade_request",
-            "terminal_ids=" + terminalIds + "&ftp_path=" + path + "&upgrade_files=" + upgrade_files +
+        $.post("../../../manage/remote/terminal_upgrade_file_info",
+            "terminal_ids=" + terminalIds + "&ftp_path=" + path + "&upgrade_type=" + type + "&match_ver=" + match +
             "&token=" + generateUUID(),
             function (data) {
-                layer.close(loadIndex);
                 if (data.id > 0) {
+                    layer.close(loadIndex);
                     layer.alert(data.msg, { icon: 2});
                 } else {
-                    layer.msg('请求发送成功！', {
+                    var msg = data.msg;
+                    upgradeIndex = msg.index;
+                    var ver = msg.ver;
+                    var title = "";
+                    if (!isNull(ver)) {
+                        title = "（ 版本：" + ver + " ）";
+                    }
+                    var files = msg.files;
+                    var tbodyHtml = "<tbody>";
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        tbodyHtml += "<tr><td class='file-type'>" + parseFileType(file.type) + "</td>" +
+                            "<td class='file-name'>" + file.name + "</td>" +
+                            "<td class='file-size'>" + file.size + "</td>" +
+                            "<td class='file-crc32'>" + file.crc32 + "</td></tr>";
+                    }
+                    tbodyHtml += "</tbody>";
+                    $(".file tbody").replaceWith(tbodyHtml);
+                    layer.close(loadIndex);
+                    layer.msg('请确认升级文件信息！', {
                         icon: 1,
                         time: 500
                     }, function () {
-                        parent.layer.close(index);
+                        openFileLayer(title);
                     });
                 }
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadIndex);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 0 || http_status > 600) {
@@ -313,6 +252,42 @@ $(function () {
                 } else {
                     layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
                 }
+            }
+        });
+    });
+
+    $("#file_cancel").click(function () {
+        layer.close(fileLayer);
+    });
+
+    $("#file_confirm").click(function () {
+        var loadIndex = layer.load();
+        $.post("../../../manage/remote/asyn_terminal_upgrade_request",
+            "index=" + upgradeIndex + "&token=" + generateUUID(),
+            function (data) {
+                layer.close(loadIndex);
+                if (data.id > 0) {
+                    layer.alert(data.msg, { icon: 2});
+                } else {
+                    layer.msg('请求发送成功！', {
+                        icon: 1,
+                        time: 500
+                    }, function () {
+                        layer.close(fileLayer);
+                        parent.layer.close(index);
+                    });
+                }
+            },
+            "json"
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadIndex);
+            if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
+                layer.confirm('登录失效，是否刷新页面重新登录？', {
+                    icon: 0,
+                    title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
+                }, function () {
+                    location.reload(true);
+                });
             }
         });
     });

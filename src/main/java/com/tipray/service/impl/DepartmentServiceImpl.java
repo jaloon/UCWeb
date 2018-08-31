@@ -1,13 +1,5 @@
 package com.tipray.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.tipray.bean.Department;
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
@@ -18,6 +10,12 @@ import com.tipray.dao.DepartmentDao;
 import com.tipray.service.DepartmentService;
 import com.tipray.util.DepartmentUtil;
 import com.tipray.util.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 部门管理业务层
@@ -26,7 +24,6 @@ import com.tipray.util.StringUtil;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("departmentService")
 public class DepartmentServiceImpl extends BaseAction implements DepartmentService {
 	@Resource
@@ -48,6 +45,7 @@ public class DepartmentServiceImpl extends BaseAction implements DepartmentServi
 		return code;
 	}
 
+	@Transactional
 	@Override
 	public Department addDepartment(Department bean) {
 		if (bean != null) {
@@ -57,6 +55,7 @@ public class DepartmentServiceImpl extends BaseAction implements DepartmentServi
 		return bean;
 	}
 
+    @Transactional
 	@Override
 	public Department updateDepartment(Department bean) {
 		if (bean != null) {
@@ -65,6 +64,7 @@ public class DepartmentServiceImpl extends BaseAction implements DepartmentServi
 		return bean;
 	}
 
+    @Transactional
 	@Override
 	public void deleteDepartmentsByIds(String ids) throws ServiceException {
 		if (ids == null) {

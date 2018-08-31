@@ -10,13 +10,13 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		t.*,c.vehicle_number vehicle_number
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_transport_card t left join tbl_vehicle c
 		on t.transport_card_id=c.transport_card_id
 		where t.is_invalid=0
@@ -24,7 +24,7 @@
 	
 	<select id="findUnusedTranscards" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_transport_card t left join tbl_vehicle c
 		on t.transport_card_id=c.transport_card_id
 		where t.is_invalid=0 and t.transport_card_id not in
@@ -57,7 +57,7 @@
 	</delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_transport_card t left join tbl_vehicle c
 		on t.transport_card_id=c.transport_card_id
 		where t.is_invalid=0 and t.id=#{id}
@@ -71,7 +71,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_transport_card t left join tbl_vehicle c
 		on t.transport_card_id=c.transport_card_id
 		where t.is_invalid=0

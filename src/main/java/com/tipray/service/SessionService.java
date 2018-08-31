@@ -62,10 +62,11 @@ public interface SessionService {
     /**
      * 根据用户ID获取session
      *
-     * @param userId
+     * @param userId 操作员ID
+     * @param isApp 是否手机登录
      * @return
      */
-    Session getSessionByUser(Long userId);
+    Session getSessionByUser(Long userId, Integer isApp);
 
     /**
      * 根据上一次登录的sessionId，获取本次登录的sessionId(同一用户)

@@ -1,17 +1,17 @@
 package com.tipray.dao;
 
-import com.tipray.bean.record.CardAndDeviceUseRecord;
+import com.tipray.bean.record.UsageRecord;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
 
 /**
- * CardAndDeviceUseRecordDao
+ * UsageRecordDao
  * 
  * @author chenlong
  * @version 1.0 2017-12-22
  *
  */
 @MyBatisAnno
-public interface CardAndDeviceUseRecordDao extends BaseDao<CardAndDeviceUseRecord> {
+public interface UsageRecordDao extends BaseDao<UsageRecord> {
 
 }

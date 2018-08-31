@@ -115,7 +115,7 @@ public class LoginValidateFilter implements Filter {
             } else {
                 // LoginError = LoginErrorEnum.LOGIN_INVALID;
                 loginStatus = HttpStatusConst.HTTP_601_LOGIN_INVALID;
-                errorMessage = encodeUrl("");
+                errorMessage = "";
             }
             return false;
         }

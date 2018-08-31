@@ -12,19 +12,10 @@ import java.util.Map;
  */
 public class ReTrack extends Record {
     private static final long serialVersionUID = 1L;
-    private boolean coorValid;
     private Integer carStatus;
     private boolean doubtable;
     private boolean alarm;
     private Map<Integer, String> alarmMap;
-
-    public boolean isCoorValid() {
-        return coorValid;
-    }
-
-    public void setCoorValid(boolean coorValid) {
-        this.coorValid = coorValid;
-    }
 
     public Integer getCarStatus() {
         return carStatus;
@@ -78,7 +69,9 @@ public class ReTrack extends Record {
         if (alarmMap != null) {
             sb.append(", alarmMap=").append(alarmMap);
         }
-        sb.append(", coorValid=").append(coorValid);
+        if (getCoorValid() != null) {
+            sb.append(", coorValid=").append(getCoorValid());
+        }
         if (getLongitude() != null) {
             sb.append(", longitude=").append(getLongitude());
         }

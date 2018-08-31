@@ -17,7 +17,13 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-@Transactional
+/**
+ * APP相关业务层
+ *
+ * @author chenlong
+ * @version 1.0 2018-07-22
+ *
+ */
 @Service("appService")
 public class AppServiceImpl implements AppService {
 	@Resource
@@ -25,6 +31,7 @@ public class AppServiceImpl implements AppService {
 	@Resource
 	private AppverDao appverDao;
 
+    @Transactional
 	@Override
 	public AppDev addAppdev(AppDev appDev) throws ServiceException {
         if (appDev != null) {
@@ -47,6 +54,7 @@ public class AppServiceImpl implements AppService {
 		return appDev;
 	}
 
+    @Transactional
 	@Override
 	public AppDev updateAppdev(AppDev appDev) throws ServiceException {
 	    if (appDev != null) {
@@ -55,11 +63,13 @@ public class AppServiceImpl implements AppService {
 		return appDev;
 	}
 
+    @Transactional
 	@Override
 	public void updateModelAndCurrentVerByUuid(String model, String currentVer, String uuid) throws ServiceException {
         appdevDao.updateModelAndCurrentVerByUuid(model, currentVer, uuid);
 	}
 
+    @Transactional
 	@Override
 	public void deleteAppdevById(Long id) throws ServiceException {
         appdevDao.delete(id);
@@ -74,6 +84,7 @@ public class AppServiceImpl implements AppService {
         return num > 0;
     }
 
+    @Transactional
     @Override
     public AppVer addAppver(AppVer appVer) {
         if (appVer == null) {
@@ -83,6 +94,7 @@ public class AppServiceImpl implements AppService {
         return appVer;
     }
 
+    @Transactional
     @Override
     public AppVer updateAppver(AppVer appVer) {
         if (appVer == null) {
@@ -92,6 +104,7 @@ public class AppServiceImpl implements AppService {
         return appVer;
     }
 
+    @Transactional
     @Override
     public void deleteAppverById(Long id) {
         if (id == null) {
@@ -109,6 +122,7 @@ public class AppServiceImpl implements AppService {
         return appverDao.getMinverByCenterIdAndSystem(centerId, system);
     }
 
+    @Transactional
     @Override
     public void sync(AppSync appSync) {
 	    List<AppVer> appVers = appSync.getAppvers();
@@ -139,7 +153,6 @@ public class AppServiceImpl implements AppService {
                     appverDao.batchUpdate(upds);
                 }
             }
-
         }
         if (!EmptyObjectUtil.isEmptyList(appDevs)) {
             List<String> dbUuids = appdevDao.findAllUuids();

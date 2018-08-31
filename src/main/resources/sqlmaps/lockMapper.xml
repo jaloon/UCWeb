@@ -15,20 +15,20 @@
         <result column="bind_status" property="bindStatus" />
         <result column="vehicle_number" property="carNumber" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		l.*,fn_type2name('lockSeat',l.seat) seat_name,c.vehicle_number vehicle_number
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_lock l,tbl_vehicle c
 		where l.vehicle_id=c.id and l.is_has_bind = 1 and l.bind_status = 2
 	</select>
 	
 	<select id="getByLockId" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_lock l,tbl_vehicle c
 		where l.vehicle_id=c.id
 		and l.is_has_bind = 1
@@ -39,7 +39,7 @@
 	
 	<select id="findLocksByCarId" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_lock l,tbl_vehicle c
 		where l.vehicle_id=c.id and l.lock_device_id != 0
 		and c.id=#{carId}
@@ -47,7 +47,7 @@
 
 	<select id="findTriggedLocksByCarId" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_lock l,tbl_vehicle c
 		where l.vehicle_id=c.id and l.is_has_bind = 1 and l.bind_status = 2 and l.lock_device_id != 0
 		and c.id=#{carId}
@@ -215,5 +215,16 @@
             #{item.id, jdbcType=INTEGER}
         </foreach>
     </update>
+
+	<select id="getLockDeviceIdById" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select lock_device_id from tbl_lock where id = #{id}
+    </select>
+
+	<select id="findIdsByDevIds" resultType="com.tipray.bean.baseinfo.Lock">
+		select id, lock_device_id lockId
+		from tbl_lock
+		where vehicle_id = #{carId}
+		and lock_device_id in (${devIds})
+	</select>
 
 </mapper>

@@ -278,14 +278,13 @@ public class VehicleAlarmUtil {
      * @return 14字节16进制字符串
      */
     public static String buildAlarmTag(int veehicleId, byte deviceType, int devcieId, byte alarmType, int lockId) {
-        StringBuffer strBuf = new StringBuffer();
-        strBuf
+        return new StringBuilder()
                 .append(NumberHexUtil.intToHex(veehicleId))
                 .append(NumberHexUtil.byteToHex(deviceType))
                 .append(NumberHexUtil.intToHex(devcieId))
                 .append(NumberHexUtil.byteToHex(alarmType))
-                .append(NumberHexUtil.intToHex(lockId));
-        return strBuf.toString();
+                .append(NumberHexUtil.intToHex(lockId))
+                .toString();
     }
 
     /**
@@ -295,14 +294,13 @@ public class VehicleAlarmUtil {
      * @return 14字节16进制字符串
      */
     public static String buildAlarmTag(AlarmDevice alarmDevice) {
-        StringBuffer strBuf = new StringBuffer();
-        strBuf
-                .append(NumberHexUtil.intToHex(alarmDevice.getVehicleId()))
+        return new StringBuilder()
+                .append(NumberHexUtil.intToHex((int) alarmDevice.getVehicleId()))
                 .append(NumberHexUtil.byteToHex((byte) alarmDevice.getDeviceType()))
                 .append(NumberHexUtil.intToHex(alarmDevice.getDeviceId()))
                 .append(NumberHexUtil.byteToHex((byte) alarmDevice.getAlarmType()))
-                .append(NumberHexUtil.intToHex(alarmDevice.getLockId()));
-        return strBuf.toString();
+                .append(NumberHexUtil.intToHex(alarmDevice.getLockId()))
+                .toString();
     }
 
     /**
@@ -312,14 +310,13 @@ public class VehicleAlarmUtil {
      * @return 14字节16进制字符串
      */
     public static String buildAlarmTag(AlarmInfo alarmInfo) {
-        StringBuffer strBuf = new StringBuffer();
-        strBuf
+        return new StringBuilder()
                 .append(NumberHexUtil.intToHex(alarmInfo.getVehicleId()))
                 .append(NumberHexUtil.byteToHex((byte) alarmInfo.getDeviceType()))
                 .append(NumberHexUtil.intToHex(alarmInfo.getDeviceId()))
                 .append(NumberHexUtil.byteToHex((byte) alarmInfo.getAlarmType()))
-                .append(NumberHexUtil.intToHex(alarmInfo.getAlarmLock().getLockId()));
-        return strBuf.toString();
+                .append(NumberHexUtil.intToHex(alarmInfo.getAlarmLock().getLockId()))
+                .toString();
     }
 
 }

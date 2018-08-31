@@ -28,7 +28,6 @@ import java.util.Map;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("distributionRecordService")
 public class DistributionRecordServiceImpl implements DistributionRecordService {
 	@Resource
@@ -68,10 +67,16 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 	}
 
 	@Override
-	public Integer countByInvoice(String invoice) {
-		return distributionRecordDao.countByInvoice(invoice);
+	public Integer countInvoice(String invoice) {
+		return distributionRecordDao.countInvoice(invoice);
 	}
 
+    @Override
+    public Integer countWaitInvoice(String invoice) {
+        return distributionRecordDao.countWaitInvoice(invoice);
+    }
+
+    @Transactional
 	@Override
 	public ByteBuffer addDistributionRecord(Map<String, Object> distributionMap) {
 		// 车辆ID
@@ -209,9 +214,13 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
                 track.put("vehicle_alarm_status", 0);
                 track.put("angle", 0);
                 track.put("speed", 0);
-                track.put("speed", 0);
                 track.put("lock_status_info", "");
                 track.put("track_time", "");
+                track.put("last_valid_longitude", 0);
+                track.put("last_valid_latitude", 0);
+                track.put("last_valid_angle", 0);
+                track.put("last_valid_speed", 0);
+                track.put("last_valid_track_time", "");
                 Map<String, Object> status = vehicleDao.getCarStatusByCarId(carId);
                 if (status != null) {
                     track.put("vehicle_status", status.get("status"));

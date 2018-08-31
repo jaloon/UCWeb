@@ -188,6 +188,7 @@ function eliminateAlarm(carNumber, alarmIds) {
         },
         "json"
     ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        layer.close(loadLayer);
         if (XMLHttpRequest.readyState == 4) {
             var http_status = XMLHttpRequest.status;
             if (http_status == 0 || http_status > 600) {
@@ -326,7 +327,7 @@ $(function () {
     setInterval(function () {
         $.post("../../manage/session/isAlive.do",
             function (data) {
-                console.log("http心跳。。。")
+                console.log("http心跳。。。");
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -335,11 +336,7 @@ $(function () {
                 if (http_status == 0 || http_status > 600) {
                     location.reload(true);
                 } else if (http_status == 200) {
-                    if (textStatus == "parsererror") {
-                        layer.alert("应答数据格式解析错误！")
-                    } else {
-                        layer.alert("http response error: " + textStatus)
-                    }
+                    console.log("http心跳。。。");
                 } else {
                     layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
                 }

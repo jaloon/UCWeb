@@ -14,7 +14,7 @@
         <result column="institution" property="institution"/>
     </resultMap>
 
-    <sql id="select_colums">
+    <sql id="select_columns">
         a.id,
     	a.uuid,
         a.system,
@@ -28,7 +28,7 @@
 
     <select id="findAll" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_webapp_device a
     </select>
@@ -74,7 +74,7 @@
 
     <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM tbl_webapp_device a
         WHERE
          a.id = #{id}
@@ -82,7 +82,7 @@
 
     <select id="getByUuid" parameterType="java.lang.String" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_webapp_device a
         WHERE
@@ -113,7 +113,7 @@
 
     <select id="findByPage" resultMap="fullResultMap">
         SELECT
-        <include refid="select_colums"></include>
+        <include refid="select_columns"></include>
         FROM
         tbl_webapp_device a
         WHERE 1 = 1

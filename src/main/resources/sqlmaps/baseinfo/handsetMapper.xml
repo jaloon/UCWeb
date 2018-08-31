@@ -15,7 +15,7 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		h.*,
         d.device_version handset_device_ver,
         g.`name` gasstation_name
@@ -23,7 +23,7 @@
 	
 	<select id="findAll" resultMap="fullResultMap">
 		SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             tbl_handset h
             LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
@@ -65,7 +65,7 @@
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             tbl_handset h
             LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
@@ -86,7 +86,7 @@
 
 	<select id="getByDeviceId" parameterType="java.lang.Integer" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             tbl_handset h
             LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,
@@ -98,7 +98,7 @@
 	</select>
 	
 	<select id="getByGasStationId" parameterType="java.lang.Long" resultMap="fullResultMap">
-        SELECT <include refid="select_colums"></include>
+        SELECT <include refid="select_columns"></include>
         FROM
             tbl_handset h,
             tbl_gasstation g,
@@ -133,7 +133,7 @@
 	
 	<select id="findByPage" resultMap="fullResultMap">
         SELECT
-            <include refid="select_colums"></include>
+            <include refid="select_columns"></include>
         FROM
             tbl_handset h
             LEFT JOIN tbl_gasstation g ON h.gasstation_id = g.id,

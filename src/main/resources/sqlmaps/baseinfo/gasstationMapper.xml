@@ -19,13 +19,13 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		g.*
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_gasstation g
 		where g.is_invalid=0
 	</select>
@@ -109,29 +109,29 @@
 	</delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_gasstation g
 		where g.is_invalid=0 and g.id=#{id}
 	</select>
 	<select id="getByOfficialId" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_gasstation g
 		where g.is_invalid=0 and g.official_id=#{officialId}
 	</select>
 	<select id="getByName" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_gasstation g
 		where g.is_invalid=0 and g.name=#{gasStationName}
 	</select>
 	
 	<select id="findByName" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_gasstation g
 		where g.is_invalid=0 and g.name like CONCAT('%',#{gasStationName},'%')
 	</select>
 
 	<select id="findGasStationsByCardId" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_gasstation g, tbl_gasstation_card cg
 		where g.is_invalid=0 and g.id=cg.gasstation_id and cg.card_id = #{cardId}
 	</select>
@@ -227,7 +227,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_gasstation g
 		where g.is_invalid=0 
 		<if test="entity.name != null and entity.name != ''">

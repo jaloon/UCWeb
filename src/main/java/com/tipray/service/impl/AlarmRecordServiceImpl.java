@@ -11,6 +11,7 @@ import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.dao.AlarmRecordDao;
 import com.tipray.dao.LockDao;
 import com.tipray.dao.TrackDao;
+import com.tipray.dao.VehicleDao;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.VehicleAlarmUtil;
@@ -31,7 +32,6 @@ import java.util.Map;
  * @author chenlong
  * @version 1.0 2017-12-22
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("alarmRecordService")
 public class AlarmRecordServiceImpl implements AlarmRecordService {
     private static final Logger logger = LoggerFactory.getLogger(AlarmRecordServiceImpl.class);
@@ -41,6 +41,8 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
     private LockDao lockDao;
     @Resource
     private TrackDao trackDao;
+    @Resource
+    private VehicleDao vehicleDao;
 
     @Override
     public AlarmRecord getRecordById(Long id) {
@@ -104,6 +106,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
      * @return 报警记录
      */
     private AlarmRecord setTrackForRecord(AlarmRecord alarmRecord, TrackInfo trackInfo) {
+        alarmRecord.setCoorValid(trackInfo.getCoorValid());
         alarmRecord.setLongitude(trackInfo.getLongitude());
         alarmRecord.setLatitude(trackInfo.getLatitude());
         alarmRecord.setAngle(trackInfo.getAngle());
@@ -119,6 +122,11 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
     @Override
     public Integer countAlarmDeviceByIds(String ids) {
         return ids != null ? alarmRecordDao.countAlarmDeviceByIds(ids) : null;
+    }
+
+    @Override
+    public AlarmRecord getAlarmForEliById(Long id) {
+        return null == id ? null : alarmRecordDao.getAlarmForEliById(id);
     }
 
     @Override
@@ -148,7 +156,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常！", e);
+                logger.warn("轨迹数据异常！{}", e.toString());
             }
         }
         return list;
@@ -166,17 +174,23 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
         return id == null ? null : alarmRecordDao.findSameAlarmIdsById(id);
     }
 
+    @Transactional
     @Override
     public void addEliminateAlarm(Map<String, Object> eAlarmMap) {
         alarmRecordDao.addEliminateAlarm(eAlarmMap);
     }
 
+    @Transactional
     @Override
     public void updateEliminateAlarm(Integer eliminateId, Integer eliminateStatus, String alarmIds, List<Long> alarmIdList) {
         alarmRecordDao.updateEliminateStatus(eliminateId, eliminateStatus);
         if (eliminateStatus == 2) {
-            alarmRecordDao.updateAlarmEliminated(eliminateId, alarmIdList);
-            alarmRecordDao.updateEliminateAlarmDone(alarmIds);
+            List<Long> alarmIdListForSame = new ArrayList<>();
+            for (Long alarmId : alarmIdList) {
+                alarmIdListForSame.addAll(alarmRecordDao.findSameAlarmIdsById(alarmId));
+            }
+            alarmRecordDao.updateAlarmEliminated(eliminateId, alarmIdListForSame);
+            alarmRecordDao.updateEliminateAlarmDone(eliminateId, alarmIds);
         }
     }
 
@@ -197,7 +211,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常！", e);
+                logger.warn("轨迹数据异常！{}", e.toString());
             }
         }
         return list;
@@ -209,13 +223,36 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
         List<AlarmDevice> alarmDevices = alarmRecordDao.findNotElimitedAlarmDevice();
         if (!EmptyObjectUtil.isEmptyList(alarmDevices)) {
             for (AlarmDevice alarmDevice : alarmDevices) {
+                if (alarmDevice.getDeviceType() == 1) {
+                    Integer terminalId = vehicleDao.getTerminalIdById(alarmDevice.getVehicleId());
+                    if (terminalId == null || terminalId == 0) {
+                        // 车或车台已不存在，报警无效
+                        continue;
+                    }
+                    if (!terminalId.equals(alarmDevice.getDeviceId())) {
+                        // 车台已换新，报警无效
+                        continue;
+                    }
+                } else {
+                    Integer lockDeviceId = lockDao.getLockDeviceIdById(alarmDevice.getLockId());
+                    if (lockDeviceId == null || lockDeviceId == 0) {
+                        // 该位置已无锁，报警无效
+                        continue;
+                    }
+                    if (!lockDeviceId.equals(alarmDevice.getDeviceId())){
+                        // 已换新锁，报警无效
+                        continue;
+                    }
+                }
                 AlarmInfo alarmInfo = alarmRecordDao.getAlarmInfoByAlarmDevcie(alarmDevice);
                 if (alarmInfo != null) {
                     alarmInfo.setAlarmTag(VehicleAlarmUtil.buildAlarmTag(alarmDevice));
                     alarmInfos.add(alarmInfo);
                 }
             }
-            alarmInfos.sort(null);
+            if (alarmInfos.size() > 1) {
+                alarmInfos.sort(null);
+            }
         }
         return alarmInfos;
     }
@@ -271,7 +308,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                     }
                 });
             } catch (Exception e) {
-                logger.error("轨迹数据异常：{}", e.toString());
+                logger.warn("轨迹数据异常！{}", e.toString());
                 list.forEach(alarmMap -> {
                     alarmMap.put("is_lnglat_valid", 0);
                     alarmMap.put("longitude", 0);

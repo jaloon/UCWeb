@@ -14,26 +14,28 @@
 		<result column="alarm_status" property="status" />
 		<result column="track_id" property="trackId" />
         <result column="alarm_time" property="alarmTime" />
+        <result column="alarm_report_time" property="alarmReportTime" />
         <result column="station" property="station" />
     </resultMap>
-	<sql id="select_colums">
-		a.id											  id,
-		c.vehicle_number								  vehicle_number,
-		a.vehicle_id									  vehicle_id,
-		c.vehicle_device_id								  terminal_id,
-		a.device_type									  device_type,
-		a.device_id										  device_id,
-		a.type											  type,
-		fn_get_alarm_type ( a.device_type, a.type )		  type_name,
-		fn_type2name ( 'alarmStatus', a.`status` )		  alarm_status,
-		fn_get_station ( a.station_type, a.station_id )	  station,
-		a.vehicle_track_id								  track_id,
-        DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' )  alarm_time
+	<sql id="select_columns">
+		a.id											        id,
+		c.vehicle_number								        vehicle_number,
+		a.vehicle_id									        vehicle_id,
+		c.vehicle_device_id								        terminal_id,
+		a.device_type									        device_type,
+		a.device_id										        device_id,
+		a.type											        type,
+		fn_get_alarm_type ( a.device_type, a.type )		        type_name,
+		fn_type2name ( 'alarmStatus', a.`status` )		        alarm_status,
+		fn_get_station ( a.station_type, a.station_id )	        station,
+		a.vehicle_track_id								        track_id,
+        DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' )        alarm_time,
+        DATE_FORMAT( a.alarm_report_time, '%Y-%m-%d %H:%i:%s' ) alarm_report_time
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		SELECT
-			<include refid="select_colums"></include>
+			<include refid="select_columns"></include>
 		FROM
 			tbl_alarm a
 			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
@@ -43,7 +45,7 @@
 	</select>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		SELECT <include refid="select_colums"></include>
+		SELECT <include refid="select_columns"></include>
 		FROM
 			tbl_alarm a,
 			tbl_vehicle c
@@ -51,8 +53,8 @@
 			a.vehicle_id = c.id AND a.id=#{id}
 	</select>
 
-    <select id="getAlarmRecordsByIdsAndCar" resultMap="fullResultMap">
-        SELECT id, type, fn_type2name('alarmStatus', `status`) alarm_status
+    <select id="getAlarmRecordsByIdsAndCar" resultType="com.tipray.bean.record.AlarmRecord">
+        SELECT id, type, `status` statusCode, fn_type2name('alarmStatus', `status` ) `status`
         FROM tbl_alarm WHERE id IN ( ${ids} ) AND vehicle_id = #{vehicleId};
     </select>
 
@@ -67,7 +69,7 @@
 		SELECT count(*) FROM tbl_alarm a, tbl_vehicle c
 		WHERE a.vehicle_id=c.id
 		<if test="begin != null and begin != '' and end != null and end != ''">
-			AND a.alarm_time BETWEEN #{begin} AND #{end}
+			AND a.alarm_report_time BETWEEN #{begin} AND #{end}
 		</if> 
 		<if test="deviceType != null and deviceType != -2">
 			AND a.device_type = #{deviceType}
@@ -81,14 +83,14 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap" resultType="java.util.Map">
-		SELECT <include refid="select_colums"></include>
+		SELECT <include refid="select_columns"></include>
 		FROM
 			tbl_alarm a,
 			tbl_vehicle c
 		WHERE
             a.vehicle_id = c.id
 		<if test="entity.begin != null and entity.begin != '' and entity.end != null and entity.end != ''">
-			and a.alarm_time between #{entity.begin} and #{entity.end} 
+			and a.alarm_report_time between #{entity.begin} and #{entity.end}
 		</if>
 		<if test="entity.deviceType != null and entity.deviceType != -2">
 			and a.device_type = #{entity.deviceType}
@@ -109,22 +111,34 @@
             t1.id
         FROM
             tbl_alarm t1,
-            (SELECT id, vehicle_id, device_type, device_id, lock_id, type, alarm_time FROM tbl_alarm  WHERE id = #{id}) t2
+            (SELECT id, vehicle_id, device_type, device_id, lock_id, type, alarm_report_time FROM tbl_alarm  WHERE id = #{id}) t2
         WHERE
             t1.vehicle_id = t2.vehicle_id
             AND t1.device_type = t2.device_type
             AND (t1.device_id = t2.device_id OR t1.lock_id = t2.lock_id)
             AND t1.type = t2.type
---             AND t1.alarm_time <= t2.alarm_time
+            AND t1.alarm_report_time <= t2.alarm_report_time
             AND t1.`status` = 0
         ]]>
     </select>
 
+	<select id="getAlarmForEliById" parameterType="java.lang.Long" resultType="com.tipray.bean.record.AlarmRecord">
+        SELECT
+            a.device_id deviceId,
+            a.device_type deviceType,
+            v.vehicle_device_id terminalId
+        FROM
+            tbl_alarm a,
+            tbl_vehicle v
+        WHERE
+            a.vehicle_id = v.id
+            AND a.id = #{id};
+    </select>
 	
 	<insert id="addEliminateAlarm" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO tbl_remote_alarm_eliminate ( user_id, vehicle_id, alarm_id_list, is_app, is_lnglat_valid, longitude, latitude )
+		INSERT INTO tbl_remote_alarm_eliminate ( user_id, vehicle_id, device_id, alarm_id_list, is_app, is_lnglat_valid, longitude, latitude )
         VALUES
-            (#{userId}, #{vehicleId}, #{alarmIds}, ifnull(#{app}, 0), ifnull(#{isLocationValid}, 0), ifnull(#{lnt}, 0), ifnull(#{lat}, 0))
+            (#{userId}, #{vehicleId},IFNULL(#{terminalId}, 0), #{alarmIds}, ifnull(#{app}, 0), ifnull(#{isLocationValid}, 0), ifnull(#{lnt}, 0), ifnull(#{lat}, 0))
 	</insert>
 
     <update id="updateEliminateStatus">
@@ -142,12 +156,15 @@
 	<update id="updateEliminateAlarmDone">
 		UPDATE tbl_alarm
 		SET
+			eliminate_trigger_type = 6,
+            eliminate_trigger_id = #{eliminateId},
+            eliminate_time = NOW( ),
 			`status` = 1
 		WHERE
-            id IN (${_parameter})
+            id IN (${alarmIds})
 	</update>
 
-	<update id="updateAlarmEliminated" parameterType="java.util.List">
+	<update id="updateAlarmEliminated">
 		UPDATE tbl_alarm
 		SET
             eliminate_trigger_type = 6,
@@ -162,7 +179,7 @@
 	</update>
 
 	<select id="findNotElimited" resultMap="fullResultMap">
-		SELECT <include refid="select_colums"></include>
+		SELECT <include refid="select_columns"></include>
 		FROM
 			tbl_alarm a
 			LEFT JOIN tbl_vehicle_track t ON a.vehicle_track_id = t.id,
@@ -228,22 +245,22 @@
     <select id="getAlarmInfoByAlarmDevcie" parameterType="com.tipray.bean.alarm.AlarmDevice" resultMap="alarmInfoMap">
         SELECT
         <include refid="alarmInfo_colums"></include>
-        FROM
-            tbl_alarm a,
-            tbl_vehicle v,
-            tbl_lock l
-        WHERE
-            a.vehicle_id = v.id
-            AND a.lock_id = l.id
-            AND a.vehicle_id = #{vehicleId}
-            AND a.device_type = #{deviceType}
-            AND a.device_id = #{deviceId}
-            AND a.lock_id = #{lockId}
-            AND a.type = #{alarmType}
-        ORDER BY
-            a.alarm_time DESC,
-            a.id DESC
-            LIMIT 1
+		FROM
+			tbl_alarm a
+			LEFT JOIN tbl_lock l ON a.lock_id = l.id,
+			tbl_vehicle v
+		WHERE
+			a.vehicle_id = v.id
+			AND a.vehicle_id = #{vehicleId}
+			AND a.device_type = #{deviceType}
+			AND a.device_id = #{deviceId}
+			AND a.lock_id = #{lockId}
+			AND a.type = #{alarmType}
+			AND a.STATUS = 0
+		ORDER BY
+			a.alarm_time DESC,
+			a.id DESC
+			LIMIT 1
     </select>
 
 	<select id="getAlarmInfoByAlarmId" parameterType="java.lang.Long" resultMap="alarmInfoMap">
@@ -262,6 +279,7 @@
 	<select id="findNotElimitedForApp" resultType="java.util.Map">
 		SELECT
 			a.id alarm_id,
+			a.record_id,
 			a.vehicle_id,
 			c.vehicle_number,
 			a.device_type,
@@ -273,6 +291,7 @@
 			a.station_id,
 			fn_get_alarm_station ( a.station_type, a.station_id ) station_name,
 			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' ) alarm_time,
+			DATE_FORMAT( a.alarm_report_time, '%Y-%m-%d %H:%i:%s' ) alarm_report_time,
 			a.vehicle_track_id
 		FROM
 			tbl_alarm a,
@@ -280,7 +299,7 @@
 		WHERE
 			a.vehicle_id = c.id
 			AND a.`status` = 0
-		ORDER BY a.alarm_time ASC, a.id ASC
+		ORDER BY a.alarm_report_time ASC, a.alarm_time ASC, a.id ASC
 	</select>
 	
 </mapper>

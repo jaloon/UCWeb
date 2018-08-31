@@ -44,7 +44,11 @@ public class StatisticsController extends BaseAction {
     @Resource
     private ChangeRecordService changeRecordService;
     @Resource
-    private CardAndDeviceUseRecordService cardAndDeviceUseRecordService;
+    private UsageRecordService usageRecordService;
+    @Resource
+    private UnlockResetRecordService unlockResetRecordService;
+    @Resource
+    private TerminalEventRecordService terminalEventRecordService;
 
     @PermissionAnno("statisticsManage")
     @RequestMapping(value = "dispatch.do")
@@ -55,8 +59,6 @@ public class StatisticsController extends BaseAction {
         switch (mode) {
             case StatisticsMode.ALARM_RECORD:
                 record = alarmRecordService.getRecordById(id);
-                // modelMap.put("record", record);
-                // return "normal/statistics/alarmBmap.jsp";
                 break;
             case StatisticsMode.REMOTE_CONTROL_RECORD:
                 record = remoteRecordService.getRecordById(id);
@@ -64,17 +66,23 @@ public class StatisticsController extends BaseAction {
             case StatisticsMode.LOCK_ACTION_RECORD:
                 record = lockRecordService.getRecordById(id);
                 break;
-            case StatisticsMode.CAR_IN_OUT_RECORD:
+            case StatisticsMode.SEAL_RECORD:
                 record = sealRecordService.getRecordById(id);
                 break;
             case StatisticsMode.DISTRIBUTION_RECORD:
                 record = distributionRecordService.getRecordById(id);
                 break;
-            case StatisticsMode.REMOTE_CHANGE_STATION_RECORD:
+            case StatisticsMode.CHANGE_STATION_RECORD:
                 record = changeRecordService.getRecordById(id);
                 break;
-            case StatisticsMode.DEVICE_USE_RECORD:
-                record = cardAndDeviceUseRecordService.getRecordById(id);
+            case StatisticsMode.USAGE_RECORD:
+                record = usageRecordService.getRecordById(id);
+                break;
+            case StatisticsMode.RESET_RECORD:
+                record = unlockResetRecordService.getRecordById(id);
+                break;
+            case StatisticsMode.EVENT_RECORD:
+                record = terminalEventRecordService.getRecordById(id);
                 break;
             default:
                 break;
@@ -113,10 +121,10 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
-    @PermissionAnno("inAndOutRecordModule")
-    @RequestMapping(value = "findInOutRecordsForPage.do")
+    @PermissionAnno("sealRecordModule")
+    @RequestMapping(value = "findSealRecordsForPage.do")
     @ResponseBody
-    public GridPage<SealRecord> findInOutRecordsForPage(@ModelAttribute SealRecord sealRecord,
+    public GridPage<SealRecord> findSealRecordsForPage(@ModelAttribute SealRecord sealRecord,
                                                         @ModelAttribute Page page) {
         logger.info("inout record list page, sealRecord={}, page={}", sealRecord, page);
         GridPage<SealRecord> gridPage = sealRecordService.findRecordsForPage(sealRecord, page);
@@ -143,13 +151,33 @@ public class StatisticsController extends BaseAction {
         return gridPage;
     }
 
-    @PermissionAnno("cardUseRecordModule")
-    @RequestMapping(value = "findDeviceRecordsForPage.do")
+    @PermissionAnno("usageRecordModule")
+    @RequestMapping(value = "findUsageRecordsForPage.do")
     @ResponseBody
-    public GridPage<CardAndDeviceUseRecord> findDeviceRecordsForPage(@ModelAttribute CardAndDeviceUseRecord useRecord,
-                                                                     @ModelAttribute Page page) {
-        logger.info("use record list page, useRecord={}, page={}", useRecord, page);
-        GridPage<CardAndDeviceUseRecord> gridPage = cardAndDeviceUseRecordService.findRecordsForPage(useRecord, page);
+    public GridPage<UsageRecord> findUsageRecordsForPage(@ModelAttribute UsageRecord usageRecord,
+                                                         @ModelAttribute Page page) {
+        logger.info("usage record list page, usageRecord={}, page={}", usageRecord, page);
+        GridPage<UsageRecord> gridPage = usageRecordService.findRecordsForPage(usageRecord, page);
+        return gridPage;
+    }
+
+    @PermissionAnno("resetRecordModule")
+    @RequestMapping(value = "findResetRecordsForPage.do")
+    @ResponseBody
+    public GridPage<UnlockResetRecord> findResetRecordsForPage(@ModelAttribute UnlockResetRecord resetRecord,
+                                                               @ModelAttribute Page page) {
+        logger.info("reset record list page, resetRecord={}, page={}", resetRecord, page);
+        GridPage<UnlockResetRecord> gridPage = unlockResetRecordService.findRecordsForPage(resetRecord, page);
+        return gridPage;
+    }
+
+    @PermissionAnno("eventRecordModule")
+    @RequestMapping(value = "findEventRecordsForPage.do")
+    @ResponseBody
+    public GridPage<TerminalEventRecord> findEventRecordsForPage(@ModelAttribute TerminalEventRecord eventRecord,
+                                                                 @ModelAttribute Page page) {
+        logger.info("event record list page, eventRecord={}, page={}", eventRecord, page);
+        GridPage<TerminalEventRecord> gridPage = terminalEventRecordService.findRecordsForPage(eventRecord, page);
         return gridPage;
     }
 

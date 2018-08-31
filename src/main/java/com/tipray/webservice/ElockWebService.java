@@ -69,7 +69,7 @@ public class ElockWebService {
      */
     @WebMethod(operationName = "SetPlan")
     @WebResult(name = "SetPlanResult", targetNamespace = "http://www.cnpc.com/")
-    public String SetPlan(@WebParam(name = "txt", targetNamespace = "http://www.cnpc.com/") String txt) {
+    public String setPlan(@WebParam(name = "txt", targetNamespace = "http://www.cnpc.com/") String txt) {
         logger.info("WebService收到物流配送报文：{}", txt);
         if (txt == null) {
             logger.warn("XML报文为null！");
@@ -112,7 +112,7 @@ public class ElockWebService {
             return "<Message>fail：具体配送信息为空！</Message>";
         }
         for (Element element : elements) {
-            String dlistNodeName =  element.getName();
+            String dlistNodeName = element.getName();
             if (!DistXmlNodeNameConst.NODE_3_DLIST.equals(dlistNodeName)) {
                 logger.warn("配送信息XML文本<dlist>节点名称不匹配！{}", dlistNodeName);
                 return "<Message>fail：配送信息XML文本<dlist>节点名称不匹配！</Message>";
@@ -129,7 +129,7 @@ public class ElockWebService {
                     return "<Message>fail：配送信息XML节点数据缺失，“<" + node + ">”标签无数据！</Message>";
                 }
             }
-            Map<String, Object> distributionMap = new HashMap<String, Object>();
+            Map<String, Object> distributionMap = new HashMap<>();
             Iterator<Element> it = element.elementIterator();
             while (it.hasNext()) {
                 Element childNode = it.next();
@@ -155,57 +155,79 @@ public class ElockWebService {
             // 配送单所属车辆ID
             Long carId = vehicle.getId();
             distributionMap.put("carId", carId);
-            Integer invoiceCount = distributionRecordService.countByInvoice((String) distributionMap.get("distributNO"));
+            distributionMap.put("terminalId", terminalId);
             try {
+                String invoice = (String) distributionMap.get(DistXmlNodeNameConst.NODE_4_01_DISTRIBUT_NO);
+                // 配送单号代表的配送记录数目
+                Integer invoiceCount = distributionRecordService.countInvoice(invoice);
                 if (invoiceCount == null || invoiceCount == 0) {
-                    ByteBuffer dataBuffer = distributionRecordService.addDistributionRecord(distributionMap);
-                    ThreadPool.CACHED_THREAD_POOL.execute(() -> {
-                        ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
-                        boolean isSend = udpServer.send(src);
-                        if (!isSend) {
-                            logger.warn("UDP发送数据异常！");
-                        }
-                    });
-                    logger.info("配送单：{}，新增成功!", distributionMap.get("distributNO"));
-                } else {
-                    // 物流配送接口更改配送信息换站
-                    Map<String, Object> map = changeRecordService.distributionChange(distributionMap);
-                    ThreadPool.CACHED_THREAD_POOL.execute(() -> {
-                        // 换站ID
-                        long changeId = (long) map.get("changeId");
-                        // 原配送ID
-                        long transportId = (long) map.get("transportId");
-                        // 换站后的配送ID
-                        long changedTransportId = (long) map.get("changedTransportId");
-                        // UDP协议数据体
-                        ByteBuffer dataBuffer = (ByteBuffer) map.get("dataBuffer");
-
-                        Map<String, Object> params = new HashMap<>();
-                        params.put("changeId", changeId);
-                        params.put("transportId", transportId);
-                        params.put("changedTransportId", changedTransportId);
-                        short bizId = UdpBizId.REMOTE_CHANGE_STATION_REQUEST;
-                        short serialNo = (short) (SerialNumberCache.getSerialNumber(bizId) + 1);
-                        int cacheId = AsynUdpCommCache.buildCacheId(bizId, serialNo);
-                        AsynUdpCommCache.putParamCache(cacheId, params);
-
-                        ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
-                        boolean isSend = udpServer.send(src);
-                        if (!isSend) {
-                            AsynUdpCommCache.removeParamCache(cacheId);
-                            logger.warn("UDP发送数据异常！");
-                        } else {
-                            new TimeOutTask(src, cacheId).executeRemoteControlTask();
-                        }
-                    });
-                    logger.info("配送单：{}，修改成功!", distributionMap.get("distributNO"));
+                    addDist(distributionMap, terminalId, invoice);
+                    continue;
                 }
-            } catch (ServiceException e) {
+                // 配送单号代表的处于配送中状态的配送记录数目
+                invoiceCount = distributionRecordService.countWaitInvoice(invoice);
+                if (invoiceCount == null || invoiceCount == 0) {
+                    addDist(distributionMap, terminalId, invoice);
+                    continue;
+                }
+                // 物流配送接口更改配送信息换站
+                Map<String, Object> map = changeRecordService.distributionChange(distributionMap);
+                ThreadPool.CACHED_THREAD_POOL.execute(() -> {
+                    // 换站ID
+                    long changeId = (long) map.get("changeId");
+                    // 原配送ID
+                    long transportId = (long) map.get("transportId");
+                    // 换站后的配送ID
+                    long changedTransportId = (long) map.get("changedTransportId");
+                    // UDP协议数据体
+                    ByteBuffer dataBuffer = (ByteBuffer) map.get("dataBuffer");
+
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("changeId", changeId);
+                    params.put("transportId", transportId);
+                    params.put("changedTransportId", changedTransportId);
+                    short bizId = UdpBizId.REMOTE_CHANGE_STATION_REQUEST;
+                    short serialNo = (short) (SerialNumberCache.getSerialNumber(bizId) + 1);
+                    int cacheId = AsynUdpCommCache.buildCacheId(bizId, serialNo);
+                    AsynUdpCommCache.putParamCache(cacheId, params);
+
+                    ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
+                    boolean isSend = udpServer.send(src);
+                    if (!isSend) {
+                        AsynUdpCommCache.removeParamCache(cacheId);
+                        logger.warn("UDP发送数据异常！");
+                    } else {
+                        new TimeOutTask(src, cacheId).executeRemoteControlTask();
+                    }
+                });
+                logger.info("配送单：{}，修改成功!", invoice);
+            } catch (Exception e) {
                 logger.error("配送信息存储异常！", e);
                 return "<Message>fail：配送信息存储异常！</Message>";
             }
         }
         return REPLY_MESSAGE_SUCCESS;
+    }
+
+    /**
+     * 新增配送单
+     *
+     * @param distributionMap 配送信息
+     * @param terminalId      车台设备ID
+     * @param invoice         配送单号
+     * @throws ServiceException
+     */
+    private void addDist(Map<String, Object> distributionMap, int terminalId, String invoice)
+            throws ServiceException {
+        ByteBuffer dataBuffer = distributionRecordService.addDistributionRecord(distributionMap);
+        ThreadPool.CACHED_THREAD_POOL.execute(() -> {
+            ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
+            boolean isSend = udpServer.send(src);
+            if (!isSend) {
+                logger.warn("UDP发送数据异常！");
+            }
+        });
+        logger.info("配送单：{}，新增成功!", invoice);
     }
 
     /**

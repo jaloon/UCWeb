@@ -14,13 +14,13 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		d.*
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_driver d
 		where d.is_invalid=0
 	</select>
@@ -73,7 +73,7 @@
 	</update>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_driver d
 		where d.is_invalid=0 and d.id=#{id}
 	</select>
@@ -85,13 +85,13 @@
 	</select>
 
 	<select id="findByCarNo" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include>
+		select <include refid="select_columns"></include>
 		from tbl_driver d
 		where d.is_invalid=0 and d.vehicle_number=#{carNo}
 	</select>
 
 	<select id="findFreeDrivers" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_driver d
 		where d.is_invalid=0 and (d.vehicle_number is null or d.vehicle_number = '')
 	</select>
@@ -104,7 +104,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_driver d
 		where d.is_invalid=0
 		<if test="entity.name != null and entity.name != ''">

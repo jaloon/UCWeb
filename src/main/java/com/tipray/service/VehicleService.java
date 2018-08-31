@@ -1,6 +1,12 @@
 package com.tipray.service;
 
-import com.tipray.bean.*;
+import com.tipray.bean.ChangeInfo;
+import com.tipray.bean.DropdownData;
+import com.tipray.bean.GridPage;
+import com.tipray.bean.Page;
+import com.tipray.bean.VehicleRealtimeStatus;
+import com.tipray.bean.VehicleStatus;
+import com.tipray.bean.VehicleTerminalConfig;
 import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
@@ -70,6 +76,14 @@ public interface VehicleService {
      * @return 车辆ID
      */
     Long getIdByCarNo(String carNo);
+
+    /**
+     * 根据车牌号获取车载终端设备ID
+     *
+     * @param carNo {@link String} 车牌号
+     * @return {@link Integer} 车载终端设备ID
+     */
+    Integer getTerminalIdByCarNo(String carNo);
 
     /**
      * 根据车牌号获取仓数
@@ -256,6 +270,13 @@ public interface VehicleService {
      * @return GPS配置信息
      */
     VehicleTerminalConfig getGpsConfByTerminalId(Integer terminalId);
+
+    /**
+     * 根据车辆ID获取GPS配置信息
+     * @param carId 车辆ID
+     * @return GPS配置信息
+     */
+    VehicleTerminalConfig getGpsConfByCarId(Long carId);
 
     /**
      * 根据车牌号获取GPS配置信息
@@ -489,4 +510,12 @@ public interface VehicleService {
      * @return 轨迹和锁信息
      */
     Map<String, Object> getTrackAndLockInfoByTrackId(String trackId);
+
+    /**
+     * 根据锁设备ID和车辆ID获取锁记录ID
+     * @param carId 车辆ID
+     * @param devIds 锁设备ID，逗号分隔
+     * @return 锁记录ID
+     */
+    List<Lock> findIdsByDevIds(Long carId, String devIds);
 }

@@ -19,6 +19,10 @@ public class Record extends BaseBean {
      */
     private Long trackId;
     /**
+     * 坐标是否有效
+     */
+    private Boolean coorValid;
+    /**
      * 经度
      */
     private Float longitude;
@@ -77,6 +81,14 @@ public class Record extends BaseBean {
 
     public void setTrackId(Long trackId) {
         this.trackId = trackId;
+    }
+
+    public Boolean getCoorValid() {
+        return coorValid;
+    }
+
+    public void setCoorValid(Boolean coorValid) {
+        this.coorValid = coorValid;
     }
 
     public Float getLongitude() {
@@ -178,6 +190,9 @@ public class Record extends BaseBean {
         }
         if (trackId != null) {
             sb.append(", trackId=").append(trackId);
+        }
+        if (coorValid != null) {
+            sb.append(", coorValid=").append(coorValid);
         }
         if (longitude != null) {
             sb.append(", longitude=").append(longitude);

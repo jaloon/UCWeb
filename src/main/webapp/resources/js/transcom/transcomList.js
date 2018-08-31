@@ -40,12 +40,16 @@ $(function() {
             $("#search_text").replaceWith("<select class=\"search-text\" id=\"search_text\"></select>");
             $.getJSON("../../manage/transcom/getSuperiorCompanyList.do",
                 function(data) {
-                    var companies = eval(data);
-                    var len = companies.length;
-                    for (var i = 0; i < len; i++) {
-                        var company = companies[i];
-                        $("#search_text").append("<option value=" + company.id + ">" + company.name + "</option>");
+                    if (data == null || data == undefined || data.length == 0) {
+                        return;
                     }
+                    var len = data.length;
+                    var comHtml = "";
+                    for (var i = 0; i < len; i++) {
+                        var company = data[i];
+                        comHtml += "<option value=" + company.id + ">" + company.name + "</option>";
+                    }
+                    $("#search_text").append(comHtml);
                 }
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
                 if (XMLHttpRequest.readyState == 4) {

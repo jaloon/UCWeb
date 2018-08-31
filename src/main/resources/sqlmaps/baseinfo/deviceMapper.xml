@@ -16,7 +16,7 @@
 		<result column="gmt_create" property="createDate"/>
 		<result column="gmt_modified" property="modifyDate"/>
 	</resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		d.id,
 		d.device_id,
 		d.type,
@@ -32,7 +32,7 @@
 	</sql>
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0
 	</select>
@@ -133,25 +133,25 @@
     </update>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0 and d.id=#{id}
 	</select>
 	
 	<select id="getByDeviceId" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0 and d.device_id=#{deviceId}
 	</select>
 	
 	<select id="findByCenterId" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_device d
 		where c.id=#{centerId} and d.is_disallowed=0 and d.is_invalid=0
 	</select>
 	
 	<select id="findByType" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_device d
 		where d.type=#{deviceType} and d.is_disallowed=0 and d.is_invalid=0
 	</select>
@@ -167,7 +167,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_device d
 		where d.is_disallowed=0 and d.is_invalid=0
 		<if test="entity.centerId != null and entity.centerId != -2l">and d.center_id=#{entity.centerId}</if>

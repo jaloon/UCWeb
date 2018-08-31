@@ -20,6 +20,22 @@ public class LastTrack extends TrackInfo {
      * 运输公司名称
      */
     private String carCom;
+    /**
+     * 最后有效经度
+     */
+    private Float lastValidLongitude;
+    /**
+     * 最后有效纬度
+     */
+    private Float lastValidLatitude;
+    /**
+     * 最后有效角度
+     */
+    private Integer lastValidAngle;
+    /**
+     * 最后有效速度
+     */
+    private Integer lastValidSpeed;
 
     public String getCarNumber() {
         return carNumber;
@@ -45,6 +61,38 @@ public class LastTrack extends TrackInfo {
         this.carCom = carCom;
     }
 
+    public Float getLastValidLongitude() {
+        return lastValidLongitude;
+    }
+
+    public void setLastValidLongitude(Float lastValidLongitude) {
+        this.lastValidLongitude = lastValidLongitude;
+    }
+
+    public Float getLastValidLatitude() {
+        return lastValidLatitude;
+    }
+
+    public void setLastValidLatitude(Float lastValidLatitude) {
+        this.lastValidLatitude = lastValidLatitude;
+    }
+
+    public Integer getLastValidAngle() {
+        return lastValidAngle;
+    }
+
+    public void setLastValidAngle(Integer lastValidAngle) {
+        this.lastValidAngle = lastValidAngle;
+    }
+
+    public Integer getLastValidSpeed() {
+        return lastValidSpeed;
+    }
+
+    public void setLastValidSpeed(Integer lastValidSpeed) {
+        this.lastValidSpeed = lastValidSpeed;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("LastTrack{");
@@ -59,12 +107,17 @@ public class LastTrack extends TrackInfo {
         sb.append(", terminalAlarm=").append(getTerminalAlarm());
         sb.append(", angle=").append(getAngle());
         sb.append(", speed=").append(getSpeed());
+        sb.append(", lastValidLongitude=").append(lastValidLongitude);
+        sb.append(", lastValidLatitude=").append(lastValidLatitude);
+        sb.append(", lastValidAngle=").append(lastValidAngle);
+        sb.append(", lastValidSpeed=").append(lastValidSpeed);
         byte[] lockStatusInfo = getLockStatusInfo();
         if (lockStatusInfo != null && lockStatusInfo.length > 0) {
             sb.append(", lockStatusInfo=");
             sb.append('[');
-            for (int i = 0, len = lockStatusInfo.length; i < len; ++i)
+            for (int i = 0, len = lockStatusInfo.length; i < len; ++i) {
                 sb.append(i == 0 ? "" : ", ").append(lockStatusInfo[i]);
+            }
             sb.append(']');
         }
         sb.append(", trackTime=").append(getTrackTime());

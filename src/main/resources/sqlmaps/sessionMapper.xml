@@ -16,7 +16,7 @@
         <result column="user_name" property="user.name"  />
         <result column="user_account" property="user.account"  />
     </resultMap>
-    <sql id="select_colums">
+    <sql id="select_columns">
     	s.session_id session_id,
     	s.old_session_id old_session_id,
     	inet_ntoa(s.ip) ip,
@@ -32,24 +32,24 @@
     </sql>
 
     <select id="findSessions" resultType="java.util.Map" resultMap="BaseResultMap">
-        select <include refid="select_colums"></include>
+        select <include refid="select_columns"></include>
         from tbl_session s,tbl_user u,tbl_role r
         where s.user_id=u.id and u.role_id=r.id
     </select>
     
-    <select id="getByUser" resultMap="BaseResultMap" parameterType="com.tipray.bean.Session" >
-        select <include refid="select_colums"></include>
+    <select id="getByUser" resultMap="BaseResultMap">
+        select <include refid="select_columns"></include>
 		from tbl_session s,tbl_user u,tbl_role r 
-		where s.user_id=u.id and u.role_id=r.id and u.id = #{user.id}
+		where s.user_id=u.id and u.role_id=r.id and u.id = #{userId} and s.is_app = #{isApp}
     </select>
     
     <select id="getByUUID" resultMap="BaseResultMap" parameterType="java.lang.String" >
-        select <include refid="select_colums"></include>
+        select <include refid="select_columns"></include>
         from tbl_session s,tbl_user u,tbl_role r 
 		where s.user_id=u.id and u.role_id=r.id and s.session_id = #{uuid}
     </select>
     <select id="getByOldUUID" resultMap="BaseResultMap" parameterType="java.lang.String" >
-        select <include refid="select_colums"></include>
+        select <include refid="select_columns"></include>
         from tbl_session s,tbl_user u,tbl_role r 
 		where s.user_id=u.id and u.role_id=r.id and s.old_session_id = #{uuid}
 		order by login_time desc limit 1
@@ -65,7 +65,7 @@
 		<include refid="select_where_vo"></include>
 	</select>
 	<select id="findByVo" resultMap="BaseResultMap">
-		select <include refid="select_colums"></include>
+		select <include refid="select_columns"></include>
 		from tbl_session s,tbl_user u,tbl_role r 
 		where s.user_id=u.id and u.role_id=r.id
 		<include refid="select_where_vo"></include>
@@ -83,11 +83,10 @@
         update tbl_session set 
         session_id = #{uuid},
         old_session_id=#{oldUuid},
-        is_app=ifnull(#{isApp},0),
         ip=inet_aton(#{ip}),
         login_time=#{loginDate},
         operate_time=#{operateDate} 
-        where user_id = #{user.id}
+        where user_id = #{user.id} and is_app = #{isApp}
     </update>
     
     <delete id="deleteByUUID" parameterType="java.lang.String" >

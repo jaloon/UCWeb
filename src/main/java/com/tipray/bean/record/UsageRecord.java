@@ -8,7 +8,7 @@ import com.tipray.bean.Record;
  * @author chenlong
  * @version 1.0 2017-12-27
  */
-public class CardAndDeviceUseRecord extends Record {
+public class UsageRecord extends Record {
     private static final long serialVersionUID = 1L;
     /**
      * 车辆ID
@@ -160,7 +160,7 @@ public class CardAndDeviceUseRecord extends Record {
             sb.append(", end='").append(getEnd()).append('\'');
         }
         if (sb.length() > 0) {
-            sb.replace(0, 2, "CardAndDeviceUseRecord{");
+            sb.replace(0, 2, "UsageRecord{");
             sb.append('}');
         }
         return sb.toString();

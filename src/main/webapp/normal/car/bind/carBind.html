@@ -8,9 +8,9 @@
     <title>设备绑定</title>
     <link rel="stylesheet" href="../../../resources/css/base.css">
     <link rel="stylesheet" href="../../../resources/css/cfgEdit.css">
-    <link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">
+    <!--<link rel="stylesheet" href="../../../resources/plugins/combo/jquery.combo.select.css">-->
     <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>
+    <!--<script src="../../../resources/plugins/combo/jquery.combo.select.js"></script>-->
     <script src="../../../resources/plugins/layer/layer.js"></script>
     <script src="../../../resources/plugins/verify.js"></script>
     <script src="../../../resources/js/base.js"></script>
@@ -31,11 +31,11 @@
                 <tr>
                     <td>车牌号</td>
                     <td>
-                        <!--<input type="text" class="editInfo" id="carno">-->
-                        <select class="editInfo" id="carno">
-                            <option value="">车牌号</option>
-                        </select>
-                    </td>
+                        <input type="text" class="editInfo" id="carno" readonly>
+                        <!--<select class="editInfo" id="carno">-->
+                            <!--<option value="">车牌号</option>-->
+                        <!--</select>-->
+                    <!--</td>-->
                 </tr>
                 <tr>
                     <td>车载终端</td>
@@ -70,26 +70,16 @@
 
 <script>
     $(function () {
-        $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+        var carNumber = getUrlParam("carNumber");
+        $("#carno").val(carNumber);
+        $.getJSON("../../../manage/car/getTerminalIdByCarNo.do", "carNo=" + encodeURI(carNumber),
             function (data, textStatus, jqXHR) {
-                var selectObj = $('#carno');
-                selectObj.append(data.com);
-                var cars = data.car;
-                var groupObj;
-                for (var i = 0, len = cars.length; i < len; i++) {
-                    var car = cars[i];
-                    groupObj = $("#com_" + car.comId);
-                    groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+                if (data == 0) {
+                    $("#terminal").val("");
+                    $("#bind_type").prop("disabled", true);
+                } else {
+                    $("#terminal").val(data);
                 }
-                selectObj.comboSelect();
-                selectObj.hide();
-                selectObj.closest(".combo-select").css({
-                    width: '396px',
-                    height: '28px',
-                    "margin-bottom": "0px"
-                });
-                selectObj.siblings(".combo-dropdown").css("max-height", "250px");
-                selectObj.siblings(".combo-input").height(2);
             }
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
             if (XMLHttpRequest.readyState == 4) {
@@ -107,6 +97,44 @@
                 }
             }
         });
+
+        // $.getJSON("../../../manage/car/selectCars.do", "scope=0",
+        //     function (data, textStatus, jqXHR) {
+        //         var selectObj = $('#carno');
+        //         selectObj.append(data.com);
+        //         var cars = data.car;
+        //         var groupObj;
+        //         for (var i = 0, len = cars.length; i < len; i++) {
+        //             var car = cars[i];
+        //             groupObj = $("#com_" + car.comId);
+        //             groupObj.append("<option value = '" + car.carNumber + "'>" + car.carNumber + "</option>");
+        //         }
+        //         selectObj.comboSelect();
+        //         selectObj.hide();
+        //         selectObj.closest(".combo-select").css({
+        //             width: '396px',
+        //             height: '28px',
+        //             "margin-bottom": "0px"
+        //         });
+        //         selectObj.siblings(".combo-dropdown").css("max-height", "250px");
+        //         selectObj.siblings(".combo-input").height(2);
+        //     }
+        // ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+        //     if (XMLHttpRequest.readyState == 4) {
+        //         var http_status = XMLHttpRequest.status;
+        //         if (http_status == 0 || http_status > 600) {
+        //             location.reload(true);
+        //         } else if (http_status == 200) {
+        //             if (textStatus == "parsererror") {
+        //                 layer.alert("应答数据格式解析错误！")
+        //             } else {
+        //                 layer.alert("http response error: " + textStatus)
+        //             }
+        //         } else {
+        //             layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+        //         }
+        //     }
+        // });
 
         $("#bind_type").change(function () {
             var bindType = $("#bind_type").val();
@@ -197,6 +225,7 @@
                 },
                 "json"
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.close(loadIndex);
                 if (XMLHttpRequest.readyState == 4) {
                     var http_status = XMLHttpRequest.status;
                     if (http_status == 0 || http_status > 600) {

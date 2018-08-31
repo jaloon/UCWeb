@@ -1,5 +1,6 @@
 package com.tipray.util;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,4 +132,38 @@ public class EmptyObjectUtil {
         return map == null || map.isEmpty();
     }
 
+    /**
+     * 判断bean所有属性为空
+     *
+     * @param bean javabean
+     * @return
+     */
+    public static boolean isAllFieldNull(Object bean) {
+        Field[] fields = bean.getClass().getDeclaredFields();
+        try {
+            for (Field field : fields) {
+                //把私有属性公有化
+                field.setAccessible(true);
+                if (field.get(bean) != null) {
+                    return false;
+                }
+            }
+        } catch (IllegalAccessException e) {
+            // none IllegalAccessException expect
+        }
+        return true;
+    }
+
+    /**
+     * javabean是否为空（null或所有属性null）
+     *
+     * @param bean javabean
+     * @return
+     */
+    public static boolean isEmptyBean(Object bean) {
+        if (bean == null) {
+            return true;
+        }
+        return isAllFieldNull(bean);
+    }
 }

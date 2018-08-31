@@ -26,8 +26,10 @@ $(function() {
                 layer.alert('两次输入新密码不一致！', { icon: 5 });
                 return;
             }
+            var loadLayer = layer.load();
             $.post(url, encodeURI(param),
                 function(data) {
+                    layer.close(loadLayer);
                     if ("error" == data.msg) {
                         if ("oldPwdError" == data.e) {
                             layer.alert('原密码不正确！', { icon: 2 }, function(index2) {
@@ -45,6 +47,7 @@ $(function() {
                 },
                 "json"
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.close(loadLayer);
                 if (XMLHttpRequest.readyState == 4) {
                     var http_status = XMLHttpRequest.status;
                     if (http_status == 0 || http_status > 600) {
@@ -167,6 +170,7 @@ $(function() {
                 },
                 "json"
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.close(loadLayer);
                 if (XMLHttpRequest.readyState == 4) {
                     var http_status = XMLHttpRequest.status;
                     if (http_status == 0 || http_status > 600) {

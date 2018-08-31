@@ -5,6 +5,7 @@ import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Card;
 import com.tipray.core.exception.ServiceException;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -22,21 +23,21 @@ public interface CardService {
 	 * @param Card
 	 * @throws ServiceException
 	 */
-    Card addCard(Card card) throws ServiceException;
+    Card addCard(Card card) throws ServiceException, SQLException;
 
 	/**
 	 * 修改卡信息
 	 * 
 	 * @param Card
 	 */
-    Card updateCard(Card card) throws ServiceException;
+    Card updateCard(Card card) throws ServiceException, SQLException;
 
 	/**
 	 * 根据Id删除卡
 	 * 
 	 * @param id
 	 */
-    void deleteCardById(Long id) throws ServiceException;
+    void deleteCardById(Long id) throws ServiceException, SQLException;
 
 	/**
 	 * 根据Id获取卡信息

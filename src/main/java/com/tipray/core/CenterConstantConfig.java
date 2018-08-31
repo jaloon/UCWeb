@@ -46,7 +46,8 @@ public class CenterConstantConfig {
 
     private static Integer webServicePort;
     private static String webServicePath;
-    private static String webServiceAddr;
+    private static String webServiceRealAddr;
+    private static String webServicePublishAddr;
     private static Boolean webServiceForword;
     private static String webServiceRtUrl;
 
@@ -147,8 +148,12 @@ public class CenterConstantConfig {
         return webServicePath;
     }
 
-    protected static String getWebServiceAddr() {
-        return webServiceAddr;
+    protected static String getWebServiceRealAddr() {
+        return webServiceRealAddr;
+    }
+
+    protected static String getWebServicePublishAddr() {
+        return webServicePublishAddr;
     }
 
     protected static Boolean getWebServiceForword() {
@@ -217,9 +222,11 @@ public class CenterConstantConfig {
         udpRemotePort = Integer.parseInt(properties.getProperty("udp.remote.port"), 10);
 
         webServicePort = Integer.parseInt(properties.getProperty("webservice.port"), 10);
-        webServicePath =  properties.getProperty("webservice.path");
-        webServiceAddr = new StringBuffer("http://").append(NetUtil.getLocalHostLANAddress().getHostAddress()).append(':')
-                .append(webServicePort).append('/').append(webServicePath).toString();
+        webServicePath = properties.getProperty("webservice.path");
+        webServicePublishAddr = new StringBuffer().append("http://0.0.0.0:").append(webServicePort).append('/')
+                .append(webServicePath).toString();
+        webServiceRealAddr = new StringBuffer().append("http://").append(NetUtil.getLocalHostLANAddress().getHostAddress())
+                .append(':').append(webServicePort).append('/').append(webServicePath).toString();
         webServiceForword = properties.getProperty("webservice.forward", "0").equals("1");
         webServiceRtUrl = properties.getProperty("webservice.rt.url");
 
@@ -232,5 +239,4 @@ public class CenterConstantConfig {
         FileUtil.createPath(excelFilePath);
         FileUtil.createPath(upgradeFilePath);
     }
-
 }

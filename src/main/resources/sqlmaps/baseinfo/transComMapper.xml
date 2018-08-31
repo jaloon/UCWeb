@@ -14,13 +14,13 @@
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
-	<sql id="select_colums">
+	<sql id="select_columns">
 		t1.*,t2.name parent_company_name
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
 		select
-		<include refid="select_colums"></include>
+		<include refid="select_columns"></include>
 		from tbl_trans_company t1
 		left join tbl_trans_company t2
 		on t1.parent_company_id=t2.id
@@ -51,7 +51,7 @@
 	</delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_trans_company t1
 		left join tbl_trans_company t2
 		on t1.parent_company_id=t2.id
@@ -59,7 +59,7 @@
 	</select>
 	
 	<select id="getByName" parameterType="java.lang.String" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_trans_company t1
 		left join tbl_trans_company t2
 		on t1.parent_company_id=t2.id
@@ -87,7 +87,7 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from tbl_trans_company t1
 		left join tbl_trans_company t2
 		on t1.parent_company_id=t2.id

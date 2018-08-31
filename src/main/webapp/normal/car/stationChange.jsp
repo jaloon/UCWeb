@@ -28,9 +28,9 @@
         }
 
         .iziToast-wrapper {
-            width: 362px;
-            height: 60px;
-        }
+             width: 362px;
+             height: 60px;
+         }
     </style>
 </head>
 

@@ -7,7 +7,6 @@ function login() {
             "manage/session/login.do",
             encodeURI("account=" + account + "&password=" + password),
             function (data) {
-                layer.close(loadLayer);
                 if (data.id == 0) {
                     // var requestUrl = $.trim($("#requestUrl").val());
                     // if (isNull(requestUrl) || requestUrl.indexOf("login.jsp") >= 0) {
@@ -18,9 +17,11 @@ function login() {
                 } else {
                     $(".login-errorMsg").html(data.msg);
                 }
+                layer.close(loadLayer);
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
             if (XMLHttpRequest.readyState == 4) {
                 var http_status = XMLHttpRequest.status;
                 if (http_status == 200) {

@@ -27,7 +27,6 @@ import java.util.Map;
  * @author chenlong
  * @version 1.0 2017-12-22
  */
-@Transactional(rollbackForClassName = "Exception")
 @Service("changeRecordService")
 public class ChangeRecordServiceImpl implements ChangeRecordService {
     @Resource
@@ -90,6 +89,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         record.setUser(user);
     }
 
+    @Transactional
     @Override
     public Map<String, Object> distributionChange(Map<String, Object> distributionMap) {
         // 配送单号
@@ -132,6 +132,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         return map;
     }
 
+    @Transactional
     @Override
     public Map<String, Object> remoteChangeStation(ChangeInfo changeInfo, String userName) {
         // 配送单号
@@ -172,11 +173,13 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         return map;
     }
 
+    @Transactional
     @Override
     public void updateChangeStatus(Long changeId, Integer changeStatus) {
         changeRecordDao.updateChangeStatus(changeId, changeStatus);
     }
 
+    @Transactional
     @Override
     public void updateChangeAndTransportStatusForDone(Long changeId, Long transportId, Long changedTransportId) {
         // 将换站状态更新为换站完成

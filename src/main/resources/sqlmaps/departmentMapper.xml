@@ -19,7 +19,7 @@
         <result column="parentCode" property="parent.code"  />
     </resultMap>
     
-    <sql id="select_colums">
+    <sql id="select_columns">
     	d.*,p.name parentName,p.code parentCode
     </sql>
 	<select id="findAll" resultMap="BaseResultMap">
@@ -45,15 +45,15 @@
 	</delete>
 	
 	<select id="getById" parameterType="java.lang.Long" resultMap="parentResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from Departments d LEFT JOIN Departments p on d.parentId=p.id where d.id=#{id}
 	</select>
 	<select id="findByParentId" parameterType="java.lang.Long" resultMap="parentResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from Departments d LEFT JOIN Departments p on d.parentId=p.id where d.parentId=#{parentId}
 	</select>
 	<select id="getByNameAndParentId" parameterType="com.tipray.bean.Department" resultMap="parentResultMap">
-		select <include refid="select_colums"></include> 
+		select <include refid="select_columns"></include> 
 		from Departments d LEFT JOIN Departments p on d.parentId=p.id where d.name=#{name} and d.parentId=#{parent.id}
 	</select>
 	<select id="getMaxCode" parameterType="java.lang.Long" resultType="java.lang.String">
@@ -73,7 +73,7 @@
 		</if>
 	</sql>
 	<select id="findByVo" resultMap="parentResultMap">
-		select  <include refid="select_colums"></include>
+		select  <include refid="select_columns"></include>
 		from Departments d LEFT JOIN Departments p on d.parentId=p.id where 1=1
 		<include refid="select_where_vo"></include>
 	</select>

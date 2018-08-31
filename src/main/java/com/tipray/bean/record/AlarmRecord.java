@@ -35,6 +35,10 @@ public class AlarmRecord extends Record {
      */
     private String typeName;
     /**
+     * 报警状态码
+     */
+    private Integer statusCode;
+    /**
      * 报警状态
      */
     private String status;
@@ -47,9 +51,9 @@ public class AlarmRecord extends Record {
      */
     private String alarmTime;
     /**
-     * 报警业务类型 （100 消除报警，110 报警(default)，120 延时推送报警，130 忽略报警）
+     * 报警上报时间
      */
-    private int biz = 110;
+    private String alarmReportTime;
 
     public Long getVehicleId() {
         return vehicleId;
@@ -99,6 +103,14 @@ public class AlarmRecord extends Record {
         this.typeName = typeName;
     }
 
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -123,12 +135,12 @@ public class AlarmRecord extends Record {
         this.alarmTime = alarmTime;
     }
 
-    public int getBiz() {
-        return biz;
+    public String getAlarmReportTime() {
+        return alarmReportTime;
     }
 
-    public void setBiz(int biz) {
-        this.biz = biz;
+    public void setAlarmReportTime(String alarmReportTime) {
+        this.alarmReportTime = alarmReportTime;
     }
 
     @Override
@@ -158,6 +170,9 @@ public class AlarmRecord extends Record {
         if (typeName != null) {
             sb.append(", typeName='").append(typeName).append('\'');
         }
+        if (statusCode != null) {
+            sb.append(", statusCode=").append(statusCode);
+        }
         if (status != null) {
             sb.append(", status='").append(status).append('\'');
         }
@@ -167,7 +182,9 @@ public class AlarmRecord extends Record {
         if (alarmTime != null) {
             sb.append(", alarmTime='").append(alarmTime).append('\'');
         }
-        sb.append(", biz=").append(biz);
+        if (alarmReportTime != null) {
+            sb.append(", alarmReportTime='").append(alarmReportTime).append('\'');
+        }
         if (getLongitude() != null) {
             sb.append(", longitude=").append(getLongitude());
         }

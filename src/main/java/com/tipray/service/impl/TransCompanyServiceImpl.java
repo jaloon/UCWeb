@@ -19,12 +19,12 @@ import java.util.List;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("transCompanyService")
 public class TransCompanyServiceImpl implements TransCompanyService {
 	@Resource
 	private TransCompanyDao transCompanyDao;
 
+	@Transactional
 	@Override
 	public TransCompany addTransCompany(TransCompany transCompany) {
 		if (transCompany != null) {
@@ -45,6 +45,7 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 		return transCompany;
 	}
 
+    @Transactional
 	@Override
 	public TransCompany updateTransCompany(TransCompany transCompany) {
 		if (transCompany != null) {
@@ -53,6 +54,7 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 		return transCompany;
 	}
 
+    @Transactional
 	@Override
 	public void deleteTransCompanyById(Long id) {
         if (id == null) {
@@ -100,5 +102,4 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 		List<TransCompany> list = findByPage(transCompany, page);
 		return new GridPage<TransCompany>(list, records, page.getPageId(), page.getRows(), list.size(), transCompany);
 	}
-
 }

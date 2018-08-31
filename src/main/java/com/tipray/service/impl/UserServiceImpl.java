@@ -21,12 +21,12 @@ import java.util.List;
  * @version 1.0 2017-12-22
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "NoSuchAlgorithmException", "Exception" })
 @Service("userService")
 public class UserServiceImpl implements UserService {
 	@Resource
 	private UserDao userDao;
 
+	@Transactional
 	@Override
 	public User addUser(User user) throws NoSuchAlgorithmException {
 		if (user != null) {
@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
+    @Transactional
 	@Override
 	public User updateUser(User user) {
 		if (user != null) {
@@ -61,6 +62,7 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
+    @Transactional
 	@Override
 	public void updatePassword(User user) throws NoSuchAlgorithmException {
 		if (user != null) {
@@ -71,9 +73,9 @@ public class UserServiceImpl implements UserService {
 				userDao.updatePassword(user);
 			}
 		}
-
 	}
 
+    @Transactional
 	@Override
 	public void deleteUserById(Long id) {
 		userDao.delete(id);

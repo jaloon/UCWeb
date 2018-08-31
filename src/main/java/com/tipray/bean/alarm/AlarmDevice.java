@@ -13,7 +13,7 @@ public class AlarmDevice implements Serializable {
     /**
      * 车辆ID
      */
-    private int vehicleId;
+    private long vehicleId;
     /**
      * 设备类型（1 车台，2 锁）
      */
@@ -31,11 +31,11 @@ public class AlarmDevice implements Serializable {
      */
     private int alarmType;
 
-    public int getVehicleId() {
+    public long getVehicleId() {
         return vehicleId;
     }
 
-    public void setVehicleId(int vehicleId) {
+    public void setVehicleId(long vehicleId) {
         this.vehicleId = vehicleId;
     }
 

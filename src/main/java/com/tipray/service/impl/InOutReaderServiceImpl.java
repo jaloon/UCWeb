@@ -16,12 +16,12 @@ import java.util.List;
  * @version 1.0 2018-03-12
  *
  */
-@Transactional(rollbackForClassName = { "ServiceException", "Exception" })
 @Service("inOutReaderService")
 public class InOutReaderServiceImpl implements InOutReaderService {
 	@Resource
 	private InOutReaderDao inOutReaderDao;
 
+	@Transactional
 	@Override
 	public InOutReader addInOutReader(InOutReader inOutReader) {
 		if (inOutReader != null) {
@@ -30,6 +30,7 @@ public class InOutReaderServiceImpl implements InOutReaderService {
 		return inOutReader;
 	}
 
+	@Transactional
 	@Override
 	public InOutReader updateInOutReader(InOutReader inOutReader) {
 		if (inOutReader != null) {
@@ -38,6 +39,7 @@ public class InOutReaderServiceImpl implements InOutReaderService {
 		return inOutReader;
 	}
 
+	@Transactional
 	@Override
 	public void deleteInOutReadersById(Long id) {
 		inOutReaderDao.delete(id);
@@ -53,6 +55,7 @@ public class InOutReaderServiceImpl implements InOutReaderService {
 		return inOutReaderDao.findByOilDepotId(oilDepotId);
 	}
 
+    @Transactional
 	@Override
 	public void deleteByOilDepotId(Long oilDepotId) {
 		inOutReaderDao.deleteByOilDepotId(oilDepotId);
@@ -62,5 +65,4 @@ public class InOutReaderServiceImpl implements InOutReaderService {
 	public List<Integer> findBarrierReaderIdByDepotId(Integer oilDepotId, Integer barrierType) {
 		return inOutReaderDao.findBarrierReaderIdByDepotId(oilDepotId, barrierType);
 	}
-
 }
