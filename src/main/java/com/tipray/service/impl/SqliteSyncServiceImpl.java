@@ -1,5 +1,6 @@
 package com.tipray.service.impl;
 
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.sqlite.BaseSqlite;
 import com.tipray.bean.sqlite.InOutCard;
 import com.tipray.bean.sqlite.InOutDev;
@@ -16,10 +17,10 @@ import com.tipray.init.impl.SqliteInit;
 import com.tipray.service.SqliteSyncService;
 import com.tipray.util.FtpUtil;
 import com.tipray.util.JDBCUtil;
+import com.tipray.util.JSONUtil;
 import com.tipray.util.OkHttpUtil;
 import com.tipray.util.StringUtil;
 import okhttp3.FormBody;
-import okhttp3.RequestBody;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -320,54 +321,76 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
             return;
         }
         boolean isSendEmail = CenterVariableConfig.isEmailSqlite();
+        String[] receivers = CenterVariableConfig.getEmailSqliteReceivers();
         try {
             syncUrgentCard();
         } catch (Exception e) {
-            dealException(isSendEmail, e);
+            dealException("应急卡", isSendEmail, receivers, e);
         }
         try {
             syncManageCard();
         } catch (Exception e) {
-            dealException(isSendEmail, e);
+            dealException("管理卡", isSendEmail, receivers, e);
         }
         try {
             syncInOutCard();
         } catch (Exception e) {
-            dealException(isSendEmail, e);
+            dealException("出入库卡", isSendEmail, receivers, e);
         }
         try {
             syncInOutDev();
         } catch (Exception e) {
-            dealException(isSendEmail, e);
+            dealException("出入库读卡器", isSendEmail, receivers, e);
         }
         try {
             syncOildepot();
         } catch (Exception e) {
-            dealException(isSendEmail, e);
+            dealException("油库", isSendEmail, receivers, e);
         }
     }
 
     /**
      * 处理同步异常
      *
+     * @param description 同步文件描述
      * @param isSendEmail 是否发送邮件
-     * @param e {@link Exception}
+     * @param receivers   邮件收件人
+     * @param e           {@link Exception}
      */
-    private void dealException(boolean isSendEmail, Exception e) {
+    private void dealException(String description, boolean isSendEmail, String[] receivers, Exception e) {
         if (isSendEmail) {
             try {
-                RequestBody body = new FormBody.Builder()
+                StringBuilder subBuilder = new StringBuilder()
+                        .append("sqlite同步异常通知-")
+                        .append(description)
+                        .append("同步异常-用户中心[")
+                        .append(CenterConst.CENTER_ID)
+                        .append(']');
+                StringBuilder msgBuilder = new StringBuilder()
+                        .append("用户中心：")
+                        .append(CenterConst.CENTER_ID)
+                        .append('\n')
+                        .append(ExceptionUtils.getStackTrace(e));
+                FormBody.Builder formBuilder = new FormBody.Builder()
                         .add("centerId", CenterConst.CENTER_ID.toString())
-                        .add("type", "0x0")
-                        .add("subject", "sqlite同步异常通知" )
-                        .add("msg", ExceptionUtils.getStackTrace(e))
-                        .build();
-                OkHttpUtil.post(EMAIL_URL, body);
+                        .add("subject", subBuilder.toString())
+                        .add("msg", msgBuilder.toString());
+                for (String receiver : receivers) {
+                    if (!receiver.trim().isEmpty()) {
+                        formBuilder.add("receiver", receiver);
+                    }
+                }
+                String reply =OkHttpUtil.post(EMAIL_URL, formBuilder.build());
+                logger.info("邮件接口应答：{}", reply);
+                ResponseMsg responseMsg = JSONUtil.parseToObject(reply, ResponseMsg.class);
+                if (responseMsg.getId() > 0) {
+                    logger.warn("邮件接口应答失败：{}", responseMsg.getMsg());
+                }
             } catch (IOException ioe) {
                 logger.error("发送sqlite同步异常邮件失败！{}", e.toString());
             }
         }
-        logger.error(e.getMessage());
+        logger.error(description + "同步异常！", e);
     }
 
     /**

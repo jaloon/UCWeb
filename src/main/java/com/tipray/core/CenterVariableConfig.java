@@ -26,6 +26,7 @@ public class CenterVariableConfig {
     private static boolean validateAppver;
 
     private static boolean emailSqlite;
+    private static String[] emailSqliteReceivers;
 
     public static synchronized boolean isRc4Net() {
         return rc4Net;
@@ -49,6 +50,10 @@ public class CenterVariableConfig {
 
     public static boolean isEmailSqlite() {
         return emailSqlite;
+    }
+
+    public static String[] getEmailSqliteReceivers() {
+        return emailSqliteReceivers;
     }
 
     /**
@@ -94,11 +99,17 @@ public class CenterVariableConfig {
                 validateAppver = validateAppverStr.equals("1");
             }
 
-            String eamilSqliteStr = properties.getProperty("email.sqlite");
-            if (eamilSqliteStr == null) {
+            String emailSqliteStr = properties.getProperty("email.sqlite");
+            if (emailSqliteStr == null) {
                 emailSqlite = false;
             } else {
-                emailSqlite = eamilSqliteStr.equals("1");
+                emailSqlite = emailSqliteStr.equals("1");
+            }
+            String emailSqliteReceiverStr = properties.getProperty("email.sqlite.receiver");
+            if (emailSqliteReceiverStr == null || emailSqliteReceiverStr.trim().isEmpty()) {
+                emailSqliteReceivers = null;
+            } else {
+                emailSqliteReceivers = emailSqliteReceiverStr.split(";");
             }
 
         } catch (IOException e) {
