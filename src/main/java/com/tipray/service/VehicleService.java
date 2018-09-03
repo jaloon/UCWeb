@@ -368,6 +368,20 @@ public interface VehicleService {
     Map<String, Object> getCarAndDriverByCarNo(String carNumber);
 
     /**
+     * 根据车辆ID获取车辆最新状态
+     * @param carId 车辆ID
+     * @return 车辆最新状态
+     */
+    Integer getLastCarStatusByCarId(Long carId);
+
+    /**
+     * 根据车牌号获取最新车辆状态
+     * @param carNumber 车牌号
+     * @return 最新车辆状态
+     */
+    Integer getLastCarStatusByCarNo(String carNumber);
+
+    /**
      * 根据车牌号获取锁及其状态信息
      *
      * @param carNumber 车牌号

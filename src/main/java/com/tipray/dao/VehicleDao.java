@@ -408,6 +408,13 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     Map<Long, String> findOnlineCarIds();
 
     /**
+     * 获取车辆最新状态
+     * @param carId 车辆ID
+     * @return 车辆最新状态
+     */
+    Integer getLastCarStatus(Long carId);
+
+    /**
      * 更新最后在线时间距现在超过6分钟的车辆在线状态为离线（超时用400秒）
      */
     void updateTimeoutOfflineCars();

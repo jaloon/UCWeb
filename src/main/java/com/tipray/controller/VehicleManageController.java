@@ -353,19 +353,23 @@ public class VehicleManageController {
                 logger.error("车载终端绑定失败：{}", DevBindErrorEnum.DEVICE_TYPE_INCONSISTENT);
                 return ResponseMsgUtil.error(DevBindErrorEnum.DEVICE_TYPE_INCONSISTENT);
             }
-            Vehicle vehicle1 = vehicleService.getCarByTerminalId(deviceId);
-            if (vehicle1 != null) {
-                String carNumber1 = vehicle1.getCarNumber();
-                if (carNumber1.equals(carNumber)) {
+            Vehicle bindedCar = vehicleService.getCarByTerminalId(deviceId);
+            if (bindedCar != null) {
+                String bindedCarNo = bindedCar.getCarNumber();
+                if (!bindedCarNo.equals(carNumber)) {
+                    result = "失败，设备已与车辆" + bindedCar.getCarNumber() + "绑定！";
+                    logger.error("车载终端绑定失败：设备已与车辆{}绑定！", bindedCar.getCarNumber());
+                    return ResponseMsgUtil.error(ErrorTagConst.DEV_BIND_ERROR_TAG, DevBindErrorEnum.DEVICE_BINDED.code(),
+                            "设备已与车辆" + bindedCarNo + "绑定！");
+                }
+                Integer bindedStoreNum = bindedCar.getStoreNum();
+                if (bindedStoreNum.equals(storeNum)) {
                     result = "车载终端绑定同步成功！";
                     isOk = true;
                     logger.info("车载终端绑定同步成功！");
                     return ResponseMsgUtil.success("车载终端绑定同步成功！");
                 }
-                result = "失败，设备已与车辆" + vehicle1.getCarNumber() + "绑定！";
-                logger.error("车载终端绑定失败：设备已与车辆{}绑定！", vehicle1.getCarNumber());
-                return ResponseMsgUtil.error(ErrorTagConst.DEV_BIND_ERROR_TAG, DevBindErrorEnum.DEVICE_BINDED.code(),
-                        "设备已与车辆" + carNumber1 + "绑定！");
+                // 仓数不同继续下发绑定
             }
 
             params.put("carNumber", carNumber);

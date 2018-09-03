@@ -535,6 +535,7 @@ public class VehicleServiceImpl implements VehicleService {
         if (vehicle == null) {
             return null;
         }
+        vehicle.put("status", getLastCarStatusByCarId((Long) vehicle.get("id")));
         List<Map<String, Object>> drivers = driverDao.findByCarNoForApp(carNumber);
         List<Map<String, Object>> locks = findlocksByCarNo(carNumber);
         Map<String, Object> map = new HashMap<>();
@@ -542,6 +543,27 @@ public class VehicleServiceImpl implements VehicleService {
         map.put("drivers", drivers);
         map.put("locks", locks);
         return map;
+    }
+
+    @Override
+    public Integer getLastCarStatusByCarId(Long carId) {
+        if (carId == null) {
+            return 0;
+        }
+        Integer status = vehicleDao.getLastCarStatus(carId);
+        if (status == null) {
+            return 0;
+        }
+        return status;
+    }
+
+    @Override
+    public Integer getLastCarStatusByCarNo(String carNumber) {
+        if (StringUtil.isEmpty(carNumber)) {
+            return 0;
+        }
+        Long carId = vehicleDao.getIdByCarNo(carNumber);
+        return getLastCarStatusByCarId(carId);
     }
 
     @Override

@@ -723,15 +723,15 @@
     </resultMap>
     <select id="getByCarNoForApp" parameterType="java.lang.String" resultMap="carMap">
         SELECT
-            id,
-            vehicle_number,
-            vehicle_device_id,
-            store_num,
-            transport_card_id
-        FROM
-            `tbl_vehicle`
-        WHERE
-            vehicle_number = #{carNo}
+			v.id,
+			v.vehicle_number,
+			v.vehicle_device_id,
+			v.store_num,
+			v.transport_card_id
+		FROM
+			`tbl_vehicle` v
+		WHERE
+			v.vehicle_number = #{carNo}
     </select>
     <select id="findOnlineCarsForApp" resultMap="carMap">
         SELECT
@@ -781,6 +781,19 @@
                 AND TIMESTAMPDIFF(SECOND, last_online_time, NOW()) <= 400;
         ]]>
     </select>
+
+	<select id="getLastCarStatus" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT
+			t.`status`
+		FROM
+			(
+			( SELECT `status`, trigger_time `time` FROM tbl_vehicle_seal_status WHERE vehicle_id = #{carId} ORDER BY trigger_time DESC, id DESC LIMIT 1 ) UNION
+			( SELECT vehicle_status `status`, track_time `time` FROM tbl_vehicle_newest_track WHERE vehicle_id = #{carId} )
+			) t
+		ORDER BY
+			t.time DESC
+			LIMIT 1;
+	</select>
 
     <update id="updateTimeoutOfflineCars">
         <![CDATA[

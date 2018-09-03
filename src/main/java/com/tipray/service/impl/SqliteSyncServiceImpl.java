@@ -358,6 +358,7 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
             try {
                 RequestBody body = new FormBody.Builder()
                         .add("centerId", CenterConst.CENTER_ID.toString())
+                        .add("type", "0x0")
                         .add("subject", "sqlite同步异常通知" )
                         .add("msg", ExceptionUtils.getStackTrace(e))
                         .build();
