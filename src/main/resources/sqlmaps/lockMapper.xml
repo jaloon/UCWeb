@@ -14,43 +14,83 @@
         <result column="is_allowed_open" property="allowOpen" />
         <result column="bind_status" property="bindStatus" />
         <result column="vehicle_number" property="carNumber" />
+        <result column="remark" property="remark" />
+        <result column="device_remark" property="deviceRemark" />
     </resultMap>
 	<sql id="select_columns">
-		l.*,fn_type2name('lockSeat',l.seat) seat_name,c.vehicle_number vehicle_number
+		l.id,
+        l.vehicle_id,
+        c.vehicle_number,
+        l.lock_index,
+        l.lock_device_id,
+        l.seat,
+        fn_type2name ( 'lockSeat', l.seat ) seat_name,
+        l.seat_index,
+        l.store_id,
+        l.is_allowed_open,
+        l.bind_status,
+        l.remark,
+        d.remark device_remark
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
-		select
-		<include refid="select_columns"></include>
-		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and l.is_has_bind = 1 and l.bind_status = 2
+		SELECT
+            <include refid="select_columns"></include>
+        FROM
+            tbl_lock l,
+            tbl_device d,
+            tbl_vehicle c
+        WHERE
+            l.lock_device_id = d.device_id
+            AND l.vehicle_id = c.id
+            AND l.is_has_bind = 1
+            AND l.bind_status = 2
 	</select>
 	
 	<select id="getByLockId" resultMap="fullResultMap">
-		select
-		<include refid="select_columns"></include>
-		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id
-		and l.is_has_bind = 1
-		and l.bind_status = 2
-		and l.lock_device_id=#{lockId}
-		and c.id=#{carId}
+        SELECT
+            <include refid="select_columns"></include>
+        FROM
+            tbl_lock l,
+            tbl_device d,
+            tbl_vehicle c
+        WHERE
+            l.lock_device_id = d.device_id
+            AND l.vehicle_id = c.id
+            AND l.is_has_bind = 1
+            AND l.bind_status = 2
+            AND l.lock_device_id = #{lockId}
+            AND c.id = #{carId}
 	</select>
 	
 	<select id="findLocksByCarId" resultMap="fullResultMap">
-		select
-		<include refid="select_columns"></include>
-		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and l.lock_device_id != 0
-		and c.id=#{carId}
+        SELECT
+            <include refid="select_columns"></include>
+        FROM
+            tbl_lock l,
+            tbl_device d,
+            tbl_vehicle c
+        WHERE
+            l.lock_device_id = d.device_id
+            AND l.vehicle_id = c.id
+            AND l.lock_device_id != 0
+            AND c.id = #{carId}
 	</select>
 
 	<select id="findTriggedLocksByCarId" resultMap="fullResultMap">
-		select
-		<include refid="select_columns"></include>
-		from tbl_lock l,tbl_vehicle c
-		where l.vehicle_id=c.id and l.is_has_bind = 1 and l.bind_status = 2 and l.lock_device_id != 0
-		and c.id=#{carId}
+        SELECT
+            <include refid="select_columns"></include>
+        FROM
+            tbl_lock l,
+            tbl_device d,
+            tbl_vehicle c
+        WHERE
+            l.lock_device_id = d.device_id
+            AND l.vehicle_id = c.id
+            AND l.is_has_bind = 1
+            AND l.bind_status = 2
+            AND l.lock_device_id = != 0
+            AND c.id = #{carId}
 	</select>
 
 	<select id="getMaxLockIndexByCarId" parameterType="java.lang.Long" resultType="java.lang.Integer">
@@ -112,9 +152,9 @@
 	</select>
 	
 	<select id="findVehicleIdByLocks" parameterType="java.util.List" resultMap="fullResultMap">
-		SELECT t1.vehicle_id, t2.lock_device_id FROM
+		SELECT t1.vehicle_id, t2.lock_device_id, t1.remark FROM
 		(
-		SELECT vehicle_id, lock_device_id FROM tbl_lock WHERE
+		SELECT vehicle_id, lock_device_id, remark FROM tbl_lock WHERE
 		<foreach collection="list" item="lock" index="index" separator="or">
 	        (
 	        lock_device_id = #{lock.lockId} 
@@ -146,21 +186,16 @@
             l.is_allowed_open,
             l.bind_status,
             l.is_has_bind,
-            l.lock_index
---             IFNULL( s.`status`, 0 ) switch_status
+            l.lock_index,
+            d.remark device_remark,
+            l.remark
         FROM
             tbl_lock l,
---             LEFT JOIN tbl_lock_status s ON l.store_id = s.store_id
---             AND l.seat = s.seat
---             AND l.seat_index = s.seat_index
---             AND l.lock_device_id = s.lock_device_id
---             AND s.id = ( SELECT MAX( t.id ) FROM tbl_lock_status t WHERE t.store_id = s.store_id
---                                                                                     AND t.seat = s.seat
---                                                                                     AND t.seat_index = s.seat_index
---                                                                                     AND t.lock_device_id = s.lock_device_id ),
-            tbl_vehicle v
+            tbl_device d,
+			tbl_vehicle v
         WHERE
-            l.vehicle_id = v.id
+        	l.lock_device_id = d.device_id
+            AND l.vehicle_id = v.id
             AND v.vehicle_number = #{carNumber}
     </select>
 
@@ -175,13 +210,6 @@
             AND seat = #{seat}
             AND seat_index = #{seat_index}
             AND lock_device_id = #{lock_device_id}
-            <!--
-            AND change_time = ( SELECT MAX( t.change_time ) FROM tbl_lock_status t WHERE t.vehicle_id = #{vehicle_id}
-             																		AND t.store_id = #{store_id}
-                                                                                    AND t.seat = #{seat}
-                                                                                    AND t.seat_index = #{seat_index}
-                                                                                    AND t.lock_device_id = #{lock_device_id} )
-                                                                                    -->
         ORDER BY
         	change_time DESC,
             id DESC

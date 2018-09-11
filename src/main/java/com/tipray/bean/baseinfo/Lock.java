@@ -50,6 +50,10 @@ public class Lock extends BaseBean {
      * 绑定状态（ 0：未知（非法值） | 1：待车台触发确认 | 2：车台已触发确认 ）
      */
     private Integer bindStatus;
+    /**
+     * 设备备注
+     */
+    private String deviceRemark;
 
     public Long getCarId() {
         return carId;
@@ -131,6 +135,14 @@ public class Lock extends BaseBean {
         this.bindStatus = bindStatus;
     }
 
+    public String getDeviceRemark() {
+        return deviceRemark;
+    }
+
+    public void setDeviceRemark(String deviceRemark) {
+        this.deviceRemark = deviceRemark;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer();
@@ -169,6 +181,9 @@ public class Lock extends BaseBean {
         }
         if (getRemark() != null) {
             sb.append(", remark='").append(getRemark()).append('\'');
+        }
+        if (deviceRemark != null) {
+            sb.append(", deviceRemark='").append(deviceRemark).append('\'');
         }
         if (sb.length() > 0) {
             sb.replace(0,2,"Lock{");

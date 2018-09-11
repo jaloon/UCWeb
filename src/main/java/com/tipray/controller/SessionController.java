@@ -64,8 +64,8 @@ public class SessionController extends BaseAction {
         try {
             String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
             if (isApp > 0) {
-                logger.info("操作员{}请求APP登录，uuid：{}，system：{}，app_ver：{}，user-agent：{}",
-                        user.getAccount(), uuid, system, appVer, userAgent);
+                logger.info("操作员{}请求APP登录，password：{}，uuid：{}，system：{}，app_ver：{}，user-agent：{}",
+                        user.getAccount(), user.getPassword(), uuid, system, appVer, userAgent);
                 if (CenterVariableConfig.isValidateAppdev()) {
                     // APP设备认证
                     if (StringUtil.isEmpty(uuid)) {
@@ -107,7 +107,7 @@ public class SessionController extends BaseAction {
                     }
                 }
             } else {
-                logger.info("操作员{}请求网页登录，user-agent：{}", user.getAccount(), userAgent);
+                logger.info("操作员{}请求网页登录，password：{}, user-agent：{}", user.getAccount(), user.getPassword(), userAgent);
             }
             // HttpSession httpSession = request.getSession();
             // String sessionId = httpSession.getId();
@@ -185,10 +185,10 @@ public class SessionController extends BaseAction {
             // 是否同一用户
             boolean isSameUser = loginedAccount.equalsIgnoreCase(loginingAccount);
             if (isSameUser) {
-                logger.info("操作员{}已登录，不必重复登录！", loginedAccount);
+                logger.info("操作员{}已登录，重复登录！", loginedAccount);
                 return true;
             }
-            logger.warn("当前浏览器已被操作员{}登录！", loginedAccount);
+            logger.warn("当前客户端已被操作员{}登录！", loginedAccount);
             // 退出已登录用户
             sessionService.deleteSessionByUUID(sessionId);
             logger.info("操作员{}已退出，操作员{}登录准备就绪。", loginedAccount, loginingAccount);

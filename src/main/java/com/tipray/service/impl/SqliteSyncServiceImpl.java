@@ -367,8 +367,10 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
                         .append(CenterConst.CENTER_ID)
                         .append(']');
                 StringBuilder msgBuilder = new StringBuilder()
-                        .append("用户中心：")
+                        .append("用户中心：[")
                         .append(CenterConst.CENTER_ID)
+                        .append(']')
+                        .append(CenterConst.CENTER_NAME)
                         .append('\n')
                         .append(ExceptionUtils.getStackTrace(e));
                 FormBody.Builder formBuilder = new FormBody.Builder()
@@ -421,7 +423,6 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
             logger.info("创建sqlite数据库{}完成！", sqliteDbName);
         } catch (SQLException e) {
             jdbcUtil.close();
-            e.printStackTrace();
             logger.error("创建sqlite数据库{}异常！\n{}", sqliteDbName, e.toString());
             throw new SQLException(e);
         }

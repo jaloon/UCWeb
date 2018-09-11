@@ -32,7 +32,7 @@
             overflow: auto;
         }
 
-        .layable {
+        .layable, .alter {
             border-bottom: #1E9FFF solid 1px;
         }
 
@@ -140,8 +140,8 @@
                     <td>
                         <select class="editInfo" id="bind_type">
                             <option value=1>增加</option>
-                            <option value=2>修改</option>
-                            <option value=3>删除</option>
+                            <option value=2>删除</option>
+                            <option value=3>修改</option>
                         </select>
                     </td>
                 </tr>
@@ -207,6 +207,12 @@
                 </select>
             </td>
         </tr>
+        <tr>
+            <td>备注:</td>
+            <td>
+                <input type="text" class="editInfo" id="remark">
+            </td>
+        </tr>
     </table>
     <div class="hidden-oper-zone">
         <input type="button" class="hidden-cancel" id="lock_cancel" value="取消">
@@ -220,6 +226,8 @@
     var lockLayer;
     var liObj;
 
+    var alter_lock_id, alter_store_id, alter_seat, alter_seat_index, alter_open_allowed, alter_remark;
+
     function openLockLayer() {
         var title = "更改";
         if (add) {
@@ -228,9 +236,9 @@
         lockLayer = layer.open({
             type: 1,
             title: [title + '待变更的锁', 'font-size:14px;color:#ffffff;background:#478de4;'],
-            area: ['500px', '289px'],
+            area: ['500px', '325px'],
             content: $('.lock'),
-            end: clearLockDiv()
+            end: clearLockDiv
         });
     }
 
@@ -239,6 +247,7 @@
         $("#seat").val("1");
         $("#seat_index").val("");
         $("#open_allowed").val("2");
+        $("#remark").val("");
     }
 
     function addLock() {
@@ -256,18 +265,24 @@
         add = false;
         openLockLayer();
         var nextAll = $(obj).nextAll();
-        // $("#lock_id").val(nextAll.eq(0).html());
-        setComboSelectVal("#lock_id", nextAll.eq(0).html());
-        $("#store_id").val(nextAll.eq(1).html());
-        $("#seat").val(nextAll.eq(2).html());
-        $("#seat_index").val(nextAll.eq(3).html());
-        $("#open_allowed").val(nextAll.eq(4).html());
+        alter_lock_id = nextAll.eq(0).html();
+        alter_store_id = nextAll.eq(1).html();
+        alter_seat = nextAll.eq(2).html();
+        alter_seat_index = nextAll.eq(3).html();
+        alter_open_allowed = nextAll.eq(4).html();
+        alter_remark = nextAll.eq(5).html();
+        setComboSelectVal("#lock_id", alter_lock_id);
+        $("#store_id").val(alter_store_id);
+        $("#seat").val(alter_seat);
+        $("#seat_index").val(alter_seat_index);
+        $("#open_allowed").val(alter_open_allowed);
+        $("#remark").val(alter_remark);
     }
 
     function setComboSelectVal(elId, val) {
         var $select = $(elId);
         $select.val(val);
-        var $ul = $select.next().next()
+        var $ul = $select.next().next();
         $ul.children().each(function () {
             if (val == $(this).attr("data-value")) {
                 $(this).addClass("option-selected option-hover");
@@ -370,6 +385,7 @@
                 + (lock.is_allowed_open == 2 ? "-" : "-不") + "允许开锁-"
                 + (lock.bind_status == 2 ? "已同步绑定" : (lock.bind_status == 1
                     ? "未同步绑定" : "未知绑定状态[" + lock.bind_status + "]"));
+                // + "-备注：" + lock.remark;
         }
 
         $("#bind_type").change(function () {
@@ -395,20 +411,22 @@
                             var liHtml = "";
                             data.forEach(function (lock) {
                                 if (lock.lock_device_id != 0) {
-                                    if (bindType == 2) {
+                                    if (bindType == 3) {
                                         liHtml += "<li><span class='layable' onclick='alterLock(this)'>" + parseLock(lock) + "</span>" +
                                             "<span style=\"display: none;\">" + lock.lock_device_id + "</span>" +
                                             "<span style=\"display: none;\">" + lock.store_id + "</span>" +
                                             "<span style=\"display: none;\">" + lock.seat + "</span>" +
                                             "<span style=\"display: none;\">" + lock.seat_index + "</span>" +
-                                            "<span style=\"display: none;\">" + lock.is_allowed_open + "</span></li>";
+                                            "<span style=\"display: none;\">" + lock.is_allowed_open + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.remark + "</span></li>";
                                     } else {
                                         liHtml += "<li><label><input type='checkbox' class='check-locks'>" + parseLock(lock) +
                                             "<span style=\"display: none;\">" + lock.lock_device_id + "</span>" +
                                             "<span style=\"display: none;\">" + lock.store_id + "</span>" +
                                             "<span style=\"display: none;\">" + lock.seat + "</span>" +
                                             "<span style=\"display: none;\">" + lock.seat_index + "</span>" +
-                                            "<span style=\"display: none;\">" + lock.is_allowed_open + "</span></label></li>";
+                                            "<span style=\"display: none;\">" + lock.is_allowed_open + "</span>" +
+                                            "<span style=\"display: none;\">" + lock.remark + "</span></label></li>";
                                     }
                                 }
                             });
@@ -449,19 +467,38 @@
         });
 
         $("#lock_confirm").click(function () {
-            var lock_id = $("#lock_id").val();
+            var $lockId = $("#lock_id");
+            var lock_id = $lockId.val();
+            if ("" === lock_id) {
+                var _lock_id = $lockId.next().next().next().val();
+                if (_lock_id === alter_lock_id) {
+                    lock_id = _lock_id;
+                } else {
+                    layer.alert('未选择系统已有的锁设备ID！', {icon: 2}, function (index2) {
+                        layer.close(index2);
+                        $("#lock_id").focus();
+                    });
+                    return;
+                }
+            }
             var store_id = $("#store_id").val();
             var seat = $("#seat").val();
             var seat_index = $("#seat_index").val();
             var open_allowed = $("#open_allowed").val();
-            if (isNull(lock_id)) {
-                layer.alert('未选择系统已有的锁设备ID！', {icon: 2}, function (index2) {
+            var remark = $("#remark").val();
+            if (alter_lock_id === lock_id
+                && alter_store_id === store_id
+                && alter_seat === seat
+                && alter_seat_index === seat_index
+                && alter_open_allowed === open_allowed
+                && alter_remark === remark) {
+                layer.confirm("不修改锁绑定信息", {icon: 0}, function (index2) {
                     layer.close(index2);
-                    $("#lock_id").focus();
+                    layer.close(lockLayer);
                 });
                 return;
             }
-            if (isNull(store_id)) {
+            if (store_id === '') {
                 layer.alert('仓号不能为空！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#store_id").select();
@@ -475,7 +512,7 @@
                 });
                 return;
             }
-            if (isNull(seat_index)) {
+            if (seat_index === '') {
                 layer.alert('同仓位锁索引不能为空！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#seat_index").select();
@@ -489,14 +526,19 @@
                 });
                 return;
             }
-            var lockHtml = lock_id + "-仓" + store_id + (seat == 1 ? "-上仓锁-" : "-下仓锁-") + seat_index + (open_allowed == 1 ? "-不" : "-") + "允许开锁";
-            var liHtml = "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delLock(this)\">\n" +
-                "<span class='layable' onclick='alterLock(this)'>锁：" + lockHtml + "</span>" +
+            var lockHtml = lock_id + "-仓" + store_id + (seat == 1 ? "-上仓锁-" : "-下仓锁-") + seat_index
+                + (open_allowed == 1 ? "-不" : "-") + "允许开锁-备注[" + remark + "]";
+            var liHtml = "<li>";
+            if (add) {
+                liHtml += "<li><img alt=\"删除\" title=\"删除\" src=\"../../../resources/images/operate/delete.png\" class=\"del\" onclick=\"delLock(this)\">\n";
+            }
+            liHtml += "<span class='alter' onclick='alterLock(this)'>锁：" + lockHtml + "</span>" +
                 "<span style=\"display: none;\">" + lock_id + "</span>" +
                 "<span style=\"display: none;\">" + store_id + "</span>" +
                 "<span style=\"display: none;\">" + seat + "</span>" +
                 "<span style=\"display: none;\">" + seat_index + "</span>" +
-                "<span style=\"display: none;\">" + open_allowed + "</span></li>";
+                "<span style=\"display: none;\">" + open_allowed + "</span>" +
+                "<span style=\"display: none;\">" + remark + "</span></li>";
             if (add) {
                 $("#locks li:eq(-1)").before(liHtml);
                 // 用js控制div的滚动条,让它在内容更新时自动滚动到底部
@@ -521,18 +563,23 @@
             //     return;
             // }
             var bind_type = $("#bind_type").val();
-            var $bindLock = $(".layable");
-            if (bind_type == 3) {
+            var $bindLock = $(".alter");
+            if (bind_type == 2) {
                 $bindLock = $(".check-locks:checked");
             }
             var lockNum = $bindLock.length;
-            if (bind_type == 1) {
-                lockNum--;
-            }
             if (lockNum == 0) {
-                layer.alert('至少要重置一把锁！', {icon: 2}, function (index2) {
+                layer.alert('至少要变更一把锁！', {icon: 2}, function (index2) {
                     layer.close(index2);
-                    $("#add").click();
+                    if (bind_type == 1) {
+                        $("#add").click();
+                    } else if (bind_type == 2) {
+                        $(".check-locks")[0].select();
+                    } else if (bind_type == 3) {
+                        $(".layable")[0].click();
+                    } else {
+                        layer.alert('未知变更类型[' + bind_type + ']！', {icon: 0});
+                    }
                 });
                 return;
             }
@@ -544,7 +591,8 @@
                     storeId: parseInt(nextAll.eq(1).html(), 10),
                     seat: parseInt(nextAll.eq(2).html(), 10),
                     seatIndex: parseInt(nextAll.eq(3).html(), 10),
-                    allowOpen: parseInt(nextAll.eq(4).html(), 10)
+                    allowOpen: parseInt(nextAll.eq(4).html(), 10),
+                    remark: nextAll.eq(5).html()
                 });
             }
             var binding_locks = encodeURIComponent(JSON.stringify(locks));
@@ -557,9 +605,9 @@
                     if (data.id > 0) {
                         layer.alert(data.msg, { icon: 2});
                     } else {
-                        layer.msg('请求发送成功！', {
+                        layer.msg(data.msg == '' ? '请求发送成功！' : data.msg, {
                             icon: 1,
-                            time: 500
+                            time: 3000
                         }, function () {
                             parent.layer.close(index);
                         });

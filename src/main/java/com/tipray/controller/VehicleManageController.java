@@ -793,7 +793,7 @@ public class VehicleManageController {
      * @param carNumber       {@link String} 车牌号
      * @param bindType        {@link Integer} 锁绑定变更类型（1 增加；2 删除；3 修改）
      * @param bindingLocks    {@link String} 锁列表json，结构如下：
-     *                        [{"lockId":33554438,"storeId":1,"seat":1,"seatIndex":1,"allowOpen":2}]
+     *                        [{"lockId":33554438,"storeId":1,"seat":1,"seatIndex":1,"allowOpen":2,"remark":"签封号123"}]
      * @param isApp           {@link Integer} 是否手机操作（0 否， 1 是）
      * @param longitude       {@link Float} 手机定位经度
      * @param latitude        {@link Float} 手机定位纬度
@@ -872,7 +872,8 @@ public class VehicleManageController {
                         || lock.getStoreId() == null    // 仓号空
                         || lock.getSeat() == null       // 仓位空
                         || lock.getSeatIndex() == null  // 相同仓位锁索引号空
-                        || lock.getAllowOpen() == null; // 是否允许开锁空
+                        || lock.getAllowOpen() == null  // 是否允许开锁空
+                        || lock.getRemark() == null;    // 备注为空
                 if (incomplete) {
                     result = "失败，待绑定锁信息不完整！";
                     logger.error("锁绑定失败：{}", DevBindErrorEnum.BINDING_LOCK_INCOMPLETE);
@@ -903,7 +904,13 @@ public class VehicleManageController {
             } else {
                 for (Lock lock : list) {
                     if (lock.getCarId() != null && lock.getCarId().equals(vehicleId)) {
-                        strBuf.append(lock.getLockId()).append('，');
+                        for (Lock bindLock : locks) {
+                            if (bindLock.getLockId().equals(lock.getLockId())
+                                    && bindLock.getRemark().equals(lock.getRemark())) {
+                                strBuf.append(lock.getLockId()).append('，');
+                                break;
+                            }
+                        }
                     }
                 }
             }

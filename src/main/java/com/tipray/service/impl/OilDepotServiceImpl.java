@@ -216,9 +216,12 @@ public class OilDepotServiceImpl implements OilDepotService {
             }
 
             // 出入库卡信息是否需要更新
-            boolean isUpdateOfInOutCard = false;
             List<Long> inOutCardIdsInDb = cardDao.findInOutCardIdsByOilDepotId(id);
+            int dbInOutCardNum = inOutCardIdsInDb.size();
             List<Card> inOutCardsOfWeb = new ArrayList<>();
+            int webInOutCardNum = 0;
+            boolean isUpdateOfInOutCard = dbInOutCardNum != webInOutCardNum;
+            oilDepotDao.deleteOilDepotCardsById(id);
             if (StringUtil.isNotEmpty(cardIds)) {
                 String[] cardIdStrArray = cardIds.split(",");
                 List<Map<String, Object>> list = new ArrayList<>();
@@ -234,15 +237,15 @@ public class OilDepotServiceImpl implements OilDepotService {
                             || cardType == CardTypeConst.CARD_TYPE_3_OUT
                             || cardType == CardTypeConst.CARD_TYPE_4_INOUT) {
                         inOutCardsOfWeb.add(card);
-                        if (!inOutCardIdsInDb.contains(cardId)) {
+                        if (!isUpdateOfInOutCard && !inOutCardIdsInDb.contains(cardId)) {
                             isUpdateOfInOutCard = true;
                         }
                     }
                 }
-                oilDepotDao.deleteOilDepotCardsById(id);
                 oilDepotDao.addOilDepotCardsByIdAndCardIds(list);
+                webInOutCardNum = inOutCardsOfWeb.size();
                 if (!isUpdateOfInOutCard) {
-                    isUpdateOfInOutCard = inOutCardIdsInDb.size() != inOutCardsOfWeb.size();
+                    isUpdateOfInOutCard = dbInOutCardNum != webInOutCardNum;
                 }
 
             }
@@ -284,11 +287,11 @@ public class OilDepotServiceImpl implements OilDepotService {
                         inOutReaderDao.addReaderList(inOutReadersOfWeb);
                         deviceDao.updateDevicesUse(webReaderIds.toString(), 1);
                     }
-                    setInOutDev(jdbcUtilDev, oilDepot, inOutReadersOfWeb);
+                    jdbcUtilDev = setInOutDev(jdbcUtilDev, oilDepot, inOutReadersOfWeb);
                 }
 
                 if (isUpdateOfInOutCard) {
-                    setInOutCard(jdbcUtilCard, oilDepot, inOutCardsOfWeb);
+                    jdbcUtilCard = setInOutCard(jdbcUtilCard, oilDepot, inOutCardsOfWeb);
                 }
 
                 // 提交
@@ -368,10 +371,10 @@ public class OilDepotServiceImpl implements OilDepotService {
             byte commonConfig = TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT;
 
             if (cardNum != null && cardNum > 0) {
-                setInOutDev(jdbcUtilCard, oilDepot, null);
+                jdbcUtilDev = setInOutDev(jdbcUtilCard, oilDepot, null);
             }
             if (!EmptyObjectUtil.isEmptyList(readerIdList)) {
-                setInOutCard(jdbcUtilDev, oilDepot, null);
+                jdbcUtilCard = setInOutCard(jdbcUtilDev, oilDepot, null);
             }
 
             // 提交
@@ -497,9 +500,10 @@ public class OilDepotServiceImpl implements OilDepotService {
      * @param jdbcUtil          JDBCUtil
      * @param oilDepot          油库信息
      * @param inOutReadersOfWeb Web页面传递的出入库读卡器列表
+     * @return {@link JDBCUtil}
      * @throws SQLException
      */
-    private void setInOutDev(JDBCUtil jdbcUtil, OilDepot oilDepot, List<InOutReader> inOutReadersOfWeb) throws SQLException {
+    private JDBCUtil setInOutDev(JDBCUtil jdbcUtil, OilDepot oilDepot, List<InOutReader> inOutReadersOfWeb) throws SQLException {
         if (jdbcUtil == null) {
             jdbcUtil = new JDBCUtil();
         }
@@ -517,6 +521,7 @@ public class OilDepotServiceImpl implements OilDepotService {
             }
         }
         setParamVer(jdbcUtil, SqliteFileConst.IN_OUT_DEV);
+        return jdbcUtil;
     }
 
     /**
@@ -525,9 +530,10 @@ public class OilDepotServiceImpl implements OilDepotService {
      * @param jdbcUtil       JDBCUtil
      * @param oilDepot       油库信息
      * @param inOutCardOfWeb Web页面传递的出入库卡列表
+     * @return {@link JDBCUtil}
      * @throws SQLException
      */
-    private void setInOutCard(JDBCUtil jdbcUtil, OilDepot oilDepot, List<Card> inOutCardOfWeb) throws SQLException {
+    private JDBCUtil setInOutCard(JDBCUtil jdbcUtil, OilDepot oilDepot, List<Card> inOutCardOfWeb) throws SQLException {
         if (jdbcUtil == null) {
             jdbcUtil = new JDBCUtil();
         }
@@ -545,6 +551,7 @@ public class OilDepotServiceImpl implements OilDepotService {
             }
         }
         setParamVer(jdbcUtil, SqliteFileConst.IN_OUT_CARD);
+        return jdbcUtil;
     }
 
     /**

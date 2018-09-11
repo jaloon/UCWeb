@@ -643,8 +643,8 @@ public class SendPacketBuilder {
                                                      List<Lock> locks) {
         // 锁数量
         int lockNum = locks.size();
-        // 缓冲区容量（每把锁8个字节）
-        int capacity = 2 + 8 * lockNum;
+        // 缓冲区容量
+        int capacity = 2;
         // 构建协议数据体
         ByteBuffer dataBuffer = ByteBuffer.allocate(capacity);
         // 添加变更类型，1个字节
@@ -652,7 +652,13 @@ public class SendPacketBuilder {
         // 添加锁个数，1个字节
         dataBuffer.put((byte) lockNum);
         for (Lock lock : locks) {
-            // 添加单个锁信息，8个字节
+            byte[] remark = lock.getRemark().getBytes(StandardCharsets.UTF_8);
+            int remarkLen = remark.length;
+            capacity += 9 + remarkLen;
+            byte[] data = dataBuffer.array();
+            dataBuffer = ByteBuffer.allocate(capacity);
+            dataBuffer.put(data);
+            // 添加单个锁信息，9 + n 个字节
             // 添加锁设备ID，4个字节
             dataBuffer.put(BytesConverterByLittleEndian.getBytes(lock.getLockId()));
             // 添加仓号，1个字节
@@ -663,6 +669,10 @@ public class SendPacketBuilder {
             dataBuffer.put(lock.getSeatIndex().byteValue());
             // 添加是否允许开锁（1 不能，2 能），1个字节
             dataBuffer.put(lock.getAllowOpen().byteValue());
+            // 添加备注内容长度，1个字节
+            dataBuffer.put((byte) remarkLen);
+            // 添加备注内容，UTF-8编码
+            dataBuffer.put(remark);
         }
         return dataBuffer;
     }

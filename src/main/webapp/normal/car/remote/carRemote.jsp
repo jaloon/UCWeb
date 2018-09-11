@@ -352,58 +352,9 @@
         //  $("#select_id option[value='3']").remove(); //删除值为3的option
         $("#changeStatus option[value=${carStatus.status}]").remove();
         var depotHtml = "", stationHtml = "";
-        $.getJSON("../../manage/oildepot/getAllOilDepotsAndGasStations.do",
-            function (data, textStatus, jqXHR) {
-                var depots = data.depots,
-                    stations = data.stations;
-                if (depots != undefined && depots != null && depots.length > 0) {
-                    for (var i = 0; i < depots.length; i++) {
-                        depotHtml += "<option value=" + depots[i].id + ">" + depots[i].name + "</option>"
-                    }
-                } else {
-                    depotHtml = "<option value=0>未知</option>";
-                }
-                if (stations != undefined && stations != null && stations.length > 0) {
-                    for (var i = 0; i < stations.length; i++) {
-                        stationHtml += "<option value=" + stations[i].id + ">" + stations[i].name + "</option>"
-                    }
-                } else {
-                    stationHtml = "<option value=0>未知</option>";
-                }
-                $("#stationId").html(depotHtml);
-            }
-        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-            if (XMLHttpRequest.readyState == 4) {
-                var http_status = XMLHttpRequest.status;
-                if (http_status == 0 || http_status > 600) {
-                    location.reload(true);
-                } else if (http_status == 200) {
-                    if (textStatus == "parsererror") {
-                        layer.alert("应答数据格式解析错误！")
-                    } else {
-                        layer.alert("http response error: " + textStatus)
-                    }
-                } else {
-                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
-                }
-            }
-        });
-        $("#stationType").change(function () {
-            if ($("#stationType").val() == 0) {
-                $("#stationId").html("<option value=0>未知</option>");
-            } else if ($("#stationType").val() == 1) {
-                $("#stationId").html(depotHtml);
-            } else {
-                $("#stationId").html(stationHtml);
-            }
-        });
-
-        function parseLock(lock) {
-            return  "仓" + lock.store_id + "-" + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index;
-        }
-
         var lockNum = 0;
-        $("#changeStatus").change(function () {
+
+        function statusChange() {
             var status = $("#changeStatus").val();
             if (status == 1 || status > 5) {
                 $("#store_tr").hide();
@@ -420,7 +371,9 @@
             } else if (status == 5) { // 5 应急
                 $("#store_tr").hide();
                 $("#lock_tr").show();
+                $("#stationType").val(1);
                 $("#stationType").prop("disabled", false);
+                $("#stationId").html(depotHtml);
                 if (lock_html.length == 0) {
                     $.getJSON("../../manage/car/findlocksByCarNo.do?carNumber=${carStatus.carNumber}",
                         function (data, textStatus, jqXHR) {
@@ -474,9 +427,63 @@
             } else {
                 $("#store_tr").hide();
                 $("#lock_tr").hide();
+                $("#stationType").val(1);
                 $("#stationType").prop("disabled", false);
+                $("#stationId").html(depotHtml);
+            }
+        }
+
+        $.getJSON("../../manage/oildepot/getAllOilDepotsAndGasStations.do",
+            function (data, textStatus, jqXHR) {
+                var depots = data.depots,
+                    stations = data.stations;
+                if (depots != undefined && depots != null && depots.length > 0) {
+                    for (var i = 0; i < depots.length; i++) {
+                        depotHtml += "<option value=" + depots[i].id + ">" + depots[i].name + "</option>"
+                    }
+                } else {
+                    depotHtml = "<option value=0>未知</option>";
+                }
+                if (stations != undefined && stations != null && stations.length > 0) {
+                    for (var i = 0; i < stations.length; i++) {
+                        stationHtml += "<option value=" + stations[i].id + ">" + stations[i].name + "</option>"
+                    }
+                } else {
+                    stationHtml = "<option value=0>未知</option>";
+                }
+                statusChange();
+            }
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
+                    location.reload(true);
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
             }
         });
+        $("#stationType").change(function () {
+            if ($("#stationType").val() == 0) {
+                $("#stationId").html("<option value=0>未知</option>");
+            } else if ($("#stationType").val() == 1) {
+                $("#stationId").html(depotHtml);
+            } else {
+                $("#stationId").html(stationHtml);
+            }
+        });
+
+        function parseLock(lock) {
+            return  "仓" + lock.store_id + "-" + (lock.seat == 1 ? "上仓锁-" : "下仓锁-") + lock.seat_index;
+        }
+
+        $("#changeStatus").change(statusChange);
 
         var lockSelectedNum = 0;
         $("#lock_tr").click(function () {
