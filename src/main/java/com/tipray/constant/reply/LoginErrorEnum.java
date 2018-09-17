@@ -28,7 +28,11 @@ public enum LoginErrorEnum {
     /** APP最低版本未配置或同步失败 */
     APP_VERSION_CONFIG_INVALID(10, "APP最低版本未配置或同步失败！"),
     /** APP版本太低 */
-    APP_VERSION_OUTDATED(11, "APP版本太低！");
+    APP_VERSION_OUTDATED(11, "APP版本太低！"),
+    /** 应用标识为空 */
+    APP_ID_NULL(12, "应用标识为空！"),
+    /** 当前版本号格式不正确 */
+    VERSION_FORMAT_INVALID(13, "当前版本号格式不正确！");
 
     private int code;
     private String msg;

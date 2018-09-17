@@ -14,6 +14,8 @@ public class AppVer extends BaseBean {
     private Long centerId;
     /** 用户中心名称 */
     private String centerName;
+    /** 应用标识（pltone_e_seal | pltone_e_seal_accredit | ...） */
+    private String appid;
     /** 设备系统（Android | iOS | ...） */
     private String system;
     /** 指定WebAPP版本 */
@@ -35,6 +37,14 @@ public class AppVer extends BaseBean {
 
     public void setCenterName(String centerName) {
         this.centerName = centerName;
+    }
+
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
     }
 
     public String getSystem() {
@@ -72,6 +82,9 @@ public class AppVer extends BaseBean {
         }
         if (centerName != null) {
             sb.append(", centerName='").append(centerName).append('\'');
+        }
+        if (appid != null) {
+            sb.append(", appid='").append(appid).append('\'');
         }
         if (system != null) {
             sb.append(", system='").append(system).append('\'');

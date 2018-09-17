@@ -11,7 +11,8 @@
 
 .search-zone {
     width: 100%;
-    min-width: 1120px;
+    /*min-width: 1120px;*/
+    /*min-width: 980px;*/
     height: 56px;
     background: #eef1f7;
     font-family: "微软雅黑";
@@ -66,7 +67,7 @@ select.search-text {
 #nav {
     /*置父容器高度，宽度，背景颜色，容器位置*/
     /* background: #eee; */
-    width: 580px;
+    /*width: 580px;*/
     height: 55px;
     /* position: absolute;
     top: 1px;

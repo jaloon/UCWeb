@@ -328,6 +328,9 @@ $(function () {
         }
     }).resize();
 
+    var navWidth = $("#nav").width();
+    $(".search-zone").css("min-width", (400 + navWidth) + "px");
+
     $.getJSON("../../../manage/car/selectCars.do", "scope=0",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#search_text');

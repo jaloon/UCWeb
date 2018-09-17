@@ -23,6 +23,7 @@
         <script type="text/javascript">
             $(function () {
                 <pop:Permission ename="editGasstation">
+                <pop:Permission ename="editHandset">
                 <c:if test="${mode=='edit'}">
                 $.getJSON("../../manage/gasstation/findUnusedHandset.do",
                     function (data) {
@@ -59,6 +60,7 @@
                 });
                 </c:if>
                 </pop:Permission>
+                </pop:Permission>
             });
         </script>
     </head>
@@ -70,7 +72,9 @@
             <div class="info-zone" style="height:540px">
                 <div class="tab-title">
                     <div class="on">加油站基本信息</div>
-                    <div>手持机信息</div>
+                    <pop:Permission ename="viewHandset">
+                        <div>手持机信息</div>
+                    </pop:Permission>
                     <div>加油站卡信息</div>
                 </div>
                 <div class="tab-con">
@@ -165,26 +169,28 @@
                             </tr>
                         </table>
                     </div>
-                    <div class="tab-con-list">
-                        <table class="sub-table">
-                            <c:if test="${handset != null}">
-                                <tr>
-                                    <td>序号</td>
-                                    <td>手持机ID</td>
+                    <pop:Permission ename="viewHandset">
+                        <div class="tab-con-list">
+                            <table class="sub-table">
+                                <c:if test="${handset != null}">
+                                    <tr>
+                                        <td>序号</td>
+                                        <td>手持机ID</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>${handset.deviceId}</td>
+                                    </tr>
+                                </c:if>
+                                <c:if test="${handset == null}">
+                                    <tr>
+                                        <td colspan="2">未配置手持机</td>
+                                    </tr>
+                                </c:if>
                                 </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>${handset.deviceId}</td>
-                                </tr>
-                            </c:if>
-                            <c:if test="${handset == null}">
-                                <tr>
-                                    <td colspan="2">未配置手持机</td>
-                                </tr>
-                            </c:if>
-                            </tr>
-                        </table>
-                    </div>
+                            </table>
+                        </div>
+                    </pop:Permission>
                     <div class="tab-con-list">
                         <table class="sub-table">
                             <tr>
@@ -298,7 +304,9 @@
                 <div class="info-zone" style="height:540px">
                     <div class="tab-title">
                         <div class="on">加油站基本信息</div>
-                        <div>手持机信息</div>
+                        <pop:Permission ename="editHandset">
+                            <div>手持机信息</div>
+                        </pop:Permission>
                         <div>加油站卡信息</div>
                     </div>
                     <div class="tab-con">
@@ -392,21 +400,23 @@
                                 </tr>
                             </table>
                         </div>
-                        <div class="tab-con-list">
-                            <table class="sub-table">
-                                <tr>
-                                    <td>序号</td>
-                                    <td>手持机ID</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>
-                                        <select id="handset">
-                                        </select>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                        <pop:Permission ename="editHandset">
+                            <div class="tab-con-list">
+                                <table class="sub-table">
+                                    <tr>
+                                        <td>序号</td>
+                                        <td>手持机ID</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>
+                                            <select id="handset">
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </pop:Permission>
                         <div class="tab-con-list">
                             <table class="sub-table" id="card_info">
                                 <tr>

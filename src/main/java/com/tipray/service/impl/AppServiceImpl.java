@@ -3,13 +3,16 @@ package com.tipray.service.impl;
 import com.tipray.bean.baseinfo.AppDev;
 import com.tipray.bean.baseinfo.AppSync;
 import com.tipray.bean.baseinfo.AppVer;
+import com.tipray.bean.baseinfo.CenterDev;
 import com.tipray.constant.CenterConst;
 import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.AppdevDao;
 import com.tipray.dao.AppverDao;
+import com.tipray.dao.CenterDevDao;
 import com.tipray.service.AppService;
 import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.StringUtil;
+import com.tipray.util.VersionUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,16 +33,36 @@ public class AppServiceImpl implements AppService {
     private AppdevDao appdevDao;
 	@Resource
 	private AppverDao appverDao;
+	@Resource
+    private CenterDevDao centerDevDao;
 
     @Transactional
-	@Override
-	public AppDev addAppdev(AppDev appDev) throws ServiceException {
-        if (appDev != null) {
-            List<Long> ids = appdevDao.findIdsByUuid(appDev.getUuid());
-            if (EmptyObjectUtil.isEmptyList(ids)) {
-                appdevDao.add(appDev);
-                return appDev;
-            }
+    @Override
+    public AppDev addOrUpdateAppdev(String uuid, String appid, String system, String ver) {
+        if (StringUtil.isEmpty(uuid)) {
+            throw new IllegalArgumentException("uuid为空！");
+        }
+        if (StringUtil.isEmpty(appid)) {
+            throw new IllegalArgumentException("appid为空！");
+        }
+        if (StringUtil.isEmpty(system)) {
+            throw new IllegalArgumentException("system为空！");
+        }
+        if (StringUtil.isEmpty(ver)) {
+            throw new IllegalArgumentException("当前版本号为空！");
+        }
+        if (!VersionUtil.isVerSion(ver)) {
+            throw new IllegalArgumentException("版本号格式不符！");
+        }
+        AppDev appDev = new AppDev();
+        appDev.setUuid(uuid);
+        appDev.setAppid(appid);
+        appDev.setSystem(system);
+        appDev.setCurrentVer(ver);
+        List<Long> ids = appdevDao.findIdsByUuidAndAppid(uuid, appid);
+        if (EmptyObjectUtil.isEmptyList(ids)) {
+            appdevDao.add(appDev);
+        } else {
             int size = ids.size();
             if (size == 1) {
                 appDev.setId(ids.get(0));
@@ -47,7 +70,39 @@ public class AppServiceImpl implements AppService {
                 return appDev;
             }
             if (size > 1) {
-                appdevDao.deleteByUuid(appDev.getUuid());
+                appdevDao.deleteByUuidAndAppid(uuid, appid);
+                appdevDao.add(appDev);
+            }
+        }
+        return appDev;
+    }
+
+    @Transactional
+	@Override
+	public AppDev addAppdev(AppDev appDev) throws ServiceException {
+        if (appDev == null) {
+            return null;
+        }
+        String uuid = appDev.getUuid();
+        if (StringUtil.isEmpty(uuid)) {
+            throw new IllegalArgumentException("uuid为空！");
+        }
+        String appid = appDev.getAppid();
+        if (StringUtil.isEmpty(appid)) {
+            throw new IllegalArgumentException("appid为空！");
+        }
+        List<Long> ids = appdevDao.findIdsByUuidAndAppid(uuid, appid);
+        if (EmptyObjectUtil.isEmptyList(ids)) {
+            appdevDao.add(appDev);
+        } else {
+            int size = ids.size();
+            if (size == 1) {
+                appDev.setId(ids.get(0));
+                appdevDao.update(appDev);
+                return appDev;
+            }
+            if (size > 1) {
+                appdevDao.deleteByUuidAndAppid(uuid, appid);
                 appdevDao.add(appDev);
             }
         }
@@ -64,10 +119,10 @@ public class AppServiceImpl implements AppService {
 	}
 
     @Transactional
-	@Override
-	public void updateModelAndCurrentVerByUuid(String model, String currentVer, String uuid) throws ServiceException {
-        appdevDao.updateModelAndCurrentVerByUuid(model, currentVer, uuid);
-	}
+    @Override
+    public void updateModelAndCurrentVerByUuidAndAppid(String model, String currentVer, String uuid, String appid) throws ServiceException {
+        appdevDao.updateModelAndCurrentVerByUuidAndAppid(model, currentVer, uuid, appid);
+    }
 
     @Transactional
 	@Override
@@ -75,9 +130,18 @@ public class AppServiceImpl implements AppService {
         appdevDao.delete(id);
 	}
 
-	@Override
+    @Override
     public boolean isAppdevExist(String uuid) {
         Integer num = appdevDao.countByUuid(uuid);
+        if (num == null) {
+            return false;
+        }
+        return num > 0;
+    }
+
+	@Override
+    public boolean isAppdevExist(String uuid, String appid) {
+        Integer num = appdevDao.countByUuidAndAppid(uuid, appid);
         if (num == null) {
             return false;
         }
@@ -114,19 +178,63 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public String getMinverBySystem(String system) {
+    public String getMinverByAppidAndSystem(String appid, String system) {
+        if (StringUtil.isEmpty(appid)) {
+            throw new IllegalArgumentException("appid为空！");
+        }
 	    if (StringUtil.isEmpty(system)) {
+            throw new IllegalArgumentException("system为空！");
+        }
+        AppVer appVer = new AppVer();
+	    appVer.setCenterId(CenterConst.CENTER_ID.longValue());
+	    appVer.setAppid(appid);
+	    appVer.setSystem(system);
+        return appverDao.getMinverByAppver(appVer);
+    }
+
+    @Override
+    public CenterDev addCenterdev(CenterDev centerDev) {
+        if (centerDev == null) {
             return null;
         }
-        Long centerId = CenterConst.CENTER_ID.longValue();
-        return appverDao.getMinverByCenterIdAndSystem(centerId, system);
+        centerDevDao.add(centerDev);
+        return centerDev;
+    }
+
+    @Override
+    public CenterDev updateCenterdev(CenterDev centerDev) {
+        if (centerDev == null) {
+            return null;
+        }
+        centerDevDao.update(centerDev);
+        return centerDev;
+    }
+
+    @Override
+    public void deleteCenterdevById(Long id) {
+        if (id == null) {
+            return;
+        }
+        centerDevDao.delete(id);
+    }
+
+    @Override
+    public boolean isCenterdevExist(String uuid) {
+        if (StringUtil.isEmpty(uuid)) {
+            throw new IllegalArgumentException("uuid为空！");
+        }
+        Integer num = centerDevDao.countByUuidAndCenterId(uuid, CenterConst.CENTER_ID.longValue());
+        if (num == null) {
+            return false;
+        }
+        return num > 0;
     }
 
     @Transactional
     @Override
     public void sync(AppSync appSync) {
 	    List<AppVer> appVers = appSync.getAppvers();
-	    List<AppDev> appDevs = appSync.getAppdevs();
+	    List<CenterDev> centerDevs = appSync.getCenterDevs();
 	    if (!EmptyObjectUtil.isEmptyList(appVers)) {
 	        List<Long> ids = appverDao.findAllIds();
 	        if (EmptyObjectUtil.isEmptyList(ids)) {
@@ -154,30 +262,30 @@ public class AppServiceImpl implements AppService {
                 }
             }
         }
-        if (!EmptyObjectUtil.isEmptyList(appDevs)) {
-            List<String> dbUuids = appdevDao.findAllUuids();
-            if (EmptyObjectUtil.isEmptyList(dbUuids)) {
-                appdevDao.batchAdd(appDevs);
+        if (!EmptyObjectUtil.isEmptyList(centerDevs)) {
+            List<Long> ids = centerDevDao.findAllIds();
+            if (EmptyObjectUtil.isEmptyList(ids)) {
+                centerDevDao.batchAdd(centerDevs);
             } else {
-                List<AppDev> adds = new ArrayList<>();
-                List<AppDev> upds = new ArrayList<>();
-                for (AppDev appDev : appDevs) {
-                    String uuid = appDev.getUuid();
-                    if (dbUuids.contains(uuid)) {
-                        upds.add(appDev);
-                        dbUuids.remove(uuid);
+                List<CenterDev> adds = new ArrayList<>();
+                List<CenterDev> upds = new ArrayList<>();
+                for (CenterDev centerDev : centerDevs) {
+                    Long id = centerDev.getId();
+                    if (ids.contains(id)) {
+                        upds.add(centerDev);
+                        ids.remove(id);
                     } else {
-                        adds.add(appDev);
+                        adds.add(centerDev);
                     }
                 }
-                if (dbUuids.size()>0){
-                    appdevDao.batchDelete(dbUuids);
+                if (ids.size()>0){
+                    centerDevDao.batchDelete(ids);
                 }
                 if (adds.size()>0){
-                    appdevDao.batchAdd(adds);
+                    centerDevDao.batchAdd(adds);
                 }
                 if (upds.size()>0) {
-                    appdevDao.batchUpdate(upds);
+                    centerDevDao.batchUpdate(upds);
                 }
             }
         }

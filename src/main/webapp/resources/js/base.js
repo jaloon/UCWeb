@@ -11,13 +11,10 @@
  * @param {*} obj
  */
 function isNull(obj) {
-    if (obj == null || obj == undefined) {
+    if (obj === null || obj === undefined) {
         return true;
     }
-    if (typeof(obj) == "string" && obj === "") {
-        return true;
-    }
-    return false;
+    return typeof(obj) === "string" && obj === "";
 }
 
 /**

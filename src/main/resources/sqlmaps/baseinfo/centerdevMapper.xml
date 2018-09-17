@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.CenterDevDao">
+    <resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.CenterDev">
+        <id column="id" property="id"/>
+        <result column="uuid" property="uuid"/>
+        <result column="center_id" property="centerId"/>
+        <result column="center_name" property="centerName"/>
+    </resultMap>
+
+    <sql id="select_colums">
+        d.id,
+    	d.uuid,
+    	d.center_id,
+        c.name center_name
+    </sql>
+
+    <select id="findAll" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_center_device d,
+        tbl_center c
+        WHERE d.center_id = c.id
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.CenterDev">
+		INSERT INTO tbl_center_device(id, uuid, center_id) VALUES(#{id}, #{uuid}, #{centerId})
+	</insert>
+
+    <update id="update" parameterType="com.tipray.bean.baseinfo.CenterDev">
+        update tbl_center_device set
+            center_id = #{centerId}
+        where id      = #{id}
+    </update>
+
+    <update id="delete" parameterType="java.lang.Long">
+		delete from tbl_center_device where id = #{id}
+	</update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_center_device d,
+        tbl_center c
+        WHERE d.center_id = c.id
+        And d.id = #{id}
+    </select>
+
+    <select id="count" parameterType="com.tipray.bean.baseinfo.CenterDev" resultType="java.lang.Long">
+        select count(*) from tbl_center_device where center_id in (select id from tbl_center where is_invalid=0)
+        <if test="uuid != null and uuid !=''">
+            and uuid like CONCAT('%',#{uuid},'%')
+        </if>
+        <if test="centerId != null and centerId != -2">
+            and center_id = #{centerId}
+        </if>
+    </select>
+
+    <select id="findByPage" resultMap="fullResultMap">
+        SELECT
+        <include refid="select_colums"></include>
+        FROM
+        tbl_center_device d,
+        tbl_center c
+        WHERE d.center_id = c.id
+        <if test="entity.uuid != null and entity.uuid !=''">
+            and d.uuid like CONCAT('%',#{entity.uuid},'%')
+        </if>
+        <if test="entity.centerId != null and entity.centerId != -2">
+            and d.center_id = #{entity.centerId}
+        </if>
+        order by d.id desc
+        limit #{page.startRow}, #{page.rows}
+    </select>
+
+    <select id="findCenterIdsByUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+        select center_id from tbl_center_device where uuid = #{uuid}
+    </select>
+
+    <select id="findCenterDevsByCenterId" parameterType="java.lang.Long" resultType="com.tipray.bean.baseinfo.CenterDev">
+        SELECT
+            id,
+            center_id centerId,
+            uuid
+        FROM
+            tbl_center_device
+        WHERE center_id = #{centerId}
+    </select>
+
+    <select id="countByUuidAndCenterId" resultType="java.lang.Integer">
+        select count(id) from tbl_center_device where uuid = #{uuid} and center_id = #{centerId}
+    </select>
+
+    <delete id="deleteAll">
+        delete from tbl_center_device
+    </delete>
+
+    <select id="findAllIds" resultType="java.lang.Long">
+        SELECT id FROM `tbl_center_device`
+    </select>
+
+    <insert id="batchAdd" parameterType="java.util.List">
+        insert into
+        tbl_center_device
+        (id, center_id, uuid)
+        values
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.id},
+            #{item.centerId},
+            #{item.uuid}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 通用批量更新方法 -->
+    <update id="batchUpdate" parameterType="java.util.List">
+        update tbl_center_device set
+        uuid =
+        <foreach collection="list" item="item" index="index" separator=" " open="case id" close="end">
+            when #{item.id} then #{item.uuid}
+        </foreach>
+        where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item.id, jdbcType=INTEGER}
+        </foreach>
+    </update>
+
+    <delete id="batchDelete" parameterType="java.util.List">
+        delete from tbl_center_device where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item, jdbcType=INTEGER}
+        </foreach>
+    </delete>
+
+
+</mapper>

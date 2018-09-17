@@ -57,58 +57,76 @@ public class SessionController extends BaseAction {
     public ResponseMsg login(@ModelAttribute User user,
                              @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
                              @RequestParam(value = "uuid", required = false) String uuid,
+                             @RequestParam(value = "app_id", required = false) String appid,
                              @RequestParam(value = "system", required = false) String system,
                              @RequestParam(value = "app_ver", required = false) String appVer,
                              ModelMap modelMap, HttpServletRequest request,
                              HttpServletResponse response) {
-        try {
-            String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-            if (isApp > 0) {
-                logger.info("操作员{}请求APP登录，password：{}，uuid：{}，system：{}，app_ver：{}，user-agent：{}",
-                        user.getAccount(), user.getPassword(), uuid, system, appVer, userAgent);
-                if (CenterVariableConfig.isValidateAppdev()) {
-                    // APP设备认证
-                    if (StringUtil.isEmpty(uuid)) {
-                        logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_UUID_NULL);
-                        return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_UUID_NULL);
+        String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
+        if (isApp > 0) {
+            logger.info("操作员{}请求APP登录，password：{}，uuid：{}，app_id：{}，system：{}，app_ver：{}，user-agent：{}",
+                    user.getAccount(), user.getPassword(), uuid, appid, system, appVer, userAgent);
+            if (CenterVariableConfig.isValidateAppdev()) {
+                // APP设备认证
+                if (StringUtil.isEmpty(uuid)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_UUID_NULL);
+                    return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_UUID_NULL);
+                }
+                if (StringUtil.isEmpty(appid)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.APP_ID_NULL);
+                    return ResponseMsgUtil.error(LoginErrorEnum.APP_ID_NULL);
+                }
+                if (CenterVariableConfig.isValidateLocal()) {
+                    // 通过本地配置文件验证UUID
+                    if (!TrustAppUuidCache.checkAppId(uuid)) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_NOT_CERTIFY);
+                        return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_NOT_CERTIFY);
                     }
-                    if (CenterVariableConfig.isValidateLocal()) {
-                        // 通过本地配置文件验证UUID
-                        if (!TrustAppUuidCache.checkAppId(uuid)) {
-                            logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_NOT_CERTIFY);
-                            return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_NOT_CERTIFY);
-                        }
-                    } else {
-                        // 通过普利通中心同步的APP设备信息数据认证
-                        if (appService.isAppdevExist(uuid)) {
-                            logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_NOT_CERTIFY);
-                            return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_NOT_CERTIFY);
-                        }
+                } else {
+                    // 通过普利通中心同步的APP设备信息数据认证
+                    if (appService.isCenterdevExist(uuid)) {
+                        logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_NOT_CERTIFY);
+                        return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_NOT_CERTIFY);
                     }
                 }
-                if (CenterVariableConfig.isValidateAppver()) {
-                    // APP版本验证
-                    if (StringUtil.isEmpty(system)) {
-                        logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_SYSTEM_NULL);
-                        return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_SYSTEM_NULL);
-                    }
-                    if (StringUtil.isEmpty(appVer)) {
-                        logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_NULL);
-                        return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_NULL);
-                    }
-                    String minimumVer = appService.getMinverBySystem(system);
-                    if (StringUtil.isEmpty(minimumVer)) {
-                        logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_CONFIG_INVALID);
-                        return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_CONFIG_INVALID);
-                    }
-                    if (VersionUtil.compareVer(appVer, minimumVer) < 0) {
-                        logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_OUTDATED);
-                        return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_OUTDATED);
-                    }
-                }
-            } else {
-                logger.info("操作员{}请求网页登录，password：{}, user-agent：{}", user.getAccount(), user.getPassword(), userAgent);
             }
+            if (CenterVariableConfig.isValidateAppver()) {
+                // APP版本验证
+                if (StringUtil.isEmpty(appid)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.APP_ID_NULL);
+                    return ResponseMsgUtil.error(LoginErrorEnum.APP_ID_NULL);
+                }
+                if (StringUtil.isEmpty(system)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.MOBILE_SYSTEM_NULL);
+                    return ResponseMsgUtil.error(LoginErrorEnum.MOBILE_SYSTEM_NULL);
+                }
+                if (StringUtil.isEmpty(appVer)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_NULL);
+                    return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_NULL);
+                }
+                if (!VersionUtil.isVerSion(appVer)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.VERSION_FORMAT_INVALID);
+                    return ResponseMsgUtil.error(LoginErrorEnum.VERSION_FORMAT_INVALID);
+                }
+                String minimumVer = appService.getMinverByAppidAndSystem(appid, system);
+                if (StringUtil.isEmpty(minimumVer)) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_CONFIG_INVALID);
+                    return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_CONFIG_INVALID);
+                }
+                if (VersionUtil.compareVer(appVer, minimumVer) < 0) {
+                    logger.warn("登录失败：{}", LoginErrorEnum.APP_VERSION_OUTDATED);
+                    return ResponseMsgUtil.error(LoginErrorEnum.APP_VERSION_OUTDATED);
+                }
+            }
+            try {
+                appService.addOrUpdateAppdev(uuid, appid, system, appVer);
+            } catch (Exception e) {
+                logger.error("录入APP设备信息异常：{}", e.getMessage());
+            }
+        } else {
+            logger.info("操作员{}请求网页登录，password：{}, user-agent：{}", user.getAccount(), user.getPassword(), userAgent);
+        }
+        try {
             // HttpSession httpSession = request.getSession();
             // String sessionId = httpSession.getId();
             String sessionId = SessionUtil.getLoginSessionId(request);
@@ -173,7 +191,7 @@ public class SessionController extends BaseAction {
      * 是否已登录
      *
      * @param sessionId {@link String}
-     * @param user {@link User}
+     * @param user      {@link User}
      * @return 是否已登录
      */
     private boolean isLogin(String sessionId, User user) {
@@ -199,6 +217,7 @@ public class SessionController extends BaseAction {
 
     /**
      * 获取APP角色权限
+     *
      * @param appRole {@link Role} APP角色
      * @return {@link Map} APP角色权限信息
      */

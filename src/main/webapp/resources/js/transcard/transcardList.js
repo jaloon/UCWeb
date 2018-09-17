@@ -2,10 +2,10 @@ var dispatch;
 var refreshPage;
 $(function() {
     dispatch = function(mode, id) {
-        var title = "添加配送卡";
+        var title = "添加配送卡信息";
         var h = "200px";
         if ("edit" == mode) {
-            title = "修改司机信息";
+            title = "修改配送卡信息";
             h = "235px";
         }
         if ("view" == mode) {

@@ -127,6 +127,12 @@ public class RoleController extends BaseAction {
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
         StringBuffer description = new StringBuffer("删除角色：");
         try {
+            if (id < 21) {
+                logger.warn("角色【{}】是系统内置角色，不允许删除！", id);
+                type++;
+                description.append("失败，系统内置角色不允许删除！");
+                return Message.error("系统内置角色不允许删除！");
+            }
             roleService.deleteRolesById(id, app);
             description.append("成功！");
             return Message.success();

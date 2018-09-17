@@ -16,9 +16,9 @@ public class AppSync implements Serializable {
      */
     private List<AppVer> appvers;
     /**
-     * APP设备信息
+     * APP归属信息
      */
-    private List<AppDev> appdevs;
+    private List<CenterDev> centerDevs;
 
     public List<AppVer> getAppvers() {
         return appvers;
@@ -28,11 +28,11 @@ public class AppSync implements Serializable {
         this.appvers = appvers;
     }
 
-    public List<AppDev> getAppdevs() {
-        return appdevs;
+    public List<CenterDev> getCenterDevs() {
+        return centerDevs;
     }
 
-    public void setAppdevs(List<AppDev> appdevs) {
-        this.appdevs = appdevs;
+    public void setCenterDevs(List<CenterDev> centerDevs) {
+        this.centerDevs = centerDevs;
     }
 }

@@ -56,6 +56,10 @@
                 height: 16px;
                 width: 16px;
             }
+            
+            #lockIds {
+                cursor: pointer;
+            }
         </style>
     </c:if>
 </head>
@@ -283,10 +287,11 @@
                 if (len == 0) {
                     layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
                         icon: 2,
-                        time: 500
+                        time: 1500
                     }, function () {
                         parent.layer.close(index);
                     });
+                    return;
                 }
                 for (var i = 0; i < len; i++) {
                     var lock = data[i];
@@ -299,7 +304,7 @@
                 if (lock_html.length == 0) {
                     layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
                         icon: 2,
-                        time: 500
+                        time: 1500
                     }, function () {
                         parent.layer.close(index);
                     });
@@ -381,10 +386,11 @@
                             if (len == 0) {
                                 layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
                                     icon: 2,
-                                    time: 500
+                                    time: 1500
                                 }, function () {
                                     parent.layer.close(index);
                                 });
+                                return;
                             }
                             lockNum = 0;
                             for (var i = 0; i < len; i++) {
@@ -398,7 +404,7 @@
                             if (lock_html.length == 0) {
                                 layer.msg("车辆${carStatus.carNumber}未绑定锁，请查证后再操作！", {
                                     icon: 2,
-                                    time: 500
+                                    time: 1500
                                 }, function () {
                                     parent.layer.close(index);
                                 });

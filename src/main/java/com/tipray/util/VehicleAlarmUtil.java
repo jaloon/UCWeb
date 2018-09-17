@@ -192,6 +192,9 @@ public class VehicleAlarmUtil {
      * @return
      */
     public static boolean isLockAlarm(byte[] lockStatusInfo) {
+        if (lockStatusInfo == null) {
+            return false;
+        }
         for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
             byte lock = lockStatusInfo[i];
             if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {

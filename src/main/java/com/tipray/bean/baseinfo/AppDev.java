@@ -12,6 +12,8 @@ public class AppDev extends BaseBean {
     private static final long serialVersionUID = 1L;
     /** 手机唯一码 */
     private String uuid;
+    /** 应用标识（pltone_e_seal | pltone_e_seal_accredit | ...） */
+    private String appid;
     /** 手机系统（Android/iOS） */
     private String system;
     /** 手机型号 */
@@ -33,6 +35,14 @@ public class AppDev extends BaseBean {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
     }
 
     public String getSystem() {
@@ -99,6 +109,9 @@ public class AppDev extends BaseBean {
         }
         if (uuid != null) {
             sb.append(", uuid='").append(uuid).append('\'');
+        }
+        if (appid != null) {
+            sb.append(", appid='").append(appid).append('\'');
         }
         if (system != null) {
             sb.append(", system='").append(system).append('\'');

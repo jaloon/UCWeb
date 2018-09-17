@@ -1,8 +1,8 @@
 package com.tipray.controller;
 
 import com.tipray.bean.ResponseMsg;
-import com.tipray.bean.baseinfo.AppDev;
 import com.tipray.bean.baseinfo.AppVer;
+import com.tipray.bean.baseinfo.CenterDev;
 import com.tipray.core.base.BaseAction;
 import com.tipray.service.AppService;
 import com.tipray.util.JSONUtil;
@@ -106,60 +106,60 @@ public class ExternalInterface extends BaseAction {
     }
 
     /**
-     * 同步新增APP设备信息
+     * 同步新增APP归属信息
      *
-     * @param appdev {@link String} APP配置信息json字符串
+     * @param centerdev {@link String} APP归属信息json字符串
      * @return {@link ResponseMsg}
      */
-    @RequestMapping(value = "appdev/add", method = RequestMethod.POST)
+    @RequestMapping(value = "centerdev/add", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseMsg addAppdev(String appdev) {
-        logger.info("同步新增APP设备信息：appdev={}", appdev);
+    public ResponseMsg addCenterdev(String centerdev) {
+        logger.info("同步新增APP归属信息：centerdev={}", centerdev);
         try {
-            AppDev appDev = JSONUtil.parseToObject(appdev, AppDev.class);
-            appService.addAppdev(appDev);
+            CenterDev centerDev = JSONUtil.parseToObject(centerdev, CenterDev.class);
+            appService.addCenterdev(centerDev);
             return ResponseMsgUtil.success();
         } catch (Exception e) {
-            logger.error("同步新增APP设备信息异常！", e);
+            logger.error("同步新增APP归属信息异常！", e);
             return ResponseMsgUtil.exception(e);
         }
     }
 
     /**
-     * 同步更新APP设备信息
+     * 同步更新APP归属信息
      *
-     * @param appdev {@link String} APP设备信息json字符串
+     * @param centerdev {@link String} APP归属信息json字符串
      * @return {@link ResponseMsg}
      */
-    @RequestMapping(value = "appdev/update", method = RequestMethod.POST)
+    @RequestMapping(value = "centerdev/update", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseMsg updateAppdev(String appdev) {
-        logger.info("同步更新APP设备信息：appdev={}", appdev);
+    public ResponseMsg updateCenterdev(String centerdev) {
+        logger.info("同步更新APP归属信息：centerdev={}", centerdev);
         try {
-            AppDev appDev = JSONUtil.parseToObject(appdev, AppDev.class);
-            appService.updateAppdev(appDev);
+            CenterDev centerDev = JSONUtil.parseToObject(centerdev, CenterDev.class);
+            appService.updateCenterdev(centerDev);
             return ResponseMsgUtil.success();
         } catch (Exception e) {
-            logger.error("同步更新APP设备信息异常！", e);
+            logger.error("同步更新APP归属信息异常！", e);
             return ResponseMsgUtil.exception(e);
         }
     }
 
     /**
-     * 同步删除APP设备信息
+     * 同步删除APP归属信息
      *
-     * @param id {@link Long}  APP设备信息记录ID
+     * @param id {@link Long}  APP归属信息记录ID
      * @return {@link ResponseMsg}
      */
-    @RequestMapping(value = "appdev/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "centerdev/delete", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseMsg deleteAppdev(Long id) {
-        logger.info("同步删除APP设备信息：id={}", id);
+    public ResponseMsg deleteCenterdev(Long id) {
+        logger.info("同步删除APP归属信息：id={}", id);
         try {
-            appService.deleteAppdevById(id);
+            appService.deleteCenterdevById(id);
             return ResponseMsgUtil.success();
         } catch (Exception e) {
-            logger.error("同步删除APP设备信息异常！", e);
+            logger.error("同步删除APP归属信息异常！", e);
             return ResponseMsgUtil.exception(e);
         }
     }

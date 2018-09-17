@@ -36,7 +36,8 @@ public class DeviceTest {
 	@Test
 	public void appSync() {
         try {
-			String json = OkHttpUtil.get("https://www.pltone.com:3003/api/appSync.do?id=1");
+			String json = OkHttpUtil.get("https://192.168.7.20:3003/api/appSync.do?id=1");
+			// String json = OkHttpUtil.get("https://www.pltone.com:3003/api/appSync.do?id=1");
             AppSync appsync = JSONUtil.parseToObject(json, AppSync.class);
             appService.sync(appsync);
         } catch (Exception e) {

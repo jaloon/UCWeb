@@ -6,6 +6,7 @@
         <id column="id" property="id"/>
         <result column="center_id" property="centerId"/>
         <result column="center_name" property="centerName"/>
+        <result column="app_id" property="appid"/>
         <result column="system" property="system"/>
         <result column="assign_webapp_version" property="assignVer"/>
         <result column="min_webapp_version" property="minVer"/>
@@ -15,6 +16,7 @@
         a.id,
     	a.center_id,
         c.`name` center_name,
+        a.app_id,
         a.system,
         a.assign_webapp_version,
         a.min_webapp_version
@@ -31,11 +33,12 @@
     </select>
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.AppVer">
-		INSERT INTO tbl_webapp_version(id, center_id, system, assign_webapp_version, min_webapp_version)
+		INSERT INTO tbl_webapp_version(id, center_id, app_id, system, assign_webapp_version, min_webapp_version)
 		VALUES
 			(
 				#{id},
 				#{centerId},
+				#{appid},
 				#{system},
 				#{assignVer},
 				#{minVer}
@@ -67,7 +70,7 @@
     </select>
 
     <select id="countCenterAppVer" resultType="java.lang.Integer">
-        select count(*) from tbl_webapp_version where center_id = #{centerId} and system = #{system}
+        select count(*) from tbl_webapp_version where center_id = #{centerId} and app_id = #{appid} and system = #{system}
     </select>
 
     <select id="count" parameterType="com.tipray.bean.baseinfo.AppVer" resultType="java.lang.Long">
@@ -101,6 +104,7 @@
         SELECT
             id,
             center_id centerId,
+            app_id appid,
             system,
             assign_webapp_version assignVer,
             min_webapp_version minVer,
@@ -112,12 +116,12 @@
             center_id = #{centerId}
     </select>
 
-    <select id="getAssignVerByCenterIdAndSystem" resultType="java.lang.String">
-        select assign_webapp_version from tbl_webapp_version where center_id = #{centerId} and system = #{system}
+    <select id="getAssignVerByAppver" parameterType="com.tipray.bean.baseinfo.AppVer" resultType="java.lang.String">
+        select assign_webapp_version from tbl_webapp_version where center_id = #{centerId} and app_id = #{appid} and system = #{system}
     </select>
 
-    <select id="getMinverByCenterIdAndSystem" resultType="java.lang.String">
-        select min_webapp_version from tbl_webapp_version where center_id = #{centerId} and system = #{system}
+    <select id="getMinverByAppver" resultType="java.lang.String">
+        select min_webapp_version from tbl_webapp_version where center_id = #{centerId} and app_id = #{appid} and system = #{system}
     </select>
 
     <delete id="deleteAll">
@@ -131,12 +135,13 @@
     <insert id="batchAdd" parameterType="java.util.List">
         insert into
         tbl_webapp_version
-        (id, center_id, system, assign_webapp_version, min_webapp_version, gmt_create, gmt_modified)
+        (id, center_id, app_id, system, assign_webapp_version, min_webapp_version, gmt_create, gmt_modified)
         values
         <foreach collection="list" item="item" index="index" separator="," >
             (
             #{item.id},
             #{item.centerId},
+            #{item.appid},
             #{item.system},
             #{item.assignVer},
             #{item.minVer},

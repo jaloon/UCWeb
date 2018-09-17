@@ -5,6 +5,7 @@
     <resultMap id="fullResultMap" type="com.tipray.bean.baseinfo.AppDev">
         <id column="id" property="id"/>
         <result column="uuid" property="uuid"/>
+        <result column="app_id" property="appid"/>
         <result column="system" property="system"/>
         <result column="model" property="model"/>
         <result column="current_webapp_version" property="currentVer"/>
@@ -17,6 +18,7 @@
     <sql id="select_columns">
         a.id,
     	a.uuid,
+    	a.app_id,
         a.system,
         a.model,
         a.current_webapp_version,
@@ -34,16 +36,16 @@
     </select>
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.AppVer">
-		INSERT INTO tbl_webapp_device(id, uuid, system, model, current_webapp_version, `name`, phone, duty, institution)
+		INSERT INTO tbl_webapp_device(uuid, app_id, system, model, current_webapp_version, `name`, phone, duty, institution)
 		VALUES
 			(
-				#{id},
 				#{uuid},
+				#{appid},
 				#{system},
-				#{model},
+				IFNULL(#{model}, ""),
 				#{currentVer},
-				#{owner},
-				#{phone},
+				IFNULL(#{owner}, ""),
+				IFNULL(#{phone}, ""),
 				IFNULL(#{duty}, ""),
 				IFNULL(#{institution}, "")
 			)
@@ -52,20 +54,22 @@
     <update id="update" parameterType="com.tipray.bean.baseinfo.AppDev">
         update tbl_webapp_device set
             system                  = #{system},
-            model                   = #{model},
+            model                   = IFNULL(#{model}, ""),
             current_webapp_version  = #{currentVer},
-            `name`                  = #{owner},
-            phone                   = #{phone},
-            duty                    = #{duty},
-            institution             = #{institution}
+            `name`                  = IFNULL(#{owner}, ""),
+            phone                   = IFNULL(#{phone}, ""),
+            duty                    = IFNULL(#{duty}, ""),
+            institution             = IFNULL(#{institution}, ""),
+            gmt_modified            = NOW()
         where id                    = #{id}
     </update>
 
-    <update id="updateModelAndCurrentVerByUuid">
+    <update id="updateModelAndCurrentVerByUuidAndAppid">
 		update tbl_webapp_device set
 		    model                   = #{model},
 			current_webapp_version	= #{currentVer}
 		where uuid 			        = #{uuid}
+		and   app_id                = #{appid}
 	</update>
 
     <update id="delete" parameterType="java.lang.Long">
@@ -80,25 +84,20 @@
          a.id = #{id}
     </select>
 
-    <select id="getByUuid" parameterType="java.lang.String" resultMap="fullResultMap">
-        SELECT
-        <include refid="select_columns"></include>
-        FROM
-        tbl_webapp_device a
-        WHERE
-         a.uuid = #{uuid}
-    </select>
-
     <select id="countByUuid" parameterType="java.lang.String" resultType="java.lang.Integer">
         select count(id) from tbl_webapp_device where uuid = #{uuid}
     </select>
 
-    <select id="findIdsByUuid" parameterType="java.lang.String" resultType="java.lang.Long">
-        select id from tbl_webapp_device where uuid = #{uuid}
+    <select id="countByUuidAndAppid" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from tbl_webapp_device where uuid = #{uuid} and app_id = #{appid}
     </select>
 
-    <delete id="deleteByUuid" parameterType="java.lang.String">
-        delete from tbl_webapp_device where uuid = #{uuid}
+    <select id="findIdsByUuidAndAppid" parameterType="java.lang.String" resultType="java.lang.Long">
+        select id from tbl_webapp_device where uuid = #{uuid} and app_id = #{appid}
+    </select>
+
+    <delete id="deleteByUuidAndAppid" parameterType="java.lang.String">
+        delete from tbl_webapp_device where uuid = #{uuid} and app_id = #{appid}
     </delete>
 
     <select id="count" parameterType="com.tipray.bean.baseinfo.AppDev" resultType="java.lang.Long">
@@ -127,6 +126,10 @@
         limit #{page.startRow}, #{page.rows}
     </select>
 
+    <select id="findAllIds" resultType="java.lang.Long">
+        SELECT id FROM tbl_webapp_device
+    </select>
+
     <select id="findAllUuids" resultType="java.lang.String">
         SELECT uuid FROM tbl_webapp_device;
     </select>
@@ -134,12 +137,13 @@
     <insert id="batchAdd" parameterType="java.util.List">
         insert into
         tbl_webapp_device
-        (id, uuid, system, model, current_webapp_version, `name`, phone, duty, institution, gmt_create, gmt_modified)
+        (id, uuid, app_id, system, model, current_webapp_version, `name`, phone, duty, institution, gmt_create, gmt_modified)
         values
         <foreach collection="list" item="item" index="index" separator="," >
             (
             #{item.id},
             #{item.uuid},
+            #{item.appid},
             #{item.system},
             #{item.model},
             #{item.currentVer},
@@ -199,6 +203,13 @@
     </update>
 
     <delete id="batchDelete" parameterType="java.util.List">
+        delete from tbl_webapp_device where id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item, jdbcType=INTEGER}
+        </foreach>
+    </delete>
+
+    <delete id="batchDeleteByUuids" parameterType="java.util.List">
         delete from tbl_webapp_device where uuid in
         <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
             #{item, jdbcType=VARCHAR}
