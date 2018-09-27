@@ -12,9 +12,9 @@ import com.tipray.mq.MyQueue;
 import com.tipray.mq.MyQueueElement;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
-import com.tipray.net.constant.UdpReplyErrorTag;
+import com.tipray.net.constant.UdpReplyCommonErrorEnum;
+import com.tipray.net.constant.UdpReplyWorkErrorEnum;
 import com.tipray.util.ArraysUtil;
-import com.tipray.util.BytesConverterByBigEndian;
 import com.tipray.util.BytesConverterByLittleEndian;
 import com.tipray.util.BytesUtil;
 import com.tipray.util.CRCUtil;
@@ -292,252 +292,6 @@ public class UdpProtocol {
     }
 
     /**
-     * 处理应答业务
-     *
-     * @param receiveBuf 应答数据字节数组
-     * @return <code>true</code> 请求成功，<code>false</code> 请求失败
-     */
-    public boolean dealProtocolOfResponse(byte[] receiveBuf) {
-        logger.debug("UDP Client receive: byte{}", Arrays.toString(receiveBuf));
-        // 应答数据是否为空
-        if (EmptyObjectUtil.isEmptyArray(receiveBuf)) {
-            logger.error("未收到应答数据或应答数据为空！");
-            return false;
-        }
-
-        // 应答数据字节数组长度
-        if (receiveBuf.length < UdpProtocol.MIN_RECEIVE_BUF_LEN) {
-            logger.error("应答数据字节数过少！");
-            return false;
-        }
-
-        // CRC校验
-        boolean valid = CRCUtil.checkCrc(receiveBuf, 0, receiveBuf.length - 1);
-        if (!valid) {
-            logger.error("应答数据CRC校验失败！");
-            return false;
-        }
-
-        // 密钥版本检查
-        byte rc4Ver = receiveBuf[0];
-        if (rc4Ver != this.keyVer) {
-            logger.error("密钥版本：{}，不符！", rc4Ver);
-            return false;
-        }
-
-        // RC4解密
-        // 获取加密业务体
-        byte[] encryptBuf = Arrays.copyOfRange(receiveBuf, 1, receiveBuf.length - 1);
-        // 获取解密业务体
-        byte[] decryptBuf = RC4Util.rc4(encryptBuf, key);
-
-        int index = 1;
-        // 协议号
-        byte[] protocolByte = Arrays.copyOfRange(decryptBuf, index, index + 1);
-        byte protocol = protocolByte[0];
-        if (protocol != UdpProtocol.PROTOCOL_ID) {
-            logger.error("应答协议号：{}，错误！", "0x" + BytesUtil.bytesToHex(protocolByte, false));
-            return false;
-        }
-        index += 1;
-
-        // 源地址
-        byte[] localAddrDWord = Arrays.copyOfRange(decryptBuf, index, index + 4);
-        int localAddress = BytesConverterByLittleEndian.getInt(localAddrDWord);
-        if (localAddress != this.remoteAddress) {
-            logger.error("应答源地址：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(localAddrDWord), false));
-            return false;
-        }
-        index += 4;
-
-        // 目的地址
-        byte[] remoteAddrDWord = Arrays.copyOfRange(decryptBuf, index, index + 4);
-        int remoteAddress = BytesConverterByLittleEndian.getInt(remoteAddrDWord);
-        if (remoteAddress != UdpProtocol.WEB_SERVER_ID) {
-            logger.error("应答目的地址：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(remoteAddrDWord), false));
-            return false;
-        }
-        index += 4;
-
-        // 业务ID
-        byte[] replyBizIdWord = Arrays.copyOfRange(decryptBuf, index, index + 2);
-        short replyBizId = BytesConverterByLittleEndian.getShort(replyBizIdWord);
-        if ((replyBizId ^ this.bizId) != 128) {
-            logger.error("应答业务ID：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(replyBizIdWord), false));
-            return false;
-        }
-        index += 2;
-
-        // 序列号
-        byte[] serialNoWord = Arrays.copyOfRange(decryptBuf, index, index + 2);
-        short serialNo = BytesConverterByLittleEndian.getShort(serialNoWord);
-        if (serialNo != this.serialNo) {
-            logger.error("应答序列号：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(serialNoWord), false));
-            return false;
-        }
-        index += 2;
-
-        // 应答数据体
-        if (replyBizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
-            // return;
-        }
-        if (decryptBuf.length - index < UdpProtocol.MIN_REPLY_DATA_LEN) {
-            logger.error("应答数据体字节数过少！");
-            return false;
-        }
-        byte[] dataErrorDWord = Arrays.copyOfRange(decryptBuf, index, index + 4);
-        int result = BytesConverterByLittleEndian.getInt(dataErrorDWord);
-        if (result != 0) {
-            logger.error("请求错误！{}", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(dataErrorDWord), false));
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 处理应答业务
-     *
-     * @param receiveMsg {@link ResponseMsg} 应答信息
-     * @return {@link ResponseMsg}
-     */
-    public ResponseMsg dealProtocolOfResponseToMsg(ResponseMsg receiveMsg) {
-        if (receiveMsg == null) {
-            logger.error("UDP回复超时！");
-            return ResponseMsgUtil.error(ErrorTagConst.UDP_COMMUNICATION_ERROR_TAG, 1, "UDP回复超时！");
-        }
-        byte[] receiveBuf = (byte[]) receiveMsg.getMsg();
-        logger.debug("UDP Client receive: byte{}, length={}", Arrays.toString(receiveBuf), receiveBuf.length);
-        // 应答数据是否为空
-        if (EmptyObjectUtil.isEmptyArray(receiveBuf)) {
-            logger.error("未收到应答数据或应答数据为空！");
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.RECEIVE_NULL);
-        }
-
-        // 应答数据字节数组长度
-        if (receiveBuf.length < UdpProtocol.MIN_RECEIVE_BUF_LEN) {
-            logger.error("应答数据字节数组长度{}太短！", receiveBuf.length);
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.RECEIVE_LEN_INVALID);
-        }
-
-        // CRC校验
-        boolean valid = CRCUtil.checkCrc(receiveBuf, 0, receiveBuf.length - 1);
-        if (!valid) {
-            logger.error("应答数据CRC校验失败！");
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.CRC_INVALID);
-        }
-
-        // 密钥版本检查
-        byte rc4Ver = receiveBuf[0];
-        if (rc4Ver != this.keyVer) {
-            logger.error("密钥版本：{}，不符！", rc4Ver);
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.RC4_VER_INCONSISTENT);
-        }
-
-        // RC4解密
-        // 获取加密业务体
-        byte[] encryptBuf = Arrays.copyOfRange(receiveBuf, 1, receiveBuf.length - 1);
-        // 获取解密业务体
-        byte[] decryptBuf = RC4Util.rc4(encryptBuf, key);
-
-        int index = 1;
-        // 协议号
-        byte[] protocolByte = Arrays.copyOfRange(decryptBuf, index, index + 1);
-        byte protocol = protocolByte[0];
-        if (protocol != UdpProtocol.PROTOCOL_ID) {
-            logger.error("应答协议号：{}，错误！", "0x" + BytesUtil.bytesToHex(protocolByte, false));
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.PROTOCOL_ID_ERROR);
-        }
-        index += 1;
-
-        // 源地址（ 暂时不做验证）
-        byte[] localAddrDWord = Arrays.copyOfRange(decryptBuf, index, index + 4);
-        int localAddress = BytesConverterByLittleEndian.getInt(localAddrDWord);
-        if (localAddress != this.remoteAddress) {
-            logger.error("应答源地址：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(localAddrDWord), false));
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.SRC_TERM_ADDR_ERROR);
-        }
-
-        index += 4;
-
-        // 目的地址（ 暂时不做验证）
-        byte[] remoteAddrDWord = Arrays.copyOfRange(decryptBuf, index, index + 4);
-        int remoteAddress = BytesConverterByLittleEndian.getInt(remoteAddrDWord);
-        if (remoteAddress != UdpProtocol.WEB_SERVER_ID) {
-            logger.error("应答目的地址：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(remoteAddrDWord), false));
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DEST_TERM_ADDR_ERROR);
-        }
-
-        index += 4;
-
-        // 业务ID
-        byte[] replyBizIdWord = Arrays.copyOfRange(decryptBuf, index, index + 2);
-        short replyBizId = BytesConverterByLittleEndian.getShort(replyBizIdWord);
-        if ((replyBizId ^ this.bizId) != 128) {
-            logger.error("业务{}应答业务ID：{}，错误！",
-                    "0x" + BytesUtil.bytesToHex(BytesConverterByBigEndian.getBytes(bizId), false),
-                    "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(replyBizIdWord), false));
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.BIZ_ID_INCONSISTENT);
-        }
-        index += 2;
-
-        // 序列号
-        byte[] serialNoWord = Arrays.copyOfRange(decryptBuf, index, index + 2);
-        short serialNo = BytesConverterByLittleEndian.getShort(serialNoWord);
-        if (serialNo != this.serialNo) {
-            logger.error("应答序列号：{}，错误！", "0x" + BytesUtil.bytesToHex(ArraysUtil.reverse(serialNoWord), false));
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.SERIAL_NO_INCONSISTENT);
-        }
-        index += 2;
-
-        // 应答数据体
-        int dataLen = decryptBuf.length - index;
-        if (replyBizId != UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE && dataLen != UdpProtocol.MIN_REPLY_DATA_LEN) {
-            logger.error("业务：{}，应答数据体字节数不符！",
-                    "0x" + BytesUtil.bytesToHex(BytesConverterByBigEndian.getBytes(bizId), false));
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
-        }
-        // 通用错误
-        byte[] commonErrorWord = Arrays.copyOfRange(decryptBuf, index, index + 2);
-        short commonError = BytesConverterByLittleEndian.getShort(commonErrorWord);
-        if (commonError != UdpReplyErrorTag.NONE_ERROR) {
-            logger.error("应答数据体通用错误！{}", commonError);
-        }
-        index += 2;
-        // 业务错误
-        byte[] bizErrorWord = Arrays.copyOfRange(decryptBuf, index, index + 2);
-        short bizError = BytesConverterByLittleEndian.getShort(bizErrorWord);
-        if (bizError != UdpReplyErrorTag.NONE_ERROR) {
-            logger.error("应答数据体业务错误！{}", bizError);
-        }
-        if (commonError + bizError == 0) {
-            return ResponseMsgUtil.success(); // 无错
-        }
-        String msg = new StringBuffer("{\"commonError\":").append(commonError).append(",\"workError\":")
-                .append(bizError).append('}').toString();
-        if (replyBizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
-            if (dataLen < 6) {
-                logger.error("业务：0x1208，应答数据体字节数不符！");
-                return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
-            }
-            index += 2;
-            // 通知失败的设备数量
-            byte devNum = decryptBuf[index];
-            if (dataLen != UdpProtocol.MIN_REPLY_DATA_LEN + 1 + devNum) {
-                logger.error("业务：0x1208，应答数据体字节数不符！");
-                return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
-            }
-            index += 1;
-            // 通知失败的设备位序（值：0到n-1）
-            byte[] devSorts = Arrays.copyOfRange(decryptBuf, index, index + devNum);
-            msg = new StringBuffer("{\"commonError\":").append(commonError).append(",\"workError\":").append(bizError)
-                    .append(",\"devNum\":").append(devNum).append(",\"devSorts\":").append(Arrays.toString(devSorts))
-                    .append('}').toString();
-        }
-        int errorId = (int) commonError << 16 | bizError;
-        return ResponseMsgUtil.error(ErrorTagConst.UDP_REPLY_ERROR_TAG, errorId, msg);
-    }
-
-    /**
      * 处理UDP服务器接收业务
      *
      * @param element {@link MyQueueElement}
@@ -587,9 +341,8 @@ public class UdpProtocol {
         // 业务ID
         byte[] bizIdWord = Arrays.copyOfRange(receiveBizBuf, 9, 11);
         short bizId = BytesConverterByLittleEndian.getShort(bizIdWord);
-        String hexBizId = BytesUtil.bytesToHex(ArraysUtil.reverse(bizIdWord), false);
         if (logger.isDebugEnabled()) {
-            logger.debug("receive udp biz id: 0x{}", hexBizId);
+            logger.debug("receive udp biz id: ", bizId);
         }
 
         if (bizId == UdpBizId.LINK_HEARTBEAT_DETECTION) {
@@ -606,7 +359,7 @@ public class UdpProtocol {
             dealProtocolReply(receiveBizBuf, bizId);
             return;
         }
-        logger.error("业务ID：0x{}，无效！", hexBizId);
+        logger.error("业务ID：0x{}，无效！", BytesUtil.bytesToHex(ArraysUtil.reverse(bizIdWord), false));
     }
 
 
@@ -653,12 +406,6 @@ public class UdpProtocol {
 
         // 应答数据体
         byte[] data = Arrays.copyOfRange(replyBizBuf, index, replyBizBuf.length);
-        // ResponseMsg msg;
-        // if (replyBizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
-        //     msg = dealReplyDataForTerminalSoftwareUpdate(data);
-        // } else {
-        //     msg = dealReplyDataForCommen(data);
-        // }
         ResponseMsg msg = dealReplyDataForCommen(data);
         int cacheId = AsynUdpCommCache.buildCacheId(replyBizId ^ 128, serialNo);
         if (replyBizId == UdpBizId.TERMINAL_COMMEN_CONFIG_UPDATE_RESPONSE
@@ -685,15 +432,15 @@ public class UdpProtocol {
         // 通用错误
         byte[] commonErrorWord = Arrays.copyOfRange(data, index, index + 2);
         short commonError = BytesConverterByLittleEndian.getShort(commonErrorWord);
-        if (commonError != UdpReplyErrorTag.NONE_ERROR) {
-            logger.error("应答数据体通用错误！{}", commonError);
+        if (commonError != 0) {
+            logger.error("应答数据体通用错误：[{}]{}", commonError, UdpReplyCommonErrorEnum.codeToMsg(commonError));
         }
         index += 2;
         // 业务错误
         byte[] bizErrorWord = Arrays.copyOfRange(data, index, index + 2);
         short bizError = BytesConverterByLittleEndian.getShort(bizErrorWord);
-        if (bizError != UdpReplyErrorTag.NONE_ERROR) {
-            logger.error("应答数据体业务错误！{}", bizError);
+        if (bizError != 0) {
+            logger.error("应答数据体业务错误：[{}]{}", bizError, UdpReplyWorkErrorEnum.codeToMsg(bizError));
         }
         if (commonError + bizError != 0) {
             int errorId = (int) commonError << 16 | bizError;
@@ -704,63 +451,6 @@ public class UdpProtocol {
             return ResponseMsgUtil.error(ErrorTagConst.UDP_REPLY_ERROR_TAG, errorId, map);
         }
         return ResponseMsgUtil.success();
-    }
-
-    /**
-     * 车台软件更新业务应答数据体处理
-     *
-     * @param data {@link byte[]} 应答数据体
-     * @return {@link ResponseMsg}
-     */
-    private ResponseMsg dealReplyDataForTerminalSoftwareUpdate(byte[] data) {
-        if (data.length < UdpProtocol.MIN_REPLY_DATA_LEN) {
-            logger.error("车台软件更新下发业务：应答数据体长度：{}，太短！", data.length);
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
-        }
-        int index = 0;
-        // 通用错误
-        byte[] commonErrorWord = Arrays.copyOfRange(data, index, index + 2);
-        short commonError = BytesConverterByLittleEndian.getShort(commonErrorWord);
-        if (commonError != UdpReplyErrorTag.NONE_ERROR) {
-            logger.error("应答数据体通用错误！{}", commonError);
-        }
-        index += 2;
-        // 业务错误
-        byte[] bizErrorWord = Arrays.copyOfRange(data, index, index + 2);
-        short bizError = BytesConverterByLittleEndian.getShort(bizErrorWord);
-        if (bizError != UdpReplyErrorTag.NONE_ERROR) {
-            logger.error("应答数据体业务错误！{}", bizError);
-        }
-        if (commonError + bizError == 0) {
-            return ResponseMsgUtil.success(); // 无错
-        }
-
-        if (data.length < 6) {
-            logger.error("车台软件更新下发业务：应答数据体通知失败后剩余字节数：{}，不够！", data.length - UdpProtocol.MIN_REPLY_DATA_LEN);
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
-        }
-        index += 2;
-        // 通知失败的设备数量
-        byte devNum = data[index];
-        if (data.length != UdpProtocol.MIN_REPLY_DATA_LEN + 1 + 4 * devNum) {
-            logger.error("车台软件更新下发业务：实际设备ID数目[n*4={}]与报文中指定的设备数量[{}]不符！", data.length - 5, devNum);
-            return ResponseMsgUtil.error(UdpProtocolParseResultEnum.DATA_LEN_INVALID);
-        }
-        index += 1;
-
-        StringBuffer msg = new StringBuffer("{\"commonError\":").append(commonError).append(",\"workError\":")
-                .append(bizError).append(",\"devIds\":[");
-        // 通知失败的设备ID
-        for (int i = 0; i < devNum; i++) {
-            byte[] devIdDWord = Arrays.copyOfRange(data, index, index + 4);
-            int devId = BytesConverterByLittleEndian.getInt(devIdDWord);
-            index += 4;
-            msg.append(devId).append(',');
-        }
-        msg.deleteCharAt(msg.length() - 1);
-        msg.append(']').append('}');
-        int errorId = (int) commonError << 16 | bizError;
-        return ResponseMsgUtil.error(ErrorTagConst.UDP_REPLY_ERROR_TAG, errorId, msg.toString());
     }
 
     /**
@@ -943,14 +633,17 @@ public class UdpProtocol {
             // 车台报警信息
             byte terminalAlarm = receiveDataBuf[index];
             index++;
+            // 是否报警
+            char alarm = isAlarm(terminalAlarm);
             // 锁数量
             byte lockNum = receiveDataBuf[index];
             index++;
-            // 锁报警信息
-            byte[] lockAlarms = Arrays.copyOfRange(receiveDataBuf, index, index + lockNum);
-            index += lockNum;
-            // 是否报警
-            char alarm = isAlarm(terminalAlarm, lockNum, lockAlarms);
+            if (lockNum > 0) {
+                // 锁报警信息
+                byte[] lockAlarms = Arrays.copyOfRange(receiveDataBuf, index, index + lockNum);
+                index += lockNum;
+                alarm = isAlarm(terminalAlarm, lockNum, lockAlarms);
+            }
             trackBuf.append("\"alarm\":\"").append(alarm).append('\"');
             trackBuf.append('}');
             trackList.add(trackBuf.toString());
@@ -988,6 +681,19 @@ public class UdpProtocol {
                 break;
         }
         return "未知";
+    }
+
+    /**
+     * 是否报警
+     *
+     * @param terminalAlarm 车台报警信息
+     * @return 是/否
+     */
+    private char isAlarm(byte terminalAlarm) {
+        if ((terminalAlarm & AlarmBitMarkConst.VALID_TERMINAL_ALARM_BITS) > 0) {
+            return '是';
+        }
+        return '否';
     }
 
     /**

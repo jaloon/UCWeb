@@ -104,16 +104,16 @@ $(function () {
                 } else {
                     $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                var dataCount = gridPage.currentRows;
+                $("#page_info").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#qcar").val(gridPage.t.carNumber);
                 $("#qdev").val(gridPage.t.deviceType);
                 $("#qtype").val(gridPage.t.type);
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
-                $(".table-body").html("");
                 var alarms = gridPage.dataList;
                 var tableData = "<table width='100%'>";
-                for (var i = 0; i < gridPage.currentRows; i++) {
+                for (var i = 0; i < dataCount; i++) {
                     var alarm = alarms[i];
                     var coordFlag = alarm.longitude == undefined || alarm.latitude == undefined;
                     tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + alarm.id + ")\">") +
@@ -161,7 +161,6 @@ $(function () {
             }
         });
     }
-
     showList("", "", "", "", "", 1);
 
     $("#search_btn").click(function () {

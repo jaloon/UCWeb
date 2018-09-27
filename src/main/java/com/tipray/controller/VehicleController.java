@@ -1,7 +1,18 @@
 package com.tipray.controller;
 
-import com.tipray.bean.*;
-import com.tipray.bean.baseinfo.*;
+import com.tipray.bean.ChangeInfo;
+import com.tipray.bean.DropdownData;
+import com.tipray.bean.GridPage;
+import com.tipray.bean.Message;
+import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
+import com.tipray.bean.VehicleStatus;
+import com.tipray.bean.VehicleTerminalConfig;
+import com.tipray.bean.baseinfo.Device;
+import com.tipray.bean.baseinfo.Lock;
+import com.tipray.bean.baseinfo.TransCompany;
+import com.tipray.bean.baseinfo.User;
+import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.log.InfoManageLog;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.upgrade.UpgradeCancelVehicle;
@@ -18,7 +29,13 @@ import com.tipray.service.GasStationService;
 import com.tipray.service.InfoManageLogService;
 import com.tipray.service.OilDepotService;
 import com.tipray.service.VehicleService;
-import com.tipray.util.*;
+import com.tipray.util.AccreditUtil;
+import com.tipray.util.DateUtil;
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.OperateLogUtil;
+import com.tipray.util.ResponseMsgUtil;
+import com.tipray.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -60,13 +77,13 @@ public class VehicleController extends BaseAction {
     public String dispatch(String mode, Long id, ModelMap modelMap) {
         logger.info("dispatch car edit page, mode={}, id={}", mode, id);
         modelMap.put("mode", mode);
-        Map<String, Object> map = new HashMap<>(16);
         if (id != null && id > 0) {
+            Map<String, Object> map = new HashMap<>(16);
             map = vehicleService.getCarById(id);
+            modelMap.put("car", map.get("car"));
+            modelMap.put("drivers", map.get("drivers"));
+            modelMap.put("locks", map.get("locks"));
         }
-        modelMap.put("car", map.get("car"));
-        modelMap.put("drivers", map.get("drivers"));
-        modelMap.put("locks", map.get("locks"));
         return "normal/car/carEdit.jsp";
     }
 
@@ -573,5 +590,22 @@ public class VehicleController extends BaseAction {
     @ResponseBody
     public VehicleTerminalConfig getGpsConfByCarNumber(String carNumber) {
         return vehicleService.getGpsConfByCarNumber(carNumber);
+    }
+
+    /**
+     * 根据授权码生成密码
+     * @param authCode 授权码
+     * @return 授权密码
+     */
+    @PermissionAnno("authCodeVerify")
+    @RequestMapping(value = "getAuthPwd.do")
+    @ResponseBody
+    public ResponseMsg getAuthPwd(String authCode) {
+        try {
+            return ResponseMsgUtil.success(AccreditUtil.getAccreditPassword(authCode));
+        }catch (Exception e) {
+            logger.error(e.toString());
+            return ResponseMsgUtil.exception(e);
+        }
     }
 }

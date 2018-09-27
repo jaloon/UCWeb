@@ -126,7 +126,7 @@ public class TransCompanyController extends BaseAction {
     @RequestMapping(value = "getCompanyList.do")
     @ResponseBody
     public List<TransCompany> getCompanyList() {
-        return transCompanyService.findAllTransCompanys();
+        return transCompanyService.getCompanyList();
     }
 
     @RequestMapping(value = "getSuperiorCompanyList.do")

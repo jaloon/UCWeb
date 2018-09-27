@@ -16,7 +16,7 @@ $(function () {
             success: function (response) {
                 drivers = response;
             },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
                 if (XMLHttpRequest.readyState == 4) {
                     var http_status = XMLHttpRequest.status;
                     if (http_status == 0 || http_status > 600) {
@@ -171,7 +171,13 @@ $(function () {
         var company = $("#company").val();
         var type = $("#type").val();
         var sim = $.trim($("#sim").val());
-        var transcard = $.trim($("#transcard").val());
+        var transcard = $("#transcard").val();
+        if (transcard === "") {
+            transcard = $("#transcard").next().next().next().val();
+            if (transcard === "") {
+                transcard = '0';
+            }
+        }
         var store = $.trim($("#store").val());
         var remark = $.trim($("#remark").val());
         var driverIds = "";
@@ -227,7 +233,8 @@ $(function () {
                             });
                         }
                     },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        ajaxFlag = false;
                         if (XMLHttpRequest.readyState == 4) {
                             var http_status = XMLHttpRequest.status;
                             if (http_status == 0 || http_status > 600) {

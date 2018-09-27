@@ -8,15 +8,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>操作员管理</title>
+    <script src="../../resources/js/base.js"></script>
     <link rel="stylesheet" href="../../resources/css/base.css ">
     <link rel="stylesheet" href="../../resources/css/baseEdit.css ">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
-    <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/user/userEdit.js"></script>
     <style type="text/css">
         tr td:first-child {
@@ -49,13 +50,19 @@
                     </c:if>
                 }
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             });
             $.getJSON("../../manage/transcom/getCompanyList.do",
@@ -71,13 +78,19 @@
                     </c:if>
                 }
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
-                if (XMLHttpRequest.readyState == 4 && XMLHttpRequest.status == 200 && textStatus == "parsererror") {
-                    layer.confirm('登录失效，是否刷新页面重新登录？', {
-                        icon: 0,
-                        title: ['登录失效', 'font-size:14px;color:#ffffff;background:#478de4;']
-                    }, function() {
+                if (XMLHttpRequest.readyState == 4) {
+                    var http_status = XMLHttpRequest.status;
+                    if (http_status == 0 || http_status > 600) {
                         location.reload(true);
-                    });
+                    } else if (http_status == 200) {
+                        if (textStatus == "parsererror") {
+                            layer.alert("应答数据格式解析错误！")
+                        } else {
+                            layer.alert("http response error: " + textStatus)
+                        }
+                    } else {
+                        layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                    }
                 }
             });
         });
@@ -153,7 +166,7 @@
                 <tr>
                     <td>账号:</td>
                     <td>
-                        <input type="text" class="editInfo" id="account" required>
+                        <input type="text" class="editInfo" id="account" placeholder="字母、数字、下划线组成，字母开头，2-16位" required>
                     </td>
                 </tr>
                 <tr>

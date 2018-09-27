@@ -329,7 +329,8 @@ $(function() {
                         });
                     }
                 },
-                error: function(XMLHttpRequest, textStatus, errorThrown) {  //#3这个error函数调试时非常有用，如果解析不正确，将会弹出错误框
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    ajaxFlag = false;
                     if (XMLHttpRequest.readyState == 4) {
                         var http_status = XMLHttpRequest.status;
                         if (http_status == 0 || http_status > 600) {

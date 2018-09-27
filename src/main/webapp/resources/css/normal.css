@@ -87,9 +87,13 @@ select.search-text {
     position: fixed;
 }
 
+.table-wrap{
+    padding: 10px;
+}
+
 .table-box {
     overflow: auto;
-    margin: 10px;
+    /*margin: 10px;*/
     box-shadow: 0 0 1px 3px #e6e7e9;
 }
 

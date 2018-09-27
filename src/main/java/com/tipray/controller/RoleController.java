@@ -62,7 +62,7 @@ public class RoleController extends BaseAction {
             role = roleService.getRoleById(id);
         }
         modelMap.put("role", role);
-        return "normal/role/roleEditDlg.jsp";
+        return "normal/role/roleEdit.jsp";
     }
 
     @PermissionAnno("editRole")

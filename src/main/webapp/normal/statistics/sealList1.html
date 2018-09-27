@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
+    <title>车辆施解封记录查询</title>
+    <script src="../../resources/js/base.js"></script>
+    <link rel="stylesheet" href="../../resources/css/base.css" media="all">
+    <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
+    <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
+    <link rel="stylesheet" href="../../resources/plugins/jqTable/css/jqTable.css">
+    <style type="text/css">
+        #type_type,
+        #type_begin,
+        #type_end {
+            left: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+    	<div class="nav-addr">
+	        <img src="../../resources/images/navbar/statistics.png"> 查询统计
+	        <img src="../../resources/images/navbar/nav_right_12.png"> 车辆施解封记录查询
+	    </div>
+        <div class="search-zone">
+            <label for="text_car" class="search-type" id="type_car">车牌号</label>
+            <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
+            <select class="search-text" id="text_car">
+                <option value="">车牌号</option>
+            </select>
+            <label for="text_type" class="search-type" id="type_type">施解封类型</label>
+            <select class="search-text" id="text_type">
+                <option value="">所有类型</option>
+                <option value=1>进油库</option>
+                <option value=2>出油库</option> 
+                <option value=3>进加油站</option> 
+                <option value=4>出加油站</option> 
+                <option value=5>进入应急</option>
+                <option value=6>取消应急</option>
+                <option value=7>状态强制变更</option>
+                <option value=8>待进油区</option>
+                <option value=9>进油区</option>
+                <option value=10>出油区</option>
+            </select>
+            <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
+            <input type="text" class="search-text" id="text_begin">
+            <label for="text_end" class="search-type" id="type_end">结束时间</label>
+            <input type="text" class="search-text" id="text_end">
+
+            <input type="button" class="search-btn button" id="search_btn" value="查询">
+        </div>
+        <div class="data-zone">
+            <div class="table-wrap">
+                <div class="table-box c-table c-table--border">
+                    <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
+                        <colgroup>
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                        </colgroup>
+                    </table>
+                </div>
+            </div>
+            <div class="page">
+                <span>第</span>
+                <select id="page_id">
+                    <option value="1">1</option>
+                </select>
+                <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
+                <select id="page_size">
+                    <option value="25">25条/页</option>
+                    <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="150">150条/页</option>
+                </select>
+                <input type="hidden" id="qcar">
+                <input type="hidden" id="qtype">
+                <input type="hidden" id="qbegin">
+                <input type="hidden" id="qend">
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<!-- 数据模版 -->
+<script id="table-tpl" type="text/html">
+    <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="200">
+        <colgroup>
+            <col name="" width="80">
+            <col name="" width="92">
+            <col name="" width="170">
+            <col name="" width="126">
+            <col name="" width="">
+            <col name="" width="126">
+            <col name="" width="">
+            <col name="" width="88">
+            <col name="" width="88">
+            <col name="" width="110">
+            <col name="" width="130">
+            <col name="" width="110">
+            <col name="" width="110">
+            <col name="" width="126">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="">
+                <div class="cell">序号</div>
+            </th>
+            <th class="">
+                <div class="cell">车牌号</div>
+            </th>
+            <th class="">
+                <div class="cell">时间</div>
+            </th>
+            <th class="">
+                <div class="cell">GPS有效性</div>
+            </th>
+            <th class="">
+                <div class="cell">位置（经纬度）</div>
+            </th>
+            <th class="">
+                <div class="cell">速度（km/h）</div>
+            </th>
+            <th class="">
+                <div class="cell">方向</div>
+            </th>
+            <th class="">
+                <div class="cell">前状态</div>
+            </th>
+            <th class="">
+                <div class="cell">现状态</div>
+            </th>
+            <th class="">
+                <div class="cell">类型</div>
+            </th>
+            <th class="">
+                <div class="cell">进出站点</div>
+            </th>
+            <th class="">
+                <div class="cell">认证类型</div>
+            </th>
+            <th class="">
+                <div class="cell">认证编号</div>
+            </th>
+            <th class="">
+                <div class="cell">是否报警</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{each data}}
+        {{if $value.coordFlag}}
+        <tr ondblclick="showBMap({{$value.id}})">
+            {{else}}
+        <tr>
+            {{/if}}
+            <td class="">
+                <div class="cell">{{$value.id}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.carNo}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.time}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.gps}}</div>
+            </td>
+            <td class="">
+                <div class="cell">
+                    {{if $value.coordFlag}}
+                    <a href="javascript:showBMap({{$value.id}})">
+                        ({{$value.coordinate}})
+                    </a>
+                    {{else}}
+                    {{$value.coordinate}}
+                    {{/if}}
+                </div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.velocity}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.aspect}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.prestatus}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.status}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.type}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.station}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.authtype}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.authid}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.alarm}}</div>
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</script>
+<script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+<script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
+<script src="../../resources/plugins/laydate/laydate.js"></script>
+<script src="../../resources/plugins/layer/layer.js"></script>
+<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
+<script src="../../resources/plugins/jqTable/js/plugins/artTemplate.js"></script>
+<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
+<script src="../../resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
+<!-- 表格插件 -->
+<script src="../../resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
+<script src="../../resources/js/statistics/sealList1.js"></script>

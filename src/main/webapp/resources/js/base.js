@@ -438,3 +438,28 @@ Date.prototype.format = function (fmt) {
     }
     return fmt;
 };
+
+/**
+ * 阻止事件冒泡stopPropagation的兼容写法
+ * @param e
+ */
+function stopPropagation(e) {
+    e = window.event || e;
+    if (document.all) {  //只有ie识别
+        e.cancelBubble = true;
+    } else {
+        e.stopPropagation();
+    }
+}
+
+if (!!window.ActiveXObject || "ActiveXObject" in window) {
+    // IE浏览器
+    document.write('<script src="/resources/plugins/polyfill/sockjs.js"></script>' +
+        '<script src="/resources/plugins/polyfill/cssfx.js"></script>' +
+        '<script src="/resources/plugins/polyfill/polyfill.min.js"></script>');
+    if (!-[1,]) {
+        // IE6~IE8
+        document.write('<script src="/resources/plugins/polyfill/ie9.js"></script>' +
+            '<script src="/resources/plugins/polyfill/json2.js"></script>');
+    }
+}

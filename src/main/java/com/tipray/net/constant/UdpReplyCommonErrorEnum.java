@@ -105,7 +105,7 @@ public enum UdpReplyCommonErrorEnum {
                 return commonError.msg;
             }
         }
-        return new StringBuffer().append("未知错误（").append(code).append('）').toString();
+        return new StringBuffer().append("未知错误[").append(code).append(']').toString();
     }
 
     @Override

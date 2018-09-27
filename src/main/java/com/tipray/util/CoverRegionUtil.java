@@ -123,8 +123,7 @@ public class CoverRegionUtil {
                 }
             }
             int len = coverList.size();
-            Byte[] cover = coverList.toArray(new Byte[len]);
-            return cover;
+            return coverList.toArray(new Byte[len]);
         }
         return null;
     }
@@ -160,8 +159,7 @@ public class CoverRegionUtil {
                     buff = buff.put(bytes);
                 }
             }
-            byte[] cover = buff.array();
-            return cover;
+            return buff.array();
         }
         return null;
     }

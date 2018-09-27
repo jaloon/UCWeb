@@ -2140,6 +2140,7 @@ public class VehicleManageController {
      * @param isLocationValid {@link Integer} 手机定位是否有效
      * @return {@link ResponseMsg}
      */
+    @PermissionAnno("authCodeVerify")
     @RequestMapping(value = "authorized_record_report", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseMsg authorizedRecordReport(

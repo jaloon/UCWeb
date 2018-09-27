@@ -123,7 +123,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.getSessionId(session);
         ConcurrentWebSocketSessionDecorator sessionDecorator = WebSocketUtil.decoratorSession(session);
         WEB_SOCKET_CLIENTS.put(sessionId, sessionDecorator);
         logger.info("monitor connection {} established.", sessionId);
@@ -131,11 +131,14 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-        if (message.getPayload() instanceof ByteBuffer) {
+        if (!(message instanceof TextMessage)) {
+            // message.getPayload() instanceof ByteBuffer
             // IE浏览器不间断发送0字节的PongMessage以维持WebSocket连接，服务端忽略此消息
             return;
         }
-        logger.debug("handleMessage：" + message.getPayload());
+        if (logger.isDebugEnabled()) {
+            logger.debug("handleMessage：" + message.getPayload());
+        }
         String msgText = null;
         try {
             msgText = URLDecoder.decode((String) message.getPayload(), "utf-8");
@@ -150,7 +153,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             logger.error("JSON解析异常：{}", e.getMessage());
             return;
         }
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.getSessionId(session);
         ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
         String biz = (String) msgMap.get("biz");
         switch (biz) {
@@ -169,18 +172,15 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     }
 
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        if (session.isOpen()) {
-            session.close();
-        }
-        Long sessionId = Long.parseLong(session.getId(), 16);
+    public void handleTransportError(WebSocketSession session, Throwable exception) {
+        long sessionId = WebSocketUtil.closeSession(session);
         removeMonitorCache(sessionId);
         logger.error("monitor connection {} transport error: {}", sessionId, exception.toString());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.closeSession(session);
         removeMonitorCache(sessionId);
         logger.info("monitor connection {} closed by {}", sessionId,
                 WebSocketCloseStatusEnum.getByCode(closeStatus.getCode()));
@@ -196,19 +196,21 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      *
      * @param sessionId {@link WebSocketSession#getId()}
      */
-    private void removeMonitorCache(Long sessionId) {
-        WEB_SOCKET_CLIENTS.remove(sessionId);
-        GENERAL_CLIENTS.remove(sessionId);
-        // FOCUS_CLIENTS.remove(sessionId);
-        // FOCUS_CARS.remove(sessionId);
-        // REALTIME_CLIENTS.remove(sessionId);
-        // REALTIME_CARS.remove(sessionId);
-        // UDP_CACHE.keySet().forEach(cacheId -> {
-        //     if (UDP_CACHE.get(cacheId).equals(sessionId)) {
-        //         UDP_CACHE.remove(cacheId);
-        //         REALTIME_CARS_CACHE.remove(cacheId);
-        //     }
-        // });
+    private void removeMonitorCache(long sessionId) {
+        if (sessionId > 0) {
+            WEB_SOCKET_CLIENTS.remove(sessionId);
+            GENERAL_CLIENTS.remove(sessionId);
+            // FOCUS_CLIENTS.remove(sessionId);
+            // FOCUS_CARS.remove(sessionId);
+            // REALTIME_CLIENTS.remove(sessionId);
+            // REALTIME_CARS.remove(sessionId);
+            // UDP_CACHE.keySet().forEach(cacheId -> {
+            //     if (UDP_CACHE.get(cacheId).equals(sessionId)) {
+            //         UDP_CACHE.remove(cacheId);
+            //         REALTIME_CARS_CACHE.remove(cacheId);
+            //     }
+            // });
+        }
     }
 
     /**
@@ -218,7 +220,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param session   {@link ConcurrentWebSocketSessionDecorator}
      * @param msgMap    {@link WebSocketMessage} JSON文本的实际对象
      */
-    private void dealGeneralMonitor(Long sessionId,
+    private void dealGeneralMonitor(long sessionId,
                                     ConcurrentWebSocketSessionDecorator session,
                                     Map<String, Object> msgMap) {
         String userIdStr = (String) msgMap.get("user");
@@ -273,7 +275,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param sessionDecorator {@link ConcurrentWebSocketSessionDecorator}
      * @param msgMap           {@link WebSocketMessage} JSON文本的实际对象
      */
-    private void dealFocusMonitor(Long sessionId,
+    private void dealFocusMonitor(long sessionId,
                                   ConcurrentWebSocketSessionDecorator sessionDecorator,
                                   Map<String, Object> msgMap) {
         String bizType = (String) msgMap.get("bizType");
@@ -426,7 +428,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param sessionDecorator {@link ConcurrentWebSocketSessionDecorator}
      * @param msgMap           {@link WebSocketMessage} JSON文本的实际对象
      */
-    private void dealRealtimeMonitor(Long sessionId,
+    private void dealRealtimeMonitor(long sessionId,
                                      ConcurrentWebSocketSessionDecorator sessionDecorator,
                                      Map<String, Object> msgMap) {
         String bizType = (String) msgMap.get("bizType");

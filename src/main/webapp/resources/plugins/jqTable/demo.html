@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--<link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/bootstrap-3.3.4.css">-->
+    <link rel="stylesheet" href="css/jqTable.css">
+</head>
+<body>
+<div class="c-table c-table--border J-table-height">
+    <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
+    </table>
+</div>
+</body>
+</html>
+<!-- 模版2 -->
+<script id="table-tpl2" type="text/html">
+    <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="200">
+        <colgroup>
+            <col name="" width="150">
+            <col name="" width="120">
+            <col name="" width="120">
+            <col name="" width="120">
+            <col name="" width="300">
+            <col name="" width="120">
+            <col name="" width="140">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="">
+                <div class="cell">日期</div>
+            </th>
+            <th class="">
+                <div class="cell">姓名</div>
+            </th>
+            <th class="">
+                <div class="cell">省份</div>
+            </th>
+            <th class="">
+                <div class="cell">市区</div>
+            </th>
+            <th class="">
+                <div class="cell">地址</div>
+            </th>
+            <th class="">
+                <div class="cell">邮编</div>
+            </th>
+            <th class="">
+                <div class="cell">操作</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{each data}}
+        <tr>
+            <td class="">
+                <div class="cell">{{$value.time}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.name}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.province}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.city}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.address}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.code}}</div>
+            </td>
+            <td class="">
+                <div class="cell">
+                    <button type="button" class="c-button">移除</button>
+                </div>
+            </td>
+        </tr>
+        {{/each}}
+
+        </tbody>
+    </table>
+</script>
+<script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template  -->
+<script src="js/plugins/artTemplate.js"></script>
+<!--另一个插件，消息提示插件  -->
+<!--<script src="js/plugins/message.js"></script>-->
+<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
+<script src="js/jquery.mousewheel.min.js"></script>
+<!-- 总引入  -->
+<script src="js/zipJs/jqTable.all.min.js"></script>
+<!-- 临时用的json -->
+<script src="js/data.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('[role="c-table"]').jqTable({
+            fixedLeft: true,
+            fixedRight: true
+        });
+        //表格1:修改高度值
+        setTimeout(function () {
+            $('.J-table-height').data('height', 300);
+            $(window).trigger('resize');
+        }, 2000);
+        //表格1:更新数据距离
+        // setTimeout(function () {
+            var html2 = template('table-tpl2', {data: json});
+            $('.c-table').eq(0).data('table').updateHtml(html2);
+        // }, 8000);
+        setTimeout(function () {
+            var html2 = template('table-tpl2', {data: json2});
+            $('.c-table').eq(0).data('table').updateHtml(html2);
+        }, 5000);
+    });
+</script>

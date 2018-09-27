@@ -178,8 +178,9 @@ public class DeviceController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            logger.error("操作员：{}（{}），同步设备异常：e={}", user.getName(), user.getAccount(), e.toString());
-            logger.debug("同步设备异常堆栈信息：", e);
+            StringBuilder builder = new StringBuilder().append("操作员：").append(user.getName()).append('(')
+                    .append(user.getAccount()).append(")，同步设备异常！");
+            logger.error(builder.toString(), e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);

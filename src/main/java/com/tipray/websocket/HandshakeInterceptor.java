@@ -25,7 +25,9 @@ public class HandshakeInterceptor extends HttpSessionHandshakeInterceptor {
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) throws Exception {
-        logger.debug("Before {} Handshake：{}", wsHandler, request);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Before {} Handshake：{}", wsHandler, request);
+        }
         // 解决The extension [x-webkit-deflate-frame] is not supported问题
         if (request.getHeaders().containsKey("Sec-WebSocket-Extensions")) {
             request.getHeaders().set("Sec-WebSocket-Extensions", "permessage-deflate");
@@ -47,7 +49,9 @@ public class HandshakeInterceptor extends HttpSessionHandshakeInterceptor {
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
                                Exception exception) {
-        logger.debug("After {} Handshake：{} {}", wsHandler, request, exception);
+        if (logger.isDebugEnabled()) {
+            logger.debug("After {} Handshake：{} {}", wsHandler, request, exception);
+        }
         super.afterHandshake(request, response, wsHandler, exception);
     }
 

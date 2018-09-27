@@ -54,7 +54,5 @@ public class UdpServerListener implements ServletContextListener {
 		} else {
 			logger.info("No running UdpServer found!");
 		}
-
 	}
-
 }

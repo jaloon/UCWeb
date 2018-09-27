@@ -8,11 +8,12 @@
 
 <head>
     <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>统计记录查看</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script src="../../resources/js/base.js"></script>
+    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script type="text/javascript"
             src="https://api.map.baidu.com/api?v=2.0&ak=F0i6SrLmHquLVNLCqpExxPrj8mWVdFwx&s=1"></script>
     <script type="text/javascript"

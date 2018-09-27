@@ -1,14 +1,5 @@
 package com.tipray.test;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.Test;
-
-import com.tipray.net.UdpClient;
 import com.tipray.net.UdpProtocol;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.util.CRCUtil;
@@ -16,6 +7,12 @@ import com.tipray.util.DateUtil;
 import com.tipray.util.FileUtil;
 import com.tipray.util.JSONUtil;
 import com.tipray.util.RC4Util;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UdpTest {
 	@Test
@@ -48,22 +45,7 @@ public class UdpTest {
 		}
 	}
 
-	@Test
-	public void testUdpTimeout() throws IOException {
-		byte[] sendBuf = { 4, 5, 6 };
-		UdpClient client = new UdpClient(sendBuf);
-		client.send();
-		byte[] b = client.receive();
-		// byte[] b=client.sendAndReceive();
-		if (b != null) {
-			System.out.println(Arrays.toString(b));
-		} else {
-			System.out.println("null");
-		}
-	}
 
-	
-	
 	@Test
 	public void testSerialNo() {
 		System.out.println(FileUtil.getWebClassesPath());

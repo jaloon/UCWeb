@@ -73,6 +73,7 @@ function upAlarmList(alarmlist) {
     removeGrayscale(tipIcoObj, css3filter, tipIcoUrl);
     $(".alarm-num").html(alarmCount);
     var trHtml = "";
+    // var jsonData = [];
     alarmlist.forEach(function (alarmInfo) {
         var alarm_id = alarmInfo.alarmId;
         trHtml += "<tr class='alarm-content' id='alarm_id_" + alarm_id + "' onclick='showAlarm(" + alarm_id + ")'>"
@@ -82,9 +83,18 @@ function upAlarmList(alarmlist) {
             + "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(\"" + alarmInfo.carNumber + "\"," + alarm_id + ")'>"
             + "<img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>"
             + "</tr>";
+        // jsonData.push({
+        //     id: alarm_id,
+        //     car: alarmInfo.carNumber,
+        //     dev: parseAlarmDev(alarmInfo),
+        //     type: alarmInfo.alarmName
+        // });
         alarmTagCache.set(alarmInfo.alarmTag, alarm_id);
     });
     $("#alarm_tips tbody").html(trHtml);
+    // // 更新表格数据
+    // var tableHtml = template('table-tpl', {data: jsonData});
+    // $('.c-table').eq(0).data('table').updateHtml(tableHtml);
     if (window.Notification && Notification.permission === "granted") {
         alarmNotify.setTitle(true).setFavicon(alarmCount);
     }
@@ -136,7 +146,7 @@ function addAlarm(alarmInfo) {
     alarmTagCache.set(alarmTag, alarmId);
     var trHtml = "<tr class='alarm-content' id='alarm_id_" + alarmId + "' onclick='showAlarm(" + alarmId + ")'>"
         + "<td class='alarm-car'>" + alarmInfo.carNumber + "</td>"
-        + "<td class='alarm-dev'>" +  parseAlarmDev(alarmInfo) + "</td>"
+        + "<td class='alarm-dev'>" + parseAlarmDev(alarmInfo) + "</td>"
         + "<td class='alarm-type'>" + alarmInfo.alarmName + "</td>"
         + "<td class='alarm-eli' title='消除报警' onclick='eliminateAlarm(\"" + alarmInfo.carNumber + "\"," + alarmId + ")'>"
         + "<img src='../../resources/images/operate/delete.png' alt='消除报警'/></td>"
@@ -205,7 +215,7 @@ function eliminateAlarm(carNumber, alarmIds) {
         }
     });
     // 阻止事件冒泡到DOM树上
-    event.stopPropagation();
+    stopPropagation(event);
 }
 
 function showAlarm(alarmId) {
@@ -218,30 +228,34 @@ function showAlarm(alarmId) {
         area: ['800px', '560px'],
         content: 'normal/alarm/alarmTipView.html?alarmId=' + alarmId
     });
-    event.stopPropagation();
+    stopPropagation(event);
 }
 
 $(function () {
-    var tableCont = document.querySelector('#alarm_tips');
+    // var tableCont = document.querySelector('#alarm_tips');
+    //
+    // /**
+    //  * scroll handle
+    //  * @param {event} e scroll event
+    //  */
+    // function scrollHandle(e) {
+    //     // console.log(this)
+    //     var scrollTop = this.scrollTop;
+    //     this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
+    // }
+    //
+    // tableCont.addEventListener('scroll', scrollHandle);
 
-    /**
-     * scroll handle
-     * @param {event} e scroll event
-     */
-    function scrollHandle(e) {
-        // console.log(this)
-        var scrollTop = this.scrollTop;
-        this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
-    }
-
-    tableCont.addEventListener('scroll', scrollHandle);
+    $('[role="c-table"]').jqTable();
 
     tipIcoObj = $(".alarm-tip");
     tipIcoUrl = tipIcoObj.attr("src");
     css3filter = grayscale(tipIcoObj);
     var ctx = $("#ctx").val();
+    var httpProtocol = "http";
     var wsProtocol = "ws";
-    if ("https:" == document.location.protocol || location.href.indexOf("https") > -1) {
+    if ("https:" === document.location.protocol || location.href.indexOf("https") > -1) {
+        httpProtocol = "https";
         wsProtocol = "wss";
     }
     var wsUrl = window.location.host + ctx;
@@ -286,8 +300,13 @@ $(function () {
         // } else if ('MozWebSocket' in window) {
         //     ws = new MozWebSocket("ws://" + wsUrl + "/alarm");
     } else {
-        // ws = new SockJS("http://" + wsUrl + "/sockjs/alarm");
-        layer.alert("您的浏览器不支持websocket协议，建议使用新版谷歌、火狐等浏览器，请勿使用IE10以下浏览器，360浏览器请使用极速模式，不要使用兼容模式！");
+        ws = new SockJS(httpProtocol + "://" + wsUrl + "/sockjs/alarm");
+        layer.alert("您的浏览器内核版本太低，部分功能可能无法使用，建议使用" +
+            "<a href='manage/file/download/chrome_setup.rar'>Chrome</a>、" +
+            "<a href='manage/file/download/firefox_setup.rar'>Firefox</a>、" +
+            "<a href='manage/file/download/ie11_setup.rar'>IE11</a>、" +
+            "Edge等现代浏览器，360浏览器、QQ浏览器、搜狗浏览器等双核浏览器请使用极速模式浏览！",
+            {icon: 0, title: ['提示', 'font-size:14px;color:#ffffff;background:#478de4;']});
     }
     ws.onopen = function (event) {
         if (window.console) console.log("websocket connected");
@@ -310,8 +329,8 @@ $(function () {
                 // receiveAlarm(receiveObj.msg);
                 break;
             case 111: //缓存报警
-                Concurrent.Thread.create(cacheAlarm, receiveObj.msg);
-                // cacheAlarm(receiveObj.msg);
+                // Concurrent.Thread.create(cacheAlarm, receiveObj.msg);
+                cacheAlarm(receiveObj.msg);
                 break;
             default:
                 break;

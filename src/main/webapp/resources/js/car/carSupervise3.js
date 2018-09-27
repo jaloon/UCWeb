@@ -9,6 +9,34 @@ var focusId;
 var realtimeId;
 var focusCancelOrder;
 
+var isInitMap = false;
+// 百度地图API功能
+var map = new BMap.Map("bmap"); // 创建Map实例
+var localCity = new BMap.LocalCity();
+localCity.get(function (localCityResult) {
+    if (isInitMap) {
+        console.log("track point")
+        return;
+    }
+    console.log("local point")
+    // center	Point	城市所在中心点
+    // level	Number	展示当前城市的最佳地图级别，如果您在使用此对象时提供了map实例，则地图级别将根据您提供的地图大小进行调整
+    // name	String	城市名称
+    initMap(localCityResult.center, 12); // 初始化地图,设置中心点坐标和地图级别
+    // console.log(localCityResult.center)
+    isInitMap = true;
+});
+
+function initMap(centerPoint, zoom) {
+    map.centerAndZoom(centerPoint, zoom);
+    map.addControl(new BMap.NavigationControl()); //左上角，添加默认缩放平移控件
+    map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
+    map.addControl(new BMap.ScaleControl({
+        anchor: BMAP_ANCHOR_BOTTOM_RIGHT
+    })); // 右下角，添加比例尺
+    map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
+}
+
 var point_layer, icon_layer, text_layer;
 var point_dataSet, icon_dataSet, text_dataSet;
 
@@ -172,7 +200,7 @@ function show(point_data, icon_data, text_data) {
 }
 
 var onlineCarIds = [];
-var $tbody = $(".table-body");
+// var $tbody = $(".table-body");
 
 function getCarIcon(gpsValid, alarm) {
     if (!gpsValid) {
@@ -197,6 +225,7 @@ function flushTrack(tracks) {
         nelng = ne.lng,
         nelat = ne.lat;
 
+    var jsonData = [];
     tracks.forEach(function (track) {
         var carId = track.carId;
         var lng = track.lastValidLongitude;
@@ -215,21 +244,20 @@ function flushTrack(tracks) {
         car_text_cache.set(carId, text);
 
         if (onlineCarIds.indexOf(carId) >= 0) {
-            var carTr = "<tr id='car_" + carId + "'>" +
-                "<td class=\"car-num\">" + text + "</td>" +
-                "<td class=\"car-company\">" + track.carCom + "</td>" +
-                "<td class=\"car-gps\">" + (gpsValid ? "有效" : "无效") + "</td>" +
-                "<td class=\"car-coordinate\">(" + track.longitude + ", " + track.latitude + ")</td>" +
-                "<td class=\"car-velocity\">" + track.velocity + "</td>" +
-                "<td class=\"car-aspect\">" + angle2aspect(track.angle) + "</td>" +
-                "<td class=\"car-lastcoord\">(" + lng + ", " + lat + ")</td>" +
-                "<td class=\"car-lastspeed\">" + track.lastValidSpeed + "</td>" +
-                "<td class=\"car-lastaspect\">" + angle2aspect(track.lastValidAngle) + "</td>" +
-                "<td class=\"car-status\">" + track.carStatus + "</td>" +
-                "<td class=\"car-alarm\">" + track.alarm + "</td>" +
-                "<td class=\"car-online\">在线</td>" +
-                "</tr>";
-            car_list_cache.set(carId, carTr);
+            car_list_cache.set(carId, text);
+            jsonData.push({
+                carId: carId,
+                carNo: text,
+                gps: gpsValid ? "有效" : "无效",
+                coordinate: track.longitude + ", " + track.latitude,
+                velocity: track.velocity,
+                aspect: angle2aspect(track.angle),
+                lastcoord: lng + ", " + lat,
+                lastspeed: track.lastValidSpeed,
+                lastaspect: angle2aspect(track.lastValidAngle),
+                carStatus: track.carStatus,
+                alarm: track.alarm
+            });
             if (pos[0] > swlng && pos[0] < nelng && pos[1] > swlat && pos[1] < nelat) {
                 var geometry = {
                     type: GeometryType.Point,
@@ -256,11 +284,9 @@ function flushTrack(tracks) {
         }
     });
     show(point_data, icon_data, text_data);
-    var trDomStr = "";
-    car_list_cache.forEach(function (carTr, carId, mapObj) {
-        trDomStr += carTr;
-    });
-    $tbody.html(trDomStr);
+    // 更新表格数据
+    var tableHtml = template('table-tpl', {data: jsonData});
+    $('.c-table').eq(0).data('table').updateHtml(tableHtml);
 }
 
 function dealOnlineCarsCache(onlineCars) {
@@ -319,6 +345,8 @@ function reFreshLog(log) {
 }
 
 $(function () {
+    $('[role="c-table"]').jqTable();
+
     // iframe高度自适应
     $(window).resize(function () {
         if ($('#car_info').is(':hidden')) {
@@ -408,8 +436,10 @@ $(function () {
 
     userId = getUrlParam("user");
     var ctx = getUrlParam("ctx");
+    var httpProtocol = "http";
     var wsProtocol = "ws";
-    if( "https:" == document.location.protocol || location.href.indexOf("https") > -1 ) {
+    if ("https:" === document.location.protocol || location.href.indexOf("https") > -1) {
+        httpProtocol = "https";
         wsProtocol = "wss";
     }
     wsUrl = window.location.host + ctx;
@@ -427,8 +457,7 @@ $(function () {
             // } else if ('MozWebSocket' in window) {
             //     ws = new MozWebSocket("ws://" + wsUrl + "/track");
         } else {
-            // ws = new SockJS("http://" + wsUrl + "/sockjs/track");
-            layer.alert("您的浏览器不支持websocket协议，建议使用新版谷歌、火狐等浏览器，请勿使用IE10以下浏览器，360浏览器请使用极速模式，不要使用兼容模式！");
+            ws = new SockJS(httpProtocol + "://" + wsUrl + "/sockjs/track");
         }
     }
 
@@ -772,14 +801,14 @@ $(function () {
         var carNumber = "";
         var comId = 0;
         // if (scope == 1) {
-            carNumber = trimAll($("#carno").val());
-            if (carNumber == "") {
-                layer.alert('未选择系统已有车辆！', {icon: 2}, function (index2) {
-                    layer.close(index2);
-                    $("#carno").focus();
-                });
-                return;
-            }
+        carNumber = trimAll($("#carno").val());
+        if (carNumber == "") {
+            layer.alert('未选择系统已有车辆！', {icon: 2}, function (index2) {
+                layer.close(index2);
+                $("#carno").focus();
+            });
+            return;
+        }
         // } else {
         //     comId = $("#company").val();
         // }
@@ -954,6 +983,19 @@ $(function () {
             resize: false,
             area: ['540px', '435px'],
             content: 'remote/unlockReset.html?carNumber=' + encodeURI(carNumber)
+        });
+    });
+
+    /** 授权码验证 */
+    $("#auth_verify").click(function () {
+        layer.open({
+            type: 2,
+            title: ['授权认证', 'font-size:14px;color:#ffffff;background:#478de4;'],
+            // shadeClose: true,
+            shade: 0.8,
+            resize: false,
+            area: ['540px', '435px'],
+            content: 'remote/authCodeVerify.html'
         });
     });
 

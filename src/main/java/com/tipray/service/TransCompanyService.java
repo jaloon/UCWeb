@@ -1,11 +1,11 @@
 package com.tipray.service;
 
-import java.util.List;
-
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.core.exception.ServiceException;
+
+import java.util.List;
 
 /**
  * TransCompanyService
@@ -61,6 +61,13 @@ public interface TransCompanyService {
 	 * @return
 	 */
     List<TransCompany> findAllTransCompanys();
+
+	/**
+	 * 查询所有的运输公司信息列表
+	 *
+	 * @return
+	 */
+    List<TransCompany> getCompanyList();
 
 	/**
 	 * 获取上级公司列表

@@ -26,6 +26,13 @@
 		on t1.parent_company_id=t2.id
 		where t1.is_invalid=0
 	</select>
+
+    <select id="getCompanyList" resultMap="fullResultMap">
+        select
+           id,`name`
+        from tbl_trans_company
+        where is_invalid=0
+    </select>
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.TransCompany">
 		insert into
@@ -119,5 +126,10 @@
     <delete id="deleteByComName" parameterType="java.lang.String">
         delete from tbl_trans_company where `name` = #{name}
     </delete>
-	
+
+	<update id="resetCarComByComId" parameterType="java.lang.Long">
+		update tbl_vehicle set
+		trans_company_id = 0
+		where trans_company_id = #{comId}
+	</update>
 </mapper>

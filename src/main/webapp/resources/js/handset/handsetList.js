@@ -27,7 +27,7 @@ $(function() {
             }
         });
         // 阻止事件冒泡到DOM树上
-        event.stopPropagation();
+        stopPropagation(event);
     };
 
     showList("", 1);

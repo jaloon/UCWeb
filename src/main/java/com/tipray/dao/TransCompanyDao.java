@@ -16,6 +16,13 @@ import java.util.List;
 @MyBatisAnno
 public interface TransCompanyDao extends BaseDao<TransCompany> {
     /**
+     * 查询所有的运输公司信息列表
+     *
+     * @return
+     */
+    List<TransCompany> getCompanyList();
+
+    /**
      * 统计公司名称
      * @param name
      * @return
@@ -49,4 +56,10 @@ public interface TransCompanyDao extends BaseDao<TransCompany> {
 	 * @return
 	 */
     TransCompany getByName(String name);
+
+    /**
+     * 重置车辆所属运输公司
+     * @param comId 运输公司ID
+     */
+    void resetCarComByComId(Long comId);
 }

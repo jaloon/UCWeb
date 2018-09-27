@@ -33,7 +33,7 @@ public enum UdpProtocolParseResultEnum {
 	/** 应答数据体回复错误 */
 	DATA_REPLY_ERROR(11, "应答数据体回复错误！"),
 	/** 应答数据体通用错误 */
-	DATA_COMMEN_ERROR(12, "应答数据体通用错误！"),
+	DATA_COMMON_ERROR(12, "应答数据体通用错误！"),
 	/** 应答数据体业务错误 */
 	DATA_BIZ_ERROR(13, "应答数据体业务错误！");
 

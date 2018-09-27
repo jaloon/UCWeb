@@ -7,15 +7,15 @@
 
 <head>
     <meta charset="utf-8">
-    <title>手持机列表</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
+    <title>手持机列表</title>
+    <script src="../../resources/js/base.js"></script>
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal.css" media="all">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
-    <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/normal.js"></script>
     <script src="../../resources/js/handset/handsetList.js"></script>
     <style type="text/css">
@@ -87,7 +87,7 @@
                 });
 	        });
 	        // 阻止事件冒泡到DOM树上
-	        event.stopPropagation();
+	        stopPropagation(event);
 	    };
 	    </pop:Permission>
 	    function showList(gasStationId, pageId) {

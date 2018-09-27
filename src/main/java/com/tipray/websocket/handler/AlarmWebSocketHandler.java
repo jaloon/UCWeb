@@ -10,11 +10,14 @@ import com.tipray.websocket.protocol.WebSocketBizId;
 import com.tipray.websocket.protocol.WebSocketProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +44,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.getSessionId(session);
         ConcurrentWebSocketSessionDecorator sessionDecorator = WebSocketUtil.decoratorSession(session);
         WEB_SOCKET_CLIENTS.put(sessionId, sessionDecorator);
         logger.info("alarm connection {} established.", sessionId);
@@ -53,7 +56,9 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         if (message instanceof TextMessage) {
             TextMessage textMessage = (TextMessage) message;
             String msgText = textMessage.getPayload();
-            logger.debug("handle message：{}", msgText);
+            if (logger.isDebugEnabled()) {
+                logger.debug("handle message：{}", msgText);
+            }
             WebSocketProtocol protocol;
             try {
                 protocol = JSONUtil.parseToObject(msgText, WebSocketProtocol.class);
@@ -84,7 +89,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         if (EmptyObjectUtil.isEmptyList(alarmRecordsCache)) {
             return;
         }
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.getSessionId(session);
         ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
         try {
             WebSocketProtocol protocol = new WebSocketProtocol(WebSocketBizId.CACHE_ALARM, alarmRecordsCache);
@@ -98,21 +103,14 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        if (session.isOpen()) {
-            try {
-                session.close();
-            } catch (IOException e) {
-                logger.error("报警业务：关闭传输错误的客户端异常：{}", e.getMessage());
-            }
-        }
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.closeSession(session);
         dealConnectionClose(sessionId);
         logger.error("alarm connection {} transport error: {}", sessionId, exception.toString());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        Long sessionId = Long.parseLong(session.getId(), 16);
+        long sessionId = WebSocketUtil.closeSession(session);
         int closeStatusCode = closeStatus.getCode();
         // if (closeStatusCode == WebSocketCloseStatusEnum.GOING_AWAY.code()) {
         //     Long userId = SESSION_USER_CACHE.get(sessionId).longValue();
@@ -136,9 +134,11 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      *
      * @param sessionId {@link WebSocketSession#getId()}
      */
-    private void dealConnectionClose(Long sessionId) {
-        // 移除WebSocket客户端缓存
-        WEB_SOCKET_CLIENTS.remove(sessionId);
+    private void dealConnectionClose(long sessionId) {
+        if (sessionId > 0) {
+            // 移除WebSocket客户端缓存
+            WEB_SOCKET_CLIENTS.remove(sessionId);
+        }
     }
 
     /**

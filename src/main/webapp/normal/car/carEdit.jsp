@@ -8,18 +8,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=center-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>车辆信息管理</title>
+	<script src="../../resources/js/base.js"></script>
     <link rel="stylesheet" href="../../resources/css/base.css ">
     <link rel="stylesheet" href="../../resources/css/tabEdit.css ">
+    <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <link rel="stylesheet" href="../../resources/plugins/jtab/jtab.css ">
     <script src="../../resources/plugins/jtab/jtab.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
-    <script src="../../resources/plugins/json2.js"></script>
+    <script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
-    <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/car/carEdit.js"></script>
     <style>
     	.editInfo {
@@ -34,16 +36,22 @@
             height: 28px;
         }
     </style>
+    <c:if test="${mode!='veiw'}">
     <script>
         $(function() {
             $.getJSON("../../manage/transcom/getCompanyList.do",
-                function(data) {
-                    var companies = eval(data);
+                function(companies) {
                     var len = companies.length;
+                    if (len === 0) {
+                        $("#company").append("<option value=0>运输公司未配置</option>");
+                        return;
+                    }
+                    var comHtml = "<option value=0></option>";
                     for (var i = 0; i < len; i++) {
                         var company = companies[i];
-                        $("#company").append("<option value=" + company.id + ">" + company.name + "</option>");
+                        comHtml += "<option value=" + company.id + ">" + company.name + "</option>";
                     }
+                    $("#company").append(comHtml);
                     <c:if test="${mode=='edit'}">
                         $("#company").val("${car.transCompany.id}");
                     </c:if>
@@ -66,17 +74,41 @@
             });
             $.getJSON("../../manage/transcard/findUnusedTranscards.do",
                 function(data) {
+                    var transcardHtml = "";
+                        // "<option value=0>暂不设置配送卡</option>";
             		<c:if test="${mode=='edit' && car.transportCard.transportCardId != 0}">
-                        $("#transcard").append("<option value=${car.transportCard.transportCardId}>${car.transportCard.transportCardId}</option>");
+                        transcardHtml += "<option value='${car.transportCard.transportCardId}'>${car.transportCard.transportCardId}</option>";
                     </c:if>
-                    $("#transcard").append("<option value=0>暂不设置配送卡</option>");
-                    var len = data.length;
-                    for (var i = 0; i < len; i++) {
+                    for (var i = 0, len = data.length; i < len; i++) {
                         var transcard = data[i];
-                        $("#transcard").append("<option value=" + transcard.transportCardId + ">" + transcard.transportCardId + "</option>");
+                        transcardHtml += "<option value='" + transcard.transportCardId + "'>" + transcard.transportCardId + "</option>";
                     }
+                    var $transcard = $("#transcard");
+                    $transcard.append(transcardHtml);
+                    $transcard.comboSelect();
+                    $transcard.hide();
+                    $transcard.closest(".combo-select").css({
+                        width: '398px',
+                        height: '28px',
+                        "margin-bottom": "0px"
+                    });
+                    $transcard.siblings(".combo-dropdown").css("max-height", "165px");
+                    $transcard.siblings(".combo-input").height(2);
                     <c:if test="${mode=='edit'}">
-                        $("#transcard").val("${car.transportCard.transportCardId}");
+                        var transportCardId = '${car.transportCard.transportCardId}';
+                        if (transportCardId == '0') {
+                            transportCardId = "";
+                        }
+                        $transcard.val(transportCardId);
+                        var $ul = $transcard.next().next();
+                        $ul.children().each(function () {
+                            if (transportCardId == $(this).attr("data-value")) {
+                                $(this).addClass("option-selected option-hover");
+                            } else {
+                                $(this).removeClass("option-selected option-hover");
+                            }
+                        });
+                        $ul.next().val(transportCardId);
                     </c:if>
       	         }
             ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -97,6 +129,7 @@
             });
         });
     </script>
+    </c:if>
 </head>
 
 <body>
@@ -140,7 +173,9 @@
 	                            <td>配送卡ID:</td>
 	                            <td>
 	                            	<input type="hidden" required>
-	                                <select class="editInfo" id="transcard"></select>
+	                                <select class="editInfo" id="transcard">
+                                        <option value="">配送卡ID</option>
+                                    </select>
 	                            </td>
 	                        </tr>
 	                        <tr>
@@ -239,7 +274,9 @@
 	                            <td>配送卡ID:</td>
 	                            <td>
 	                            	<input type="hidden" required>
-	                                <select class="editInfo" id="transcard"></select>
+	                                <select class="editInfo" id="transcard">
+                                        <option value="">配送卡ID</option>
+                                    </select>
 	                            </td>
 	                        </tr>
 	                        <tr>

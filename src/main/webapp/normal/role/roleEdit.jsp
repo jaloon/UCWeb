@@ -8,9 +8,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>角色管理</title>
+	<script src="../../resources/js/base.js"></script>
     <link rel="stylesheet" href="../../resources/css/base.css">
     <link rel="stylesheet" href="../../resources/css/tabEdit.css">
     <link rel="stylesheet" href="../../resources/plugins/ztree/css/metroStyle/metroStyle.css">
@@ -20,7 +22,6 @@
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/plugins/ztree/js/jquery.ztree.all.min.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
-    <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/role/roleEdit.js"></script>
     <style type="text/css">
         .tree-box {

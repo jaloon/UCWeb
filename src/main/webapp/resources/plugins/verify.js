@@ -186,11 +186,11 @@ function isPhone(phone) {
 
 /**
  * 账号校验
- * 验证规则：字母、数字、下划线组成，字母开头，4-16位。
+ * 验证规则：字母、数字、下划线组成，字母开头，2-16位。
  * @param {*} account 
  */
 function isAccount(account) {
-    var reg = /^[a-zA-z]\w{3,15}$/;
+    var reg = /^[a-zA-z]\w{1,15}$/;
     return reg.test(account);
 }
 

@@ -1,7 +1,10 @@
 'use strict'
 $(function() {
     $(window).resize(function() {
-        $(".table-body").height($(window).height() - 170);
+        var height = $(window).height() - 170;
+        $(".table-body").height(height);
+        // $('.table-box').data('height', height);
+        // $(window).trigger('resize');
     }).resize();
 
     // var tableCont = document.querySelector('#table-cont');

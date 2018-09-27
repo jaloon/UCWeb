@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
+    <title>授权码验证</title>
+    <script src="../../../resources/js/base.js"></script>
+    <link rel="stylesheet" href="../../../resources/css/base.css">
+    <link rel="stylesheet" href="../../../resources/css/cfgEdit.css">
+    <script src="../../../resources/plugins/jquery-1.8.3.min.js"></script>
+    <script src="../../../resources/plugins/layer/layer.js"></script>
+    <script src="../../../resources/plugins/accredit.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="info-zone">
+        <div class="base-info">
+            <div class="info-title">
+                授权码验证
+            </div>
+            <table class="base-table">
+                <tr>
+                    <td>授权码</td>
+                    <td>
+                        <input style="ime-mode: disabled;" maxlength="6"
+                               type="text" class="editInfo" id="auth_code" placeholder="请输入6位授权码"
+                               onkeydown="if (event.keyCode === 13) event.keyCode = 9"
+                               onkeyup="this.value=this.value.replace(/\D/g,'')"
+                               onKeypress="if (event.keyCode < 48 || event.keyCode > 57) event.returnValue = false"
+                               onpaste="event.preventDefault()">
+                    </td>
+                </tr>
+                <tr>
+                    <td>密码</td>
+                    <td>
+                        <input type="text" class="editInfo" id="auth_pwd" readonly>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="oper-zone">
+        <input type="button" id="cancel" value="关闭窗口">
+        <input type="button" id="confirm" value="生成密码">
+    </div>
+</div>
+</body>
+</html>
+<script>
+    $(function () {
+        $("#auth_code").bind("input", function () {
+            var authPwd = $("#auth_pwd").val();
+            if (authPwd.length > 0) {
+                $("#auth_pwd").val("");
+            }
+        });
+
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        $("#cancel").click(function () {
+            parent.layer.close(index);
+        });
+        $("#confirm").click(function () {
+            var authCode = $("#auth_code").val();
+            var len = authCode.length;
+            if (len === 0) {
+                layer.alert('请先输入授权码！', { icon: 2 }, function(index2) {
+                    layer.close(index2);
+                    $("#auth_code").focus();
+                });
+                return;
+            }
+            if (len < 6) {
+                layer.alert('授权码必须是6位数字！', { icon: 2 }, function(index2) {
+                    layer.close(index2);
+                    $("#auth_code").focus();
+                });
+                return;
+            }
+            if ($("#auth_pwd").val().length === 0) {
+                var authPwd = getAuthPassword(authCode);
+                $("#auth_pwd").val(authPwd);
+
+                // 授权上报
+                var url = "../../../manage/remote/authorized_record_report";
+                var param = "token=" + generateUUID() + "&auth_code=" + authCode +
+                    "&auth_time=" + new Date().format("yyyy-MM-dd HH:mm:ss")
+                $.post(url, param,
+                    function (data) {
+                        if (data.id > 0) {
+                            console.log("授权记录上报：" + data.msg)
+                        } else {
+                            console.log("授权记录上报成功！" )
+                        }
+                    },
+                    "json"
+                ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.readyState == 4) {
+                        var http_status = XMLHttpRequest.status;
+                        if (http_status == 0 || http_status > 600) {
+                            location.reload(true);
+                        } else if (http_status == 200) {
+                            if (textStatus == "parsererror") {
+                                console.log("授权记录上报，应答数据格式解析错误！")
+                            } else {
+                                console.log("授权记录上报，http response error: " + textStatus)
+                            }
+                        } else {
+                            console.log("授权记录上报，http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>

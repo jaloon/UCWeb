@@ -13,24 +13,36 @@
         <result column="trans_company_id" property="transCompany.id" />
         <result column="trans_company_name" property="transCompany.name" />
         <result column="belong_type" property="type" />
+        <result column="type_name" property="typeName" />
         <result column="remark" property="remark" />
         <result column="gmt_create" property="createDate" />
         <result column="gmt_modified" property="modifyDate" />
     </resultMap>
 	<sql id="select_columns">
-		c.*,
+		c.id,
+		c.vehicle_number,
+		c.store_num,
+		c.sim,
+		c.transport_card_id,
+		c.vehicle_device_id,
 		d.model vehicle_device_model,
-		t.name trans_company_name,
-		fn_type2name('carType',c.belong_type) typeName
+		c.trans_company_id,
+		t.`name` trans_company_name,
+		c.belong_type,
+		fn_type2name('carType', c.belong_type) type_name,
+		c.remark
 	</sql>
 	
 	<select id="findAll" resultMap="fullResultMap">
-		select
+		SELECT
 			<include refid="select_columns"></include>
-		from 
-			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
-			left join tbl_trans_company t on c.trans_company_id=t.id
-		where c.is_invalid=0
+		FROM
+			tbl_vehicle c
+			LEFT JOIN tbl_device d ON c.vehicle_device_id = d.device_id
+			LEFT JOIN tbl_trans_company t ON c.trans_company_id = t.id
+			AND t.is_invalid = 0
+		WHERE
+			c.is_invalid = 0
 	</select>
 	
 	<insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="com.tipray.bean.baseinfo.Vehicle">
@@ -41,14 +53,14 @@
 	
 	<update id="update" parameterType="com.tipray.bean.baseinfo.Vehicle">
 		update tbl_vehicle set
-		vehicle_number=#{carNumber},
-		store_num=#{storeNum},
-		sim=ifnull(#{sim},''),
-		transport_card_id=#{transportCard.transportCardId},
-		trans_company_id=#{transCompany.id},
-		belong_type=#{type},
-		remark=ifnull(#{remark},'')
-		where id=#{id}
+			vehicle_number		= #{carNumber},
+			store_num			= #{storeNum},
+			sim					= IFNULL(#{sim}, ''),
+			transport_card_id	= #{transportCard.transportCardId},
+			trans_company_id	= #{transCompany.id},
+			belong_type			= #{type},
+			remark				= IFNULL(#{remark}, '')
+		where id				= #{id}
 	</update>
 	
 	<select id="getTransportCardIdById" parameterType="java.lang.Long" resultType="java.lang.Long">
@@ -96,39 +108,55 @@
     </delete>
 
 	<select id="getById" parameterType="java.lang.Long" resultMap="fullResultMap">
-		select
+		SELECT
 			<include refid="select_columns"></include>
-		from 
-			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
-			left join tbl_trans_company t on c.trans_company_id=t.id
-		where c.is_invalid=0 and c.id=#{id}
+		FROM
+			tbl_vehicle c
+			LEFT JOIN tbl_device d ON c.vehicle_device_id = d.device_id
+			LEFT JOIN tbl_trans_company t ON c.trans_company_id = t.id
+			AND t.is_invalid = 0
+		WHERE
+			c.is_invalid = 0
+			AND c.id = #{id}
 	</select>
 	
 	<select id="getByCarNo" parameterType="java.lang.String" resultMap="fullResultMap">
-		select
+		SELECT
 			<include refid="select_columns"></include>
-		from 
-			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
-			left join tbl_trans_company t on c.trans_company_id=t.id
-		where c.is_invalid=0 and c.vehicle_number=#{carNo}
+		FROM
+			tbl_vehicle c
+			LEFT JOIN tbl_device d ON c.vehicle_device_id = d.device_id
+			LEFT JOIN tbl_trans_company t ON c.trans_company_id = t.id
+			AND t.is_invalid = 0
+		WHERE
+			c.is_invalid = 0
+			AND c.vehicle_number = #{carNo}
 	</select>
 	
 	<select id="getCarByTerminalId" parameterType="java.lang.Integer" resultMap="fullResultMap">
-		select
+		SELECT
 			<include refid="select_columns"></include>
-		from 
-			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
-			left join tbl_trans_company t on c.trans_company_id=t.id
-		where c.is_invalid=0 and c.vehicle_device_id=#{terminalId}
+		FROM
+			tbl_vehicle c
+			LEFT JOIN tbl_device d ON c.vehicle_device_id = d.device_id
+			LEFT JOIN tbl_trans_company t ON c.trans_company_id = t.id
+			AND t.is_invalid = 0
+		WHERE
+			c.is_invalid = 0
+			AND c.vehicle_device_id = #{terminalId}
 	</select>
 	
 	<select id="findByTransCompany" parameterType="com.tipray.bean.baseinfo.TransCompany" resultMap="fullResultMap">
-		select
+		SELECT
 			<include refid="select_columns"></include>
-		from 
-			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id),
-			tbl_trans_company t
-		where c.trans_company_id=t.id and c.is_invalid=0 and c.trans_company_id=#{id}
+		FROM
+			tbl_vehicle c
+			LEFT JOIN tbl_device d ON c.vehicle_device_id = d.device_id
+			LEFT JOIN tbl_trans_company t ON c.trans_company_id = t.id
+			AND t.is_invalid = 0
+		WHERE
+			c.is_invalid = 0
+			AND c.trans_company_id = #{id}
 	</select>
 
 	<select id="count" parameterType="com.tipray.bean.baseinfo.Vehicle" resultType="java.lang.Long">
@@ -142,12 +170,14 @@
 	</select>
 	
 	<select id="findByPage" resultMap="fullResultMap">
-		select
+		SELECT
 			<include refid="select_columns"></include>
-		from 
-			(tbl_vehicle c left join tbl_device d on c.vehicle_device_id=d.device_id)
-			left join tbl_trans_company t on c.trans_company_id=t.id
-		where c.is_invalid=0
+		FROM
+			tbl_vehicle c
+			LEFT JOIN tbl_device d ON c.vehicle_device_id = d.device_id
+			LEFT JOIN tbl_trans_company t ON c.trans_company_id = t.id
+			AND t.is_invalid = 0
+		WHERE c.is_invalid = 0
 		<if test="entity.carNumber != null and entity.carNumber != ''">
 			and c.vehicle_number = #{entity.carNumber}
 		</if>

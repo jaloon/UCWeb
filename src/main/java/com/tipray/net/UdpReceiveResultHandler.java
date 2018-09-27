@@ -7,11 +7,15 @@ import com.tipray.constant.RemoteControlConst;
 import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.net.constant.UdpReplyCommonErrorEnum;
+import com.tipray.net.constant.UdpReplyWorkErrorEnum;
 import com.tipray.service.AlarmRecordService;
 import com.tipray.service.ChangeRecordService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
-import com.tipray.util.*;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.OperateLogUtil;
+import com.tipray.util.ResponseMsgUtil;
+import com.tipray.util.SpringBeanUtil;
 import com.tipray.websocket.handler.AlarmWebSocketHandler;
 import com.tipray.websocket.handler.MonitorWebSocketHandler;
 import org.slf4j.Logger;
@@ -26,7 +30,7 @@ import java.util.Map;
  * @author chenlong
  * @version 1.0 2018-04-10
  */
-public class UdpReceiveResultHandler {
+class UdpReceiveResultHandler {
     private static final Logger logger = LoggerFactory.getLogger(UdpReceiveResultHandler.class);
     private static final VehicleService VEHICLE_SERVICE = SpringBeanUtil.getBean(VehicleService.class);
     private static final ChangeRecordService CHANGE_SERVICE = SpringBeanUtil.getBean(ChangeRecordService.class);
@@ -42,7 +46,7 @@ public class UdpReceiveResultHandler {
      * @param cacheId {@link Integer} 缓存ID
      * @param msg     {@link ResponseMsg}
      */
-    public static void handleReplyForRemoteControl(short bizId, int cacheId, ResponseMsg msg) {
+    static void handleReplyForRemoteControl(short bizId, int cacheId, ResponseMsg msg) {
         synchronized (AsynUdpCommCache.class) {
             Map<String, Object> params = AsynUdpCommCache.getParamCache(cacheId);
             boolean isOk = msg.getId() == 0;
@@ -123,19 +127,18 @@ public class UdpReceiveResultHandler {
                 Long logId = AsynUdpCommCache.getLogCache(cacheId);
                 // 移除任务日志缓存
                 AsynUdpCommCache.removeLogCache(cacheId);
-                if (logId == null || logId.equals(0L)) {
-                    return;
+                if (logId != null && logId > 0) {
+                    VehicleManageLog vehicleManageLog = new VehicleManageLog(logId);
+                    vehicleManageLog.setResult(result);
+                    vehicleManageLog.setResponseMsg(msg);
+                    try {
+                        vehicleManageLog.setResponseMsgJson(JSONUtil.stringify(msg));
+                    } catch (Exception e) {
+                        logger.error("对象转JSON异常：", e.toString());
+                        vehicleManageLog.setResponseMsgJson("服务器数据处理异常！");
+                    }
+                    OperateLogUtil.updateVehicleManageLog(vehicleManageLog, LOG_SERVICE, logger);
                 }
-                VehicleManageLog vehicleManageLog = new VehicleManageLog(logId);
-                vehicleManageLog.setResult(result);
-                vehicleManageLog.setResponseMsg(msg);
-                try {
-                    vehicleManageLog.setResponseMsgJson(JSONUtil.stringify(msg));
-                } catch (Exception e) {
-                    logger.error("对象转JSON异常：", e.toString());
-                    vehicleManageLog.setResponseMsgJson("服务器数据处理异常！");
-                }
-                OperateLogUtil.updateVehicleManageLog(vehicleManageLog, LOG_SERVICE, logger);
             }
         }
     }
@@ -155,26 +158,6 @@ public class UdpReceiveResultHandler {
             case ErrorTagConst.UDP_PARSE_ERROR_TAG:
                 return "失败，UDP应答数据解析错误！";
             case ErrorTagConst.UDP_REPLY_ERROR_TAG:
-                // if (bizId == UdpBizId.TERMINAL_SOFTWARE_UPGRADE_RESPONSE) {
-                //     String errorMsg = (String) msg.getMsg();
-                //     int beginIndex = errorMsg.indexOf("[") + 1;
-                //     int endIndex = errorMsg.indexOf("]");
-                //     if (beginIndex > 1 && endIndex > beginIndex) {
-                //         String terminalIds = errorMsg.substring(beginIndex, endIndex);
-                //         List<String> carNumbers = VEHICLE_SERVICE.findCarNumbersByTerminalIds(terminalIds);
-                //         if (EmptyObjectUtil.isEmptyList(carNumbers)) {
-                //             return "失败，数据库车辆数据异常！";
-                //         }
-                //         StringBuffer strBuf = new StringBuffer();
-                //         for (String carNumber : carNumbers) {
-                //             strBuf.append('，').append(carNumber);
-                //         }
-                //         strBuf.deleteCharAt(0);
-                //         strBuf.append("车载终端软件升级通知失败！");
-                //         return strBuf.toString();
-                //     }
-                //     return "失败，UDP应答数据解析错误！";
-                // }
                 int errorId = msg.getCode();
                 int commonError = errorId >>> 16;
                 int workError = errorId & 0xFFFF;
@@ -183,7 +166,7 @@ public class UdpReceiveResultHandler {
                     strBuf.append("公共错误：").append(UdpReplyCommonErrorEnum.codeToMsg(commonError)).append('；');
                 }
                 if (workError > 0) {
-                    strBuf.append("业务错误：").append(workError).append('；');
+                    strBuf.append("业务错误：").append(UdpReplyWorkErrorEnum.codeToMsg(workError)).append('；');
                 }
                 strBuf.deleteCharAt(strBuf.length() - 1);
                 strBuf.append('！');
@@ -201,7 +184,7 @@ public class UdpReceiveResultHandler {
      * @param carId     {@link Long} 车辆ID
      * @param trackList {@link String} 车辆轨迹JSON字符串列表
      */
-    public static void handleTrack(long carId, List<String> trackList) {
+    static void handleTrack(long carId, List<String> trackList) {
         MONITOR_WEB_SOCKET_HANDLER.dealTrackUploadByUdp(carId, trackList);
     }
 
@@ -211,7 +194,7 @@ public class UdpReceiveResultHandler {
      * @param carId {@link Long} 车辆ID
      * @return {@link Boolean} 车辆是否在线
      */
-    public static boolean checkCarOnline(long carId) {
+    static boolean checkCarOnline(long carId) {
         return MONITOR_WEB_SOCKET_HANDLER.checkCarOnline(carId);
     }
 }

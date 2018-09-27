@@ -216,10 +216,15 @@ select.search-text {
 }
 
 .table-list {
+    height: 336px;
     overflow: auto;
     /*margin: 10px;*/
     box-shadow: 0 0 1px 3px #e6e7e9;
 }
+
+/*.table-box {*/
+    /*min-height: 81px;*/
+/*}*/
 
 .table-cont {
     background: #e6e7e9;
@@ -312,7 +317,7 @@ select.search-text {
     width: 420px;
     height: 340px;
     float: right;
-    padding-left: 4px;
+    /*padding-left: 4px;*/
 }
 
 .log-title {
@@ -322,6 +327,7 @@ select.search-text {
     font-weight: bold;
     line-height: 42px;
     letter-spacing: 2px;
+    text-align: center;
 }
 
 .log-box {

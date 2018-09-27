@@ -8,15 +8,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=center-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>配送卡管理</title>
+    <script src="../../resources/js/base.js"></script>
     <link rel="stylesheet" href="../../resources/css/base.css ">
     <link rel="stylesheet" href="../../resources/css/baseEdit.css ">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
-    <script src="../../resources/js/base.js"></script>
     <script src="../../resources/js/transcard/transcardEdit.js"></script>
 </head>
 

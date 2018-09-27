@@ -19,9 +19,9 @@ public interface AccreditDll extends Library {
     /**
      * @param data    {@link byte[]}
      * @param dataLen {@link Integer}
-     * @param key     {@link byte[]}
-     * @param keyLen  {@link Integer}
+     * @param pwd     {@link byte[]}
+     * @param pwdLen  {@link Integer}
      * @return {@link Boolean}
      */
-    boolean GetAccreditPassword(byte[] data, int dataLen, byte[] key, int keyLen);
+    boolean GetAccreditPassword(byte[] data, int dataLen, byte[] pwd, int pwdLen);
 }

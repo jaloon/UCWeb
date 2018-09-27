@@ -61,6 +61,7 @@ public class TransCompanyServiceImpl implements TransCompanyService {
             return;
         }
 		transCompanyDao.delete(id);
+        transCompanyDao.resetCarComByComId(id);
 	}
 
 	@Override
@@ -81,7 +82,12 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 		return transCompanyDao.findAll();
 	}
 
-	@Override
+    @Override
+    public List<TransCompany> getCompanyList() {
+        return transCompanyDao.getCompanyList();
+    }
+
+    @Override
 	public List<TransCompany> findSuperiorCom() {
 		return transCompanyDao.findSuperiorCom();
 	}

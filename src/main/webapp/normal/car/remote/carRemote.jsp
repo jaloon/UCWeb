@@ -8,16 +8,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=center-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>车辆远程控制</title>
+    <script src="../../resources/js/base.js"></script>
     <link rel="stylesheet" href="../../resources/css/base.css ">
     <link rel="stylesheet" href="../../resources/css/cfgEdit.css ">
     <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     <script src="../../resources/plugins/layer/layer.js"></script>
     <script src="../../resources/plugins/verify.js"></script>
     <script src="../../resources/plugins/SelectBox.min.js"></script>
-    <script src="../../resources/js/base.js"></script>
     <c:if test="${mode==5|| mode == 7}">
         <style>
             <c:if test="${mode == 7}">

@@ -2,6 +2,8 @@ package com.tipray.util;
 
 import com.tipray.core.dll.AccreditDll;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * 授权工具类
  *
@@ -11,6 +13,29 @@ import com.tipray.core.dll.AccreditDll;
 public class AccreditUtil {
     private static final AccreditDll ACCREDIT_DLL = AccreditDll.INSTANCE_DLL;
 
-    // public static boolean
+    /**
+     *
+     * @param data
+     * @param dataLen
+     * @param pwd
+     * @param pwdLen
+     * @return
+     */
+    private static boolean getAccreditPassword(byte[] data, int dataLen, byte[] pwd, int pwdLen) {
+        return ACCREDIT_DLL.GetAccreditPassword(data, dataLen, pwd, pwdLen);
+    }
 
+    /**
+     * 根据授权码生成密码
+     * @param authCode {@link String} 授权码
+     * @return {@link String} 密码
+     */
+    public static String getAccreditPassword(String authCode) {
+        byte[] pwd = new byte[6];
+        boolean flag = getAccreditPassword(authCode.getBytes(StandardCharsets.ISO_8859_1), 6, pwd, 6);
+        if (flag) {
+            return new String(pwd, StandardCharsets.ISO_8859_1);
+        }
+        throw new IllegalArgumentException("授权码[" + authCode + "]生成密码失败！");
+    }
 }

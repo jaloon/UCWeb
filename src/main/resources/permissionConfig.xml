@@ -90,6 +90,7 @@
 				<permission cname="出油区" ename="quitOildom" permissionType="0" description="" />
 				<permission cname="状态变更" ename="alterStatus" permissionType="0" description="" />
 				<permission cname="开锁重置" ename="unlockReset" permissionType="0" description="" />
+				<permission cname="授权码验证" ename="authCodeVerify" permissionType="0" description="" />
 			</permission>
 			<permission cname="车辆远程换站" ename="changeModule" permissionType="1" gridUrl="normal/car/stationChange.jsp">
 				<permission cname="远程换站" ename="changeStation" permissionType="0" description="" />
@@ -132,7 +133,7 @@
 				<permission cname="查看开锁重置记录" ename="viewResetRecord" permissionType="0" description="" />
 			</permission>
 			<permission cname="车台事件记录查询" ename="eventRecordModule" permissionType="1" gridUrl="normal/statistics/eventList.jsp">
-				<permission cname="查看车台事件记录记录" ename="viewEventRecord" permissionType="0" description="" />
+				<permission cname="查看车台事件记录" ename="viewEventRecord" permissionType="0" description="" />
 			</permission>
 			<permission cname="施解封状态查询" ename="sealStatusModule" permissionType="0" description="">
 				<permission cname="查看施解封状态" ename="viewSealStatus" permissionType="0" description="" />

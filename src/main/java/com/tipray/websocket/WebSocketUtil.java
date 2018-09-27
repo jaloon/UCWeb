@@ -8,6 +8,10 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * WebSocket工具类
  *
@@ -16,8 +20,58 @@ import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorato
  */
 public class WebSocketUtil {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketUtil.class);
+    private static final Map<String, Long> SOCKJS_SESSION_ID_CACHE = new ConcurrentHashMap<>();
 
     private WebSocketUtil() {
+    }
+
+    /**
+     * 获取session id
+     *
+     * @param session {@link WebSocketSession}
+     * @return {@link Long} session id
+     */
+    public static long getSessionId(WebSocketSession session) {
+        try {
+            return Long.parseLong(session.getId(), 16);
+        } catch (Exception e) {
+            Long sessionId = SOCKJS_SESSION_ID_CACHE.get(session.getId());
+            if (sessionId == null) {
+                sessionId = System.currentTimeMillis();
+                SOCKJS_SESSION_ID_CACHE.put(session.getId(), sessionId);
+            }
+            return sessionId;
+        }
+    }
+
+    /**
+     * 关闭WebSocket连接
+     *
+     * @param session {@link WebSocketSession}
+     * @return {@link Long} session id
+     */
+    public static long closeSession(WebSocketSession session) {
+        if (session.isOpen()) {
+            try {
+                session.close();
+            } catch (IOException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("关闭传输错误的WebSocket连接异常：{}", e.getMessage());
+                }
+            }
+        }
+        Long sessionId = SOCKJS_SESSION_ID_CACHE.get(session.getId());
+        if (sessionId == null) {
+            try {
+                sessionId = Long.parseLong(session.getId(), 16);
+            } catch (Exception e) {
+                // session id 缓存已被移除
+                return 0L;
+            }
+        } else {
+            SOCKJS_SESSION_ID_CACHE.remove(session.getId());
+        }
+        return sessionId;
     }
 
     /**
@@ -37,13 +91,12 @@ public class WebSocketUtil {
      * @param message {@link Object} 待发送信息
      */
     public static void sendMsg(WebSocketSession session, Object message) {
+        if (session == null || message == null) {
+            return;
+        }
         synchronized (session) {
-            if (session == null || message == null) {
-                return;
-            }
-            Long sessionId = Long.parseLong(session.getId(), 16);
             if (!session.isOpen()) {
-                logger.warn("web socket connection {} is not still open", sessionId);
+                logger.warn("web socket connection is not still open");
                 return;
             }
             try {
@@ -77,13 +130,13 @@ public class WebSocketUtil {
         // 给session加锁，防止WebSocket多线程推送出错[TEXT_PARTIAL_WRITING] （不能完全避免，推荐使用sendConcurrentMsg()方法）
         // java.lang.IllegalStateException: The remote endpoint was in state [TEXT_PARTIAL_WRITING] which is an invalid state for called method
         // The problem is that several thread try to write in same time on the socket so
+        if (session == null || message == null || message.length() == 0) {
+            return;
+        }
+
         synchronized (session) {
-            if (session == null || message == null || message.length() == 0) {
-                return;
-            }
-            Long sessionId = Long.parseLong(session.getId(), 16);
             if (!session.isOpen()) {
-                logger.warn("web socket connection {} is not still open", sessionId);
+                logger.warn("web socket connection is not still open");
                 return;
             }
             try {
@@ -104,9 +157,8 @@ public class WebSocketUtil {
         if (session == null || session.getDelegate() == null || message == null || message.length() == 0) {
             return;
         }
-        Long sessionId = Long.parseLong(session.getId(), 16);
         if (!session.isOpen()) {
-            logger.warn("web socket connection {} is not still open", sessionId);
+            logger.warn("web socket connection is not still open");
             return;
         }
         try {
@@ -119,23 +171,22 @@ public class WebSocketUtil {
     /**
      * 并发发送WebSocket通信业务信息给指定客户端
      *
-     * @param session   {@link ConcurrentWebSocketSessionDecorator}
-     * @param protocol  {@link WebSocketProtocol} WebSocket通信业务信息
+     * @param session  {@link ConcurrentWebSocketSessionDecorator}
+     * @param protocol {@link WebSocketProtocol} WebSocket通信业务信息
      */
     public static void sendConcurrentMsg(ConcurrentWebSocketSessionDecorator session, WebSocketProtocol protocol) {
         if (session == null || session.getDelegate() == null || protocol == null) {
             return;
         }
-        Long sessionId = Long.parseLong(session.getId(), 16);
         if (!session.isOpen()) {
-            logger.warn("web socket connection {} is not still open", sessionId);
+            logger.warn("WebSocket connection is not still open!");
             return;
         }
         try {
             String message = JSONUtil.stringify(protocol);
             session.sendMessage(new TextMessage(message));
         } catch (Exception e) {
-            logger.error("send text message error stack！", e);
+            logger.error("send text message error stack!", e);
         }
     }
 

@@ -132,10 +132,12 @@ public class SessionController extends BaseAction {
             String sessionId = SessionUtil.getLoginSessionId(request);
             if (isLogin(sessionId, user)) {
                 if (isApp == 0) {
+                    logger.info("操作员{}登录成功！", user.getAccount());
                     return ResponseMsgUtil.success("已登录！");
                 }
                 request.getSession().setAttribute("appdev-uuid", uuid);
                 Role appRole = sessionService.userCheck(user, isApp).getAppRole();
+                logger.info("操作员{}登录成功！", user.getAccount());
                 return ResponseMsgUtil.success(getAppPermissions(appRole));
             }
             Session session = new Session();

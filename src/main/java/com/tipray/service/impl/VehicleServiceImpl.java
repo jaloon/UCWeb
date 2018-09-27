@@ -12,6 +12,7 @@ import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Driver;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
+import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.track.LastCarStatus;
 import com.tipray.bean.track.LastTrack;
@@ -28,6 +29,7 @@ import com.tipray.dao.DriverDao;
 import com.tipray.dao.LockDao;
 import com.tipray.dao.TerminalUpgradeDao;
 import com.tipray.dao.TrackDao;
+import com.tipray.dao.TransportCardDao;
 import com.tipray.dao.VehicleDao;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
@@ -68,6 +70,8 @@ public class VehicleServiceImpl implements VehicleService {
     @Resource
     private VehicleDao vehicleDao;
     @Resource
+    private TransportCardDao transportCardDao;
+    @Resource
     private DriverDao driverDao;
     @Resource
     private LockDao lockDao;
@@ -97,6 +101,7 @@ public class VehicleServiceImpl implements VehicleService {
                 vehicleDao.deleteByCarNumber(carNumber);
                 vehicleDao.add(car);
             }
+            dealTransCard(car.getTransportCard());
             updateDrivers(driverIds, car.getCarNumber());
         }
         return car;
@@ -111,6 +116,7 @@ public class VehicleServiceImpl implements VehicleService {
             Long oldTransportCardId = vehicleDao.getTransportCardIdById(id);
             Long newTransportCardId = car.getTransportCard().getTransportCardId();
             vehicleDao.update(car);
+            dealTransCard(car.getTransportCard());
             updateDrivers(driverIds, car.getCarNumber());
             if (!EmptyObjectUtil.isEmptyList(locks)) {
                 lockDao.updateLockRemarks(locks);
@@ -125,6 +131,23 @@ public class VehicleServiceImpl implements VehicleService {
             }
         }
         return car;
+    }
+
+    /**
+     * 处理配送卡
+     * @param transportCard 配送卡
+     */
+    private void dealTransCard(TransportCard transportCard) {
+        Long transCardId = transportCard.getTransportCardId();
+        if (transCardId > 0) {
+            Integer count = transportCardDao.countCardByCardId(transCardId);
+            if (count == null || count == 0) {
+                transportCardDao.add(transportCard);
+            } else if (count > 1) {
+                transportCardDao.deleteByCardId(transCardId);
+                transportCardDao.add(transportCard);
+            }
+        }
     }
 
     /**
@@ -803,7 +826,10 @@ public class VehicleServiceImpl implements VehicleService {
             lockStatusBuf.append("锁绑定状态异常！");
         } else {
             byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
-            if (lockStatusInfo.length < locks.size() || lockStatusInfo.length != maxLockIndex) {
+            if (lockStatusInfo == null
+                    || lockStatusInfo.length < locks.size()
+                    || lockStatusInfo.length != maxLockIndex)
+            {
                 lockStatusBuf.append("锁绑定状态异常！");
             } else {
                 locks.forEach(lock -> {

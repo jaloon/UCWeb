@@ -7,6 +7,7 @@ var index = 0; //轨迹回放到第几个point
 var tracks = []; //轨迹点
 var prePoint; //前一个有效轨迹点
 
+var overlays = [];
 var doubtableMarkers = [];
 
 function parseGpsValid(coorValid) {
@@ -266,7 +267,7 @@ $(function () {
         $.getJSON("../../../manage/car/getTrackAndLockInfoByTrackId.do", "trackId=" + $(this).children().last().html(),
             function (data, textStatus, jqXHR) {
                 if (data == null) {
-                    layer.alert("数据查询异常，请刷新页面测试！")
+                    layer.alert("数据查询异常，请刷新页面测试！");
                     return;
                 }
                 var track = data.track;
@@ -288,7 +289,6 @@ $(function () {
                 map.openInfoWindow(infoWindow, point); //开启信息窗口
                 map.panTo(point);
                 map.setZoom(18);
-
             }
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
             if (XMLHttpRequest.readyState == 4) {
@@ -325,7 +325,9 @@ $(function () {
             var point = new BMap.Point(bd09[0], bd09[1]);
             // var point = new BMap.Point(tracks[index].longitude, tracks[index].latitude);
             if (index > 0 && prePoint != undefined) {
-                map.addOverlay(new BMap.Polyline([prePoint, point], getLineOpts(tracks[index].carStatus)));
+                var polyline = new BMap.Polyline([prePoint, point], getLineOpts(tracks[index].carStatus));
+                map.addOverlay(polyline);
+                overlays.push(polyline);
             }
             initCarIcon(tracks[index].alarm);
             carMarker = new BMap.Marker(point, {
@@ -351,6 +353,7 @@ $(function () {
             carLabel.setZIndex(10000 + index);
             carMarker.setLabel(carLabel);
             map.addOverlay(carMarker);
+            overlays.push(carMarker);
             // 图随点移
             map.panTo(point);
             prePoint = point;
@@ -546,8 +549,15 @@ $(function () {
         }
     }
 
+    function clearOverlays() {
+        overlays.forEach(function (overlay, index, overlays) {
+            map.removeOverlay(overlay);
+        });
+        overlays.length = 0;
+    }
+
     function start() {
-        map.clearOverlays(); //清除地图上所有覆盖物
+        clearOverlays(); //清除地图上所有覆盖物
         btn_gps.attr('disabled', true);
         btn_start.attr('disabled', true);
         btn_stop.attr('disabled', false);
@@ -568,8 +578,9 @@ $(function () {
         if (timer) {
             window.clearTimeout(timer);
         }
-        map.clearOverlays(); //清除地图上所有覆盖物
+        clearOverlays(); //清除地图上所有覆盖物
         $("#toggle_button").prop("checked", false);
+        toggleDoubtableMarkers();
         index = 0;
         // map.panTo(centerPoint);
     }
