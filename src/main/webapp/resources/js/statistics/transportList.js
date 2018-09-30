@@ -1,4 +1,4 @@
-$(function() {
+$(function () {
     $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
@@ -47,7 +47,8 @@ $(function() {
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -65,8 +66,9 @@ $(function() {
         var loadLayer = layer.load();
         $.post(
             "../../manage/statistics/findDistributionRecordsForPage.do",
-            encodeURI("carNumber=" + carNumber + "&status=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(gridPage) {
+            encodeURI("carNumber=" + carNumber + "&status=" + type + "&begin=" + begin + "&end=" + end
+                + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
                 layer.close(loadLayer);
                 var pageCount = gridPage.total;
                 if (pageCount > 1) {
@@ -79,30 +81,30 @@ $(function() {
                 } else {
                     $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                var dataCount = gridPage.currentRows;
+                $("#page_info").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#qcar").val(gridPage.t.carNumber);
                 $("#qtype").val(gridPage.t.status);
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
-                $(".table-body").html("");
                 var transports = gridPage.dataList;
-                var tableData = "<table width='100%'>";
-                for (var i = 0; i < gridPage.currentRows; i++) {
+                var jsonData = [];
+                for (var i = 0; i < dataCount; i++) {
                     var transport = transports[i];
-                    tableData += "<tr>" +
-                        "<td class=\"transport-id\">" + transport.id + "</td>" +
-                        "<td class=\"transport-car\">" + transport.carNumber + "</td>" +
-                        "<td class=\"transport-time\">" + transport.createDate + "</td>" +
-                        "<td class=\"transport-invoice\">" + transport.invoice + "</td>" +
-                        "<td class=\"transport-depot\">" + transport.oilDepot.name + "</td>" +
-                        "<td class=\"transport-store\">" + transport.storeId + "</td>" +
-                        "<td class=\"transport-station\">" + transport.gasStation.name + "</td>" +
-                        "<td class=\"transport-status\">" + transport.statusName + "</td>" +
-                        "</tr>";
+                    jsonData.push({
+                        id: transport.id,
+                        carNo: transport.carNumber,
+                        time: transport.createDate,
+                        invoice: transport.invoice,
+                        depot: transport.oilDepot.name,
+                        store: transport.storeId,
+                        station: transport.gasStation.name,
+                        status: transport.statusName
+                    });
                 }
-                tableData += "</table>";
-                tableData = tableData.replace(/>null</g, "><");
-                $(".table-body").html(tableData);
+                // 更新表格数据
+                var tableHtml = template('table-tpl', {data: jsonData});
+                $('.c-table').eq(0).data('table').updateHtml(tableHtml);
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -124,9 +126,16 @@ $(function() {
         });
     }
 
+    $(window).resize(function () {
+        var height = $(window).height() - 133;
+        $('.table-box').data('height', height);
+        // $(window).trigger('resize');
+    }).resize();
+
+    $('[role="c-table"]').jqTable();
     showList("", "", "", "", 1);
 
-    $("#search_btn").click(function() {
+    $("#search_btn").click(function () {
         var carNumber = $("#text_car").val();
         var type = $("#text_type").val();
         var begin = $("#text_begin").val();
@@ -155,7 +164,7 @@ $(function() {
         showList(carNumber, type, begin, end, pageId);
     }
 
-    $("#page_id").change(function() {
+    $("#page_id").change(function () {
         var pageId = $("#page_id").val();
         if (isNull(pageId)) {
             pageId = 1;
@@ -163,7 +172,7 @@ $(function() {
         refreshPage(pageId);
     });
 
-    $("#page_size").change(function() {
+    $("#page_size").change(function () {
         refreshPage(1);
     });
 });

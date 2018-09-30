@@ -39,7 +39,7 @@ function parseCarStatus(carStatus) {
         case 7:
             return "在油区";
         default:
-            return "未知";
+            return "未知车辆状态[" + carStatus + "]";
     }
 }
 
@@ -213,7 +213,8 @@ $(function () {
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -237,7 +238,26 @@ $(function () {
         map.addControl(new BMap.ScaleControl()); // 添加比例尺
         map.addControl(new BMap.OverviewMapControl({isOpen: true})); //添加缩略地图控件
         map.enableScrollWheelZoom(); //开启鼠标滚轮缩放
+        // drawDepot();
     });
+
+    // function drawDepot() {
+    //     var bd09_1 = wgs84tobd09(109.34082, 24.219507);
+    //     var point_1 = new BMap.Point(bd09_1[0], bd09_1[1]);
+    //     var bd09_2 = wgs84tobd09(109.33922, 24.219482);
+    //     var point_2 = new BMap.Point(bd09_2[0], bd09_2[1]);
+    //     var bd09_3 = wgs84tobd09(109.33916, 24.220762);
+    //     var point_3 = new BMap.Point(bd09_3[0], bd09_3[1]);
+    //     var bd09_4 = wgs84tobd09(109.34073, 24.2208);
+    //     var point_4 = new BMap.Point(bd09_4[0], bd09_4[1]);
+    //     var polygon = new BMap.Polygon([
+    //         point_1,
+    //         point_2,
+    //         point_3,
+    //         // point_4
+    //     ], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});  //创建多边形
+    //     map.addOverlay(polygon);   //增加多边形
+    // }
 
     var carMarker, carLabel, carIcon; //车辆标注
 
@@ -267,7 +287,9 @@ $(function () {
         $.getJSON("../../../manage/car/getTrackAndLockInfoByTrackId.do", "trackId=" + $(this).children().last().html(),
             function (data, textStatus, jqXHR) {
                 if (data == null) {
-                    layer.alert("数据查询异常，请刷新页面测试！");
+                    layer.alert("数据查询异常，请刷新页面重试！", function () {
+                        location.reload(true);
+                    });
                     return;
                 }
                 var track = data.track;

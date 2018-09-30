@@ -3,6 +3,7 @@ package com.tipray.controller;
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Message;
 import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.baseinfo.Card;
 import com.tipray.bean.baseinfo.InOutReader;
 import com.tipray.bean.baseinfo.OilDepot;
@@ -154,6 +155,13 @@ public class OildepotController extends BaseAction {
     public Boolean isOilDepotExist(OilDepot oilDepot) {
         logger.info("oildepot exist, oilDepot={}", oilDepot);
         return oilDepotService.isOilDepotExist(oilDepot);
+    }
+
+    @RequestMapping(value = "getExistInfo.do")
+    @ResponseBody
+    public ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode) {
+        logger.info("get oildepot exist info, officialId={}, name={}, abbr={}, mode={}", officialId, name, abbr, mode);
+        return oilDepotService.getExistInfo(officialId, name, abbr, mode);
     }
 
     @PermissionAnno("viewOildepot")

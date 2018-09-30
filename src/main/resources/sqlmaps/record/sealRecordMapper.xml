@@ -23,7 +23,7 @@
         s.status,
         s.trigger_type,
         s.trigger_id,
-        fn_get_station ( s.station_type, s.station_id ) station,
+        fn_get_alarm_station(s.station_type, s.station_id) station,
         s.trigger_time,
         s.vehicle_track_id track_id,
         v.vehicle_number vehicle_number

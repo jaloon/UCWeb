@@ -11,119 +11,165 @@
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
     <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
-    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
-    <script src="../../resources/plugins/laydate/laydate.js"></script>
-    <script src="../../resources/plugins/layer/layer.js"></script>
-    <script src="../../resources/js/normal.js"></script>
-    <script src="../../resources/js/statistics/transportList.js"></script>
+    <link rel="stylesheet" href="../../resources/plugins/jqTable/css/jqTable.css">
     <style type="text/css">
         #type_type,
         #type_begin,
         #type_end {
             left: 40px;
         }
-        
-        /*.transport-id {*/
-            /*width: 100px;*/
-        /*}*/
-        
-        /*.transport-car {*/
-            /*width: 160px;*/
-        /*}*/
-        
-        /*.transport-time {*/
-            /*width: 160px;*/
-        /*}*/
-        
-        /*.transport-invoice {*/
-            /*width: 120px;*/
-        /*}*/
-        
-        /*.transport-depot {*/
-            /*width: 200px;*/
-        /*}*/
-        
-        /*.transport-store {*/
-            /*width: 100px;*/
-        /*}*/
-        
-        /*.transport-station {*/
-            /*width: 200px;*/
-        /*}*/
-        
-        /*.transport-status {*/
-            /*width: 160px;*/
-        /*}*/
     </style>
 </head>
 
 <body>
-    <div class="container">
-    	<div class="nav-addr">
-	        <img src="../../resources/images/navbar/statistics.png"> 查询统计
-	        <img src="../../resources/images/navbar/nav_right_12.png"> 配送信息查询
-	    </div>
-        <div class="search-zone">
-            <label for="text_car" class="search-type" id="type_car">车牌号</label>
-            <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
-            <select class="search-text" id="text_car">
-                <option value="">车牌号</option>
-            </select>
-            <label for="text_type" class="search-type" id="type_type">配送状态</label>
-            <select class="search-text" id="text_type">
-                <option value="">所有状态</option> 
-                <option value=0>未知</option> 
-                <option value=1>配送未完成</option> 
-                <option value=2>配送完成</option> 
-                <option value=3>换站</option> 
-                <option value=4>配送信息过期失效</option> 
-            </select>
-            <!-- <input type="text" class="search-text" id="text_type"> -->
-            <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
-            <input type="text" class="search-text" id="text_begin">
-            <label for="text_end" class="search-type" id="type_end">结束时间</label>
-            <input type="text" class="search-text" id="text_end">
+<div class="container">
+    <div class="nav-addr">
+        <img src="../../resources/images/navbar/statistics.png"> 查询统计
+        <img src="../../resources/images/navbar/nav_right_12.png"> 配送信息查询
+    </div>
+    <div class="search-zone">
+        <label for="text_car" class="search-type" id="type_car">车牌号</label>
+        <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
+        <select class="search-text" id="text_car">
+            <option value="">车牌号</option>
+        </select>
+        <label for="text_type" class="search-type" id="type_type">配送状态</label>
+        <select class="search-text" id="text_type">
+            <option value="">所有状态</option>
+            <option value=0>未知</option>
+            <option value=1>配送未完成</option>
+            <option value=2>配送完成</option>
+            <option value=3>换站</option>
+            <option value=4>配送信息过期失效</option>
+        </select>
+        <!-- <input type="text" class="search-text" id="text_type"> -->
+        <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
+        <input type="text" class="search-text" id="text_begin">
+        <label for="text_end" class="search-type" id="type_end">结束时间</label>
+        <input type="text" class="search-text" id="text_end">
 
-            <input type="button" class="search-btn button" id="search_btn" value="查询">
-        </div>
-        <div class="data-zone">
-            <div class='table-box'>
-                <table class="table-cont" width="100%">
-                    <thead class="table-head">
-                        <tr>
-                            <th class="transport-id">序号</th>
-                            <th class="transport-car">车牌号</th>
-                            <th class="transport-time">时间</th>
-                            <th class="transport-invoice">配送单号</th>
-                            <th class="transport-depot">油库</th>
-                            <th class="transport-store">仓号</th>
-                            <th class="transport-station">加油站</th>
-                            <th class="transport-status">配送状态</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-body"></tbody>
+        <input type="button" class="search-btn button" id="search_btn" value="查询">
+    </div>
+    <div class="data-zone">
+        <div class="table-wrap">
+            <div class="table-box c-table c-table--border">
+                <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
+                    <colgroup>
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                    </colgroup>
                 </table>
             </div>
-            <div class="page">
-                <span>第</span>
-                <select id="page_id">
-                    <option value="1">1</option>
-                </select>
-                <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
-                <select id="page_size">
-                    <option value="25">25条/页</option>
-                    <option value="50">50条/页</option>
-                    <option value="100">100条/页</option>
-                    <option value="150">150条/页</option>
-                </select>
-                <input type="hidden" id="qcar">
-                <input type="hidden" id="qtype">
-                <input type="hidden" id="qbegin">
-                <input type="hidden" id="qend">
-            </div>
+        </div>
+        <div class="page">
+            <span>第</span>
+            <select id="page_id">
+                <option value="1">1</option>
+            </select>
+            <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
+            <select id="page_size">
+                <option value="25">25条/页</option>
+                <option value="50">50条/页</option>
+                <option value="100">100条/页</option>
+                <option value="150">150条/页</option>
+            </select>
+            <input type="hidden" id="qcar">
+            <input type="hidden" id="qtype">
+            <input type="hidden" id="qbegin">
+            <input type="hidden" id="qend">
         </div>
     </div>
+</div>
 </body>
 
 </html>
+<!-- 数据模版 -->
+<script id="table-tpl" type="text/html">
+    <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="200">
+        <colgroup>
+            <col name="" width="80">
+            <col name="" width="92">
+            <col name="" width="180">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="120">
+            <col name="" width="">
+            <col name="" width="">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="">
+                <div class="cell">序号</div>
+            </th>
+            <th class="">
+                <div class="cell">车牌号</div>
+            </th>
+            <th class="">
+                <div class="cell">时间</div>
+            </th>
+            <th class="">
+                <div class="cell">配送单号</div>
+            </th>
+            <th class="">
+                <div class="cell">油库</div>
+            </th>
+            <th class="">
+                <div class="cell">仓号</div>
+            </th>
+            <th class="">
+                <div class="cell">加油站</div>
+            </th>
+            <th class="">
+                <div class="cell">配送状态</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{each data}}
+        <tr>
+            <td class="">
+                <div class="cell">{{$value.id}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.carNo}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.time}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.invoice}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.depot}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.store}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.station}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.status}}</div>
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</script>
+<script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+<script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
+<script src="../../resources/plugins/laydate/laydate.js"></script>
+<script src="../../resources/plugins/layer/layer.js"></script>
+<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
+<script src="../../resources/plugins/jqTable/js/plugins/artTemplate.js"></script>
+<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
+<script src="../../resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
+<!-- 表格插件 -->
+<script src="../../resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
+<script src="../../resources/js/statistics/transportList.js"></script>

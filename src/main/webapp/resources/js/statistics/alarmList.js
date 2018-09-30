@@ -72,7 +72,8 @@ $(function () {
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -90,8 +91,9 @@ $(function () {
         var loadLayer = layer.load();
         $.post(
             "../../manage/statistics/findAlarmRecordsForPage.do",
-            encodeURI("carNumber=" + carNumber + "&deviceType=" + dev + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(gridPage) {
+            encodeURI("carNumber=" + carNumber + "&deviceType=" + dev + "&type=" + type + "&begin=" + begin
+                + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
                 layer.close(loadLayer);
                 var pageCount = gridPage.total;
                 if (pageCount > 1) {
@@ -112,35 +114,34 @@ $(function () {
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
                 var alarms = gridPage.dataList;
-                var tableData = "<table width='100%'>";
+                var jsonData = [];
                 for (var i = 0; i < dataCount; i++) {
                     var alarm = alarms[i];
-                    var coordFlag = alarm.longitude == undefined || alarm.latitude == undefined;
-                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + alarm.id + ")\">") +
-                        "<td class=\"alarm-id\">" + alarm.id + "</td>" +
-                        "<td class=\"alarm-car\">" + alarm.carNumber + "</td>" +
-                        "<td class=\"alarm-station\">" + alarm.station + "</td>";
+                    var coordFlag = alarm.longitude != undefined && alarm.latitude != undefined;
+                    var gps = "-", coordinate = "-";
                     if (coordFlag) {
-                        tableData += "<td class='alarm-gps'>数据库记录异常</td>" +
-                            "<td class=\"alarm-coordinate\">数据库记录异常</td>";
-                    } else {
-                        tableData += "<td class='alarm-gps'>" + (alarm.coorValid ? "有效" : "无效") + "</td>" +
-                            "<td class=\"alarm-coordinate\"><a href=\"javascript:showBMap(" + alarm.id + ")\">(" +
-                            alarm.longitude + ", " + alarm.latitude + ")</a></td>";
+                        gps = alarm.coorValid ? "有效" : "无效";
+                        coordinate = alarm.longitude + ", " + alarm.latitude;
                     }
-                    tableData += "<td class=\"alarm-velocity\">" + (alarm.velocity == undefined ? "数据库记录异常" : alarm.velocity) + "</td>" +
-                        "<td class=\"alarm-aspect\">" + angle2aspect(alarm.angle) + "</td>" +
-                        "<td class=\"alarm-time\">" + alarm.alarmTime + "</td>" +
-                        "<td class=\"alarm-dev\">" + (alarm.deviceType == 1 ? "车载终端（" : "锁（") + alarm.deviceId + "）</td>" +
-                        "<td class=\"alarm-type\">" + alarm.typeName + "</td>" +
-                        "<td class=\"alarm-status\">" + (alarm.status == undefined ? "数据库记录异常" : alarm.status) + "</td>" +
-                        "<td class=\"alarm-report\">" + alarm.alarmReportTime + "</td>" +
-                        // "<td class=\"alarm-lock\">" + (alarm.lockStatus == undefined ? "数据库记录异常" : alarm.lockStatus) + "</td>" +
-                        "</tr>";
+                    jsonData.push({
+                        id: alarm.id,
+                        carNo: alarm.carNumber,
+                        station: alarm.station,
+                        coordFlag: coordFlag,
+                        gps: gps,
+                        coordinate: coordinate,
+                        velocity: alarm.velocity === undefined ? "-" : alarm.velocity,
+                        aspect: angle2aspect(alarm.angle),
+                        time: alarm.alarmTime,
+                        dev: (alarm.deviceType === 1 ? "车载终端[" : "锁[") + alarm.deviceId + "]",
+                        type: alarm.typeName,
+                        status: alarm.status == undefined ? "-" : alarm.status,
+                        report: alarm.alarmReportTime
+                    });
                 }
-                tableData += "</table>";
-                tableData = tableData.replace(/>null</g, "><");
-                $(".table-body").html(tableData);
+                // 更新表格数据
+                var tableHtml = template('table-tpl', {data: jsonData});
+                $('.c-table').eq(0).data('table').updateHtml(tableHtml);
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -161,6 +162,14 @@ $(function () {
             }
         });
     }
+
+    $(window).resize(function () {
+        var height = $(window).height() - 133;
+        $('.table-box').data('height', height);
+        // $(window).trigger('resize');
+    }).resize();
+
+    $('[role="c-table"]').jqTable();
     showList("", "", "", "", "", 1);
 
     $("#search_btn").click(function () {

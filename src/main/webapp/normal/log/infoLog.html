@@ -8,44 +8,15 @@
     <meta name="viewport" content="width=center-width, initial-scale=1, maximum-scale=1">
     <title>信息管理日志</title>
     <script src="../../resources/js/base.js"></script>
-    <link rel="stylesheet" href="../../resources/css/base.css" media="all">
-    <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
-    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../resources/plugins/laydate/laydate.js"></script>
-    <script src="../../resources/plugins/layer/layer.js"></script>
-    <script src="../../resources/js/normal.js"></script>
-    <script src="../../resources/js/log/infoLog.js"></script>
+    <link rel="stylesheet" href="../../resources/css/base.css">
+    <link rel="stylesheet" href="../../resources/css/normal2.css">
+    <link rel="stylesheet" href="../../resources/plugins/jqTable/css/jqTable.css">
     <style type="text/css">
         #type_type,
         #type_begin,
         #type_end {
             left: 40px;
         }
-        
-        /*.log-id {*/
-            /*width: 100px;*/
-        /*}*/
-        
-        /*.log-account {*/
-            /*width: 120px;*/
-        /*}*/
-        
-        /*.log-name {*/
-            /*width: 120px;*/
-        /*}*/
-        
-        /*.log-type {*/
-            /*width: 160px;*/
-        /*}*/
-        
-        /*.log-description {*/
-            /*width: 500px;*/
-            /*text-align: left;*/
-        /*}*/
-        
-        /*.log-time {*/
-            /*width: 200px;*/
-        /*}*/
     </style>
 </head>
 
@@ -71,20 +42,19 @@
             <input type="button" class="search-btn button" id="search_btn" value="查询">
         </div>
         <div class="data-zone">
-            <div class='table-box'>
-                <table class="table-cont" width="100%">
-                    <thead class="table-head">
-                        <tr>
-                            <th class="log-id">序号</th>
-                            <th class="log-account">操作员账号</th>
-                            <th class="log-name">操作员姓名</th>
-                            <th class="log-type">日志标志</th>
-                            <th class="log-description">操作内容</th>
-                            <th class="log-time">操作时间</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-body"></tbody>
-                </table>
+            <div class="table-wrap">
+                <div class="table-box c-table c-table--border">
+                    <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
+                        <colgroup>
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                            <col name="" width="">
+                        </colgroup>
+                    </table>
+                </div>
             </div>
             <div class="page">
                 <span>第</span>
@@ -109,3 +79,72 @@
 </body>
 
 </html>
+<!-- 数据模版 -->
+<script id="table-tpl" type="text/html">
+    <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="200">
+        <colgroup>
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="">
+                <div class="cell">序号</div>
+            </th>
+            <th class="">
+                <div class="cell">操作员账号</div>
+            </th>
+            <th class="">
+                <div class="cell">操作员姓名</div>
+            </th>
+            <th class="">
+                <div class="cell">日志类型</div>
+            </th>
+            <th class="">
+                <div class="cell">操作内容</div>
+            </th>
+            <th class="">
+                <div class="cell">操作时间</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{each data}}
+        <tr>
+            <td class="">
+                <div class="cell">{{$value.id}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.account}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.username}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.type}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.description}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.time}}</div>
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</script>
+<script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+<script src="../../resources/plugins/laydate/laydate.js"></script>
+<script src="../../resources/plugins/layer/layer.js"></script>
+<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
+<script src="../../resources/plugins/jqTable/js/plugins/artTemplate.js"></script>
+<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
+<script src="../../resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
+<!-- 表格插件 -->
+<script src="../../resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
+<script src="../../resources/js/log/infoLog.js"></script>

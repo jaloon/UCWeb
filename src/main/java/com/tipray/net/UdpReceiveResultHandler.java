@@ -51,7 +51,7 @@ class UdpReceiveResultHandler {
             Map<String, Object> params = AsynUdpCommCache.getParamCache(cacheId);
             boolean isOk = msg.getId() == 0;
             String task = AsynUdpCommCache.getTaskCache(cacheId);
-            String result = buildLogResultByResponseMsg(bizId, msg);
+            String result = buildLogResultByResponseMsg(msg);
             if (task != null) {
                 MONITOR_WEB_SOCKET_HANDLER.dealUdpReply(bizId, cacheId, task, isOk, result);
             }
@@ -146,11 +146,10 @@ class UdpReceiveResultHandler {
     /**
      * 根据UDP应答结果构建日志显示结果
      *
-     * @param bizId {@link Short} 应答业务ID
      * @param msg   {@link ResponseMsg} UDP应答结果
      * @return {@link String} 日志显示结果
      */
-    private static String buildLogResultByResponseMsg(short bizId, ResponseMsg msg) {
+    private static String buildLogResultByResponseMsg(ResponseMsg msg) {
         byte errorTag = msg.getTag();
         switch (errorTag) {
             case ErrorTagConst.NO_ERROR_TAG:

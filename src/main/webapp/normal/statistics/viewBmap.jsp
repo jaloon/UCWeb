@@ -161,7 +161,7 @@
         <%--+ "<tr><td>同仓位锁序号：</td><td>${record.seatIndex}</td></tr>"--%>
         + "<tr><td>重置时间：</td><td>${record.recordTime}</td></tr>"
         + "<tr><td>上报时间：</td><td>${record.resetReportTime}</td></tr>"
-        + "<tr><td>重置状态：</td><td>" + parseResetStatus(${record.seatIndex}) + "</td></tr>"
+        + "<tr><td>重置状态：</td><td>" + parseResetStatus(${record.status}) + "</td></tr>"
         </c:if>
         <c:if test="${mode=='event'}">
         + "<tr><td>终端编号：</td><td>${record.terminalId}</td></tr>"
@@ -194,7 +194,7 @@
 
     function parseGpsValid(gpsValid) {
         if (gpsValid == undefined || gpsValid == null) {
-            return "数据异常";
+            return "-";
         }
         if (gpsValid) {
             return "有效";
@@ -262,7 +262,7 @@
             case 10:
                 return "出油区";
             default:
-                return "未知(" + type + ")";
+                return "施解封类型[" + type + "]";
         }
     }
 </script>

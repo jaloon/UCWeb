@@ -22,8 +22,8 @@ public @interface PermissionAnno {
 	String value();
 	/**
 	 * 多个权限的连接符：
-	 *       and    or
+	 *       , and    or
 	 * @return
 	 */
-	String mode() default "and";
+	String mode() default ",";
 }

@@ -63,7 +63,7 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 	public GridPage<DistributionRecord> findRecordsForPage(DistributionRecord record, Page page) {
 		long records = countRecord(record);
 		List<DistributionRecord> list = findByPage(record, page);
-		return new GridPage<DistributionRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+		return new GridPage<>(list, records, page, record);
 	}
 
 	@Override
@@ -74,6 +74,11 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
     @Override
     public Integer countWaitInvoice(String invoice) {
         return distributionRecordDao.countWaitInvoice(invoice);
+    }
+
+    @Override
+    public Integer countSameWaitDistInfo(Map<String, Object> distributionMap) {
+        return distributionRecordDao.countSameWaitDistInfo(distributionMap);
     }
 
     @Transactional

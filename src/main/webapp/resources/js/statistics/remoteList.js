@@ -9,7 +9,7 @@ function showBMap(id) {
     });
 }
 
-$(function() {
+$(function () {
     $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
@@ -57,7 +57,8 @@ $(function() {
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -75,8 +76,9 @@ $(function() {
         var loadLayer = layer.load();
         $.post(
             "../../manage/statistics/findRemoteRecordsForPage.do",
-            encodeURI("carNumber=" + carNumber + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(gridPage) {
+            encodeURI("carNumber=" + carNumber + "&type=" + type + "&begin=" + begin + "&end=" + end
+                + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
                 layer.close(loadLayer);
                 var pageCount = gridPage.total;
                 if (pageCount > 1) {
@@ -89,44 +91,38 @@ $(function() {
                 } else {
                     $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                var dataCount = gridPage.currentRows;
+                $("#page_info").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#qcar").val(gridPage.t.carNumber);
                 $("#qtype").val(gridPage.t.type);
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
-
-                $(".table-body").html("");
                 var remotes = gridPage.dataList;
-                var tableData = "<table width='100%'>";
-                for (var i = 0; i < gridPage.currentRows; i++) {
+                var jsonData = [];
+                for (var i = 0; i < dataCount; i++) {
                     var remote = remotes[i];
-                    var coordFlag = remote.longitude == undefined || remote.latitude == undefined;
-                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + remote.id + ")\">") +
-                        "<td class=\"remote-id\">" + remote.id + "</td>" +
-                        "<td class=\"remote-car\">" + remote.carNumber + "</td>" +
-                        "<td class=\"remote-time\">" + remote.createDate + "</td>";
+                    var coordFlag = remote.longitude != undefined && remote.latitude != undefined;
+                    var gps = "-", coordinate = "-";
                     if (coordFlag) {
-                        if (remote.status < 2) {
-                            tableData += "<td class=\"remote-gps\">未知</td>";
-                            tableData += "<td class=\"remote-coordinate\">未知</td>";
-                        } else {
-                            tableData += "<td class=\"remote-gps\">数据库记录异常</td>";
-                            tableData += "<td class=\"remote-coordinate\">数据库记录异常</td>";
-                        }
-                    } else {
-                        tableData += "<td class=\"remote-gps\">" + (remote.coorValid ? "有效" : "无效") + "</td>";
-                        tableData += "<td class=\"remote-coordinate\"><a href=\"javascript:showBMap(" + remote.id + ")\">("
-                            + remote.longitude + ", " + remote.latitude + ")</a></td>";
+                        gps = remote.coorValid ? "有效" : "无效";
+                        coordinate = remote.longitude + ", " + remote.latitude;
                     }
-                    tableData += "<td class=\"remote-type\">" + remote.typeName + "</td>" +
-                        "<td class=\"remote-user\">" + remote.user.name + "(" + remote.user.account + ")" + "</td>" +
-                        "<td class=\"remote-result\">" + remote.statusName + "</td>" +
-                        "<td class=\"remote-app\">" + (remote.isApp > 0 ? "是" : "否") + "</td>" +
-                        "</tr>";
+                    jsonData.push({
+                        id: remote.id,
+                        carNo: remote.carNumber,
+                        time: remote.station,
+                        coordFlag: coordFlag,
+                        gps: gps,
+                        coordinate: coordinate,
+                        type: remote.typeName,
+                        user: remote.user.name + "(" + remote.user.account + ")",
+                        result: remote.statusName,
+                        app: remote.isApp > 0 ? "是" : "否"
+                    });
                 }
-                tableData += "</table>";
-                tableData = tableData.replace(/>null</g, "><");
-                $(".table-body").html(tableData);
+                // 更新表格数据
+                var tableHtml = template('table-tpl', {data: jsonData});
+                $('.c-table').eq(0).data('table').updateHtml(tableHtml);
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -148,9 +144,16 @@ $(function() {
         });
     }
 
+    $(window).resize(function () {
+        var height = $(window).height() - 133;
+        $('.table-box').data('height', height);
+        // $(window).trigger('resize');
+    }).resize();
+
+    $('[role="c-table"]').jqTable();
     showList("", "", "", "", 1);
 
-    $("#search_btn").click(function() {
+    $("#search_btn").click(function () {
         var carNumber = $("#text_car").val();
         var type = $("#text_type").val();
         var begin = $("#text_begin").val();
@@ -179,7 +182,7 @@ $(function() {
         showList(carNumber, type, begin, end, pageId);
     }
 
-    $("#page_id").change(function() {
+    $("#page_id").change(function () {
         var pageId = $("#page_id").val();
         if (isNull(pageId)) {
             pageId = 1;
@@ -187,7 +190,7 @@ $(function() {
         refreshPage(pageId);
     });
 
-    $("#page_size").change(function() {
+    $("#page_size").change(function () {
         refreshPage(1);
     });
 });

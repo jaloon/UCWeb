@@ -2,6 +2,7 @@ package com.tipray.service;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.baseinfo.InOutReader;
 import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.core.exception.ServiceException;
@@ -108,6 +109,16 @@ public interface OilDepotService {
     boolean isOilDepotExist(OilDepot oilDepot);
 
     /**
+     * 获取油库存在信息
+     * @param officialId
+     * @param name
+     * @param abbr
+     * @param mode
+     * @return
+     */
+    ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode);
+
+    /**
      * 查询未使用的读卡器
      *
      * @return
@@ -150,4 +161,5 @@ public interface OilDepotService {
      * @return
      */
     Integer barrierCount(Long oilDepotId);
+
 }

@@ -26,9 +26,33 @@ public interface OilDepotDao extends BaseDao<OilDepot> {
     /**
      * 根据编号或名称或简称统计有效油库
      * @param oilDepot
-     * @return
+     * @return 油库数目
      */
 	Integer countValidOilDepot(OilDepot oilDepot);
+
+	/**
+	 * 根据编号统计有效油库
+	 *
+	 * @param officialId 油库编号
+	 * @retur 油库数目
+	 */
+	Integer countValidOilDepotByOfficialId(String officialId);
+
+	/**
+	 * 根据名称统计有效油库
+	 *
+	 * @param name 油库名称
+	 * @return 油库数目
+	 */
+	Integer countValidOilDepotByName(String name);
+
+	/**
+	 * 根据简称统计有效油库
+	 *
+	 * @param abbr 油库简称
+	 * @return 油库数目
+	 */
+	Integer countValidOilDepotByAbbr(String abbr);
 
     /**
      * 根据编号或名称或简称查询无效油库ID

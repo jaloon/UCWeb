@@ -329,22 +329,19 @@
                                 <tr>
                                     <td>加油站名称:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="name" value="${gasStation.name}"
-                                               readonly>
+                                        <input type="text" class="editInfo" id="name" value="${gasStation.name}">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>加油站名称:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="abbr" value="${gasStation.abbr}"
-                                               readonly>
+                                        <input type="text" class="editInfo" id="abbr" value="${gasStation.abbr}">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>负责人:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="director"
-                                               value="${gasStation.director}">
+                                        <input type="text" class="editInfo" id="director" value="${gasStation.director}">
                                     </td>
                                 </tr>
                                 <tr>

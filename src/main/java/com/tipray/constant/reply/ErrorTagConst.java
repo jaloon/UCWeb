@@ -69,6 +69,9 @@ public class ErrorTagConst {
 
 	/** 道闸接口错误标志位 */
 	public static final byte BARRIER_ERROR_TAG = 50;
+
+    /** 参数校验错误标志位 */
+	public static final byte PARAM_CHECK_ERROR_TAG = 99;
 	
 	/** 异常信息标志位 */
 	public static final byte EXCEPTON_MESSAGE_TAG = Byte.MAX_VALUE;

@@ -11,131 +11,186 @@
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
     <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
-    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
-    <script src="../../resources/plugins/laydate/laydate.js"></script>
-    <script src="../../resources/plugins/layer/layer.js"></script>
-    <script src="../../resources/js/normal.js"></script>
-    <script src="../../resources/js/statistics/changeList.js"></script>
+    <link rel="stylesheet" href="../../resources/plugins/jqTable/css/jqTable.css">
     <style type="text/css">
         #type_type,
         #type_begin,
         #type_end {
             left: 40px;
         }
-        
-        /*.change-id {*/
-            /*width: 100px;*/
-        /*}*/
-        
-        /*.change-car {*/
-            /*width: 160px;*/
-        /*}*/
-        
-        /*.change-time {*/
-            /*width: 160px;*/
-        /*}*/
-        
-        /*.change-user {*/
-            /*width: 200px;*/
-        /*}*/
-        
-        /*.change-invoice {*/
-            /*width: 120px;*/
-        /*}*/
-        
-        /*.change-depot {*/
-            /*width: 200px;*/
-        /*}*/
-        
-        /*.change-store {*/
-            /*width: 100px;*/
-        /*}*/
-        
-        /*.change-station {*/
-            /*width: 200px;*/
-        /*}*/
-        
-        /*.change-change {*/
-            /*width: 200px;*/
-        /*}*/
-        
-        /*.change-status {*/
-            /*width: 160px;*/
-        /*}*/
-        
-        /*.change-app {*/
-            /*width: 100px;*/
-        /*}*/
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="nav-addr">
-	        <img src="../../resources/images/navbar/statistics.png"> 查询统计
-	        <img src="../../resources/images/navbar/nav_right_12.png"> 远程换站记录查询
-	    </div>
-        <div class="search-zone">
-            <label for="text_car" class="search-type" id="type_car">车牌号</label>
-            <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
-            <select class="search-text" id="text_car">
-                <option value="">车牌号</option>
-            </select>
-            <label for="text_type" class="search-type" id="type_type">换站状态</label>
-            <select class="search-text" id="text_type"> 
-                    <option value="">所有换站状态</option> 
-                    <option value=1>远程换站请求中</option> 
-                    <option value=0>远程换站未完成</option>
-                    <option value=2>远程换站完成</option> 
-            </select>
-            <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
-            <input type="text" class="search-text" id="text_begin">
-            <label for="text_end" class="search-type" id="type_end">结束时间</label>
-            <input type="text" class="search-text" id="text_end">
+<div class="container">
+    <div class="nav-addr">
+        <img src="../../resources/images/navbar/statistics.png"> 查询统计
+        <img src="../../resources/images/navbar/nav_right_12.png"> 远程换站记录查询
+    </div>
+    <div class="search-zone">
+        <label for="text_car" class="search-type" id="type_car">车牌号</label>
+        <input class="search-text" id="hidden_car" style="display: none; opacity: 0;" disabled>
+        <select class="search-text" id="text_car">
+            <option value="">车牌号</option>
+        </select>
+        <label for="text_type" class="search-type" id="type_type">换站状态</label>
+        <select class="search-text" id="text_type">
+            <option value="">所有换站状态</option>
+            <option value=1>远程换站请求中</option>
+            <option value=0>远程换站未完成</option>
+            <option value=2>远程换站完成</option>
+        </select>
+        <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
+        <input type="text" class="search-text" id="text_begin">
+        <label for="text_end" class="search-type" id="type_end">结束时间</label>
+        <input type="text" class="search-text" id="text_end">
 
-            <input type="button" class="search-btn button" id="search_btn" value="查询">
-        </div>
-        <div class="data-zone">
-            <div class='table-box'>
-                <table class="table-cont" width="100%">
-                    <thead class="table-head">
-                        <tr>
-                            <th class="change-id">序号</th>
-                            <th class="change-car">车牌号</th>
-                            <th class="change-time">时间</th>
-                            <th class="change-user">操作员</th>
-                            <th class="change-invoice">配送单号</th>
-                            <th class="change-depot">油库</th>
-                            <th class="change-store">仓号</th>
-                            <th class="change-station">原配送加油站</th>
-                            <th class="change-change">换站后加油站</th>
-                            <th class="change-status">换站状态</th>
-                            <th class="change-app">是否APP操作</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-body"></tbody>
+        <input type="button" class="search-btn button" id="search_btn" value="查询">
+    </div>
+    <div class="data-zone">
+        <div class="table-wrap">
+            <div class="table-box c-table c-table--border">
+                <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
+                    <colgroup>
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                    </colgroup>
                 </table>
             </div>
-            <div class="page">
-                <span>第</span>
-                <select id="page_id">
-                    <option value="1">1</option>
-                </select>
-                <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
-                <select id="page_size">
-                    <option value="25">25条/页</option>
-                    <option value="50">50条/页</option>
-                    <option value="100">100条/页</option>
-                    <option value="150">150条/页</option>
-                </select>
-                <input type="hidden" id="qcar">
-                <input type="hidden" id="qtype">
-                <input type="hidden" id="qbegin">
-                <input type="hidden" id="qend">
-            </div>
+        </div>
+        <div class="page">
+            <span>第</span>
+            <select id="page_id">
+                <option value="1">1</option>
+            </select>
+            <span id="page_info">页(几条数据)/共几页(共几条数据)</span>
+            <select id="page_size">
+                <option value="25">25条/页</option>
+                <option value="50">50条/页</option>
+                <option value="100">100条/页</option>
+                <option value="150">150条/页</option>
+            </select>
+            <input type="hidden" id="qcar">
+            <input type="hidden" id="qtype">
+            <input type="hidden" id="qbegin">
+            <input type="hidden" id="qend">
         </div>
     </div>
+</div>
 </body>
 
 </html>
+<!-- 数据模版 -->
+<script id="table-tpl" type="text/html">
+    <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="200">
+        <colgroup>
+            <col name="" width="80">
+            <col name="" width="92">
+            <col name="" width="180">
+            <col name="" width="">
+            <col name="" width="160">
+            <col name="" width="120">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="137">
+            <col name="" width="110">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="">
+                <div class="cell">序号</div>
+            </th>
+            <th class="">
+                <div class="cell">车牌号</div>
+            </th>
+            <th class="">
+                <div class="cell">时间</div>
+            </th>
+            <th class="">
+                <div class="cell">操作员</div>
+            </th>
+            <th class="">
+                <div class="cell">配送单号</div>
+            </th>
+            <th class="">
+                <div class="cell">油库</div>
+            </th>
+            <th class="">
+                <div class="cell">仓号</div>
+            </th>
+            <th class="">
+                <div class="cell">原配送加油站</div>
+            </th>
+            <th class="">
+                <div class="cell">换站后加油站</div>
+            </th>
+            <th class="">
+                <div class="cell">换站状态</div>
+            </th>
+            <th class="">
+                <div class="cell">是否APP操作</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{each data}}
+        <tr>
+            <td class="">
+                <div class="cell">{{$value.id}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.carNo}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.time}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.user}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.invoice}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.depot}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.store}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.station}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.change}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.status}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.app}}</div>
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</script>
+<script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+<script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
+<script src="../../resources/plugins/laydate/laydate.js"></script>
+<script src="../../resources/plugins/layer/layer.js"></script>
+<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
+<script src="../../resources/plugins/jqTable/js/plugins/artTemplate.js"></script>
+<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
+<script src="../../resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
+<!-- 表格插件 -->
+<script src="../../resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
+<script src="../../resources/js/statistics/changeList.js"></script>

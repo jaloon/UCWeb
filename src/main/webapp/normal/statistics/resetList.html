@@ -10,12 +10,7 @@
     <link rel="stylesheet" href="../../resources/css/base.css" media="all">
     <link rel="stylesheet" href="../../resources/css/normal2.css" media="all">
     <link rel="stylesheet" href="../../resources/plugins/combo/jquery.combo.select.css">
-    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
-    <script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
-    <script src="../../resources/plugins/laydate/laydate.js"></script>
-    <script src="../../resources/plugins/layer/layer.js"></script>
-    <script src="../../resources/js/normal.js"></script>
-    <script src="../../resources/js/statistics/resetList.js"></script>
+    <link rel="stylesheet" href="../../resources/plugins/jqTable/css/jqTable.css">
     <style type="text/css">
         #type_type,
         #type_begin,
@@ -52,30 +47,27 @@
         <input type="button" class="search-btn button" id="search_btn" value="查询">
     </div>
     <div class="data-zone">
-        <div class='table-box'>
-            <table class="table-cont" width="100%">
-                <thead class="table-head">
-                <tr>
-                    <th class="reset-id">序号</th>
-                    <th class="reset-car">车牌号</th>
-                    <th class="reset-gps">GPS有效性</th>
-                    <th class="reset-coordinate">位置（经纬度）</th>
-                    <th class="reset-velocity">速度（km/h）</th>
-                    <th class="reset-aspect">方向</th>
-                    <th class="reset-dev">锁设备ID</th>
-                    <th class="reset-store">仓号</th>
-                    <th class="reset-seat">仓位</th>
-                    <th class="reset-index">同仓位锁序号</th>
-                    <th class="reset-time">重置时间</th>
-                    <th class="reset-status">重置状态</th>
-                    <th class="reset-authtype">认证类型</th>
-                    <th class="reset-authid">认证编号</th>
-                    <th class="reset-report">重置上报时间</th>
-                    <th class="reset-app">是否APP操作</th>
-                </tr>
-                </thead>
-                <tbody class="table-body"></tbody>
-            </table>
+        <div class="table-wrap">
+            <div class="table-box c-table c-table--border">
+                <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
+                    <colgroup>
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                        <col name="" width="">
+                    </colgroup>
+                </table>
+            </div>
         </div>
         <div class="page">
             <span>第</span>
@@ -98,3 +90,141 @@
 </div>
 </body>
 </html>
+<!-- 数据模版 -->
+<script id="table-tpl" type="text/html">
+    <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="200">
+        <colgroup>
+            <col name="" width="80">
+            <col name="" width="92">
+            <col name="" width="126">
+            <col name="" width="">
+            <col name="" width="126">
+            <col name="" width="">
+            <col name="" width="92">
+            <col name="" width="120">
+            <col name="" width="180">
+            <col name="" width="">
+            <col name="" width="">
+            <col name="" width="88">
+            <col name="" width="180">
+            <col name="" width="110">
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="">
+                <div class="cell">序号</div>
+            </th>
+            <th class="">
+                <div class="cell">车牌号</div>
+            </th>
+            <th class="">
+                <div class="cell">GPS有效性</div>
+            </th>
+            <th class="">
+                <div class="cell">位置（经纬度）</div>
+            </th>
+            <th class="">
+                <div class="cell">速度（km/h）</div>
+            </th>
+            <th class="">
+                <div class="cell">方向</div>
+            </th>
+            <th class="">
+                <div class="cell">锁设备ID</div>
+            </th>
+            <th class="">
+                <div class="cell">仓位</div>
+            </th>
+            <th class="">
+                <div class="cell">重置时间</div>
+            </th>
+            <th class="">
+                <div class="cell">重置状态</div>
+            </th>
+            <th class="">
+                <div class="cell">认证类型</div>
+            </th>
+            <th class="">
+                <div class="cell">认证编号</div>
+            </th>
+            <th class="">
+                <div class="cell">重置上报时间</div>
+            </th>
+            <th class="">
+                <div class="cell">是否APP操作</div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{each data}}
+        {{if $value.coordFlag}}
+        <tr ondblclick="showBMap({{$value.id}})">
+            {{else}}
+        <tr>
+            {{/if}}
+            <td class="">
+                <div class="cell">{{$value.id}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.carNo}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.gps}}</div>
+            </td>
+            <td class="">
+                <div class="cell">
+                    {{if $value.coordFlag}}
+                    <a href="javascript:showBMap({{$value.id}})">
+                        ({{$value.coordinate}})
+                    </a>
+                    {{else}}
+                    {{$value.coordinate}}
+                    {{/if}}
+                </div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.velocity}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.aspect}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.dev}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.store}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.time}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.status}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.authtype}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.authid}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.report}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.app}}</div>
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+</script>
+<script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+<script src="../../resources/plugins/combo/jquery.combo.select.js"></script>
+<script src="../../resources/plugins/laydate/laydate.js"></script>
+<script src="../../resources/plugins/layer/layer.js"></script>
+<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
+<script src="../../resources/plugins/jqTable/js/plugins/artTemplate.js"></script>
+<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
+<script src="../../resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
+<!-- 表格插件 -->
+<script src="../../resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
+<script src="../../resources/js/statistics/resetList.js"></script>

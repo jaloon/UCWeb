@@ -84,7 +84,7 @@ function parseAuthType(authtype) {
     }
 }
 
-function showBMap(id) {
+function showSealBMap(id) {
     layer.open({
         type: 2,
         title: ['车辆施解封记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
@@ -94,7 +94,19 @@ function showBMap(id) {
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=seal&id=' + id)
     });
 }
-$(function() {
+
+function showLockBMap(id) {
+    layer.open({
+        type: 2,
+        title: ['锁动作记录查询', 'font-size:14px;color:#ffffff;background:#478de4;'],
+        // shadeClose: true,
+        shade: 0.6,
+        area: ['800px', '560px'],
+        content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=lock&id=' + id)
+    });
+}
+
+$(function () {
     $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
             var selectObj = $('#text_car');
@@ -142,7 +154,8 @@ $(function() {
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -154,14 +167,15 @@ $(function() {
         max: new Date().getTime() //new Date().getTime()获取当前时间的时间戳，指定日期最大值为当前时间
     });
 
-    function showList(carNumber, type, begin, end, pageId) {
-        var rows = $("#page_size").val();
+    function showSealList(carNumber, type, begin, end, pageId) {
+        var rows = $("#page_size_seal").val();
         var startRow = (pageId - 1) * rows;
         var loadLayer = layer.load();
         $.post(
             "../../manage/statistics/findSealRecordsForPage.do",
-            encodeURI("carNumber=" + carNumber + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(gridPage) {
+            encodeURI("carNumber=" + carNumber + "&type=" + type + "&begin=" + begin + "&end=" + end
+                + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
                 layer.close(loadLayer);
                 var pageCount = gridPage.total;
                 if (pageCount > 1) {
@@ -169,23 +183,23 @@ $(function() {
                     for (var i = 1; i <= pageCount; i++) {
                         pageOpts += "<option value=" + i + ">" + i + "</option>";
                     }
-                    $("#page_id").html(pageOpts);
-                    $("#page_id").val(gridPage.page);
+                    $("#page_id_seal").html(pageOpts);
+                    $("#page_id_seal").val(gridPage.page);
                 } else {
-                    $("#page_id").html("<option value='1'>1</option>");
+                    $("#page_id_seal").html("<option value='1'>1</option>");
                 }
                 var dataCount = gridPage.currentRows;
-                $("#page_info").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
-                $("#qcar").val(gridPage.t.carNumber);
-                $("#qtype").val(gridPage.t.type);
-                $("#qbegin").val(gridPage.t.begin);
-                $("#qend").val(gridPage.t.end);
+                $("#page_info_seal").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                $("#qcar_seal").val(gridPage.t.carNumber);
+                $("#qtype_seal").val(gridPage.t.type);
+                $("#qbegin_seal").val(gridPage.t.begin);
+                $("#qend_seal").val(gridPage.t.end);
                 var seals = gridPage.dataList;
                 var jsonData = [];
                 for (var i = 0; i < dataCount; i++) {
                     var seal = seals[i];
                     var coordFlag = seal.longitude != undefined && seal.latitude != undefined;
-                    var gps = "数据库记录异常", coordinate = "数据库记录异常";
+                    var gps = "-", coordinate = "-";
                     if (coordFlag) {
                         gps = seal.coorValid ? "有效" : "无效";
                         coordinate = seal.longitude + ", " + seal.latitude;
@@ -197,7 +211,7 @@ $(function() {
                         coordFlag: coordFlag,
                         gps: gps,
                         coordinate: coordinate,
-                        velocity: seal.velocity === undefined ? "数据库记录异常" : seal.velocity,
+                        velocity: seal.velocity === undefined ? "-" : seal.velocity,
                         aspect: angle2aspect(seal.angle),
                         prestatus: parseCarStatus(seal.prestatus),
                         status: parseCarStatus(seal.status),
@@ -205,11 +219,11 @@ $(function() {
                         station: seal.station,
                         authtype: parseAuthType(seal.authtype),
                         authid: seal.authid,
-                        alarm: seal.alarm == undefined ? "数据库记录异常" : seal.alarm
+                        alarm: seal.alarm == undefined ? "-" : seal.alarm
                     });
                 }
                 // 更新表格数据
-                var tableHtml = template('table-tpl', {data: jsonData});
+                var tableHtml = template('seal-table-tpl', {data: jsonData});
                 $('.c-table').eq(0).data('table').updateHtml(tableHtml);
             },
             "json"
@@ -231,53 +245,174 @@ $(function() {
             }
         });
     }
+
+    function showLockList(carNumber, type, begin, end, pageId) {
+        var rows = $("#page_size_lock").val();
+        var startRow = (pageId - 1) * rows;
+        var loadLayer = layer.load();
+        $.post(
+            "../../manage/statistics/findLockRecordsForPage.do",
+            encodeURI("carNumber=" + carNumber + "&status=" + type + "&begin=" + begin + "&end=" + end
+                + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
+                layer.close(loadLayer);
+                var pageCount = gridPage.total;
+                if (pageCount > 1) {
+                    var pageOpts = "";
+                    for (var i = 1; i <= pageCount; i++) {
+                        pageOpts += "<option value=" + i + ">" + i + "</option>";
+                    }
+                    $("#page_id_lock").html(pageOpts);
+                    $("#page_id_lock").val(gridPage.page);
+                } else {
+                    $("#page_id_lock").html("<option value='1'>1</option>");
+                }
+                var dataCount = gridPage.currentRows;
+                $("#page_info_lock").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                $("#qcar_lock").val(gridPage.t.carNumber);
+                $("#qtype_lock").val(gridPage.t.status);
+                $("#qbegin_lock").val(gridPage.t.begin);
+                $("#qend_lock").val(gridPage.t.end);
+                var locks = gridPage.dataList;
+                var jsonData = [];
+                for (var i = 0; i < dataCount; i++) {
+                    var lock = locks[i];
+                    var coordFlag = lock.longitude != undefined && lock.latitude != undefined;
+                    var gps = "-", coordinate = "-";
+                    if (coordFlag) {
+                        gps = lock.coorValid ? "有效" : "无效";
+                        coordinate = lock.longitude + ", " + lock.latitude;
+                    }
+                    jsonData.push({
+                        id: lock.id,
+                        carNo: lock.carNumber,
+                        // station: lock.station,
+                        coordFlag: coordFlag,
+                        gps: gps,
+                        coordinate: coordinate,
+                        velocity: lock.velocity === undefined ? "-" : lock.velocity,
+                        aspect: angle2aspect(lock.angle),
+                        dev: lock.lockId,
+                        store: "仓" + lock.storeId + "-" + lock.seatName + "-" + lock.seatIndex,
+                        status: lock.statusName,
+                        time: lock.createDate,
+                        station: lock.station,
+                        report: lock.changeReportTime,
+                        alarm: lock.alarm == undefined ? "-" : lock.alarm
+                    });
+                }
+                // 更新表格数据
+                var tableHtml = template('lock-table-tpl', {data: jsonData});
+                $('.c-table').eq(1).data('table').updateHtml(tableHtml);
+            },
+            "json"
+        ).error(function (XMLHttpRequest, textStatus, errorThrown) {
+            layer.close(loadLayer);
+            if (XMLHttpRequest.readyState == 4) {
+                var http_status = XMLHttpRequest.status;
+                if (http_status == 0 || http_status > 600) {
+                    location.reload(true);
+                } else if (http_status == 200) {
+                    if (textStatus == "parsererror") {
+                        layer.alert("应答数据格式解析错误！")
+                    } else {
+                        layer.alert("http response error: " + textStatus)
+                    }
+                } else {
+                    layer.alert("http connection error: status[" + http_status + "], " + XMLHttpRequest.statusText)
+                }
+            }
+        });
+    }
+
     $(window).resize(function () {
-        var height = $(window).height() - 133;
-        $('.table-box').data('height', height);
+        var contentH = ($(window).height() - 77) / 2;
+        $(".content").height(contentH);
+        $('.table-box').data('height', contentH - 108);
         // $(window).trigger('resize');
     }).resize();
 
     $('[role="c-table"]').jqTable();
-    showList("", "", "", "", 1);
+    showSealList("", "", "", "", 1);
+    showLockList("", "", "", "", 1);
 
-    $("#search_btn").click(function() {
+    $("#search_btn_seal").click(function () {
         var carNumber = $("#text_car").val();
-        var type = $("#text_type").val();
+        var type = $("#text_type_seal").val();
         var begin = $("#text_begin").val();
         var end = $("#text_end").val();
-        showList(carNumber, type, begin, end, 1);
+        showSealList(carNumber, type, begin, end, 1);
     });
 
-    function refreshPage(pageId) {
+    $("#search_btn_lock").click(function () {
+        var carNumber = $("#text_car").val();
+        var type = $("#text_type_lock").val();
+        var begin = $("#text_begin").val();
+        var end = $("#text_end").val();
+        showLockList(carNumber, type, begin, end, 1);
+    });
 
-        var carNumber = $("#qcar").val();
+    function refreshSeal(pageId) {
+        var carNumber = $("#qcar_seal").val();
         if (isNull(carNumber)) {
             carNumber = "";
         }
-        var type = $("#qtype").val();
+        var type = $("#qtype_seal").val();
         if (isNull(type)) {
             type = "";
         }
-        var begin = $("#qbegin").val();
+        var begin = $("#qbegin_seal").val();
         if (isNull(begin)) {
             begin = "";
         }
-        var end = $("#qend").val();
+        var end = $("#qend_seal").val();
         if (isNull(end)) {
             end = "";
         }
-        showList(carNumber, type, begin, end, pageId);
+        showSealList(carNumber, type, begin, end, pageId);
     }
 
-    $("#page_id").change(function() {
-        var pageId = $("#page_id").val();
+    $("#page_id_seal").change(function () {
+        var pageId = $("#page_id_seal").val();
         if (isNull(pageId)) {
             pageId = 1;
         }
-        refreshPage(pageId);
+        refreshSeal(pageId);
     });
 
-    $("#page_size").change(function() {
-        refreshPage(1);
+    $("#page_size_seal").change(function () {
+        refreshSeal(1);
+    });
+
+    function refreshLock(pageId) {
+        var carNumber = $("#qcar_lock").val();
+        if (isNull(carNumber)) {
+            carNumber = "";
+        }
+        var type = $("#qtype_lock").val();
+        if (isNull(type)) {
+            type = "";
+        }
+        var begin = $("#qbegin_lock").val();
+        if (isNull(begin)) {
+            begin = "";
+        }
+        var end = $("#qend_lock").val();
+        if (isNull(end)) {
+            end = "";
+        }
+        showLockList(carNumber, type, begin, end, pageId);
+    }
+
+    $("#page_id_lock").change(function () {
+        var pageId = $("#page_id_lock").val();
+        if (isNull(pageId)) {
+            pageId = 1;
+        }
+        refreshLock(pageId);
+    });
+
+    $("#page_size_lock").change(function () {
+        refreshLock(1);
     });
 });

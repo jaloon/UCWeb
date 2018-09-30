@@ -2,15 +2,19 @@ package com.tipray.service.impl;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.VehicleParamVer;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.Handset;
+import com.tipray.constant.PageActionMode;
 import com.tipray.constant.SqliteFileConst;
+import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.dao.GasStationDao;
 import com.tipray.dao.HandsetDao;
 import com.tipray.dao.VehicleParamVerDao;
 import com.tipray.service.GasStationService;
 import com.tipray.util.CoverRegionUtil;
+import com.tipray.util.ResponseMsgUtil;
 import com.tipray.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,7 +158,7 @@ public class GasStationServiceImpl implements GasStationService {
 	public GridPage<GasStation> findGasStationsForPage(GasStation gasStation, Page page) {
 		long records = countGasStation(gasStation);
 		List<GasStation> list = findByPage(gasStation, page);
-		return new GridPage<GasStation>(list, records, page.getPageId(), page.getRows(), list.size(), gasStation);
+		return new GridPage<>(list, records, page, gasStation);
 	}
 
 	@Override
@@ -163,19 +167,70 @@ public class GasStationServiceImpl implements GasStationService {
             return false;
         }
         Integer count = gasStationDao.countValidGasStation(gasStation);
-        if (count == null || count == 0) {
-            return false;
-        }
-        return true;
+		return count != null && count > 0;
 	}
 
-	private void setRegion(GasStation gasStation) {
+    @Override
+    public ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode) {
+        if (StringUtil.isEmpty(mode)) {
+            throw new IllegalArgumentException("参数不完整！");
+        }
+        if (StringUtil.isEmpty(officialId)) {
+            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 11, "加油站编号为空！");
+        }
+        if (StringUtil.isEmpty(name)) {
+            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 21, "加油站名称为空！");
+        }
+        if (StringUtil.isEmpty(abbr)) {
+            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 31, "加油站简称为空！");
+        }
+        if (PageActionMode.EDIT.equalsIgnoreCase(mode)) {
+            GasStation gasStation = gasStationDao.getByOfficialId(officialId);
+            if (!gasStation.getName().equals(name)) {
+                Integer nameCount = gasStationDao.countValidGasStationByName(name);
+                if (nameCount != null && nameCount > 0) {
+                    return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 22, "加油站名称已存在！");
+                }
+            }
+            if (!gasStation.getAbbr().equals(abbr)) {
+                Integer abbrCount = gasStationDao.countValidGasStationByAbbr(abbr);
+                if (abbrCount != null && abbrCount > 0) {
+                    return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 32, "加油站简称已存在！");
+                }
+            }
+            return ResponseMsgUtil.success();
+        }
+        if (PageActionMode.ADD.equalsIgnoreCase(mode)) {
+            Integer idCount = gasStationDao.countValidGasStationByOfficialId(officialId);
+            if (idCount != null && idCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 12, "加油站编号已存在！");
+            }
+            Integer nameCount = gasStationDao.countValidGasStationByName(name);
+            if (nameCount != null && nameCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 22, "加油站名称已存在！");
+            }
+            Integer abbrCount = gasStationDao.countValidGasStationByAbbr(abbr);
+            if (abbrCount != null && abbrCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 32, "加油站简称已存在！");
+            }
+            return ResponseMsgUtil.success();
+        }
+        throw new IllegalArgumentException("参数无效！");
+    }
+
+    private void setRegion(GasStation gasStation) {
+		if (gasStation == null) {
+			return;
+		}
 		byte[] cover = gasStation.getCover();
 		String region = CoverRegionUtil.coverToRegion(cover);
 		gasStation.setCoverRegion(region);
 	}
 
 	private void setCover(GasStation gasStation) {
+        if (gasStation == null) {
+            return;
+        }
 		String region = gasStation.getCoverRegion();
 		byte[] cover = CoverRegionUtil.regionToCover(region);
 		gasStation.setCover(cover);

@@ -1,9 +1,10 @@
-$(function() {
+$(function () {
     laydate.render({
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -21,8 +22,9 @@ $(function() {
         var loadLayer = layer.load();
         $.post(
             "../../manage/log/ajaxFindCarLogsForPage.do",
-            encodeURI("user.account=" + account + "&user.name=" + name + "&type=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(gridPage) {
+            encodeURI("user.account=" + account + "&user.name=" + name + "&type=" + type + "&begin=" + begin
+                + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
                 layer.close(loadLayer);
                 var pageCount = gridPage.total;
                 if (pageCount > 1) {
@@ -35,32 +37,32 @@ $(function() {
                 } else {
                     $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                var dataCount = gridPage.currentRows;
+                $("#page_info").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#olaccount").val(gridPage.t.user.account);
                 $("#olname").val(gridPage.t.user.name);
                 $("#oltype").val(gridPage.t.type);
                 $("#olbegin").val(gridPage.t.begin);
                 $("#olend").val(gridPage.t.end);
-                $(".table-body").html("");
                 var logs = gridPage.dataList;
-                var tableData = "<table width='100%'>";
-                for (var i = 0; i < gridPage.currentRows; i++) {
+                var jsonData = [];
+                for (var i = 0; i < dataCount; i++) {
                     var log = logs[i];
-                    tableData += "<tr>" +
-                        "<td class=\"log-id\">" + log.id + "</td>" +
-                        "<td class=\"log-account\">" + log.user.account + "</td>" +
-                        "<td class=\"log-name\">" + log.user.name + "</td>" +
-                        "<td class=\"log-type\">" + toHexId(log.type) + "</td>" +
-                        "<td class=\"log-description\">" + log.description + "</td>" +
-                        "<td class=\"log-result\">" + log.result + "</td>" +
-                        "<td class=\"log-app\">" + (log.isApp > 0 ? "是" : "否") + "</td>" +
-                        "<td class=\"log-time\">" + log.createDate + "</td>" +
-                        "<td class=\"log-update\">" + (log.udpBizId > 0 ? log.modifyDate : "") + "</td>" +
-                        "</tr>";
+                    jsonData.push({
+                        id: log.id,
+                        account: log.user.account,
+                        username: log.user.name,
+                        type: toHexId(log.type),
+                        description: log.description,
+                        result: log.result,
+                        app: log.isApp > 0 ? "是" : "否",
+                        time: log.createDate,
+                        update: log.udpBizId > 0 ? log.modifyDate : ""
+                    });
                 }
-                tableData += "</table>";
-                tableData = tableData.replace(/>null</g, "><");
-                $(".table-body").html(tableData);
+                // 更新表格数据
+                var tableHtml = template('table-tpl', {data: jsonData});
+                $('.c-table').eq(0).data('table').updateHtml(tableHtml);
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -82,9 +84,16 @@ $(function() {
         });
     }
 
+    $(window).resize(function () {
+        var height = $(window).height() - 133;
+        $('.table-box').data('height', height);
+        // $(window).trigger('resize');
+    }).resize();
+
+    $('[role="c-table"]').jqTable();
     showList("", "", "", "", "", 1);
 
-    $("#search_btn").click(function() {
+    $("#search_btn").click(function () {
         var account = "";
         var name = "";
         var type_user = $("#type_user").val();
@@ -95,7 +104,8 @@ $(function() {
 
         }
         var type = $("#text_type").val();
-        if (!isNull(type)){s
+        if (!isNull(type)) {
+            s
             type = parseInt(type, 16);
         }
         var begin = $("#text_begin").val();
@@ -128,7 +138,7 @@ $(function() {
         showList(account, name, type, begin, end, pageId);
     }
 
-    $("#page_id").change(function() {
+    $("#page_id").change(function () {
         var pageId = $("#page_id").val();
         if (isNull(pageId)) {
             pageId = 1;
@@ -136,7 +146,7 @@ $(function() {
         refreshPage(pageId);
     });
 
-    $("#page_size").change(function() {
+    $("#page_size").change(function () {
         refreshPage(1);
     });
 });

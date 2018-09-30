@@ -1,11 +1,11 @@
 package com.tipray.util;
 
+import com.tipray.bean.baseinfo.Permission;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.tipray.bean.baseinfo.Permission;
 /**
  * 权限工具类
  * @author chends
@@ -104,11 +104,14 @@ public class PermissionUtil {
 	 * @return
 	 */
 	public static boolean containPermission(List<Permission> permissions, String ename) {
+		String[] enames = ename.split(",");
 		if (permissions != null) {
 			for (Permission permission : permissions) {
-				if (permission.getEname().equals(ename)) {
-					return true;
-				}
+                for (String pName : enames) {
+                    if (permission.getEname().equals(pName)) {
+                        return true;
+                    }
+                }
 			}
 		}
 		return false;

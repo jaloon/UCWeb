@@ -183,8 +183,26 @@
         and is_invalid = 0
     </select>
 
+	<select id="countValidOilDepotByOfficialId" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from tbl_oildepot
+        where official_id = #{officialId}
+        and is_invalid = 0
+    </select>
+
+	<select id="countValidOilDepotByName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from tbl_oildepot
+        where `name` = #{name}
+        and is_invalid = 0
+    </select>
+
+	<select id="countValidOilDepotByAbbr" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from tbl_oildepot
+        where short_name = #{abbr}
+        and is_invalid = 0
+    </select>
+
     <select id="findInvalidOilDepot" parameterType="com.tipray.bean.baseinfo.OilDepot" resultType="java.lang.Long">
-        select id from from tbl_oildepot
+        select id from tbl_oildepot
         where (official_id = #{officialId} or `name` = #{name} or short_name = #{abbr})
         and is_invalid = 1
     </select>

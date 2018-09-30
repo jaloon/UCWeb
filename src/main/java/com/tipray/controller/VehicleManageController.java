@@ -2081,6 +2081,7 @@ public class VehicleManageController {
             List<Integer> list = new ArrayList<>();
             Map<String, Object> map = null;
             StringBuffer resetIds = new StringBuffer();
+            int resetId = 0;
             for (String lockIdStr : lockIdStrs) {
                 int lockId = Integer.parseInt(lockIdStr, 10);
                 map = new HashMap<>();
@@ -2098,13 +2099,13 @@ public class VehicleManageController {
                     logger.error("远程开锁重置失败：{}", RemoteLockResetErrorEnum.LOCK_DEV_ID_INVALID);
                     return ResponseMsgUtil.error(RemoteLockResetErrorEnum.LOCK_DEV_ID_INVALID);
                 }
-                int resetId = ((Long) map.get("id")).intValue();
+                resetId = ((Long) map.get("id")).intValue();
                 list.add(resetId);
                 list.add(lockId);
                 resetIds.append(resetId).append(',');
             }
+            vehicleManageLog.setRemoteId(resetId);
             resetIds.deleteCharAt(resetIds.length() - 1);
-
             params.put("resetIds", resetIds.toString());
             cacheId = addCache(UdpBizId.LOCK_OPEN_RESET_REQUEST, logId, description, params);
 

@@ -16,7 +16,7 @@
     <link rel="stylesheet" type="text/css" href="resources/css/base.css">
     <link rel="stylesheet" type="text/css" href="resources/css/index.css"/>
     <link rel="stylesheet" type="text/css" href="resources/plugins/iziToast/iziToast.min.css"/>
-    <link rel="stylesheet" type="text/css" href="resources/plugins/jqTable/css/jqTable.css"/>
+    <%--<link rel="stylesheet" type="text/css" href="resources/plugins/jqTable/css/jqTable.css"/>--%>
     <style type="text/css">
         .userManage dt {
             background-image: url(resources/images/navbar/permission.png);
@@ -72,28 +72,28 @@
                 <dl class="infoManage">
                     <dt>基本信息管理</dt>
                     <pop:Permission ename="oildepotModule">
-                        <dd class="first_dd"><a name="normal/oildepot/oildepotList1.jsp">油库管理</a></dd>
+                        <dd class="first_dd"><a name="normal/oildepot/oildepotList.jsp">油库管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="gasstationModule">
-                        <dd><a name="normal/gasstation/gasstationList1.jsp">加油站管理</a></dd>
+                        <dd><a name="normal/gasstation/gasstationList.jsp">加油站管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="cardModule">
-                        <dd><a name="normal/card/cardList1.jsp">卡信息管理</a></dd>
+                        <dd><a name="normal/card/cardList.jsp">卡信息管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="handsetModule">
-                        <dd><a name="normal/handset/handsetList1.jsp">手持机管理</a></dd>
+                        <dd><a name="normal/handset/handsetList.jsp">手持机管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="transcardModule">
-                        <dd><a name="normal/transcard/transcardList1.jsp">配送卡管理</a></dd>
+                        <dd><a name="normal/transcard/transcardList.jsp">配送卡管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="transcomModule">
-                        <dd><a name="normal/transcom/transcomList1.jsp">运输公司管理</a></dd>
+                        <dd><a name="normal/transcom/transcomList.jsp">运输公司管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="driverModule">
-                        <dd><a name="normal/driver/driverList1.jsp">司机管理</a></dd>
+                        <dd><a name="normal/driver/driverList.jsp">司机管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="deviceModule">
-                        <dd><a name="normal/device/deviceList1.jsp">设备信息同步</a></dd>
+                        <dd><a name="normal/device/deviceList.jsp">设备信息同步</a></dd>
                     </pop:Permission>
                 </dl>
             </pop:Permission>
@@ -101,7 +101,7 @@
                 <dl class="carManage">
                     <dt>车辆管理</dt>
                     <pop:Permission ename="carModule">
-                        <dd class="first_dd"><a name="normal/car/carList1.jsp">车辆信息管理</a></dd>
+                        <dd class="first_dd"><a name="normal/car/carList.jsp">车辆信息管理</a></dd>
                     </pop:Permission>
                     <dd>
                         <a name="normal/car/carSupervise.jsp">车辆监控及远程操作</a>
@@ -115,31 +115,28 @@
                 <dl class="statisticsManage">
                     <dt>查询统计</dt>
                     <pop:Permission ename="alarmRecordModule">
-                        <dd class="first_dd"><a name="normal/statistics/alarmList1.html">报警记录查询</a></dd>
+                        <dd class="first_dd"><a name="normal/statistics/alarmList.html">报警记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="remoteRecordModule">
-                        <dd><a name="normal/statistics/remoteList1.html">远程操作查询</a></dd>
+                        <dd><a name="normal/statistics/remoteList.html">远程操作查询</a></dd>
                     </pop:Permission>
-                    <pop:Permission ename="lockStatusModule">
-                        <dd><a name="normal/statistics/lockstatusList1.html">锁动作记录查询</a></dd>
-                    </pop:Permission>
-                    <pop:Permission ename="sealRecordModule">
-                        <dd><a name="normal/statistics/sealList1.html">施解封记录查询</a></dd>
+                    <pop:Permission ename="sealRecordModule,lockStatusModule">
+                        <dd><a name="normal/statistics/sealAndLockList.html">施解封和锁动作查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="transRecordModule">
-                        <dd><a name="normal/statistics/transportList1.html">配送信息查询</a></dd>
+                        <dd><a name="normal/statistics/transportList.html">配送信息查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="changeRecordModule">
-                        <dd><a name="normal/statistics/changeList1.html">远程换站记录查询</a></dd>
+                        <dd><a name="normal/statistics/changeList.html">远程换站记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="usageRecordModule">
-                        <dd><a name="normal/statistics/usageList1.html">卡及设备使用记录查询</a></dd>
+                        <dd><a name="normal/statistics/usageList.html">卡及设备使用记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="resetRecordModule">
-                        <dd><a name="normal/statistics/resetList1.html">开锁重置记录查询</a></dd>
+                        <dd><a name="normal/statistics/resetList.html">开锁重置记录查询</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="eventRecordModule">
-                        <dd><a name="normal/statistics/eventList1.html">车载终端事件记录查询</a></dd>
+                        <dd><a name="normal/statistics/eventList.html">车载终端事件记录查询</a></dd>
                     </pop:Permission>
                 </dl>
             </pop:Permission>
@@ -149,10 +146,10 @@
                 <dl class="userManage">
                     <dt>操作员权限管理</dt>
                     <pop:Permission ename="userModule">
-                        <dd class="first_dd"><a name="normal/user/userList1.jsp">操作员管理</a></dd>
+                        <dd class="first_dd"><a name="normal/user/userList.jsp">操作员管理</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="roleModule">
-                        <dd><a name="normal/role/roleList1.jsp">角色管理</a></dd>
+                        <dd><a name="normal/role/roleList.jsp">角色管理</a></dd>
                     </pop:Permission>
                 </dl>
             </pop:Permission>
@@ -160,10 +157,10 @@
                 <dl class="logManage">
                     <dt>操作日志管理</dt>
                     <pop:Permission ename="infologModule">
-                        <dd class="first_dd"><a name="normal/log/infoLog1.html">信息管理日志</a></dd>
+                        <dd class="first_dd"><a name="normal/log/infoLog.html">信息管理日志</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="carlogModule">
-                        <dd><a name="normal/log/carLog1.html">车辆管理日志</a></dd>
+                        <dd><a name="normal/log/carLog.html">车辆管理日志</a></dd>
                     </pop:Permission>
                 </dl>
             </pop:Permission>
@@ -262,10 +259,10 @@
 <script src="resources/plugins/iziToast/iziToast.min.js"></script>
 <script src="resources/plugins/layer/layer.js"></script>
 <script src="resources/plugins/polyfill/grayscale.js"></script>
-<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
-<script src="resources/plugins/jqTable/js/plugins/artTemplate.js"></script>
-<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->
-<script src="resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
-<!-- 表格插件 -->
-<script src="resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
+<%--<!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->--%>
+<%--<script src="resources/plugins/jqTable/js/plugins/artTemplate.js"></script>--%>
+<%--<!-- 必要插件：固定列滚动需要用到，鼠标滚动兼容多浏览器 -->--%>
+<%--<script src="resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>--%>
+<%--<!-- 表格插件 -->--%>
+<%--<script src="resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>--%>
 <script src="resources/js/index.js"></script>

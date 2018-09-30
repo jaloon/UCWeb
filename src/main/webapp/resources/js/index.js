@@ -232,21 +232,11 @@ function showAlarm(alarmId) {
 }
 
 $(function () {
-    // var tableCont = document.querySelector('#alarm_tips');
-    //
-    // /**
-    //  * scroll handle
-    //  * @param {event} e scroll event
-    //  */
-    // function scrollHandle(e) {
-    //     // console.log(this)
-    //     var scrollTop = this.scrollTop;
-    //     this.querySelector('.table-head').style.transform = 'translateY(' + scrollTop + 'px)';
-    // }
-    //
-    // tableCont.addEventListener('scroll', scrollHandle);
+    $("#alarm_tips").scroll(function (event) {
+        $(".table-head").css("transform", "translateY(" + event.target.scrollTop + "px)");
+    });
 
-    $('[role="c-table"]').jqTable();
+    // $('[role="c-table"]').jqTable();
 
     tipIcoObj = $(".alarm-tip");
     tipIcoUrl = tipIcoObj.attr("src");
@@ -329,8 +319,8 @@ $(function () {
                 // receiveAlarm(receiveObj.msg);
                 break;
             case 111: //缓存报警
-                // Concurrent.Thread.create(cacheAlarm, receiveObj.msg);
-                cacheAlarm(receiveObj.msg);
+                Concurrent.Thread.create(cacheAlarm, receiveObj.msg);
+                // cacheAlarm(receiveObj.msg);
                 break;
             default:
                 break;

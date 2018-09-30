@@ -127,7 +127,7 @@ select.search-text {
 }
 
 .data-zone td {
-    text-align: center;
+    /*text-align: center;*/
     vertical-align: middle;
     height: 30px;
     border-bottom: 1px solid #e6e7e9;

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -69,9 +70,9 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                             lockStatusBuf.append("锁绑定状态异常！");
                         } else {
                             locks.forEach(lock -> lockStatusBuf.append('仓').append(lock.getStoreId()).append('-')
-                                        .append(lock.getSeatName()).append('-').append(lock.getSeatIndex()).append('-')
-                                        .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()))
-                                        .append("<br>"));
+                                    .append(lock.getSeatName()).append('-').append(lock.getSeatIndex()).append('-')
+                                    .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()))
+                                    .append("<br>"));
                         }
                     }
                 } else {
@@ -239,7 +240,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                         // 该位置已无锁，报警无效
                         continue;
                     }
-                    if (!lockDeviceId.equals(alarmDevice.getDeviceId())){
+                    if (!lockDeviceId.equals(alarmDevice.getDeviceId())) {
                         // 已换新锁，报警无效
                         continue;
                     }
@@ -272,55 +273,98 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
     @Override
     public List<Map<String, Object>> findNotElimitedForApp() {
         List<Map<String, Object>> list = alarmRecordDao.findNotElimitedForApp();
-        if (!EmptyObjectUtil.isEmptyList(list)) {
-            StringBuffer trackIds = new StringBuffer();
-            list.forEach(alarmMap -> trackIds.append(',').append(alarmMap.get("vehicle_track_id")));
-            trackIds.deleteCharAt(0);
-            try {
-                Map<Long, TrackInfo> trackInfoMap = trackDao.findTrackMapByTrackIds(trackIds.toString());
-                list.forEach(alarmMap -> {
-                    Map<String, Integer> lockinfo = lockDao.getByIdForAppAlarm((Long) alarmMap.get("lock_id"));
-                    TrackInfo trackInfo = trackInfoMap.get(((BigInteger) alarmMap.get("vehicle_track_id")).longValue());
-                    if (trackInfo == null) {
-                        alarmMap.put("is_lnglat_valid", 0);
-                        alarmMap.put("longitude", 0);
-                        alarmMap.put("latitude", 0);
-                        if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
-                            lockinfo.put("switch_status", 0);
-                        }
-                    } else {
-                        alarmMap.put("is_lnglat_valid", trackInfo.getCoorValid() ? 1 : 0);
-                        alarmMap.put("longitude", trackInfo.getLongitude());
-                        alarmMap.put("latitude", trackInfo.getLatitude());
-                        if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
-                            byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
-                            Integer lockIndex = lockinfo.get("lock_index");
-                            if (lockStatusInfo == null || lockIndex == null || lockStatusInfo.length < lockIndex) {
-                                lockinfo.put("switch_status", 0);
-                            } else {
-                                int switchStatus = lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
-                                lockinfo.put("switch_status", switchStatus > 0 ? 2 : 1);
-                            }
-                        }
-                    }
-                    if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
-                        alarmMap.put("lockinfo", lockinfo);
-                    }
-                });
-            } catch (Exception e) {
-                logger.warn("轨迹数据异常！{}", e.toString());
-                list.forEach(alarmMap -> {
+        if (EmptyObjectUtil.isEmptyList(list)) {
+            return Collections.emptyList();
+        }
+        list.removeIf(this::isInvalidAlarm);
+        if (EmptyObjectUtil.isEmptyList(list)) {
+            return Collections.emptyList();
+        }
+        StringBuffer trackIds = new StringBuffer();
+        list.forEach(alarmMap -> trackIds.append(',').append(alarmMap.get("vehicle_track_id")));
+        trackIds.deleteCharAt(0);
+        try {
+            Map<Long, TrackInfo> trackInfoMap = trackDao.findTrackMapByTrackIds(trackIds.toString());
+            list.forEach(alarmMap -> {
+                Map<String, Integer> lockinfo = lockDao.getByIdForAppAlarm((Long) alarmMap.get("lock_id"));
+                TrackInfo trackInfo = trackInfoMap.get(((BigInteger) alarmMap.get("vehicle_track_id")).longValue());
+                if (trackInfo == null) {
                     alarmMap.put("is_lnglat_valid", 0);
                     alarmMap.put("longitude", 0);
                     alarmMap.put("latitude", 0);
-                    Map<String, Integer> lockinfo = lockDao.getByIdForAppAlarm((Long) alarmMap.get("lock_id"));
                     if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
                         lockinfo.put("switch_status", 0);
-                        alarmMap.put("lockinfo", lockinfo);
                     }
-                });
-            }
+                } else {
+                    alarmMap.put("is_lnglat_valid", trackInfo.getCoorValid() ? 1 : 0);
+                    alarmMap.put("longitude", trackInfo.getLongitude());
+                    alarmMap.put("latitude", trackInfo.getLatitude());
+                    if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
+                        byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
+                        Integer lockIndex = lockinfo.get("lock_index");
+                        if (lockStatusInfo == null || lockIndex == null || lockStatusInfo.length < lockIndex) {
+                            lockinfo.put("switch_status", 0);
+                        } else {
+                            int switchStatus = lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
+                            lockinfo.put("switch_status", switchStatus > 0 ? 2 : 1);
+                        }
+                    }
+                }
+                if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
+                    alarmMap.put("lockinfo", lockinfo);
+                }
+            });
+        } catch (Exception e) {
+            logger.warn("轨迹数据异常！{}", e.toString());
+            list.forEach(alarmMap -> {
+                alarmMap.put("is_lnglat_valid", 0);
+                alarmMap.put("longitude", 0);
+                alarmMap.put("latitude", 0);
+                Map<String, Integer> lockinfo = lockDao.getByIdForAppAlarm((Long) alarmMap.get("lock_id"));
+                if (!EmptyObjectUtil.isEmptyMap(lockinfo)) {
+                    lockinfo.put("switch_status", 0);
+                    alarmMap.put("lockinfo", lockinfo);
+                }
+            });
         }
         return list;
+    }
+
+    /**
+     * 是否无效报警
+     * @param alarm 报警信息
+     * @return
+     */
+    private boolean isInvalidAlarm(Map<String, Object> alarm) {
+        Integer deviceType = (Integer) alarm.get("device_type");
+        if (deviceType == 1) {
+            Integer terminalId = vehicleDao.getTerminalIdById((Long) alarm.get("vehicle_id"));
+            if (terminalId == null || terminalId == 0) {
+                // 车或车台已不存在，报警无效
+                return true;
+            }
+            if (!terminalId.equals(((Long) alarm.get("device_id")).intValue())) {
+                // 车台已换新，报警无效
+                return true;
+            }
+        } else if (deviceType == 2){
+            int lockId = ((Long) alarm.get("lock_id")).intValue();
+            if (lockId == 0) {
+                // 该位置已无锁，报警无效
+                return true;
+            }
+            Integer lockDeviceId = lockDao.getLockDeviceIdById(lockId);
+            if (lockDeviceId == null || lockDeviceId == 0) {
+                // 该位置已无锁，报警无效
+                return true;
+            }
+            if (!lockDeviceId.equals(((Long) alarm.get("device_id")).intValue())) {
+                // 已换新锁，报警无效
+                return true;
+            }
+        } else {
+            return true;
+        }
+        return false;
     }
 }

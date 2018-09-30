@@ -82,8 +82,8 @@ select.search-text {
     width: 100%;
     height: auto !important;
     overflow: visible !important;
-    height: 100% !important;
-    position: fixed;
+    /*height: 100% !important;*/
+    /*position: fixed;*/
 }
 
 .table-wrap {
@@ -126,7 +126,7 @@ select.search-text {
 }
 
 .data-zone td {
-    text-align: center;
+    /*text-align: center;*/
     vertical-align: middle;
     height: 30px;
     border-bottom: 1px solid #e6e7e9;
@@ -143,7 +143,7 @@ select.search-text {
     height: 36px;
     color: #445065;
     background: #e6e7e9;
-    position: fixed;
+    position: absolute;
     bottom: 0;
 }
 

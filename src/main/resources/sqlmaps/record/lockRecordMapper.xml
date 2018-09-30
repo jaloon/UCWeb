@@ -12,6 +12,7 @@
 		<result column="seat_name" property="seatName" />
 		<result column="seat_index" property="seatIndex" />
         <result column="lock_status" property="statusName" />
+		<result column="station" property="station" />
         <result column="change_time" property="createDate" />
         <result column="change_report_time" property="changeReportTime" />
         <result column="station" property="station" />
@@ -26,7 +27,7 @@
 		l.lock_device_id										lock_device_id,
         tl.lock_index                                   		lock_index,
 		fn_type2name('lockStatus', l.`status`)					lock_status,
-		fn_get_station(l.station_type, l.station_id)			station,
+		fn_get_alarm_station(l.station_type, l.station_id)      station,
 		l.vehicle_track_id										track_id,
 		l.change_time											change_time,
 		DATE_FORMAT(l.change_report_time, '%Y-%m-%d %H:%i:%s' )	change_report_time

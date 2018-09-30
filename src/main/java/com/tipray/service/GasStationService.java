@@ -2,6 +2,7 @@ package com.tipray.service;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.core.exception.ServiceException;
 
@@ -101,6 +102,16 @@ public interface GasStationService {
     boolean isGasStationExist(GasStation gasStation);
 
 	/**
+	 * 获取加油站存在信息
+	 * @param officialId
+	 * @param name
+	 * @param abbr
+	 * @param mode
+	 * @return
+	 */
+	ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode);
+
+	/**
 	 * 批量添加加油站
 	 * 
 	 * @param gasStations
@@ -112,4 +123,5 @@ public interface GasStationService {
 	 * 获取所有加油站的ID和名称
 	 */
     List<Map<String, Object>> getIdAndNameOfAllGasStations();
+
 }

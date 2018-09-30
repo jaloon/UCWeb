@@ -2,6 +2,7 @@ package com.tipray.service.impl;
 
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.Station;
 import com.tipray.bean.VehicleParamVer;
 import com.tipray.bean.baseinfo.Card;
@@ -10,9 +11,11 @@ import com.tipray.bean.baseinfo.OilDepot;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
 import com.tipray.constant.CardTypeConst;
+import com.tipray.constant.PageActionMode;
 import com.tipray.constant.SqliteFileConst;
 import com.tipray.constant.SqliteSqlConst;
 import com.tipray.constant.TerminalConfigBitMarkConst;
+import com.tipray.constant.reply.ErrorTagConst;
 import com.tipray.core.exception.ServiceException;
 import com.tipray.dao.CardDao;
 import com.tipray.dao.DeviceDao;
@@ -30,6 +33,7 @@ import com.tipray.util.EmptyObjectUtil;
 import com.tipray.util.FtpUtil;
 import com.tipray.util.JDBCUtil;
 import com.tipray.util.JSONUtil;
+import com.tipray.util.ResponseMsgUtil;
 import com.tipray.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,7 +175,8 @@ public class OilDepotServiceImpl implements OilDepotService {
             OilDepot oilDepotInDb = oilDepotDao.getById(id);
             setRegion(oilDepotInDb);
             // sqlite油库信息是否需要更新
-            boolean isUpdateOfSqliteOilDepot = !oilDepot.getLongitude().equals(oilDepotInDb.getLongitude())
+            boolean isUpdateOfSqliteOilDepot = !oilDepot.getAbbr().equals(oilDepotInDb.getAbbr())
+                    || !oilDepot.getLongitude().equals(oilDepotInDb.getLongitude())
                     || !oilDepot.getLatitude().equals(oilDepotInDb.getLatitude())
                     || !oilDepot.getRadius().equals(oilDepotInDb.getRadius())
                     || !oilDepot.getCoverRegion().equals(oilDepotInDb.getCoverRegion());
@@ -259,11 +264,12 @@ public class OilDepotServiceImpl implements OilDepotService {
                     jdbcUtilOil = new JDBCUtil();
                     jdbcUtilOil.createSqliteConnection(SqliteFileConst.OIL_DEPOT);
                     jdbcUtilOil.createPrepareStatement(SqliteSqlConst.UPDATE_OIL_DEPOT_SQL);
-                    jdbcUtilOil.setFloat(1, oilDepot.getLongitude());
-                    jdbcUtilOil.setFloat(2, oilDepot.getLatitude());
-                    jdbcUtilOil.setInt(3, oilDepot.getRadius());
-                    jdbcUtilOil.setBytes(4, oilDepot.getCover());
-                    jdbcUtilOil.setLong(5, oilDepot.getId());
+                    jdbcUtilOil.setString(1, oilDepot.getAbbr());
+                    jdbcUtilOil.setFloat(2, oilDepot.getLongitude());
+                    jdbcUtilOil.setFloat(3, oilDepot.getLatitude());
+                    jdbcUtilOil.setInt(4, oilDepot.getRadius());
+                    jdbcUtilOil.setBytes(5, oilDepot.getCover());
+                    jdbcUtilOil.setLong(6, oilDepot.getId());
                     jdbcUtilOil.executeUpdate();
                     setParamVer(jdbcUtilOil, SqliteFileConst.OIL_DEPOT);
                 }
@@ -460,10 +466,61 @@ public class OilDepotServiceImpl implements OilDepotService {
             return false;
         }
         Integer count = oilDepotDao.countValidOilDepot(oilDepot);
-        if (count == null || count == 0) {
-            return false;
+        return count != null && count > 0;
+    }
+
+    @Override
+    public ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode) {
+        if (StringUtil.isEmpty(mode)) {
+            throw new IllegalArgumentException("参数不完整！");
         }
-        return true;
+        if (StringUtil.isEmpty(officialId)) {
+            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 11, "油库编号为空！");
+        }
+        if (StringUtil.isEmpty(name)) {
+            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 21, "油库名称为空！");
+        }
+        if (StringUtil.isEmpty(abbr)) {
+            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 31, "油库简称为空！");
+        }
+        if (PageActionMode.EDIT.equalsIgnoreCase(mode)) {
+            OilDepot oilDepot = oilDepotDao.getByOfficialId(officialId);
+            if (!oilDepot.getName().equals(name)) {
+                Integer nameCount = oilDepotDao.countValidOilDepotByName(name);
+                if (nameCount != null && nameCount > 0) {
+                    return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 22, "油库名称已存在！");
+                }
+            }
+            if (!oilDepot.getAbbr().equals(abbr)) {
+                Integer abbrCount = oilDepotDao.countValidOilDepotByAbbr(abbr);
+                if (abbrCount != null && abbrCount > 0) {
+                    return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 32, "油库简称已存在！");
+                }
+            }
+            return ResponseMsgUtil.success();
+        }
+        if (PageActionMode.ADD.equalsIgnoreCase(mode)) {
+            Integer idCount = oilDepotDao.countValidOilDepotByOfficialId(officialId);
+            if (idCount != null && idCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 12, "油库编号已存在！");
+            }
+        }
+        if (StringUtil.isNotEmpty(officialId)) {
+            Integer idCount = oilDepotDao.countValidOilDepotByOfficialId(officialId);
+            if (idCount != null && idCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 12, "油库编号已存在！");
+            }
+            Integer nameCount = oilDepotDao.countValidOilDepotByName(name);
+            if (nameCount != null && nameCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 22, "油库名称已存在！");
+            }
+            Integer abbrCount = oilDepotDao.countValidOilDepotByAbbr(abbr);
+            if (abbrCount != null && abbrCount > 0) {
+                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 32, "油库简称已存在！");
+            }
+            return ResponseMsgUtil.success();
+        }
+        throw new IllegalArgumentException("参数无效！");
     }
 
     @Override

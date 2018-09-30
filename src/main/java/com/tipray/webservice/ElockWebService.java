@@ -8,7 +8,6 @@ import com.tipray.constant.CenterConst;
 import com.tipray.core.exception.ServiceException;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
-import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.pool.ThreadPool;
 import com.tipray.service.ChangeRecordService;
@@ -16,6 +15,8 @@ import com.tipray.service.DistributionRecordService;
 import com.tipray.service.VehicleService;
 import com.tipray.webservice.client.ElockClient;
 import com.tipray.webservice.constant.DistXmlNodeNameConst;
+import com.tipray.webservice.job.DistUdpTask;
+import com.tipray.webservice.job.DistUdpTaskCache;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -147,8 +148,8 @@ public class ElockWebService {
                 logger.warn("配送单所属车辆未绑定车台！<vehicNo>{}</vehicNo>", carNumber);
                 continue;
             }
-            int terminalId = terminal.getDeviceId();
-            if (terminalId == 0) {
+            Integer terminalId = terminal.getDeviceId();
+            if (terminalId == null || terminalId == 0) {
                 logger.warn("配送单所属车辆未绑定车台！<vehicNo>{}</vehicNo>", carNumber);
                 continue;
             }
@@ -157,22 +158,38 @@ public class ElockWebService {
             distributionMap.put("carId", carId);
             distributionMap.put("terminalId", terminalId);
             try {
+                long taskKey = DistUdpTaskCache.buildTaskKey(carId,
+                        Integer.parseInt((String) distributionMap.get("binNum"), 10));
+                DistUdpTaskCache.interrupt(taskKey);
+
                 String invoice = (String) distributionMap.get(DistXmlNodeNameConst.NODE_4_01_DISTRIBUT_NO);
                 // 配送单号代表的配送记录数目
                 Integer invoiceCount = distributionRecordService.countInvoice(invoice);
                 if (invoiceCount == null || invoiceCount == 0) {
-                    addDist(distributionMap, terminalId, invoice);
+                    logger.info("配送单号[{}]代表的配送记录不存在，配送新增！", invoice);
+                    addDist(distributionMap, terminalId, invoice, taskKey);
                     continue;
                 }
                 // 配送单号代表的处于配送中状态的配送记录数目
                 invoiceCount = distributionRecordService.countWaitInvoice(invoice);
                 if (invoiceCount == null || invoiceCount == 0) {
-                    addDist(distributionMap, terminalId, invoice);
+                    logger.info("配送单号[{}]代表的配送记录存在，但无配送中的记录，配送新增！", invoice);
+                    addDist(distributionMap, terminalId, invoice, taskKey);
                     continue;
                 }
+
+                // 相同配送信息的未完成配送记录数目
+                invoiceCount = distributionRecordService.countSameWaitDistInfo(distributionMap);
+                if (invoiceCount != null && invoiceCount > 0) {
+                    logger.info("已存在与配送单号[{}]相同配送信息的未完成配送记录，不处理！", invoice);
+                    continue;
+                }
+
                 // 物流配送接口更改配送信息换站
                 Map<String, Object> map = changeRecordService.distributionChange(distributionMap);
+                logger.info("配送单【{}】换站，数据录入成功！", invoice);
                 ThreadPool.CACHED_THREAD_POOL.execute(() -> {
+                    logger.info("配送单【{}】换站下发开始...", invoice);
                     // 换站ID
                     long changeId = (long) map.get("changeId");
                     // 原配送ID
@@ -195,12 +212,13 @@ public class ElockWebService {
                     boolean isSend = udpServer.send(src);
                     if (!isSend) {
                         AsynUdpCommCache.removeParamCache(cacheId);
-                        logger.warn("UDP发送数据异常！");
+                        logger.warn("配送单【{}】换站下发失败：UDP发送数据异常！", invoice);
                     } else {
-                        new TimeOutTask(src, cacheId).executeRemoteControlTask();
+                        DistUdpTask task = DistUdpTask.buildAlterDistTask(invoice, taskKey, cacheId, src, params);
+                        DistUdpTaskCache.add(taskKey, task);
+                        // new TimeOutTask(src, cacheId).executeRemoteControlTask();
                     }
                 });
-                logger.info("配送单：{}，修改成功!", invoice);
             } catch (Exception e) {
                 logger.error("配送信息存储异常！", e);
                 return "<Message>fail：配送信息存储异常！</Message>";
@@ -215,19 +233,27 @@ public class ElockWebService {
      * @param distributionMap 配送信息
      * @param terminalId      车台设备ID
      * @param invoice         配送单号
+     * @param taskKey         任务key
      * @throws ServiceException
      */
-    private void addDist(Map<String, Object> distributionMap, int terminalId, String invoice)
+    private void addDist(Map<String, Object> distributionMap, int terminalId, String invoice, long taskKey)
             throws ServiceException {
         ByteBuffer dataBuffer = distributionRecordService.addDistributionRecord(distributionMap);
+        logger.info("配送单【{}】新增，数据录入成功！", invoice);
         ThreadPool.CACHED_THREAD_POOL.execute(() -> {
+            logger.info("配送单【{}】新增下发开始...", invoice);
+            short bizId = UdpBizId.REMOTE_CHANGE_STATION_REQUEST;
+            short serialNo = (short) (SerialNumberCache.getSerialNumber(bizId) + 1);
+            int cacheId = AsynUdpCommCache.buildCacheId(bizId, serialNo);
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
-                logger.warn("UDP发送数据异常！");
+                logger.warn("配送单【{}】新增下发失败：UDP发送数据异常！", invoice);
+            } else {
+                DistUdpTask task = DistUdpTask.buildNewDistTask(invoice, taskKey, cacheId, src);
+                DistUdpTaskCache.add(taskKey, task);
             }
         });
-        logger.info("配送单：{}，新增成功!", invoice);
     }
 
     /**

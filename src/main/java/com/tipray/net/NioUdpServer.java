@@ -162,9 +162,7 @@ public class NioUdpServer {
 	 * @return <code>true</code>成功；<code>false</code>失败
 	 */
 	public boolean send(byte[] src, InetSocketAddress target) {
-		ByteBuffer buf = ByteBuffer.allocate(src.length);
-		buf.put(src);
-		return send(buf, target);
+		return send(ByteBuffer.wrap(src), target);
 	}
 
 	/**
@@ -177,8 +175,7 @@ public class NioUdpServer {
 	 * @return <code>true</code>成功；<code>false</code>失败
 	 */
 	public boolean send(String src, InetSocketAddress target) {
-		ByteBuffer buf = StandardCharsets.UTF_8.encode(src);
-		return send(buf, target);
+		return send(StandardCharsets.UTF_8.encode(src), target);
 	}
 
 	/**

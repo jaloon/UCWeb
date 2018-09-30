@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * jqgrid分页对象
+ * 分页对象
  * 
  * @author chends
  */
@@ -26,23 +26,7 @@ public class GridPage<T> implements Serializable {
 	/** 数据集合 */
 	private List<T> dataList = new ArrayList<T>();
 
-	public GridPage(List<T> list, int records, int page, int pageRows, int currentRows, T t) {
-		setRecords(records);
-		setDataList(list);
-		setPage(page);
-		setPageRows(pageRows);
-		setCurrentRows(currentRows);
-		setT(t);
-		if (pageRows == 0) {
-			setTotal(1);
-		} else if (records % pageRows > 0) {
-			setTotal((records / pageRows) + 1);
-		} else {
-			setTotal(records / pageRows);
-		}
-	}
-
-	public GridPage(List<T> list, Long records, int page, int pageRows, int currentRows, T t) {
+	public GridPage(List<T> list, long records, int page, int pageRows, int currentRows, T t) {
 		setRecords(records);
 		setDataList(list);
 		setPage(page);
@@ -54,8 +38,12 @@ public class GridPage<T> implements Serializable {
 		} else if (records % pageRows > 0) {
 			setTotal((int) (records / pageRows) + 1);
 		} else {
-			setTotal((int) (records / pageRows));
+			setTotal((int) records / pageRows);
 		}
+	}
+
+	public GridPage(List<T> list, long records, Page page, T t) {
+	    this(list, records, page.getPageId(), page.getRows(), list.size(), t);
 	}
 
 	public GridPage() {

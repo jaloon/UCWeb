@@ -256,7 +256,7 @@
 			AND a.device_id = #{deviceId}
 			AND a.lock_id = #{lockId}
 			AND a.type = #{alarmType}
-			AND a.STATUS = 0
+			AND a.`status` = 0
 		ORDER BY
 			a.alarm_time DESC,
 			a.id DESC
@@ -265,15 +265,14 @@
 
 	<select id="getAlarmInfoByAlarmId" parameterType="java.lang.Long" resultMap="alarmInfoMap">
         SELECT
-        <include refid="alarmInfo_colums"></include>
-        FROM
-            tbl_alarm a,
-            tbl_vehicle v,
-            tbl_lock l
-        WHERE
-            a.vehicle_id = v.id
-            AND a.lock_id = l.id
-            AND a.id = #{alarmId}
+			<include refid="alarmInfo_colums"></include>
+		FROM
+			tbl_alarm a
+			LEFT JOIN tbl_lock l ON a.lock_id = l.id,
+			tbl_vehicle v
+		WHERE
+			a.vehicle_id = v.id
+			AND a.id = #{alarmId}
     </select>
 
 	<select id="findNotElimitedForApp" resultType="java.util.Map">

@@ -128,6 +128,13 @@ public interface DistributionRecordDao extends BaseDao<DistributionRecord> {
      */
     Integer countWaitInvoice(String invoice);
 
+    /**
+     * 相同配送信息的未完成配送记录数目
+     * @param distributionMap
+     * @return
+     */
+    Integer countSameWaitDistInfo(Map<String, Object> distributionMap);
+
 	/**
 	 * 根据车辆ID和仓号检查先前的配送记录，若有未完成或未知状态的记录，改为配送完成状态
 	 * 
@@ -158,4 +165,5 @@ public interface DistributionRecordDao extends BaseDao<DistributionRecord> {
 	 */
     List<Map<String, Object>> findDistributionsByVehicle(@Param("carNumber") String carNumber,
                                                          @Param("storeId") Integer storeId);
+
 }

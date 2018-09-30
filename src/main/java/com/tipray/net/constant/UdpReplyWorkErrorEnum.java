@@ -27,6 +27,8 @@ public enum UdpReplyWorkErrorEnum {
     OPERATE_FAIL_108_DATA_NOT_AVAILABLE(108, "操作失败，数据不存在"),
     /** 操作失败，业务处理失败 */
     OPERATE_FAIL_109_FAILURE_OF_BUSINESS_PROCESS(109, "操作失败，业务处理失败"),
+    /** 操作失败，设备已断电 */
+    OPERATE_FAIL_110_DEVICE_HAS_BEEN_POWERED_OFF(110, "操作失败，设备已断电"),
     /** 操作失败，设备状态不允许 */
     OPERATE_FAIL_150_DEVICE_STATUS_NOT_ALLOWED(150, "操作失败，设备状态不允许"),
     /** 操作失败，设备存在报警 */

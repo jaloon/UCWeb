@@ -112,6 +112,18 @@ function openFocusLayer(item) {
 }
 
 /**
+ * 图随点移
+ * @param longitude
+ * @param latitude
+ */
+function panTo(longitude, latitude) {
+    var bd09 = wgs84tobd09(longitude, latitude);
+    var point = new BMap.Point(bd09[0], bd09[1]);
+    map.panTo(point);
+    map.setZoom(18);
+}
+
+/**
  * 更新视图
  */
 function upView() {
@@ -213,19 +225,6 @@ function getCarIcon(gpsValid, alarm) {
 }
 
 function flushTrack(tracks) {
-    var point_data = [];
-    var icon_data = [];
-    var text_data = [];
-    var bounds = map.getBounds(); // 返回map可视区域，以地理坐标表示
-    var sw = bounds.getSouthWest(); // 返回矩形区域的西南角
-    var ne = bounds.getNorthEast(); // 返回矩形区域的东北角
-    var swlng = sw.lng,
-        swlat = sw.lat,
-
-        nelng = ne.lng,
-        nelat = ne.lat;
-
-    var jsonData = [];
     tracks.forEach(function (track) {
         var carId = track.carId;
         var lng = track.lastValidLongitude;
@@ -244,8 +243,7 @@ function flushTrack(tracks) {
         car_text_cache.set(carId, text);
 
         if (onlineCarIds.indexOf(carId) >= 0) {
-            car_list_cache.set(carId, text);
-            jsonData.push({
+            car_list_cache.set(carId, {
                 carId: carId,
                 carNo: text,
                 gps: gpsValid ? "有效" : "无效",
@@ -258,32 +256,15 @@ function flushTrack(tracks) {
                 carStatus: track.carStatus,
                 alarm: track.alarm
             });
-            if (pos[0] > swlng && pos[0] < nelng && pos[1] > swlat && pos[1] < nelat) {
-                var geometry = {
-                    type: GeometryType.Point,
-                    coordinates: pos
-                };
-                point_data.push({
-                    carid: carId,
-                    carno: text,
-                    geometry: geometry
-                });
-                icon_data.push({
-                    carid: carId,
-                    carno: text,
-                    geometry: geometry,
-                    deg: deg,
-                    icon: img
-                });
-                text_data.push({
-                    geometry: geometry,
-                    text: text
-                });
-
-            }
         }
     });
-    show(point_data, icon_data, text_data);
+    // 更新地图
+    upView();
+
+    var jsonData = [];
+    car_list_cache.forEach(function (carInfo, carId, mapObj) {
+        jsonData.push(carInfo);
+    });
     // 更新表格数据
     var tableHtml = template('table-tpl', {data: jsonData});
     $('.c-table').eq(0).data('table').updateHtml(tableHtml);
@@ -311,6 +292,10 @@ function flushOnline(onlineInfo) {
         });
         if (car_list_cache.get(carId) != undefined) {
             car_list_cache.delete(carId);
+            car_pos_cache.delete(carId);
+            car_deg_cache.delete(carId);
+            car_img_cache.delete(carId);
+            car_text_cache.delete(carId);
             $("#car_" + carId).remove();
         }
         upView();
@@ -327,6 +312,8 @@ function flushOnline(onlineInfo) {
         }
     }
 }
+
+
 
 var logCount = 0;
 

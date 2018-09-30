@@ -262,7 +262,7 @@ function getUrlParam(name) {
  */
 function angle2aspect(angle) {
     if (isNull(angle)) {
-        return "数据异常"
+        return "-"
     }
     if (angle == 0 || angle == 360) {
         return "正北";
@@ -452,6 +452,7 @@ function stopPropagation(e) {
     }
 }
 
+// 给IE打补丁
 if (!!window.ActiveXObject || "ActiveXObject" in window) {
     // IE浏览器
     document.write('<script src="/resources/plugins/polyfill/sockjs.js"></script>' +

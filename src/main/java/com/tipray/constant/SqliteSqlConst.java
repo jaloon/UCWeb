@@ -225,6 +225,7 @@ public class SqliteSqlConst {
      */
     public static final String UPDATE_OIL_DEPOT_SQL = new StringBuilder()
             .append("UPDATE \"tbl_oildepot\" SET\n")
+            .append("  \"name\" = ?,\n")
             .append("  \"longitude\" = ?,\n")
             .append("  \"latitude\" = ?,\n")
             .append("  \"radius\" = ?,\n")

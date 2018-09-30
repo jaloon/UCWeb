@@ -312,7 +312,7 @@
                 <div class="cell">{{$value.gps}}</div>
             </td>
             <td class="">
-                <div class="cell">{{$value.coordinate}}</div>
+                <div class="cell">({{$value.coordinate}})</div>
             </td>
             <td class="">
                 <div class="cell">{{$value.velocity}}</div>
@@ -321,7 +321,11 @@
                 <div class="cell">{{$value.aspect}}</div>
             </td>
             <td class="">
-                <div class="cell">{{$value.lastcoord}}</div>
+                <div class="cell">
+                    <a href="javascript:panTo({{$value.lastcoord}})">
+                        ({{$value.lastcoord}})
+                    </a>
+                </div>
             </td>
             <td class="">
                 <div class="cell">{{$value.lastspeed}}</div>

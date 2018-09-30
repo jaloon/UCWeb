@@ -96,7 +96,9 @@ public class WebSocketUtil {
         }
         synchronized (session) {
             if (!session.isOpen()) {
-                logger.warn("web socket connection is not still open");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("WebSocket connection is not still open!");
+                }
                 return;
             }
             try {
@@ -136,7 +138,9 @@ public class WebSocketUtil {
 
         synchronized (session) {
             if (!session.isOpen()) {
-                logger.warn("web socket connection is not still open");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("WebSocket connection is not still open!");
+                }
                 return;
             }
             try {
@@ -158,7 +162,9 @@ public class WebSocketUtil {
             return;
         }
         if (!session.isOpen()) {
-            logger.warn("web socket connection is not still open");
+            if (logger.isDebugEnabled()) {
+                logger.debug("WebSocket connection is not still open!");
+            }
             return;
         }
         try {
@@ -179,7 +185,9 @@ public class WebSocketUtil {
             return;
         }
         if (!session.isOpen()) {
-            logger.warn("WebSocket connection is not still open!");
+            if (logger.isDebugEnabled()) {
+                logger.debug("WebSocket connection is not still open!");
+            }
             return;
         }
         try {
@@ -189,5 +197,4 @@ public class WebSocketUtil {
             logger.error("send text message error stack!", e);
         }
     }
-
 }

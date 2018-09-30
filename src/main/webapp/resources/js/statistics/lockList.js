@@ -8,7 +8,8 @@ function showBMap(id) {
         content: '../../manage/statistics/dispatch.do?' + encodeURI('mode=lock&id=' + id)
     });
 }
-$(function() {
+
+$(function () {
 
     $.getJSON("../../../manage/car/selectCars.do", "scope=0&comlimit=1",
         function (data, textStatus, jqXHR) {
@@ -57,7 +58,8 @@ $(function() {
         elem: '#text_begin',
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
-        value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
+        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
         min: -90,
         max: new Date().getTime()
     });
@@ -75,8 +77,9 @@ $(function() {
         var loadLayer = layer.load();
         $.post(
             "../../manage/statistics/findLockRecordsForPage.do",
-            encodeURI("carNumber=" + carNumber + "&status=" + type + "&begin=" + begin + "&end=" + end + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
-            function(gridPage) {
+            encodeURI("carNumber=" + carNumber + "&status=" + type + "&begin=" + begin + "&end=" + end
+                + "&pageId=" + pageId + "&startRow=" + startRow + "&rows=" + rows),
+            function (gridPage) {
                 layer.close(loadLayer);
                 var pageCount = gridPage.total;
                 if (pageCount > 1) {
@@ -89,43 +92,42 @@ $(function() {
                 } else {
                     $("#page_id").html("<option value='1'>1</option>");
                 }
-                $("#page_info").html("页(" + gridPage.currentRows + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
+                var dataCount = gridPage.currentRows;
+                $("#page_info").html("页(" + dataCount + "条数据)/共" + pageCount + "页(共" + gridPage.records + "条数据)");
                 $("#qcar").val(gridPage.t.carNumber);
                 $("#qtype").val(gridPage.t.status);
                 $("#qbegin").val(gridPage.t.begin);
                 $("#qend").val(gridPage.t.end);
-                $(".table-body").html("");
                 var locks = gridPage.dataList;
-                var tableData = "<table width='100%'>";
-                for (var i = 0; i < gridPage.currentRows; i++) {
+                var jsonData = [];
+                for (var i = 0; i < dataCount; i++) {
                     var lock = locks[i];
-                    var coordFlag = lock.longitude == undefined || lock.latitude == undefined;
-                    tableData += (coordFlag == true ? "<tr>" : "<tr ondblclick=\"showBMap(" + lock.id + ")\">") +
-                        "<td class=\"lock-id\">" + lock.id + "</td>" +
-                        "<td class=\"lock-car\">" + lock.carNumber + "</td>";
+                    var coordFlag = lock.longitude != undefined && lock.latitude != undefined;
+                    var gps = "-", coordinate = "-";
                     if (coordFlag) {
-                        tableData += "<td class=\"lock-gps\">数据库记录异常</td>";
-                        tableData += "<td class=\"lock-coordinate\">数据库记录异常</td>";
-                    } else {
-                        tableData += "<td class=\"lock-gps\">" + (lock.coorValid ? "有效" : "无效") + "</td>";
-                        tableData += "<td class=\"lock-coordinate\"><a href=\"javascript:showBMap(" + lock.id + ")\">("
-                            + lock.longitude + ", " + lock.latitude + ")</a></td>";
+                        gps = lock.coorValid ? "有效" : "无效";
+                        coordinate = lock.longitude + ", " + lock.latitude;
                     }
-                    tableData += "<td class=\"lock-velocity\">" + (lock.velocity == undefined ? "数据库记录异常" : lock.velocity) + "</td>" +
-                        "<td class=\"lock-aspect\">" + angle2aspect(lock.angle) + "</td>" +
-                        "<td class=\"lock-dev\">" + lock.lockId + "</td>" +
-                        "<td class=\"lock-store\">" + lock.storeId + "</td>" +
-                        "<td class=\"lock-seat\">" + lock.seatName + "</td>" +
-                        "<td class=\"lock-index\">" + lock.seatIndex + "</td>" +
-                        "<td class=\"lock-time\">" + lock.createDate + "</td>" +
-                        "<td class=\"lock-status\">" + lock.statusName + "</td>" +
-                        "<td class=\"lock-report\">" + lock.changeReportTime + "</td>" +
-                        "<td class=\"lock-alarm\">" + (lock.alarm == undefined ? "数据库记录异常" : lock.alarm) + "</td>" +
-                        "</tr>";
+                    jsonData.push({
+                        id: lock.id,
+                        carNo: lock.carNumber,
+                        // station: lock.station,
+                        coordFlag: coordFlag,
+                        gps: gps,
+                        coordinate: coordinate,
+                        velocity: lock.velocity === undefined ? "-" : lock.velocity,
+                        aspect: angle2aspect(lock.angle),
+                        dev: lock.lockId,
+                        store: "仓" + lock.storeId + "-" + lock.seatName + "-" + lock.seatIndex,
+                        status: lock.statusName,
+                        time: lock.createDate,
+                        report: lock.changeReportTime,
+                        alarm: lock.alarm == undefined ? "-" : lock.alarm
+                    });
                 }
-                tableData += "</table>";
-                tableData = tableData.replace(/>null</g, "><");
-                $(".table-body").html(tableData);
+                // 更新表格数据
+                var tableHtml = template('table-tpl', {data: jsonData});
+                $('.c-table').eq(0).data('table').updateHtml(tableHtml);
             },
             "json"
         ).error(function (XMLHttpRequest, textStatus, errorThrown) {
@@ -147,9 +149,16 @@ $(function() {
         });
     }
 
+    $(window).resize(function () {
+        var height = $(window).height() - 133;
+        $('.table-box').data('height', height);
+        // $(window).trigger('resize');
+    }).resize();
+
+    $('[role="c-table"]').jqTable();
     showList("", "", "", "", 1);
 
-    $("#search_btn").click(function() {
+    $("#search_btn").click(function () {
         var carNumber = $("#text_car").val();
         var type = $("#text_type").val();
         var begin = $("#text_begin").val();
@@ -178,7 +187,7 @@ $(function() {
         showList(carNumber, type, begin, end, pageId);
     }
 
-    $("#page_id").change(function() {
+    $("#page_id").change(function () {
         var pageId = $("#page_id").val();
         if (isNull(pageId)) {
             pageId = 1;
@@ -186,7 +195,7 @@ $(function() {
         refreshPage(pageId);
     });
 
-    $("#page_size").change(function() {
+    $("#page_size").change(function () {
         refreshPage(1);
     });
 });

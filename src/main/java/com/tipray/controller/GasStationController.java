@@ -3,6 +3,7 @@ package com.tipray.controller;
 import com.tipray.bean.GridPage;
 import com.tipray.bean.Message;
 import com.tipray.bean.Page;
+import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.baseinfo.Card;
 import com.tipray.bean.baseinfo.GasStation;
 import com.tipray.bean.baseinfo.Handset;
@@ -148,6 +149,13 @@ public class GasStationController extends BaseAction {
     public Boolean isGasStationExist(GasStation gasStation) {
         logger.info("gasStation exist, gasStation={}", gasStation);
         return gasStationService.isGasStationExist(gasStation);
+    }
+
+    @RequestMapping(value = "getExistInfo.do")
+    @ResponseBody
+    public ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode) {
+        logger.info("get gasStation exist info, officialId={}, name={}, abbr={}, mode={}", officialId, name, abbr, mode);
+        return gasStationService.getExistInfo(officialId, name, abbr, mode);
     }
 
     @RequestMapping(value = "getGasStationList.do")
