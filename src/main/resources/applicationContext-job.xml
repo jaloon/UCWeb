@@ -7,15 +7,12 @@
     http://www.springframework.org/schema/task
 	http://www.springframework.org/schema/task/spring-task.xsd">
 
-    <!-- 定时器开关 -->
-    <!-- <task:annotation-driven/> -->
-
     <!-- <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" />  -->
 
     <!-- 启用注解驱动的定时任务 -->
     <task:annotation-driven scheduler="scheduler"/>
     <!-- 配置定时任务的线程池（多任务时需要进行配置，若不配置多任务下会有问题。） -->
-    <task:scheduler id="scheduler" pool-size="5"/>
+    <task:scheduler id="scheduler" pool-size="10"/>
 
     <task:scheduled-tasks scheduler="scheduler">
         <!--<task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/>-->
@@ -34,5 +31,7 @@
         <task:scheduled ref="scheduledJob" method="executeLastTtracksQuery" cron="*/5 * * * * ?"/>
         <!--车辆基础配置信息sqlite文件同步任务，每天22点半执行一次-->
         <task:scheduled ref="scheduledJob" method="executeSqliteSync" cron="0 30 22 * * ?"/>
+        <!--删除过期日志（超过60天的）任务，每天0点执行一次-->
+        <task:scheduled ref="scheduledJob" method="executeDeleteOverdueLog" cron="0 0 0 * * ?"/>
     </task:scheduled-tasks>
 </beans>

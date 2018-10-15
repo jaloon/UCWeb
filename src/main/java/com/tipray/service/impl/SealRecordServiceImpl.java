@@ -96,8 +96,7 @@ public class SealRecordServiceImpl implements SealRecordService {
 
     @Override
     public List<SealRecord> findAllRecords() {
-        List<SealRecord> list = sealRecordDao.findAll();
-        return list;
+        return sealRecordDao.findAll();
     }
 
     @Override
@@ -142,6 +141,6 @@ public class SealRecordServiceImpl implements SealRecordService {
     public GridPage<SealRecord> findRecordsForPage(SealRecord record, Page page) {
         long records = countRecord(record);
         List<SealRecord> list = findByPage(record, page);
-        return new GridPage<SealRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 }

@@ -329,13 +329,13 @@
                                 <tr>
                                     <td>加油站名称:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="name" value="${gasStation.name}">
+                                        <input type="text" class="editInfo" id="name" value="${gasStation.name}" required>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>加油站名称:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="abbr" value="${gasStation.abbr}">
+                                        <input type="text" class="editInfo" id="abbr" value="${gasStation.abbr}" required>
                                     </td>
                                 </tr>
                                 <tr>

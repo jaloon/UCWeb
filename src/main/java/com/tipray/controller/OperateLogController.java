@@ -25,7 +25,6 @@ import javax.annotation.Resource;
  */
 @Controller
 @RequestMapping("/manage/log")
-/* @Scope("prototype") */
 public class OperateLogController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(OperateLogController.class);
     @Resource
@@ -38,7 +37,9 @@ public class OperateLogController extends BaseAction {
     @ResponseBody
     public GridPage<InfoManageLog> ajaxFindInfoManageLogsForPage(@ModelAttribute InfoManageLog infoManageLog,
                                                                  @ModelAttribute Page page) {
-        logger.info("infoManageLog list page, infoManageLog={}, page={}", infoManageLog, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("infoManageLog list page, infoManageLog={}, page={}", infoManageLog, page);
+        }
         GridPage<InfoManageLog> gridPage = infoManageLogService.findInfoManageLogsForPage(infoManageLog, page);
         return gridPage;
     }
@@ -48,7 +49,9 @@ public class OperateLogController extends BaseAction {
     @ResponseBody
     public GridPage<VehicleManageLog> ajaxFindVehicleManageLogsForPage(@ModelAttribute VehicleManageLog infoManageLog,
                                                                        @ModelAttribute Page page) {
-        logger.info("infoManageLog list page, infoManageLog={}, page={}", infoManageLog, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("infoManageLog list page, infoManageLog={}, page={}", infoManageLog, page);
+        }
         GridPage<VehicleManageLog> gridPage = vehicleManageLogService.findVehicleManageLogsForPage(infoManageLog, page);
         return gridPage;
     }

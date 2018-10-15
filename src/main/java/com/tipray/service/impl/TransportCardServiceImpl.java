@@ -107,7 +107,7 @@ public class TransportCardServiceImpl implements TransportCardService {
 	public GridPage<TransportCard> findTransportCardsForPage(TransportCard transportCard, Page page) {
 		long records = countTransportCard(transportCard);
 		List<TransportCard> list = findByPage(transportCard, page);
-		return new GridPage<TransportCard>(list, records, page.getPageId(), page.getRows(), list.size(), transportCard);
+		return new GridPage<>(list, records, page, transportCard);
 	}
 
 	@Override

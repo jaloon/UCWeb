@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 
 /**
- * AuthorizedRecordService
+ * 授权记录业务层
  *
  * @author chenlong
  * @version 1.0 2018-07-12

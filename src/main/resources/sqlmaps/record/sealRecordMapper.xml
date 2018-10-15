@@ -84,4 +84,32 @@
 		ORDER BY s.id DESC
 		limit #{page.startRow}, #{page.rows}
 	</select>
+
+    <select id="findSealRecords" resultType="java.util.LinkedHashMap">
+        <![CDATA[
+        SELECT
+            id,
+            vehicle_id,
+            device_id,
+            record_id,
+            vehicle_device_id,
+            pre_status,
+            `status`,
+            status_incident,
+            trigger_type,
+            trigger_id,
+            station_type,
+            station_id,
+            fn_get_alarm_station(station_type, station_id) station,
+            store_id_list,
+            HEX(lock_device_id_list) lock_device_id_list,
+            vehicle_track_id,
+            trigger_time
+        FROM
+            tbl_vehicle_seal_status
+        WHERE
+            vehicle_id = #{carId}
+            AND trigger_time > #{beginTime}
+        ]]>
+    </select>
 </mapper>

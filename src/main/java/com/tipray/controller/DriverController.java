@@ -33,7 +33,6 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/manage/driver")
-/* @Scope("prototype") */
 public class DriverController extends BaseAction {
 	private static final Logger logger = LoggerFactory.getLogger(DriverController.class);
 
@@ -45,7 +44,9 @@ public class DriverController extends BaseAction {
 	@PermissionAnno("driverModule")
 	@RequestMapping(value = "dispatch.do")
 	public String dispatch(String mode, Long id, ModelMap modelMap) {
-		logger.info("dispatch driver edit page, mode={}, id={}", mode, id);
+		if (logger.isDebugEnabled()) {
+            logger.debug("dispatch driver edit page, mode={}, id={}", mode, id);
+        }
 		modelMap.put("mode", mode);
 		Driver driver = new Driver();
 		if (id != null && id > 0) {
@@ -59,7 +60,9 @@ public class DriverController extends BaseAction {
 	@RequestMapping(value = "add.do")
 	@ResponseBody
 	public Message addDriver(@ModelAttribute Driver driver) {
-        logger.info("add driver, driver={}", driver);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add driver, driver={}", driver);
+        }
 		InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
 		Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DRIVER
 				| LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -82,7 +85,9 @@ public class DriverController extends BaseAction {
 	@RequestMapping(value = "update.do")
 	@ResponseBody
 	public Message updateDriver(Driver driver) {
-        logger.info("update driver, driver={}", driver);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update driver, driver={}", driver);
+        }
 		InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
 		Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DRIVER
 				| LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -105,7 +110,9 @@ public class DriverController extends BaseAction {
 	@RequestMapping(value = "delete.do")
 	@ResponseBody
 	public Message deleteDriver(Long id) {
-        logger.info("delete driver, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete driver, id={}", id);
+        }
 		InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
 		Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DRIVER
 				| LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -128,9 +135,10 @@ public class DriverController extends BaseAction {
 	@RequestMapping(value = "ajaxFindForPage.do")
 	@ResponseBody
 	public GridPage<Driver> ajaxFinddriversForPage(@ModelAttribute Driver driver, @ModelAttribute Page page) {
-        logger.info("driver list page, driver={}, page={}", driver, page);
-		GridPage<Driver> gridPage = driverService.findDriversForPage(driver, page);
-		return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("driver list page, driver={}, page={}", driver, page);
+        }
+        return driverService.findDriversForPage(driver, page);
 	}
 
 	@RequestMapping(value = "findFreeDrivers.do")
@@ -142,7 +150,9 @@ public class DriverController extends BaseAction {
 	@RequestMapping(value = "getDriverById.do")
 	@ResponseBody
 	public Driver getDriverById(Long id) {
-		logger.info("get driver by id, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get driver by id, id={}", id);
+        }
 	    return driverService.getDriverById(id);
 	}
 }

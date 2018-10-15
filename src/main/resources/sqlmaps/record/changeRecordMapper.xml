@@ -124,7 +124,12 @@
 	
 	<update id="updateChangeStatus">
 		update tbl_remote_change_gasstation
-		set status=#{changeStatus}
+		<set>
+			status=#{changeStatus}
+			<if test="changeStatus == 2">
+				,finish_time = NOW()
+			</if>
+		</set>
 		where id=#{changeId}
 	</update>
 	

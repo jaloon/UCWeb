@@ -14,10 +14,9 @@ import net.sf.json.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -27,7 +26,7 @@ import java.util.Map;
  *
  * @author chenlong
  */
-@Controller
+@RestController
 @RequestMapping("api")
 public class ExternalInterface extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(ExternalInterface.class);
@@ -45,7 +44,6 @@ public class ExternalInterface extends BaseAction {
      * @param biz     {@link Integer} 业务类型（1 报警，2 车台消除报警）
      */
     @RequestMapping(value = "alarm", method = RequestMethod.POST)
-    @ResponseBody
     public void alarm(Long alarmId, Integer biz) {
         logger.info("报警业务：alarmId = {}，biz = {}", alarmId, biz);
         boolean isParamsValid = alarmId != null && alarmId > 0 && biz != null && biz > 0;
@@ -72,7 +70,6 @@ public class ExternalInterface extends BaseAction {
      * @param vehicleCfg      {@link JSON} 车辆配置信息 vehicleCfg={"vehicle_id": 1}
      */
     @RequestMapping(value = "monitor", method = RequestMethod.POST)
-    @ResponseBody
     public void monitor(String vehicleIsOnline, String vehicleCfg) {
         logger.info("车辆监控业务：vehicleIsOnline = {}, vehicleCfg = {}", vehicleIsOnline, vehicleCfg);
         try {
@@ -112,7 +109,6 @@ public class ExternalInterface extends BaseAction {
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "centerdev/add", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseMsg addCenterdev(String centerdev) {
         logger.info("同步新增APP归属信息：centerdev={}", centerdev);
         try {
@@ -132,7 +128,6 @@ public class ExternalInterface extends BaseAction {
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "centerdev/update", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseMsg updateCenterdev(String centerdev) {
         logger.info("同步更新APP归属信息：centerdev={}", centerdev);
         try {
@@ -152,7 +147,6 @@ public class ExternalInterface extends BaseAction {
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "centerdev/delete", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseMsg deleteCenterdev(Long id) {
         logger.info("同步删除APP归属信息：id={}", id);
         try {
@@ -170,7 +164,6 @@ public class ExternalInterface extends BaseAction {
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "appver/add", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseMsg addAppver(String appver) {
         logger.info("同步新增APP版本信息：appver={}", appver);
         try {
@@ -190,7 +183,6 @@ public class ExternalInterface extends BaseAction {
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "appver/update", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseMsg updateAppver(String appver) {
         logger.info("同步更新APP版本信息：appver={}", appver);
         try {
@@ -210,7 +202,6 @@ public class ExternalInterface extends BaseAction {
      * @return {@link ResponseMsg}
      */
     @RequestMapping(value = "appver/delete", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseMsg deleteAppver(Long id) {
         logger.info("同步删除APP版本信息：id={}", id);
         try {

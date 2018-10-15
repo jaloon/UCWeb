@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="../../resources/css/base.css">
         <link rel="stylesheet" href="../../resources/css/normal.css">
         <link rel="stylesheet" href="../../resources/plugins/jqTable/css/jqTable.css">
+        <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
     </head>
 
     <body>
@@ -177,7 +178,7 @@
             </tbody>
         </table>
     </script>
-    <script src="../../resources/plugins/jquery-1.8.3.min.js"></script>
+
     <script src="../../resources/plugins/layer/layer.js"></script>
     <!--开源模版引擎： art-template@4.12.2 for browser | https://github.com/aui/art-template -->
     <script src="../../resources/plugins/jqTable/js/plugins/artTemplate.js"></script>

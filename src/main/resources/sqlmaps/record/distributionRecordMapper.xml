@@ -106,7 +106,7 @@
 	<insert id="addByChangeInfo" useGeneratedKeys="true" keyProperty="changedTransportId" parameterType="com.tipray.bean.ChangeInfo">
 		insert into
 		tbl_transport(distribute_id,vehicle_id,device_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
-		values(#{invoice},#{carId},IFNULL(#{terminalId}, 0),#{storeId},#{oildepotId},#{changedGasstationId},5,6,0)
+		values(#{invoice},#{carId},IFNULL(#{terminalId}, 0),#{storeId},#{oildepotId},#{changedGasstationId},0,6,0)
 	</insert>
 	
 	<insert id="addByDistributionMap" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
@@ -119,7 +119,7 @@
 			#{binNum},
 			(select o.id from tbl_oildepot o where o.official_id=#{depotNo}),
 			(select g.id from tbl_gasstation g where g.official_id=#{deptId}),
-			1,0,0)
+			0,0,0)
 	</insert>
 	
 	<select id="countInvoice" parameterType="java.lang.String" resultType="java.lang.Integer">
@@ -171,46 +171,38 @@
 			DATE_FORMAT( t.issue_time, '%Y-%m-%d %H:%i:%s' ) issue_time
 		]]>
 	</sql>
-	
+
 	<select id="findDistributionsByGasStationId" parameterType="java.lang.Long" resultType="java.util.LinkedHashMap">
 		SELECT
-			<include refid="select_distribution"></include>
--- 			,IF(ISNULL(s.is_online) || s.is_online = 0, -1, tt.vehicle_status) vehicle_status
--- 			,tt.is_lnglat_valid
--- 			,tt.longitude
--- 			,tt.latitude
+		<include refid="select_distribution"></include>
 		FROM
-			tbl_transport t
-			,tbl_vehicle c
-			,tbl_oildepot o
-			,tbl_gasstation g
--- 			,tbl_vehicle_newest_track tt
--- 			,tbl_vehicle_realtime_status s
+		tbl_transport t
+		,tbl_vehicle c
+		,tbl_oildepot o
+		,tbl_gasstation g
 		WHERE
-			t.vehicle_id = c.id
-			AND c.vehicle_device_id > 0
--- 			AND tt.vehicle_id = c.id
--- 			AND s.vehicle_id = c.id
-			AND t.oildepot_id = o.id
-			AND t.gasstation_id = g.id 
-			AND t.`status` = 1
-			AND t.gasstation_id = #{gasStationId}
+		t.vehicle_id = c.id
+		AND c.vehicle_device_id > 0
+		AND t.oildepot_id = o.id
+		AND t.gasstation_id = g.id
+		AND <![CDATA[ t.`status` < 2 ]]>
+		AND t.gasstation_id = #{gasStationId}
 	</select>
-	
+
 	<select id="findDistributionsByVehicle" parameterType="java.lang.Long" resultType="java.util.LinkedHashMap">
 		SELECT
-			<include refid="select_distribution"></include> 
+		<include refid="select_distribution"></include>
 		FROM
-			tbl_transport t,
-			tbl_vehicle c,
-			tbl_oildepot o,
-			tbl_gasstation g 
+		tbl_transport t,
+		tbl_vehicle c,
+		tbl_oildepot o,
+		tbl_gasstation g
 		WHERE
-			t.vehicle_id = c.id 
-			AND t.oildepot_id = o.id 
-			AND t.gasstation_id = g.id 
-			AND t.`status` = 1
-			AND c.vehicle_number = #{carNumber}
+		t.vehicle_id = c.id
+		AND t.oildepot_id = o.id
+		AND t.gasstation_id = g.id
+		AND <![CDATA[ t.`status` < 2 ]]>
+		AND c.vehicle_number = #{carNumber}
 		<if test="storeId != null and storeId != 0">
 			AND t.store_id = #{storeId}
 		</if>

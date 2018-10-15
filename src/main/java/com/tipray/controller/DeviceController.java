@@ -47,7 +47,9 @@ public class DeviceController extends BaseAction {
     @PermissionAnno("deviceModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch device edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch device edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         Device device = new Device();
         if (id != null && id > 0) {
@@ -61,7 +63,9 @@ public class DeviceController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addDevice(@ModelAttribute Device device) {
-        logger.info("add device, device={}", device);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add device, device={}", device);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DEVICE
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -84,7 +88,9 @@ public class DeviceController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateDevice(@ModelAttribute Device device) {
-        logger.info("update device, device={}", device);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update device, device={}", device);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DEVICE
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -107,7 +113,9 @@ public class DeviceController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteDevice(Long id) {
-        logger.info("delete device, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete device, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DEVICE
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -129,21 +137,27 @@ public class DeviceController extends BaseAction {
     @RequestMapping(value = "getByDeviceId.do")
     @ResponseBody
     public Device getDeviceByDeviceId(Integer deviceId) {
-        logger.info("get device by device_id, deviceId={}", deviceId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get device by device_id, deviceId={}", deviceId);
+        }
         return deviceService.getDeviceByDeviceId(deviceId);
     }
 
     @RequestMapping(value = "findByType.do")
     @ResponseBody
     public List<Device> findDevicesByType(Integer deviceType) {
-        logger.info("find devices by type, deviceType={}", deviceType);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find devices by type, deviceType={}", deviceType);
+        }
         return deviceService.findByType(deviceType);
     }
 
     @RequestMapping(value = "isExist.do")
     @ResponseBody
     public Boolean isDeviceExist(Integer deviceId) {
-        logger.info("device exist, deviceId={}", deviceId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("device exist, deviceId={}", deviceId);
+        }
         return deviceService.getDeviceByDeviceId(deviceId) != null;
     }
 
@@ -151,9 +165,10 @@ public class DeviceController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Device> ajaxFindDevicesForPage(@ModelAttribute Device device, @ModelAttribute Page page) {
-        logger.info("device list page, device={}, page={}", device, page);
-        GridPage<Device> gridPage = deviceService.findDeviceForPage(device, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("device list page, device={}, page={}", device, page);
+        }
+        return deviceService.findDeviceForPage(device, page);
     }
 
     @PermissionAnno("syncDevice")
@@ -178,9 +193,9 @@ public class DeviceController extends BaseAction {
         } catch (Exception e) {
             type++;
             description.append("失败！");
-            StringBuilder builder = new StringBuilder().append("操作员：").append(user.getName()).append('(')
+            StringBuilder logBuilder = new StringBuilder().append("操作员：").append(user.getName()).append('(')
                     .append(user.getAccount()).append(")，同步设备异常！");
-            logger.error(builder.toString(), e);
+            logger.error(logBuilder.toString(), e);
             return Message.error(e);
         } finally {
             OperateLogUtil.addInfoManageLog(infoManageLog, type, description.toString(), infoManageLogService, logger);

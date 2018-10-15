@@ -200,6 +200,7 @@ public class ElockWebService {
                     ByteBuffer dataBuffer = (ByteBuffer) map.get("dataBuffer");
 
                     Map<String, Object> params = new HashMap<>();
+                    params.put("type", 1);
                     params.put("changeId", changeId);
                     params.put("transportId", transportId);
                     params.put("changedTransportId", changedTransportId);
@@ -238,19 +239,28 @@ public class ElockWebService {
      */
     private void addDist(Map<String, Object> distributionMap, int terminalId, String invoice, long taskKey)
             throws ServiceException {
-        ByteBuffer dataBuffer = distributionRecordService.addDistributionRecord(distributionMap);
+        Long transportId = distributionRecordService.addDistributionRecord(distributionMap);
         logger.info("配送单【{}】新增，数据录入成功！", invoice);
         ThreadPool.CACHED_THREAD_POOL.execute(() -> {
             logger.info("配送单【{}】新增下发开始...", invoice);
+            ByteBuffer dataBuffer = distributionRecordService.buildNewDistDataBuffer(
+                    (String) distributionMap.get(DistXmlNodeNameConst.NODE_4_06_DEPT_ID),
+                    transportId.intValue(),
+                    Byte.parseByte((String) distributionMap.get(DistXmlNodeNameConst.NODE_4_05_BIN_NUM), 10));
+            Map<String, Object> params = new HashMap<>();
+            params.put("type", 2);
+            params.put("transportId", transportId);
             short bizId = UdpBizId.REMOTE_CHANGE_STATION_REQUEST;
             short serialNo = (short) (SerialNumberCache.getSerialNumber(bizId) + 1);
             int cacheId = AsynUdpCommCache.buildCacheId(bizId, serialNo);
+            AsynUdpCommCache.putParamCache(cacheId, params);
+
             ByteBuffer src = SendPacketBuilder.buildProtocol0x1401(terminalId, dataBuffer);
             boolean isSend = udpServer.send(src);
             if (!isSend) {
                 logger.warn("配送单【{}】新增下发失败：UDP发送数据异常！", invoice);
             } else {
-                DistUdpTask task = DistUdpTask.buildNewDistTask(invoice, taskKey, cacheId, src);
+                DistUdpTask task = DistUdpTask.buildNewDistTask(invoice, taskKey, cacheId, src, params);
                 DistUdpTaskCache.add(taskKey, task);
             }
         });

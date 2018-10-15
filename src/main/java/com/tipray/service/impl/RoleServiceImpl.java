@@ -85,6 +85,6 @@ public class RoleServiceImpl implements RoleService {
 	public GridPage<Role> findRolesForPage(Role role, Page page) {
 		long records = countRole(role);
 		List<Role> list = findByPage(role, page);
-		return new GridPage<Role>(list, records, page.getPageId(), page.getRows(), list.size(), role);
+		return new GridPage<>(list, records, page, role);
 	}
 }

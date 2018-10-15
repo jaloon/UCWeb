@@ -278,13 +278,13 @@
                                 <tr>
                                     <td>油库名称:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="name" value="${oilDepot.name}">
+                                        <input type="text" class="editInfo" id="name" value="${oilDepot.name}" required>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>油库简称:</td>
                                     <td>
-                                        <input type="text" class="editInfo" id="abbr" value="${oilDepot.abbr}">
+                                        <input type="text" class="editInfo" id="abbr" value="${oilDepot.abbr}" required>
                                     </td>
                                 </tr>
                                 <tr>

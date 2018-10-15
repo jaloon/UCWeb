@@ -102,6 +102,6 @@ public class RemoteRecordServiceImpl implements RemoteRecordService {
     public GridPage<RemoteRecord> findRecordsForPage(RemoteRecord record, Page page) {
         long records = countRecord(record);
         List<RemoteRecord> list = findByPage(record, page);
-        return new GridPage<RemoteRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 }

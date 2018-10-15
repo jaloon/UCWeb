@@ -70,8 +70,7 @@ public class OkHttpUtil {
         try {
             SSLContext sslcontext = SSLContext.getInstance("SSL");
             sslcontext.init(null, trustManagers, new SecureRandom());
-            SSLSocketFactory sslSocketFactory = sslcontext.getSocketFactory();
-            return sslSocketFactory;
+            return sslcontext.getSocketFactory();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -371,6 +370,7 @@ public class OkHttpUtil {
                 try {
                     fileOutputStream.close();
                 } catch (IOException e) {
+                    // none IOException expected
                 }
                 fileOutputStream = null;
             }
@@ -378,6 +378,7 @@ public class OkHttpUtil {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
+                    // none IOException expected
                 }
                 inputStream = null;
             }

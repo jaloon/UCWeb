@@ -53,7 +53,9 @@ public class StatisticsController extends BaseAction {
     @PermissionAnno("statisticsManage")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch record bmap page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch record bmap page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         Record record = null;
         switch (mode) {
@@ -96,9 +98,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<AlarmRecord> findAlarmRecordsForPage(@ModelAttribute AlarmRecord alarmRecord,
                                                          @ModelAttribute Page page) {
-        logger.info("alarm record list page, alarmRecord={}, page={}", alarmRecord, page);
-        GridPage<AlarmRecord> gridPage = alarmRecordService.findRecordsForPage(alarmRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("alarm record list page, alarmRecord={}, page={}", alarmRecord, page);
+        }
+        return alarmRecordService.findRecordsForPage(alarmRecord, page);
     }
 
     @PermissionAnno("remoteRecordModule")
@@ -106,9 +109,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<RemoteRecord> findRemoteRecordsForPage(@ModelAttribute RemoteRecord remoteRecord,
                                                            @ModelAttribute Page page) {
-        logger.info("remote record list page, remoteRecord={}, page={}", remoteRecord, page);
-        GridPage<RemoteRecord> gridPage = remoteRecordService.findRecordsForPage(remoteRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("remote record list page, remoteRecord={}, page={}", remoteRecord, page);
+        }
+        return remoteRecordService.findRecordsForPage(remoteRecord, page);
     }
 
     @PermissionAnno("lockStatusModule")
@@ -116,9 +120,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<LockRecord> findLockRecordsForPage(@ModelAttribute LockRecord lockRecord,
                                                        @ModelAttribute Page page) {
-        logger.info("lock record list page, lockRecord={}, page={}", lockRecord, page);
-        GridPage<LockRecord> gridPage = lockRecordService.findRecordsForPage(lockRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("lock record list page, lockRecord={}, page={}", lockRecord, page);
+        }
+        return lockRecordService.findRecordsForPage(lockRecord, page);
     }
 
     @PermissionAnno("sealRecordModule")
@@ -126,9 +131,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<SealRecord> findSealRecordsForPage(@ModelAttribute SealRecord sealRecord,
                                                         @ModelAttribute Page page) {
-        logger.info("inout record list page, sealRecord={}, page={}", sealRecord, page);
-        GridPage<SealRecord> gridPage = sealRecordService.findRecordsForPage(sealRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("inout record list page, sealRecord={}, page={}", sealRecord, page);
+        }
+        return sealRecordService.findRecordsForPage(sealRecord, page);
     }
 
     @PermissionAnno("transRecordModule")
@@ -136,9 +142,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<DistributionRecord> findDistributionRecordsForPage(
             @ModelAttribute DistributionRecord distributionRecord, @ModelAttribute Page page) {
-        logger.info("distribution record list page, distributionRecord={}, page={}", distributionRecord, page);
-        GridPage<DistributionRecord> gridPage = distributionRecordService.findRecordsForPage(distributionRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("distribution record list page, distributionRecord={}, page={}", distributionRecord, page);
+        }
+        return distributionRecordService.findRecordsForPage(distributionRecord, page);
     }
 
     @PermissionAnno("changeRecordModule")
@@ -146,9 +153,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<ChangeRecord> findChangeRecordsForPage(@ModelAttribute ChangeRecord changeRecord,
                                                            @ModelAttribute Page page) {
-        logger.info("change record list page, changeRecord={}, page={}", changeRecord, page);
-        GridPage<ChangeRecord> gridPage = changeRecordService.findRecordsForPage(changeRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("change record list page, changeRecord={}, page={}", changeRecord, page);
+        }
+        return changeRecordService.findRecordsForPage(changeRecord, page);
     }
 
     @PermissionAnno("usageRecordModule")
@@ -156,9 +164,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<UsageRecord> findUsageRecordsForPage(@ModelAttribute UsageRecord usageRecord,
                                                          @ModelAttribute Page page) {
-        logger.info("usage record list page, usageRecord={}, page={}", usageRecord, page);
-        GridPage<UsageRecord> gridPage = usageRecordService.findRecordsForPage(usageRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("usage record list page, usageRecord={}, page={}", usageRecord, page);
+        }
+        return usageRecordService.findRecordsForPage(usageRecord, page);
     }
 
     @PermissionAnno("resetRecordModule")
@@ -166,9 +175,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<UnlockResetRecord> findResetRecordsForPage(@ModelAttribute UnlockResetRecord resetRecord,
                                                                @ModelAttribute Page page) {
-        logger.info("reset record list page, resetRecord={}, page={}", resetRecord, page);
-        GridPage<UnlockResetRecord> gridPage = unlockResetRecordService.findRecordsForPage(resetRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("reset record list page, resetRecord={}, page={}", resetRecord, page);
+        }
+        return unlockResetRecordService.findRecordsForPage(resetRecord, page);
     }
 
     @PermissionAnno("eventRecordModule")
@@ -176,9 +186,10 @@ public class StatisticsController extends BaseAction {
     @ResponseBody
     public GridPage<TerminalEventRecord> findEventRecordsForPage(@ModelAttribute TerminalEventRecord eventRecord,
                                                                  @ModelAttribute Page page) {
-        logger.info("event record list page, eventRecord={}, page={}", eventRecord, page);
-        GridPage<TerminalEventRecord> gridPage = terminalEventRecordService.findRecordsForPage(eventRecord, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("event record list page, eventRecord={}, page={}", eventRecord, page);
+        }
+        return terminalEventRecordService.findRecordsForPage(eventRecord, page);
     }
 
     /**
@@ -202,7 +213,9 @@ public class StatisticsController extends BaseAction {
     @RequestMapping(value = "findDistributionsByGasStationId.do")
     @ResponseBody
     public List<Map<String, Object>> findDistributionsByGasStationId(Long gasStationId) {
-        logger.info("find distributions by station id, gasStationId={}", gasStationId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find distributions by station id, gasStationId={}", gasStationId);
+        }
         return distributionRecordService.findDistributionsByGasStationId(gasStationId);
     }
 
@@ -216,7 +229,9 @@ public class StatisticsController extends BaseAction {
     @RequestMapping(value = "findDistributionsByVehicle.do")
     @ResponseBody
     public List<Map<String, Object>> findDistributionsByVehicle(String carNumber, Integer storeId) {
-        logger.info("find distributions by vehicle, carNumber={}, storeId={}", carNumber, storeId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find distributions by vehicle, carNumber={}, storeId={}", carNumber, storeId);
+        }
         return distributionRecordService.findDistributionsByVehicle(carNumber, storeId);
     }
 

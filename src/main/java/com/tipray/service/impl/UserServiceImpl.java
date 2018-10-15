@@ -125,6 +125,6 @@ public class UserServiceImpl implements UserService {
 	public GridPage<User> findUsersForPage(User user, Page page) {
 		long records = countUser(user);
 		List<User> list = findByPage(user, page);
-		return new GridPage<User>(list, records, page.getPageId(), page.getRows(), list.size(), user);
+		return new GridPage<>(list, records, page, user);
 	}
 }

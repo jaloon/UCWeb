@@ -358,7 +358,8 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
      * @param e           {@link Exception}
      */
     private void dealException(String description, boolean isSendEmail, String[] receivers, Exception e) {
-        if (isSendEmail) {
+        logger.error(description + "同步异常！", e);
+        if (isSendEmail && receivers != null) {
             try {
                 StringBuilder subBuilder = new StringBuilder()
                         .append("sqlite同步异常通知-")
@@ -392,7 +393,6 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
                 logger.error("发送sqlite同步异常邮件失败！{}", e.toString());
             }
         }
-        logger.error(description + "同步异常！", e);
     }
 
     /**

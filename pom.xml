@@ -82,7 +82,8 @@
             <version>1.4.10</version>
         </dependency>-->
         <!-- junit mock end -->
-        <dependency>
+
+        <!--<dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>1.6.1</version>
@@ -92,6 +93,11 @@
                     <artifactId>xml-apis</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>-->
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.1</version>
         </dependency>
 
         <!-- spring start -->
@@ -371,7 +377,6 @@
             <!--<version>1.6</version>-->
         <!--</dependency>-->
 
-
         <!-- logger config start -->
         <dependency>
             <groupId>commons-logging</groupId>
@@ -450,11 +455,11 @@
             <version>1.1</version>
             <scope>provided</scope>
         </dependency> -->
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-catalina</artifactId>
-            <version>8.5.23</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.tomcat</groupId>-->
+            <!--<artifactId>tomcat-catalina</artifactId>-->
+            <!--<version>8.5.23</version>-->
+        <!--</dependency>-->
 
         <!--<dependency>-->
             <!--<groupId>org.apache.tomcat</groupId>-->
@@ -492,14 +497,13 @@
         </dependency> -->
         <!-- cxf config end -->
 
-        <!-- ftpserver -->
+        <!-- ftp server -->
         <dependency>
             <groupId>org.apache.ftpserver</groupId>
             <artifactId>ftpserver-core</artifactId>
             <version>1.1.1</version>
-            <!-- <scope>test</scope> -->
         </dependency>
-        <!-- ftpclient -->
+        <!-- ftp client -->
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
@@ -559,68 +563,68 @@
         <finalName>UCWeb</finalName><!-- war包文件名 -->
         <outputDirectory>${webroot.path}/WEB-INF/classes</outputDirectory>
         <plugins>
-            <!--<plugin>&lt;!&ndash; 拷贝资源文件（css\js），便于下一步的压缩 &ndash;&gt;-->
-                <!--<artifactId>maven-resources-plugin</artifactId>-->
-                <!--<version>2.5</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>copy-resources</id>-->
-                        <!--<phase>validate</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy-resources</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<outputDirectory>${webroot.path}/zipresources</outputDirectory>-->
-                            <!--<resources>-->
-                                <!--<resource>-->
-                                    <!--<directory>${webroot.path}/resources</directory>-->
-                                    <!--<includes>-->
-                                        <!--<include>*/**/*.*</include>-->
-                                    <!--</includes>-->
-                                    <!--<filtering>false</filtering>-->
-                                <!--</resource>-->
-                            <!--</resources>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-            <!--<plugin>&lt;!&ndash; 压缩资源文件（css\js） &ndash;&gt;-->
-                <!--<groupId>net.alchim31.maven</groupId>-->
-                <!--<artifactId>yuicompressor-maven-plugin</artifactId>-->
-                <!--<version>1.3.0</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>prepare-package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>compress</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--&lt;!&ndash; 读取js,css文件采用UTF-8编码 &ndash;&gt;-->
-                    <!--<encoding>UTF-8</encoding>-->
-                    <!--&lt;!&ndash; 不显示js可能的错误 &ndash;&gt;-->
-                    <!--<jswarn>false</jswarn>-->
-                    <!--&lt;!&ndash; 若存在已压缩的文件，会先对比源文件是否有改动。有改动便压缩，无改动就不压缩 &ndash;&gt;-->
-                    <!--<force>false</force>-->
-                    <!--&lt;!&ndash; 在指定的列号后插入新行 &ndash;&gt;-->
-                    <!--<linebreakpos>-1</linebreakpos>-->
-                    <!--&lt;!&ndash; 压缩后保存文件后缀 无后缀 &ndash;&gt;-->
-                    <!--<nosuffix>true</nosuffix>-->
-                    <!--&lt;!&ndash; 源目录，即需压缩的根目录 &ndash;&gt;-->
-                    <!--<sourceDirectory>${webroot.path}/resources</sourceDirectory>-->
-                    <!--&lt;!&ndash; 压缩js和css文件 &ndash;&gt;-->
-                    <!--<includes>-->
-                        <!--<include>js/**/*.js</include>-->
-                        <!--<include>css/**/*.css</include>-->
-                    <!--</includes>-->
-                    <!--&lt;!&ndash; 以下目录和文件不会被压缩 &ndash;&gt;-->
-                    <!--&lt;!&ndash; <excludes> <exclude>**/jquery.ex.ztree.js</exclude> <exclude>plugins/datepicker/*</exclude>-->
-                        <!--</excludes> &ndash;&gt;-->
-                    <!--&lt;!&ndash; 压缩后输出文件目录 &ndash;&gt;-->
-                    <!--<outputDirectory>${webroot.path}/zipresources</outputDirectory>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin><!-- 拷贝资源文件（css\js），便于下一步的压缩 -->
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${webroot.path}/zipresources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${webroot.path}/resources</directory>
+                                    <includes>
+                                        <include>*/**/*.*</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin><!-- 压缩资源文件（css\js） -->
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>yuicompressor-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>compress</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- 读取js,css文件采用UTF-8编码 -->
+                    <encoding>UTF-8</encoding>
+                    <!-- 不显示js可能的错误 -->
+                    <jswarn>false</jswarn>
+                    <!-- 若存在已压缩的文件，会先对比源文件是否有改动。有改动便压缩，无改动就不压缩 -->
+                    <force>false</force>
+                    <!-- 在指定的列号后插入新行 -->
+                    <linebreakpos>-1</linebreakpos>
+                    <!-- 压缩后保存文件后缀 无后缀 -->
+                    <nosuffix>true</nosuffix>
+                    <!-- 源目录，即需压缩的根目录 -->
+                    <sourceDirectory>${webroot.path}/resources</sourceDirectory>
+                    <!-- 压缩js和css文件 -->
+                    <includes>
+                        <include>js/**/*.js</include>
+                        <include>css/**/*.css</include>
+                    </includes>
+                    <!-- 以下目录和文件不会被压缩 -->
+                    <!-- <excludes> <exclude>**/jquery.ex.ztree.js</exclude> <exclude>plugins/datepicker/*</exclude>
+                        </excludes> -->
+                    <!-- 压缩后输出文件目录 -->
+                    <outputDirectory>${webroot.path}/zipresources</outputDirectory>
+                </configuration>
+            </plugin>
             <plugin><!-- 打war包 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>

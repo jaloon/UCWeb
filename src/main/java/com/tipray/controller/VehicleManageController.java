@@ -1762,7 +1762,7 @@ public class VehicleManageController {
             ByteBuffer dataBuffer;
             if (lockNum > 0) {
                 dataBuffer = SendPacketBuilder.buildDataBufForCarInOutUrgent(remoteControlId,
-                        readerId, controlType, stationType, stationId, (byte) lockNum, lockIdBuf, userName);
+                        readerId, controlType, stationType, stationId, (byte) lockNum, lockDevIdBuf, userName);
             } else {
                 dataBuffer = SendPacketBuilder.buildDataBufForCarInOut(remoteControlId,
                         readerId, controlType, stationType, stationId, userName);

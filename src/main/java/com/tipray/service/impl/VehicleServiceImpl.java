@@ -233,7 +233,7 @@ public class VehicleServiceImpl implements VehicleService {
     public GridPage<Vehicle> findCarsForPage(Vehicle car, Page page) {
         long records = countCar(car);
         List<Vehicle> list = findByPage(car, page);
-        return new GridPage<Vehicle>(list, records, page.getPageId(), page.getRows(), list.size(), car);
+        return new GridPage<>(list, records, page, car);
     }
 
     @Override

@@ -51,26 +51,22 @@ public class DeviceServiceImpl implements DeviceService {
 
 	@Override
 	public Device getDeviceById(Long id) {
-		Device device = id == null ? null : deviceDao.getById(id);
-		return device;
+		return id == null ? null : deviceDao.getById(id);
 	}
 
 	@Override
 	public List<Device> findAllDevices() {
-		List<Device> devices = deviceDao.findAll();
-		return devices;
+		return deviceDao.findAll();
 	}
 
 	@Override
 	public List<Device> findByCenterId(Long centerId) {
-		List<Device> devices = centerId == null ? null : deviceDao.findByCenterId(centerId);
-		return devices;
+		return centerId == null ? null : deviceDao.findByCenterId(centerId);
 	}
 
 	@Override
 	public List<Device> findByType(Integer deviceType) {
-		List<Device> devices = deviceType == null ? null : deviceDao.findByType(deviceType);
-		return devices;
+		return deviceType == null ? null : deviceDao.findByType(deviceType);
 	}
 
 	@Override
@@ -80,15 +76,14 @@ public class DeviceServiceImpl implements DeviceService {
 
 	@Override
 	public List<Device> findByPage(Device device, Page page) {
-		List<Device> devices = deviceDao.findByPage(device, page);
-		return devices;
+		return deviceDao.findByPage(device, page);
 	}
 
 	@Override
 	public GridPage<Device> findDeviceForPage(Device device, Page page) {
 		long records = countDevice(device);
 		List<Device> list = findByPage(device, page);
-		return new GridPage<Device>(list, records, page.getPageId(), page.getRows(), list.size(), device);
+		return new GridPage<>(list, records, page, device);
 	}
 
 	@Override

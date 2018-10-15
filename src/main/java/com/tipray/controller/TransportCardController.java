@@ -32,7 +32,6 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/manage/transcard")
-/* @Scope("prototype") */
 public class TransportCardController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(TransportCardController.class);
 
@@ -44,7 +43,9 @@ public class TransportCardController extends BaseAction {
     @PermissionAnno("transcardModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch transportCard edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch transportCard edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         TransportCard transportCard = new TransportCard();
         if (id != null && id > 0) {
@@ -58,7 +59,9 @@ public class TransportCardController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addTransportCard(@ModelAttribute TransportCard transportCard) {
-        logger.info("add transportCard, transportCard={}", transportCard);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add transportCard, transportCard={}", transportCard);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DISTRIBUTION_CARD
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -81,7 +84,9 @@ public class TransportCardController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateTransportCard(TransportCard transportCard) {
-        logger.info("update transportCard, transportCard={}", transportCard);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update transportCard, transportCard={}", transportCard);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DISTRIBUTION_CARD
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -104,7 +109,9 @@ public class TransportCardController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteTransportCard(Long id) {
-        logger.info("delete transportCard, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete transportCard, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_DISTRIBUTION_CARD
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -128,9 +135,10 @@ public class TransportCardController extends BaseAction {
     @ResponseBody
     public GridPage<TransportCard> ajaxFindTransportCardsForPage(@ModelAttribute TransportCard transportCard,
                                                                  @ModelAttribute Page page) {
-        logger.info("transportCard list page, transportCard={}, page={}", transportCard, page);
-        GridPage<TransportCard> gridPage = transportCardService.findTransportCardsForPage(transportCard, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("transportCard list page, transportCard={}, page={}", transportCard, page);
+        }
+        return transportCardService.findTransportCardsForPage(transportCard, page);
     }
 
     @RequestMapping(value = "findUnusedTranscards.do")

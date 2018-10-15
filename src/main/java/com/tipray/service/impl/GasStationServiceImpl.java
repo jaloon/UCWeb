@@ -46,7 +46,7 @@ public class GasStationServiceImpl implements GasStationService {
 	public void addGasStations(List<GasStation> gasStations) {
 		gasStations.parallelStream().forEach(station -> setCover(station));
 		gasStationDao.addGasStations(gasStations);
-        setVer(SqliteFileConst.GAS_STATION);
+        setVer();
 	}
 
     @Transactional
@@ -81,7 +81,7 @@ public class GasStationServiceImpl implements GasStationService {
                 gasStationDao.add(gasStation);
 			}
 
-            setVer(SqliteFileConst.GAS_STATION);
+            setVer();
 		}
 		return gasStation;
 	}
@@ -102,17 +102,17 @@ public class GasStationServiceImpl implements GasStationService {
 			gasStationDao.deleteGasStationCardsById(id);
 			if (StringUtil.isNotEmpty(cardIds)) {
 				String[] cardIdStrArray = cardIds.split(",");
-				List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+				List<Map<String, Object>> list = new ArrayList<>();
 				for (String string : cardIdStrArray) {
 					Long cardId = Long.parseLong(string, 10);
-					Map<String, Object> map = new HashMap<String, Object>();
+					Map<String, Object> map = new HashMap<>();
 					map.put("id", id);
 					map.put("cardId", cardId);
 					list.add(map);
 				}
 				gasStationDao.addGasStationCardsByIdAndCardIds(list);
 			}
-            setVer(SqliteFileConst.GAS_STATION);
+            setVer();
 		}
 		return gasStation;
 	}
@@ -121,7 +121,7 @@ public class GasStationServiceImpl implements GasStationService {
 	@Override
 	public void deleteGasStationById(Long id) {
 		gasStationDao.delete(id);
-        setVer(SqliteFileConst.GAS_STATION);
+        setVer();
 	}
 
 	@Override
@@ -133,14 +133,12 @@ public class GasStationServiceImpl implements GasStationService {
 
 	@Override
 	public List<GasStation> findByName(String gasStationName) {
-		List<GasStation> gasStations = gasStationDao.findByName(gasStationName);
-		return gasStations;
+		return gasStationDao.findByName(gasStationName);
 	}
 
 	@Override
 	public List<GasStation> findAllGasStations() {
-		List<GasStation> gasStations = gasStationDao.findAll();
-		return gasStations;
+        return gasStationDao.findAll();
 	}
 
 	@Override
@@ -150,8 +148,7 @@ public class GasStationServiceImpl implements GasStationService {
 
 	@Override
 	public List<GasStation> findByPage(GasStation gasStation, Page page) {
-		List<GasStation> gasStations = gasStationDao.findByPage(gasStation, page);
-		return gasStations;
+        return gasStationDao.findByPage(gasStation, page);
 	}
 
 	@Override
@@ -236,15 +233,15 @@ public class GasStationServiceImpl implements GasStationService {
 		gasStation.setCover(cover);
 	}
 
-	private void setVer(String param){
-        VehicleParamVer vehicleParamVer = vehicleParamVerDao.getByParam(param);
+	private void setVer(){
+        VehicleParamVer vehicleParamVer = vehicleParamVerDao.getByParam(SqliteFileConst.GAS_STATION);
         if (vehicleParamVer == null) {
             vehicleParamVer = new VehicleParamVer();
-            vehicleParamVer.setParam(param);
+            vehicleParamVer.setParam(SqliteFileConst.GAS_STATION);
             vehicleParamVer.setVer(System.currentTimeMillis());
             vehicleParamVerDao.add(vehicleParamVer);
         } else {
-            vehicleParamVerDao.updateVerByParam(param, System.currentTimeMillis());
+            vehicleParamVerDao.updateVerByParam(SqliteFileConst.GAS_STATION, System.currentTimeMillis());
         }
     }
 

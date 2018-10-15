@@ -77,7 +77,7 @@ public class DriverServiceImpl implements DriverService {
 	public GridPage<Driver> findDriversForPage(Driver driver, Page page) {
 		long records = countDriver(driver);
 		List<Driver> list = findByPage(driver, page);
-		return new GridPage<Driver>(list, records, page.getPageId(), page.getRows(), list.size(), driver);
+		return new GridPage<>(list, records, page, driver);
 	}
 
 	@Override

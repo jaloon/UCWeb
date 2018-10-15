@@ -54,8 +54,7 @@ public class LockRecordServiceImpl implements LockRecordService {
 
     @Override
     public List<LockRecord> findAllRecords() {
-        List<LockRecord> list = lockRecordDao.findAll();
-        return list;
+        return lockRecordDao.findAll();
     }
 
     @Override
@@ -100,7 +99,7 @@ public class LockRecordServiceImpl implements LockRecordService {
     public GridPage<LockRecord> findRecordsForPage(LockRecord record, Page page) {
         long records = countRecord(record);
         List<LockRecord> list = findByPage(record, page);
-        return new GridPage<LockRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 
     private void setAlarm(LockRecord record) {

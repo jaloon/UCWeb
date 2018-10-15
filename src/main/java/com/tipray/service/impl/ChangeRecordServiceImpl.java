@@ -69,7 +69,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
     public GridPage<ChangeRecord> findRecordsForPage(ChangeRecord record, Page page) {
         long records = countRecord(record);
         List<ChangeRecord> list = findByPage(record, page);
-        return new GridPage<ChangeRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 
     private void setUser(ChangeRecord record) {
@@ -80,7 +80,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         int userId = user.getId().intValue();
         switch (userId) {
             case Integer.MAX_VALUE:
-                user.setName("物流配送接口");
+                user.setName("物流平台");
                 user.setAccount("-");
                 break;
             default:
@@ -94,12 +94,12 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
     public Map<String, Object> distributionChange(Map<String, Object> distributionMap) {
         // 配送单号
         String invoice = (String) distributionMap.get("distributNO");
-        // 仓号
+        // // 仓号
         // byte storeId = Byte.parseByte((String) distributionMap.get("binNum"), 10);
         // 获取当前配送ID
         long transportId = distributionRecordDao.getRecentTransportIdByInvoice(invoice);
-        // 将当前配送记录的配送状态更新为换站
-        distributionRecordDao.updateStatusToChanged(transportId);
+        // // 将当前配送记录的配送状态更新为换站
+        // distributionRecordDao.updateStatusToChanged(transportId);
         // 根据变更的物流配送信息添加配送记录
         distributionRecordDao.addByDistributionMap(distributionMap);
         // 新配送ID
@@ -122,7 +122,7 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         // 更新换站前配送记录的触发信息
         distributionRecordDao.updateTriggerInfo(transportId, changeId);
 
-        String userName = "物流配送接口";
+        String userName = "物流平台";
         ByteBuffer udpDataBuf = buildUdpDataBuf(userName, transportId, changedTransportId, changedGasstationId, stationMap);
         Map<String, Object> map = new HashMap<>();
         map.put("changeId", changeId);
@@ -135,16 +135,16 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
     @Transactional
     @Override
     public Map<String, Object> remoteChangeStation(ChangeInfo changeInfo, String userName) {
-        // 配送单号
+        // // 配送单号
         // String invoice = changeInfo.getInvoice();
-        // 仓号
+        // // 仓号
         // byte storeId = changeInfo.getStoreId().byteValue();
         // 新加油站ID
         long changedGasstationId = changeInfo.getChangedGasstationId();
         // 获取当前配送ID
         // long transportId = distributionRecordDao.getRecentTransportIdByInvoice(invoice);
         long transportId = changeInfo.getTransportId();
-        // 将当前配送记录的配送状态更新为换站
+        // // 将当前配送记录的配送状态更新为换站
         // distributionRecordDao.updateStatusToChanged(transportId);
         // 根据远程换站信息添加配送记录
         distributionRecordDao.addByChangeInfo(changeInfo);
@@ -188,6 +188,12 @@ public class ChangeRecordServiceImpl implements ChangeRecordService {
         distributionRecordDao.updateStatusToChanged(transportId);
         // 将新配送记录的配送状态更新为配送中
         distributionRecordDao.updateStatus(changedTransportId, 1);
+    }
+
+    @Transactional
+    @Override
+    public void updateDistStatus(Long transportId, Integer status) {
+        distributionRecordDao.updateStatus(transportId, status);
     }
 
     /**

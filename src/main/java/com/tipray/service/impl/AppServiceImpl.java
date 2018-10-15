@@ -25,15 +25,14 @@ import java.util.List;
  *
  * @author chenlong
  * @version 1.0 2018-07-22
- *
  */
 @Service("appService")
 public class AppServiceImpl implements AppService {
-	@Resource
+    @Resource
     private AppdevDao appdevDao;
-	@Resource
-	private AppverDao appverDao;
-	@Resource
+    @Resource
+    private AppverDao appverDao;
+    @Resource
     private CenterDevDao centerDevDao;
 
     @Transactional
@@ -78,8 +77,8 @@ public class AppServiceImpl implements AppService {
     }
 
     @Transactional
-	@Override
-	public AppDev addAppdev(AppDev appDev) throws ServiceException {
+    @Override
+    public AppDev addAppdev(AppDev appDev) throws ServiceException {
         if (appDev == null) {
             return null;
         }
@@ -106,17 +105,17 @@ public class AppServiceImpl implements AppService {
                 appdevDao.add(appDev);
             }
         }
-		return appDev;
-	}
+        return appDev;
+    }
 
     @Transactional
-	@Override
-	public AppDev updateAppdev(AppDev appDev) throws ServiceException {
-	    if (appDev != null) {
+    @Override
+    public AppDev updateAppdev(AppDev appDev) throws ServiceException {
+        if (appDev != null) {
             appdevDao.update(appDev);
         }
-		return appDev;
-	}
+        return appDev;
+    }
 
     @Transactional
     @Override
@@ -125,10 +124,10 @@ public class AppServiceImpl implements AppService {
     }
 
     @Transactional
-	@Override
-	public void deleteAppdevById(Long id) throws ServiceException {
+    @Override
+    public void deleteAppdevById(Long id) throws ServiceException {
         appdevDao.delete(id);
-	}
+    }
 
     @Override
     public boolean isAppdevExist(String uuid) {
@@ -139,7 +138,7 @@ public class AppServiceImpl implements AppService {
         return num > 0;
     }
 
-	@Override
+    @Override
     public boolean isAppdevExist(String uuid, String appid) {
         Integer num = appdevDao.countByUuidAndAppid(uuid, appid);
         if (num == null) {
@@ -182,13 +181,13 @@ public class AppServiceImpl implements AppService {
         if (StringUtil.isEmpty(appid)) {
             throw new IllegalArgumentException("appid为空！");
         }
-	    if (StringUtil.isEmpty(system)) {
+        if (StringUtil.isEmpty(system)) {
             throw new IllegalArgumentException("system为空！");
         }
         AppVer appVer = new AppVer();
-	    appVer.setCenterId(CenterConst.CENTER_ID.longValue());
-	    appVer.setAppid(appid);
-	    appVer.setSystem(system);
+        appVer.setCenterId(CenterConst.CENTER_ID.longValue());
+        appVer.setAppid(appid);
+        appVer.setSystem(system);
         return appverDao.getMinverByAppver(appVer);
     }
 
@@ -233,15 +232,15 @@ public class AppServiceImpl implements AppService {
     @Transactional
     @Override
     public void sync(AppSync appSync) {
-	    List<AppVer> appVers = appSync.getAppvers();
-	    List<CenterDev> centerDevs = appSync.getCenterDevs();
-	    if (!EmptyObjectUtil.isEmptyList(appVers)) {
-	        List<Long> ids = appverDao.findAllIds();
-	        if (EmptyObjectUtil.isEmptyList(ids)) {
-	            appverDao.batchAdd(appVers);
+        List<AppVer> appVers = appSync.getAppvers();
+        List<CenterDev> centerDevs = appSync.getCenterDevs();
+        if (!EmptyObjectUtil.isEmptyList(appVers)) {
+            List<Long> ids = appverDao.findAllIds();
+            if (EmptyObjectUtil.isEmptyList(ids)) {
+                appverDao.batchAdd(appVers);
             } else {
-	            List<AppVer> adds = new ArrayList<>();
-	            List<AppVer> upds = new ArrayList<>();
+                List<AppVer> adds = new ArrayList<>();
+                List<AppVer> upds = new ArrayList<>();
                 for (AppVer appVer : appVers) {
                     Long id = appVer.getId();
                     if (ids.contains(id)) {
@@ -251,13 +250,13 @@ public class AppServiceImpl implements AppService {
                         adds.add(appVer);
                     }
                 }
-                if (ids.size()>0){
+                if (ids.size() > 0) {
                     appverDao.batchDelete(ids);
                 }
-                if (adds.size()>0){
+                if (adds.size() > 0) {
                     appverDao.batchAdd(adds);
                 }
-                if (upds.size()>0) {
+                if (upds.size() > 0) {
                     appverDao.batchUpdate(upds);
                 }
             }
@@ -278,13 +277,13 @@ public class AppServiceImpl implements AppService {
                         adds.add(centerDev);
                     }
                 }
-                if (ids.size()>0){
+                if (ids.size() > 0) {
                     centerDevDao.batchDelete(ids);
                 }
-                if (adds.size()>0){
+                if (adds.size() > 0) {
                     centerDevDao.batchAdd(adds);
                 }
-                if (upds.size()>0) {
+                if (upds.size() > 0) {
                     centerDevDao.batchUpdate(upds);
                 }
             }

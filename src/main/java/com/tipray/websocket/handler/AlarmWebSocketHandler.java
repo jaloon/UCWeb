@@ -135,7 +135,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      * @param sessionId {@link WebSocketSession#getId()}
      */
     private void dealConnectionClose(long sessionId) {
-        if (sessionId > 0) {
+        if (sessionId > -1) {
             // 移除WebSocket客户端缓存
             WEB_SOCKET_CLIENTS.remove(sessionId);
         }
@@ -154,7 +154,7 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
         }
         logger.info("broadcast alarm: {}", alarmInfo);
         WebSocketProtocol protocol = new WebSocketProtocol(WebSocketBizId.NEW_ALARM, alarmInfo);
-        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, protocol));
+        WEB_SOCKET_CLIENTS.forEach((sessionId, session) -> sendConcurrentMsg(sessionId, session, protocol));
     }
 
     /**
@@ -198,6 +198,19 @@ public class AlarmWebSocketHandler implements WebSocketHandler {
      */
     public void pushAlarmIfos(List<AlarmInfo> alarmInfos) {
         WebSocketProtocol protocol = new WebSocketProtocol(WebSocketBizId.ELIMINATE_ALARM, alarmInfos);
-        WEB_SOCKET_CLIENTS.values().forEach(session -> WebSocketUtil.sendConcurrentMsg(session, protocol));
+        WEB_SOCKET_CLIENTS.forEach((sessionId, session) -> sendConcurrentMsg(sessionId, session, protocol));
+    }
+
+    /**
+     * 并发发送WebSocket通信业务信息给指定客户端，并移除连接关闭的客户端
+     *
+     * @param sessionId {@link Long} session id
+     * @param session   {@link ConcurrentWebSocketSessionDecorator}
+     * @param protocol  {@link WebSocketProtocol} WebSocket通信业务信息
+     */
+    private void sendConcurrentMsg(Long sessionId,
+                                   ConcurrentWebSocketSessionDecorator session,
+                                   WebSocketProtocol protocol) {
+        WebSocketUtil.sendConcurrentMsg(sessionId, session, protocol, this::dealConnectionClose);
     }
 }

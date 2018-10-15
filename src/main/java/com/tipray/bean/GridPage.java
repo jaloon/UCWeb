@@ -24,7 +24,7 @@ public class GridPage<T> implements Serializable {
 	/** 查询条件 */
 	private T t;
 	/** 数据集合 */
-	private List<T> dataList = new ArrayList<T>();
+	private List<T> dataList = new ArrayList<>();
 
 	public GridPage(List<T> list, long records, int page, int pageRows, int currentRows, T t) {
 		setRecords(records);

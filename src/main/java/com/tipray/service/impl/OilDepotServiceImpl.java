@@ -377,10 +377,10 @@ public class OilDepotServiceImpl implements OilDepotService {
             byte commonConfig = TerminalConfigBitMarkConst.COMMON_CONFIG_BIT_5_OIL_DEPOT;
 
             if (cardNum != null && cardNum > 0) {
-                jdbcUtilDev = setInOutDev(jdbcUtilCard, oilDepot, null);
+                jdbcUtilCard = setInOutCard(jdbcUtilCard, oilDepot, null);
             }
             if (!EmptyObjectUtil.isEmptyList(readerIdList)) {
-                jdbcUtilCard = setInOutCard(jdbcUtilDev, oilDepot, null);
+                jdbcUtilDev = setInOutDev(jdbcUtilDev, oilDepot, null);
             }
 
             // 提交
@@ -424,7 +424,9 @@ public class OilDepotServiceImpl implements OilDepotService {
     @Override
     public OilDepot getOilDepotById(Long id) {
         OilDepot oilDepot = id == null ? null : oilDepotDao.getById(id);
-        setRegion(oilDepot);
+        if (oilDepot != null) {
+            setRegion(oilDepot);
+        }
         return oilDepot;
     }
 
@@ -457,7 +459,7 @@ public class OilDepotServiceImpl implements OilDepotService {
     public GridPage<OilDepot> findOilDepotsForPage(OilDepot oilDepot, Page page) {
         long records = countOilDepot(oilDepot);
         List<OilDepot> list = findByPage(oilDepot, page);
-        return new GridPage<OilDepot>(list, records, page.getPageId(), page.getRows(), list.size(), oilDepot);
+        return new GridPage<>(list, records, page, oilDepot);
     }
 
     @Override
@@ -525,8 +527,7 @@ public class OilDepotServiceImpl implements OilDepotService {
 
     @Override
     public List<InOutReader> findUnusedReaders() {
-        List<InOutReader> list = inOutReaderDao.findUnusedReader();
-        return list;
+        return inOutReaderDao.findUnusedReader();
     }
 
     /**

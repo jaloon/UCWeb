@@ -11,6 +11,7 @@ import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorato
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * WebSocket工具类
@@ -66,7 +67,7 @@ public class WebSocketUtil {
                 sessionId = Long.parseLong(session.getId(), 16);
             } catch (Exception e) {
                 // session id 缓存已被移除
-                return 0L;
+                return -1L;
             }
         } else {
             SOCKJS_SESSION_ID_CACHE.remove(session.getId());
@@ -94,31 +95,29 @@ public class WebSocketUtil {
         if (session == null || message == null) {
             return;
         }
-        synchronized (session) {
-            if (!session.isOpen()) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("WebSocket connection is not still open!");
-                }
+        if (!session.isOpen()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("WebSocket connection is not still open!");
+            }
+            return;
+        }
+        try {
+            if (message instanceof byte[]) {
+                session.sendMessage(new TextMessage((byte[]) message));
                 return;
             }
-            try {
-                if (message instanceof byte[]) {
-                    session.sendMessage(new TextMessage((byte[]) message));
-                    return;
-                }
-                CharSequence payload;
-                if (message instanceof CharSequence) {
-                    payload = (CharSequence) message;
-                } else {
-                    payload = JSONUtil.stringify(message);
-                }
-                if (payload.length() == 0) {
-                    return;
-                }
-                session.sendMessage(new TextMessage(payload));
-            } catch (Exception e) {
-                logger.error("send message error！", e);
+            CharSequence payload;
+            if (message instanceof CharSequence) {
+                payload = (CharSequence) message;
+            } else {
+                payload = JSONUtil.stringify(message);
             }
+            if (payload.length() == 0) {
+                return;
+            }
+            session.sendMessage(new TextMessage(payload));
+        } catch (Exception e) {
+            logger.error("send message error！", e);
         }
     }
 
@@ -175,6 +174,35 @@ public class WebSocketUtil {
     }
 
     /**
+     * 并发发送文本信息给指定客户端，并移除连接关闭的客户端
+     *
+     * @param sessionId  {@link Long} session id
+     * @param session    {@link ConcurrentWebSocketSessionDecorator}
+     * @param message    {@link CharSequence} 待发送文本信息
+     * @param removeFunc {@link Consumer} 移除session缓存的函数
+     */
+    public static void sendConcurrentMsg(Long sessionId,
+                                         ConcurrentWebSocketSessionDecorator session,
+                                         CharSequence message,
+                                         Consumer<Long> removeFunc) {
+        if (session == null || session.getDelegate() == null || message == null || message.length() == 0) {
+            return;
+        }
+        if (!session.isOpen()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("WebSocket connection is not still open!");
+            }
+            removeFunc.accept(sessionId);
+            return;
+        }
+        try {
+            session.sendMessage(new TextMessage(message));
+        } catch (Exception e) {
+            logger.error("send text message error stack！", e);
+        }
+    }
+
+    /**
      * 并发发送WebSocket通信业务信息给指定客户端
      *
      * @param session  {@link ConcurrentWebSocketSessionDecorator}
@@ -188,6 +216,36 @@ public class WebSocketUtil {
             if (logger.isDebugEnabled()) {
                 logger.debug("WebSocket connection is not still open!");
             }
+            return;
+        }
+        try {
+            String message = JSONUtil.stringify(protocol);
+            session.sendMessage(new TextMessage(message));
+        } catch (Exception e) {
+            logger.error("send text message error stack!", e);
+        }
+    }
+
+    /**
+     * 并发发送WebSocket通信业务信息给指定客户端，并移除连接关闭的客户端
+     *
+     * @param sessionId  {@link Long} session id
+     * @param session    {@link ConcurrentWebSocketSessionDecorator}
+     * @param protocol   {@link WebSocketProtocol} WebSocket通信业务信息
+     * @param removeFunc {@link Consumer} 移除session缓存的函数
+     */
+    public static void sendConcurrentMsg(Long sessionId,
+                                         ConcurrentWebSocketSessionDecorator session,
+                                         WebSocketProtocol protocol,
+                                         Consumer<Long> removeFunc) {
+        if (session == null || session.getDelegate() == null || protocol == null) {
+            return;
+        }
+        if (!session.isOpen()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("WebSocket connection is not still open!");
+            }
+            removeFunc.accept(sessionId);
             return;
         }
         try {

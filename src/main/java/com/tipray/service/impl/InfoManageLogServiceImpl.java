@@ -56,6 +56,6 @@ public class InfoManageLogServiceImpl implements InfoManageLogService {
 	public GridPage<InfoManageLog> findInfoManageLogsForPage(InfoManageLog infoManageLog, Page page) {
 		long records = countInfoManageLog(infoManageLog);
 		List<InfoManageLog> list = findByPage(infoManageLog, page);
-		return new GridPage<InfoManageLog>(list, records, page.getPageId(), page.getRows(), list.size(), infoManageLog);
+		return new GridPage<>(list, records, page, infoManageLog);
 	}
 }

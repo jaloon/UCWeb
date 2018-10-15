@@ -93,6 +93,6 @@ public class UnlockResetRecordServiceImpl implements UnlockResetRecordService {
     public GridPage<UnlockResetRecord> findRecordsForPage(UnlockResetRecord record, Page page) {
         long records = countRecord(record);
         List<UnlockResetRecord> list = findByPage(record, page);
-        return new GridPage<>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 }

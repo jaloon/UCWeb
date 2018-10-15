@@ -107,7 +107,7 @@ public class VehicleAlarmUtil {
             }
             return alarm.toString();
         }
-        return "数据库记录异常。";
+        return "-";
     }
 
     /**
@@ -159,8 +159,17 @@ public class VehicleAlarmUtil {
      * @return
      */
     public static String getLockAlarmByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
-        StringBuffer alarm = new StringBuffer();
         byte lock = lockStatusInfo[lockIndex - 1];
+        return getLockAlarm(lock);
+    }
+
+    /**
+     * 获取锁报警信息
+     * @param lock
+     * @return
+     */
+    public static String getLockAlarm(byte lock) {
+        StringBuffer alarm = new StringBuffer();
         if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_1_COMM_ANOMALY) > 0) {
             alarm.append("、通讯异常报警");
         }
@@ -197,6 +206,10 @@ public class VehicleAlarmUtil {
         }
         for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
             byte lock = lockStatusInfo[i];
+            if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) == 0) {
+                // 无效锁提前排除
+                continue;
+            }
             if ((lock & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {
                 return true;
             }
@@ -267,6 +280,16 @@ public class VehicleAlarmUtil {
      */
     public static String getLockStatusByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
         byte status = (byte) (lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+        return status == 0 ? "关" : "开";
+    }
+
+    /**
+     * 获取锁开关状态
+     * @param lockStatusInfo
+     * @return
+     */
+    public static String getLockStatus(byte lockStatusInfo) {
+        byte status = (byte) (lockStatusInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
         return status == 0 ? "关" : "开";
     }
 

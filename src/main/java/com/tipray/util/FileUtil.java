@@ -21,8 +21,10 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -32,9 +34,9 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * 文件工具类
- * 
+ *
  * @author chends
- * 
+ *
  */
 public class FileUtil {
 	/** 1B等于多少 */
@@ -52,7 +54,7 @@ public class FileUtil {
 
 	/**
 	 * 拼接路径
-	 * 
+	 *
 	 * @param paths
 	 * @return
 	 */
@@ -73,7 +75,7 @@ public class FileUtil {
 
 	/**
 	 * 获取绝对路径
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 */
@@ -88,7 +90,7 @@ public class FileUtil {
 
 	/**
 	 * Resource locator helper
-	 * 
+	 *
 	 * http://www.thinkplexx.com/learn/howto/java/system/java-resource-loading-
 	 * explained
 	 * -absolute-and-relative-names-difference-between-classloader-and-class
@@ -215,7 +217,7 @@ public class FileUtil {
 
 	/**
 	 * 判断文件的编码格式
-	 * 
+	 *
 	 * @param fileName
 	 * @return
 	 */
@@ -292,7 +294,7 @@ public class FileUtil {
 
 	/**
 	 * 读取文件
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 * @throws FileNotFoundException
@@ -307,7 +309,7 @@ public class FileUtil {
 
 	/**
 	 * 使用NIO输出文件
-	 * 
+	 *
 	 * @param is
 	 * @param filePath
 	 */
@@ -349,7 +351,7 @@ public class FileUtil {
 
 	/**
 	 * 输出文件
-	 * 
+	 *
 	 * @param is
 	 * @param filePath
 	 */
@@ -390,7 +392,7 @@ public class FileUtil {
 
 	/**
 	 * 格式化路径
-	 * 
+	 *
 	 * @param string
 	 * @return
 	 */
@@ -401,7 +403,7 @@ public class FileUtil {
 
 	/**
 	 * 格式化默认路径
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 */
@@ -419,7 +421,7 @@ public class FileUtil {
 
 	/**
 	 * 创建文件夹
-	 * 
+	 *
 	 * @param path
 	 */
 	public static void createPath(String path) {
@@ -437,7 +439,7 @@ public class FileUtil {
 
 	/**
 	 * 创建文件
-	 * 
+	 *
 	 * @param path
 	 */
 	public static void createFile(String path) {
@@ -456,7 +458,7 @@ public class FileUtil {
 
 	/**
 	 * 获取java.library.path的路径
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getJavaLibraryPath() {
@@ -474,7 +476,7 @@ public class FileUtil {
 
 	/**
 	 * 获取user.dir用户的当前工作目录
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getUserDir() {
@@ -492,7 +494,7 @@ public class FileUtil {
 
 	/**
 	 * 获取web class目录
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getWebClassesPath() {
@@ -523,7 +525,7 @@ public class FileUtil {
 
 	/**
 	 * 获取WEB-INF目录
-	 * 
+	 *
 	 * @return
 	 * @throws RuntimeException
 	 */
@@ -545,7 +547,7 @@ public class FileUtil {
 
 	/**
 	 * 获取WEB根目录
-	 * 
+	 *
 	 * @return
 	 * @throws RuntimeException
 	 */
@@ -566,7 +568,7 @@ public class FileUtil {
 
 	/**
 	 * 项目根目录
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getRootPath() {
@@ -580,7 +582,7 @@ public class FileUtil {
 
 	/**
 	 * 临时文件存放目录
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getTempPath() {
@@ -590,7 +592,7 @@ public class FileUtil {
 
 	/**
 	 * 获取文件名
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 */
@@ -608,7 +610,7 @@ public class FileUtil {
 
 	/**
 	 * 压缩文件夹里的文件 起初不知道是文件还是文件夹--- 统一调用该方法
-	 * 
+	 *
 	 * @param zipPath
 	 *            压缩后文件的完整路径
 	 * @param dirPath
@@ -625,7 +627,7 @@ public class FileUtil {
 
 	/**
 	 * 获取文件路径下所有文件
-	 * 
+	 *
 	 * @param dirPath
 	 *            要压缩的文件夹路径
 	 * @param list
@@ -646,7 +648,7 @@ public class FileUtil {
 
 	/**
 	 * 压缩多个文件
-	 * 
+	 *
 	 * @param zipPath
 	 *            压缩后文件的完整路径
 	 * @param files
@@ -712,7 +714,7 @@ public class FileUtil {
 
 	/**
 	 * 解压缩文件
-	 * 
+	 *
 	 * @param zipPath
 	 *            待解压文件的完整路径
 	 * @param outPath
@@ -765,7 +767,7 @@ public class FileUtil {
 
 	/**
 	 * 获取解压后的文件流
-	 * 
+	 *
 	 * @param file
 	 * @return
 	 * @throws IOException
@@ -796,7 +798,7 @@ public class FileUtil {
 
 	/**
 	 * 读取文件的部分信息
-	 * 
+	 *
 	 * @param file
 	 * @param sord
 	 *            asc:从头开始读，desc:从结尾开始读
@@ -873,7 +875,7 @@ public class FileUtil {
 
 	/**
 	 * 根据大小格式化对应的单位
-	 * 
+	 *
 	 * @param b
 	 * @return
 	 */
@@ -901,7 +903,7 @@ public class FileUtil {
 
 	/**
 	 * 删除文件
-	 * 
+	 *
 	 * @param filePaths
 	 */
 	public static void deleteFile(File file) {
@@ -919,4 +921,63 @@ public class FileUtil {
 			}
 		}
 	}
+
+    /**
+     * 删除指定文件夹下指定日期前的文件
+     * @param folderPath 文件夹路径
+     * @param duration 日期间隔
+     * @param timeUnit 日期单位
+     * @return 删除的文件
+     * @throws IllegalArgumentException if path is file not folder.
+     */
+	public static File[] deleteFilesBeforeDateInFolder(String folderPath, long duration, TimeUnit timeUnit) {
+	    File folder = new File(folderPath);
+	    if (folder.isFile()) throw new IllegalArgumentException("给定的路径[" + folderPath + "]是文件而非文件夹！");
+	    long durationMillis = timeUnit.toMillis(duration);
+	    long beforeMillis = System.currentTimeMillis() - durationMillis;
+	    return folder.listFiles(file -> {
+            long lastModified = file.lastModified();
+            boolean flag = lastModified < beforeMillis;
+            if (flag) file.delete();
+            return flag;
+        });
+    }
+
+    /**
+     * 获取整形属性值
+     *
+     * @param properties   {@link Properties}
+     * @param key          属性名称
+     * @param defaultValue 默认值
+     * @return 属性值
+     */
+    public static int getIntProp(Properties properties, String key, int defaultValue) {
+        String value = properties.getProperty(key);
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(value, 10);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * 获取布尔型属性值
+     *
+     * @param properties   {@link Properties}
+     * @param key          属性名称
+     * @param defaultValue 默认值
+     * @return 属性值
+     */
+    public static boolean getBoolProp(Properties properties, String key, boolean defaultValue) {
+        String value = properties.getProperty(key);
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        return value.equals("1")
+                || value.equalsIgnoreCase("true")
+                || value.equalsIgnoreCase("yes");
+    }
 }

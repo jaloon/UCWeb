@@ -33,7 +33,6 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/manage/handset")
-/* @Scope("prototype") */
 public class HandsetController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(HandsetController.class);
 
@@ -45,7 +44,9 @@ public class HandsetController extends BaseAction {
     @PermissionAnno("handsetModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch handset edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch handset edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         Handset handset = new Handset();
         if (id != null && id > 0) {
@@ -63,7 +64,9 @@ public class HandsetController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addHandset(@ModelAttribute Handset handset) {
-        logger.info("add handset, handset={}", handset);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add handset, handset={}", handset);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_HANDSET
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -86,7 +89,9 @@ public class HandsetController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateHandset(@ModelAttribute Handset handset) {
-        logger.info("update handset, handset={}", handset);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update handset, handset={}", handset);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_HANDSET
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -109,7 +114,9 @@ public class HandsetController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteHandset(Long id) {
-        logger.info("delete card, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete card, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_HANDSET
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -150,7 +157,9 @@ public class HandsetController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Handset> ajaxFindHandsetsForPage(@ModelAttribute Handset handset, @ModelAttribute Page page) {
-        logger.info("handset list page, handset={}, page={}", handset, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("handset list page, handset={}, page={}", handset, page);
+        }
         GridPage<Handset> gridPage = handsetService.findHandsetsForPage(handset, page);
         return gridPage;
     }

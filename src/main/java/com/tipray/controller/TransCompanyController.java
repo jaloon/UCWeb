@@ -32,7 +32,6 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/manage/transcom")
-/* @Scope("prototype") */
 public class TransCompanyController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(TransCompanyController.class);
 
@@ -44,7 +43,9 @@ public class TransCompanyController extends BaseAction {
     @PermissionAnno("transcomModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch transCompany edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch transCompany edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         TransCompany transCompany = new TransCompany();
         if (id != null && id > 0) {
@@ -58,7 +59,9 @@ public class TransCompanyController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addTransCompany(@ModelAttribute TransCompany transCompany) {
-        logger.info("add transCompany, transCompany={}", transCompany);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add transCompany, transCompany={}", transCompany);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_TRANSPORT_COMPANY
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -81,7 +84,9 @@ public class TransCompanyController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateTransCompany(TransCompany transCompany) {
-        logger.info("update transCompany, transCompany={}", transCompany);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update transCompany, transCompany={}", transCompany);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_TRANSPORT_COMPANY
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -104,7 +109,9 @@ public class TransCompanyController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteTransCompany(Long id) {
-        logger.info("delete transCompany, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete transCompany, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_TRANSPORT_COMPANY
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -138,7 +145,9 @@ public class TransCompanyController extends BaseAction {
     @RequestMapping(value = "isExist.do")
     @ResponseBody
     public Boolean isExist(String name) {
-        logger.info("transcom exist, name={}", name);
+        if (logger.isDebugEnabled()) {
+            logger.debug("transcom exist, name={}", name);
+        }
         return transCompanyService.getByName(name) != null;
     }
 
@@ -147,9 +156,10 @@ public class TransCompanyController extends BaseAction {
     @ResponseBody
     public GridPage<TransCompany> ajaxFindTransCompanysForPage(@ModelAttribute TransCompany transCompany,
                                                                @ModelAttribute Page page) {
-        logger.info("transCompany list page, transCompany={}, page={}", transCompany, page);
-        GridPage<TransCompany> gridPage = transCompanyService.findTransCompanysForPage(transCompany, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("transCompany list page, transCompany={}, page={}", transCompany, page);
+        }
+        return transCompanyService.findTransCompanysForPage(transCompany, page);
     }
 
 }

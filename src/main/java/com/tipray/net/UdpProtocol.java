@@ -723,6 +723,10 @@ public class UdpProtocol {
         // --------------------------------------------------------------------------------------
         for (int i = 0; i < lockNum; i++) {
             byte lockAlarm = lockAlarms[i];
+            if ((lockAlarm & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) == 0) {
+                // 无效锁提前排除
+                continue;
+            }
             if ((lockAlarm & AlarmBitMarkConst.VALID_LOCK_ALARM_BITS) > 0) {
                 return '是';
             }

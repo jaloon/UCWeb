@@ -21,7 +21,6 @@ import com.tipray.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -39,7 +38,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/manage/role")
-@Scope("prototype")
+// @Scope("prototype")
 public class RoleController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(RoleController.class);
     @Autowired
@@ -52,7 +51,9 @@ public class RoleController extends BaseAction {
     @PermissionAnno("roleModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch role edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch role edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         Role role = new Role();
         if (id != null && id > 0) {
@@ -69,7 +70,9 @@ public class RoleController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addRole(@ModelAttribute Role role) {
-        logger.info("add role, role={}", role);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add role, role={}", role);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_ROLE
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -92,7 +95,9 @@ public class RoleController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateRole(@ModelAttribute Role role) {
-        logger.info("update role, role={}", role);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update role, role={}", role);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_ROLE
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -121,7 +126,9 @@ public class RoleController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteRoles(Long id, Integer app) {
-        logger.info("delete role, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete role, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_ROLE
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -149,7 +156,9 @@ public class RoleController extends BaseAction {
     @RequestMapping("isExist.do")
     @ResponseBody
     public Boolean isRoleExist(@ModelAttribute Role role) {
-        logger.info("role exist, role={}", role);
+        if (logger.isDebugEnabled()) {
+            logger.debug("role exist, role={}", role);
+        }
         Role bean = roleService.getRoleByName(role.getName());
         return bean != null && role.getId() != bean.getId();
     }
@@ -158,9 +167,10 @@ public class RoleController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Role> ajaxFindRolesForPage(@ModelAttribute Role role, @ModelAttribute Page page) {
-        logger.info("role list page, role={}, page={}", role, page);
-        GridPage<Role> gridPage = roleService.findRolesForPage(role, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("role list page, role={}, page={}", role, page);
+        }
+        return roleService.findRolesForPage(role, page);
     }
 
     @RequestMapping(value = "findAllRoles.do")
@@ -179,7 +189,9 @@ public class RoleController extends BaseAction {
     @RequestMapping(value = "findPermissions.do")
     @ResponseBody
     public List<Permission> findPermissions(String mode, Long roleId) {
-        logger.info("find permissions, mode={}, roleId={}", mode, roleId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find permissions, mode={}, roleId={}", mode, roleId);
+        }
         if (PageActionMode.ADD.equals(mode)) {
             List<Permission> permissions = permissionService.findOperatePermissions();
             permissions.parallelStream().forEach(permission -> permission.setOpen(permission.getParentId() == 0));

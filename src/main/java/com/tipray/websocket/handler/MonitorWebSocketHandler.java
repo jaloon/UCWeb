@@ -17,19 +17,32 @@ import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.UserService;
 import com.tipray.service.VehicleManageLogService;
 import com.tipray.service.VehicleService;
-import com.tipray.util.*;
+import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.JSONUtil;
+import com.tipray.util.OperateLogUtil;
+import com.tipray.util.SpringBeanUtil;
+import com.tipray.util.StringUtil;
 import com.tipray.websocket.WebSocketCloseStatusEnum;
 import com.tipray.websocket.WebSocketUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -197,7 +210,7 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      * @param sessionId {@link WebSocketSession#getId()}
      */
     private void removeMonitorCache(long sessionId) {
-        if (sessionId > 0) {
+        if (sessionId > -1) {
             WEB_SOCKET_CLIENTS.remove(sessionId);
             GENERAL_CLIENTS.remove(sessionId);
             // FOCUS_CLIENTS.remove(sessionId);
@@ -226,7 +239,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         String userIdStr = (String) msgMap.get("user");
         if (StringUtil.isEmpty(userIdStr)) {
             logger.warn("普通监控：获取用户信息失败！");
-            WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
+            // WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
+            sendConcurrentMsg(sessionId, session, BIZ_REPEAT);
             return;
         }
         Long userId;
@@ -234,13 +248,15 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             userId = Long.parseLong((String) msgMap.get("user"), 10);
         } catch (Exception e) {
             logger.warn("普通监控：收到的用户ID【{}】不是整数！", userIdStr);
-            WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
+            // WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
+            sendConcurrentMsg(sessionId, session, BIZ_REPEAT);
             return;
         }
         User user = userService.getUserById(userId);
         if (user == null) {
             logger.warn("ID为【{}】的用户不存在！", userIdStr);
-            WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
+            // WebSocketUtil.sendConcurrentMsg(session, BIZ_REPEAT);
+            sendConcurrentMsg(sessionId, session, BIZ_REPEAT);
         } else {
             Long comId = user.getComId();
             GENERAL_CLIENTS.put(sessionId, comId);
@@ -259,7 +275,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     session.sendMessage(new TextMessage(JSONUtil.stringify(onlineCarsCahe)));
                     String trackMsg = TRACK_CACHE.cacheTracks(comId);
                     if (StringUtil.isNotEmpty(trackMsg)) {
-                        WebSocketUtil.sendConcurrentMsg(session, trackMsg);
+                        // WebSocketUtil.sendConcurrentMsg(session, trackMsg);
+                        sendConcurrentMsg(sessionId, session, trackMsg);
                     }
                 }
             } catch (Exception e) {
@@ -288,7 +305,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     user = JSONUtil.parseToObject((String) msgMap.get("user"), User.class);
                 } catch (Exception e) {
                     logger.error("JSON解析User对象异常：{}", e.toString());
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, "parse_error");
+                    // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "parse_error");
+                    sendConcurrentMsg(sessionId, sessionDecorator, "parse_error");
                     return;
                 }
                 // 车辆ID
@@ -300,11 +318,13 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 VehicleManageLog vehicleManageLog = new VehicleManageLog(user, 0);
                 Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TRACK
                         | LogTypeConst.TYPE_FOCUS_MONITOR | LogTypeConst.RESULT_DONE;
-                String description = new StringBuffer("车辆轨迹查看：").append(user.getName()).append("通过网页查看车辆").append(carNumber)
-                        .append("的轨迹。").toString();
-                Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+                String description = new StringBuffer("车辆轨迹查看：").append(user.getName())
+                        .append("通过网页查看车辆").append(carNumber).append("的轨迹。").toString();
+                Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token,
+                        vehicleManageLogService, logger);
                 if (logId == null || logId == 0L) {
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, "db_error");
+                    // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "db_error");
+                    sendConcurrentMsg(sessionId, sessionDecorator, "db_error");
                     return;
                 }
                 String result = "";
@@ -319,7 +339,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         removeUdpCache(cacheId, description);
                         result = "失败，指令发送异常！";
                         logger.error("UDP发送数据异常！");
-                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                        // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                        sendConcurrentMsg(sessionId, sessionDecorator, "conn_error");
                         return;
                     }
                     addUdpTimeoutTask(src, cacheId, false);
@@ -329,12 +350,14 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     Long timestamp = System.currentTimeMillis();
                     FOCUS_CLIENTS.put(sessionId, timestamp);
                     FOCUS_CARS.put(sessionId, carId);
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, TRACK_CACHE.cacheTrack(carId));
+                    // WebSocketUtil.sendConcurrentMsg(sessionDecorator, TRACK_CACHE.cacheTrack(carId));
+                    sendConcurrentMsg(sessionId, sessionDecorator, TRACK_CACHE.cacheTrack(carId));
                 } catch (Exception e) {
                     removeUdpCache(cacheId, description);
                     result = "失败，重点监控异常！";
                     logger.error("重点监控异常！", e);
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                    // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                    sendConcurrentMsg(sessionId, sessionDecorator, "conn_error");
                 } finally {
                     updateLog(vehicleManageLog, type, result);
                 }
@@ -349,7 +372,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     logger.error("UDP发送数据异常！");
                     // FOCUS_CLIENTS.remove(sessionId);
                     // FOCUS_CARS.remove(sessionId);
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_broken");
+                    // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_broken");
+                    sendConcurrentMsg(sessionId, sessionDecorator, "conn_broken");
                 }
                 addUdpTimeoutTask(src, repeatCacheId, true);
                 break;
@@ -390,9 +414,11 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 VehicleManageLog vehicleManageLog = new VehicleManageLog(user, 0);
                 Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TRACK
                         | LogTypeConst.TYPE_FOCUS_CANCEL | LogTypeConst.RESULT_DONE;
-                String description = new StringBuffer("车辆轨迹查看：").append(user.getName()).append("通过网页取消查看车辆")
-                        .append(vehicleService.getCarNumberById(carId)).append("的轨迹").toString();
-                Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+                String description = new StringBuffer("车辆轨迹查看：").append(user.getName())
+                        .append("通过网页取消查看车辆").append(vehicleService.getCarNumberById(carId))
+                        .append("的轨迹").toString();
+                Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description,
+                        token, vehicleManageLogService, logger);
                 if (logId == null || logId == 0L) {
                     return;
                 }
@@ -438,7 +464,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             user = JSONUtil.parseToObject((String) msgMap.get("user"), User.class);
         } catch (Exception e) {
             logger.error("JSON解析User对象异常：{}", e.toString());
-            WebSocketUtil.sendConcurrentMsg(sessionDecorator, "parse_error");
+            // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "parse_error");
+            sendConcurrentMsg(sessionId, sessionDecorator, "parse_error");
             return;
         }
         // token
@@ -473,11 +500,14 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                     VehicleManageLog vehicleManageLog = new VehicleManageLog(user, 0);
                     Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TRACK
                             | LogTypeConst.TYPE_REALTIME_MONITOR | LogTypeConst.RESULT_DONE;
-                    String description = new StringBuffer("车辆轨迹实时监控：").append(user.getName()).append("通过网页实时监控")
-                            .append("车辆" + car.getCarNumber()).append("的轨迹。").toString();
-                    Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+                    String description = new StringBuffer("车辆轨迹实时监控：").append(user.getName())
+                            .append("通过网页实时监控").append("车辆").append(car.getCarNumber())
+                            .append("的轨迹。").toString();
+                    Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description,
+                            token, vehicleManageLogService, logger);
                     if (logId == null || logId == 0L) {
-                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, "db_error");
+                        // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "db_error");
+                        sendConcurrentMsg(sessionId, sessionDecorator, "db_error");
                         return;
                     }
                     String result = "";
@@ -501,7 +531,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         succuessAtLeastOne = true;
                         carIds.add(car.getId());
                         REALTIME_CARS_CACHE.put(cacheId, car.getId());
-                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, TRACK_CACHE.cacheTrack(car.getId()));
+                        // WebSocketUtil.sendConcurrentMsg(sessionDecorator, TRACK_CACHE.cacheTrack(car.getId()));
+                        sendConcurrentMsg(sessionId, sessionDecorator, TRACK_CACHE.cacheTrack(car.getId()));
                     } catch (Exception e) {
                         removeUdpCache(cacheId, description);
                         result = "失败，实时监控异常！";
@@ -513,7 +544,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
 
                 });
                 if (!succuessAtLeastOne) {
-                    WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                    // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                    sendConcurrentMsg(sessionId, sessionDecorator, "conn_error");
                 } else {
                     // 当前时间戳
                     Long timestamp = System.currentTimeMillis();
@@ -532,7 +564,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         strBuf.append("\"biz\":\"error\",\"carNos\":\"").append(carNoBuf).append('\"');
                         strBuf.append('}');
                         String error = strBuf.toString();
-                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, error);
+                        // WebSocketUtil.sendConcurrentMsg(sessionDecorator, error);
+                        sendConcurrentMsg(sessionId, sessionDecorator, error);
                     }
                 }
                 break;
@@ -565,9 +598,11 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 VehicleManageLog vehicleManageLog = new VehicleManageLog(user, 0);
                 Integer type = LogTypeConst.CLASS_VEHICLE_MANAGE | LogTypeConst.ENTITY_TRACK
                         | LogTypeConst.TYPE_REALTIME_CANCEL | LogTypeConst.RESULT_DONE;
-                String description = new StringBuffer("车辆轨迹实时监控：").append(user.getName()).append("通过网页取消车辆")
-                        .append(vehicleService.getCarNumberById(carId)).append("的实时监控").toString();
-                Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token, vehicleManageLogService, logger);
+                String description = new StringBuffer("车辆轨迹实时监控：").append(user.getName())
+                        .append("通过网页取消车辆").append(vehicleService.getCarNumberById(carId))
+                        .append("的实时监控").toString();
+                Long logId = OperateLogUtil.addVehicleManageLog(vehicleManageLog, type, description, token,
+                        vehicleManageLogService, logger);
                 if (logId == null || logId == 0L) {
                     return;
                 }
@@ -623,14 +658,12 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
         // 父页面sessionId
         Long parentSessionId = ((Integer) msgMap.get("parentSession")).longValue();
         ConcurrentWebSocketSessionDecorator parentSession = WEB_SOCKET_CLIENTS.get(parentSessionId);
-        Map<String, Object> sessionMap = new HashMap<>();
-        sessionMap.put("biz", biz);
-        sessionMap.put("sessionId", sessionId);
         StringBuffer strBuf = new StringBuffer();
         strBuf.append('{');
         strBuf.append("\"biz\":\"").append(biz).append("\",\"sessionId\":").append(sessionId);
         strBuf.append('}');
-        WebSocketUtil.sendConcurrentMsg(parentSession, strBuf.toString());
+        // WebSocketUtil.sendConcurrentMsg(parentSession, strBuf.toString());
+        sendConcurrentMsg(parentSessionId, parentSession, strBuf.toString());
     }
 
 
@@ -659,7 +692,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                 GENERAL_CLIENTS.remove(sessionId);
                 return;
             }
-            WebSocketUtil.sendConcurrentMsg(sessionDecorator, msg);
+            // WebSocketUtil.sendConcurrentMsg(sessionDecorator, msg);
+            sendConcurrentMsg(sessionId, sessionDecorator, msg);
         });
     }
 
@@ -722,10 +756,12 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
             return;
         }
         if (timeout) {
-            WebSocketUtil.sendConcurrentMsg(sessionDecorator, "timeout");
+            // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "timeout");
+            sendConcurrentMsg(sessionId, sessionDecorator, "timeout");
             return;
         }
-        WebSocketUtil.sendConcurrentMsg(sessionDecorator, track);
+        // WebSocketUtil.sendConcurrentMsg(sessionDecorator, track);
+        sendConcurrentMsg(sessionId, sessionDecorator, track);
     }
 
     /**
@@ -985,16 +1021,16 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
      */
     public void pushLastTracks(List<LastTrack> lastTracks) {
         TRACK_CACHE.flushCache(lastTracks);
-        GENERAL_CLIENTS.entrySet().parallelStream().forEach(entry -> {
-            Long sessionId = entry.getKey();
+        GENERAL_CLIENTS.forEach((sessionId, comId) -> {
             ConcurrentWebSocketSessionDecorator sessionDecorator = WEB_SOCKET_CLIENTS.get(sessionId);
             if (sessionDecorator == null || !sessionDecorator.isOpen()) {
                 GENERAL_CLIENTS.remove(sessionId);
                 return;
             }
-            String trackMsg = TRACK_CACHE.updateTracks(entry.getValue());
+            String trackMsg = TRACK_CACHE.updateTracks(comId);
             if (StringUtil.isNotEmpty(trackMsg)) {
-                WebSocketUtil.sendConcurrentMsg(sessionDecorator, trackMsg);
+                // WebSocketUtil.sendConcurrentMsg(sessionDecorator, trackMsg);
+                sendConcurrentMsg(sessionId, sessionDecorator, trackMsg);
             }
         });
     }
@@ -1052,7 +1088,8 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         errorBuf.append("\"biz\":\"error\",");
                         errorBuf.append("\"carNos\":\"").append(carNumber).append('\"');
                         errorBuf.append('}');
-                        WebSocketUtil.sendConcurrentMsg(sessionDecorator, errorBuf.toString());
+                        // WebSocketUtil.sendConcurrentMsg(sessionDecorator, errorBuf.toString());
+                        sendConcurrentMsg(sessionId, sessionDecorator, errorBuf.toString());
                     }
                 }
                 break;
@@ -1066,15 +1103,18 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
                         if (!resultFlag) {
                             // FOCUS_CLIENTS.remove(sessionId);
                             // FOCUS_CARS.remove(sessionId);
-                            WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_broken");
+                            // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_broken");
+                            sendConcurrentMsg(sessionId, sessionDecorator, "conn_broken");
                         }
                     } else {
                         if (resultFlag) {
-                            WebSocketUtil.sendConcurrentMsg(sessionDecorator, "success");
+                            // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "success");
+                            sendConcurrentMsg(sessionId, sessionDecorator, "success");
                         } else {
                             // FOCUS_CLIENTS.remove(sessionId);
                             // FOCUS_CARS.remove(sessionId);
-                            WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                            // WebSocketUtil.sendConcurrentMsg(sessionDecorator, "conn_error");
+                            sendConcurrentMsg(sessionId, sessionDecorator, "conn_error");
                         }
                     }
                 }
@@ -1098,6 +1138,17 @@ public class MonitorWebSocketHandler implements WebSocketHandler {
     public void removeUdpCommAlarm() {
         logger.info("UDP通信畅通！");
         broadcastLog(0, "", "UDP通信畅通！");
+    }
+
+    /**
+     * 并发发送文本信息给指定客户端，并移除连接关闭的客户端
+     *
+     * @param sessionId {@link Long} session id
+     * @param session   {@link ConcurrentWebSocketSessionDecorator}
+     * @param message   {@link CharSequence} 待发送文本信息
+     */
+    private void sendConcurrentMsg(Long sessionId, ConcurrentWebSocketSessionDecorator session, CharSequence message) {
+        WebSocketUtil.sendConcurrentMsg(sessionId, session, message, this::removeMonitorCache);
     }
 
 }

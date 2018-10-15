@@ -99,7 +99,7 @@ public class HandsetServiceImpl implements HandsetService {
 	public GridPage<Handset> findHandsetsForPage(Handset handset, Page page) {
 		long records = countHandset(handset);
 		List<Handset> list = findByPage(handset, page);
-		return new GridPage<Handset>(list, records, page.getPageId(), page.getRows(), list.size(), handset);
+		return new GridPage<>(list, records, page, handset);
 	}
 
 	@Override

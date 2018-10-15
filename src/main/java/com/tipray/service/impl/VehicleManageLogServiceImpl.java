@@ -65,8 +65,7 @@ public class VehicleManageLogServiceImpl implements VehicleManageLogService {
     public GridPage<VehicleManageLog> findVehicleManageLogsForPage(VehicleManageLog vehicleManageLog, Page page) {
         long records = countVehicleManageLog(vehicleManageLog);
         List<VehicleManageLog> list = findByPage(vehicleManageLog, page);
-        return new GridPage<VehicleManageLog>(list, records, page.getPageId(), page.getRows(), list.size(),
-                vehicleManageLog);
+        return new GridPage<>(list, records, page, vehicleManageLog);
     }
 
     @Override

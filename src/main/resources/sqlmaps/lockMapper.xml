@@ -255,4 +255,18 @@
 		and lock_device_id in (${devIds})
 	</select>
 
+    <select id="getLockByCarIdAndLockIndex" resultType="java.util.LinkedHashMap">
+        SELECT
+            id,
+            store_id,
+            seat,
+            seat_index,
+            lock_index
+        FROM
+            tbl_lock
+        WHERE
+            vehicle_id = #{carId}
+            AND lock_index = #{lockIndex}
+    </select>
+
 </mapper>

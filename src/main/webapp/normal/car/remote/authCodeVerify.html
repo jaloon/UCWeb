@@ -27,7 +27,7 @@
                         <input style="ime-mode: disabled;" maxlength="6"
                                type="text" class="editInfo" id="auth_code" placeholder="请输入6位授权码"
                                onkeydown="if (event.keyCode === 13) event.keyCode = 9"
-                               onkeyup="this.value=this.value.replace(/\D/g,'')"
+                               onkeyup="this.value = this.value.replace(/\D/g,'')"
                                onKeypress="if (event.keyCode < 48 || event.keyCode > 57) event.returnValue = false"
                                onpaste="event.preventDefault()">
                     </td>
@@ -65,14 +65,14 @@
             var authCode = $("#auth_code").val();
             var len = authCode.length;
             if (len === 0) {
-                layer.alert('请先输入授权码！', { icon: 2 }, function(index2) {
+                layer.alert('请先输入授权码！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#auth_code").focus();
                 });
                 return;
             }
             if (len < 6) {
-                layer.alert('授权码必须是6位数字！', { icon: 2 }, function(index2) {
+                layer.alert('授权码必须是6位数字！', {icon: 2}, function (index2) {
                     layer.close(index2);
                     $("#auth_code").focus();
                 });
@@ -91,7 +91,7 @@
                         if (data.id > 0) {
                             console.log("授权记录上报：" + data.msg)
                         } else {
-                            console.log("授权记录上报成功！" )
+                            console.log("授权记录上报成功！")
                         }
                     },
                     "json"

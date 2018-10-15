@@ -37,7 +37,6 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/manage/gasstation")
-/* @Scope("prototype") */
 public class GasStationController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(GasStationController.class);
 
@@ -53,7 +52,9 @@ public class GasStationController extends BaseAction {
     @PermissionAnno("gasstationModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch gasStation edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch gasStation edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         GasStation gasStation = new GasStation();
         List<Card> cards = new ArrayList<Card>();
@@ -73,7 +74,9 @@ public class GasStationController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addGasStation(@ModelAttribute GasStation gasStation) {
-        logger.info("add gasStation, gasStation={}", gasStation);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add gasStation, gasStation={}", gasStation);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_GAS_STATION
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -96,7 +99,9 @@ public class GasStationController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateGasStation(@ModelAttribute GasStation gasStation, Integer handset, String cardIds) {
-        logger.info("update gasStation, gasStation={}", gasStation);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update gasStation, gasStation={}", gasStation);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_GAS_STATION
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -119,7 +124,9 @@ public class GasStationController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteGasStation(Long id) {
-        logger.info("delete gasStation, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete gasStation, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_GAS_STATION
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -147,14 +154,18 @@ public class GasStationController extends BaseAction {
     @RequestMapping(value = "isExist.do")
     @ResponseBody
     public Boolean isGasStationExist(GasStation gasStation) {
-        logger.info("gasStation exist, gasStation={}", gasStation);
+        if (logger.isDebugEnabled()) {
+            logger.debug("gasStation exist, gasStation={}", gasStation);
+        }
         return gasStationService.isGasStationExist(gasStation);
     }
 
     @RequestMapping(value = "getExistInfo.do")
     @ResponseBody
     public ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode) {
-        logger.info("get gasStation exist info, officialId={}, name={}, abbr={}, mode={}", officialId, name, abbr, mode);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get gasStation exist info, officialId={}, name={}, abbr={}, mode={}", officialId, name, abbr, mode);
+        }
         return gasStationService.getExistInfo(officialId, name, abbr, mode);
     }
 
@@ -169,7 +180,9 @@ public class GasStationController extends BaseAction {
     @ResponseBody
     public GridPage<GasStation> ajaxFindGasStationsForPage(@ModelAttribute GasStation gasStation,
                                                            @ModelAttribute Page page) {
-        logger.info("gasStation list page, gasStation={}, page={}", gasStation, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("gasStation list page, gasStation={}, page={}", gasStation, page);
+        }
         return gasStationService.findGasStationsForPage(gasStation, page);
     }
 

@@ -60,7 +60,6 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/manage/car")
-/* @Scope("prototype") */
 public class VehicleController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(VehicleController.class);
     @Resource
@@ -75,7 +74,9 @@ public class VehicleController extends BaseAction {
     @PermissionAnno("carModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch car edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch car edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         if (id != null && id > 0) {
             Map<String, Object> map = new HashMap<>(16);
@@ -91,7 +92,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addCar(@ModelAttribute Vehicle car, String driverIds) {
-        logger.info("add car, car={}, driverIds={}", car, driverIds);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add car, car={}, driverIds={}", car, driverIds);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_VEHICLE
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -114,7 +117,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateCar(@ModelAttribute Vehicle car, String driverIds, String locksJson) {
-        logger.info("update car, car={}, driverIds={}, locksJson={}", car, driverIds, locksJson);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update car, car={}, driverIds={}, locksJson={}", car, driverIds, locksJson);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_VEHICLE
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -138,7 +143,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteCar(Long id, String carNumber) {
-        logger.info("delete car, id={}, carNumber={}", id, carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete car, id={}, carNumber={}", id, carNumber);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_VEHICLE
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -161,7 +168,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Vehicle> ajaxFindCarsForPage(@ModelAttribute Vehicle car, @ModelAttribute Page page) {
-        logger.info("car list page, car={}, page={}", car, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("car list page, car={}, page={}", car, page);
+        }
         User user = ThreadVariable.getUser();
         Long userComId = user.getComId();
         TransCompany transCompany = car.getTransCompany();
@@ -176,8 +185,7 @@ public class VehicleController extends BaseAction {
                 throw new PermissionException(PermissionErrorEnum.PERMISSION_DENIED);
             }
         }
-        GridPage<Vehicle> gridPage = vehicleService.findCarsForPage(car, page);
-        return gridPage;
+        return vehicleService.findCarsForPage(car, page);
     }
 
     /**
@@ -189,7 +197,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "getCarByNo.do")
     @ResponseBody
     public Vehicle getCarByNo(String carNo) {
-        logger.info("get car by carno, carNo={}", carNo);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get car by carno, carNo={}", carNo);
+        }
         return vehicleService.getByCarNo(carNo);
     }
 
@@ -214,7 +224,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "getCarByTerminalId.do")
     @ResponseBody
     public Vehicle getCarByTerminalId(Integer terminalId) {
-        logger.info("get car by terminal id, terminalId={}", terminalId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get car by terminal id, terminalId={}", terminalId);
+        }
         return vehicleService.getCarByTerminalId(terminalId);
     }
 
@@ -282,7 +294,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "findLocksByCarId.do")
     @ResponseBody
     public List<Lock> findLocksByCarId(Long carId) {
-        logger.info("find locks by car id, carId={}", carId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find locks by car id, carId={}", carId);
+        }
         return vehicleService.findLocksByCarId(carId);
     }
 
@@ -295,7 +309,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "getBindingLocks.do")
     @ResponseBody
     public List<Integer> getBindingLocks(String carNumber) {
-        logger.info("get binding locks, carNumber={}", carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get binding locks, carNumber={}", carNumber);
+        }
         return vehicleService.findBindingLockDeviceIds(carNumber);
     }
 
@@ -310,7 +326,9 @@ public class VehicleController extends BaseAction {
     @PermissionAnno("remoteModule")
     @RequestMapping(value = "carStatusDispatch.do")
     public String carStatusDispatch(Integer mode, String carNumber, ModelMap modelMap) {
-        logger.info("dispatch remote control page, mode={}, carNumber={}", mode, carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch remote control page, mode={}, carNumber={}", mode, carNumber);
+        }
         modelMap.put("mode", mode);
         VehicleStatus carStatus = vehicleService.getCarStatus(carNumber);
         if (carStatus.getStatus() == null) {
@@ -340,14 +358,18 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "getDistribution.do")
     @ResponseBody
     public List<ChangeInfo> getDistribution(String carNumber) {
-        logger.info("get distribution, carNumber={}", carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get distribution, carNumber={}", carNumber);
+        }
         return vehicleService.getDistributionsByCarNumber(carNumber);
     }
 
     @PermissionAnno("changeModule")
     @RequestMapping(value = "changeDispatch.do")
     public String changeDispatch(String carNumber, ModelMap modelMap) {
-        logger.info("dispatch change station page, carNumber={}", carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch change station page, carNumber={}", carNumber);
+        }
         long userId = ThreadVariable.getUser().getId();
         List<ChangeInfo> distributions = vehicleService.getDistributionsByCarNumber(carNumber);
         List<Map<String, Object>> gasStations = gasStationService.getIdAndNameOfAllGasStations();
@@ -367,9 +389,10 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "retrack.do")
     @ResponseBody
     public Map<String, Object> reTrack(ReTrack carTrack) {
-        logger.info("retrack, carTrack={}", carTrack);
-        Map<String, Object> map = vehicleService.findTracks(carTrack);
-        return map;
+        if (logger.isDebugEnabled()) {
+            logger.debug("retrack, carTrack={}", carTrack);
+        }
+        return vehicleService.findTracks(carTrack);
     }
 
     /**
@@ -381,7 +404,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "getCarAndDriverByCarNo.do")
     @ResponseBody
     public Map<String, Object> getCarAndDriverByCarNo(String carNumber) {
-        logger.info("getCarAndDriverByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("getCarAndDriverByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+        }
         if (StringUtil.isEmpty(carNumber)) {
             return null;
         }
@@ -397,7 +422,9 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "findlocksByCarNo.do")
     @ResponseBody
     public List<Map<String, Object>> findlocksByCarNo(String carNumber) {
-        logger.info("findlocksByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+        if (logger.isDebugEnabled()) {
+            logger.debug("findlocksByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
+        }
         if (StringUtil.isEmpty(carNumber)) {
             return null;
         }
@@ -434,8 +461,7 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "selectDropdownData.do")
     @ResponseBody
     public List<DropdownData> selectDropdownData() {
-        List<DropdownData> list = vehicleService.selectCars();
-        return list;
+        return vehicleService.selectCars();
     }
 
     /**
@@ -474,7 +500,10 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "findTracksByCarNumbers.do")
     @ResponseBody
     public ResponseMsg findTracksByCarNumbers(String carNumbers, String beginTime) {
-        logger.info("findTracksByCarNumbers: 某【几】辆车某个时间点以后的轨迹信息, carNumbers={}, beginTime={}", carNumbers, beginTime);
+        if (logger.isDebugEnabled()) {
+            logger.debug("findTracksByCarNumbers: 某【几】辆车某个时间点以后的轨迹信息, carNumbers={}, beginTime={}",
+                    carNumbers, beginTime);
+        }
         if (StringUtil.isEmpty(carNumbers)) {
             logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
             return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
@@ -512,7 +541,10 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "findTracksByCarNumber.do")
     @ResponseBody
     public ResponseMsg findTracksByCarNumber(String carNumber, String beginTime) {
-        logger.info("findTracksByCarNumber: 某辆车某个时间点以后的轨迹信息, carNumber={}, beginTime={}", carNumber, beginTime);
+        if (logger.isDebugEnabled()) {
+            logger.debug("findTracksByCarNumber: 某辆车某个时间点以后的轨迹信息, carNumber={}, beginTime={}",
+                    carNumber, beginTime);
+        }
         if (StringUtil.isEmpty(carNumber)) {
             logger.error("查询车辆轨迹信息错误：{}", FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);
             return ResponseMsgUtil.error(FindTracksByCarNumberErrorEnum.CAR_NUMBER_NULL);

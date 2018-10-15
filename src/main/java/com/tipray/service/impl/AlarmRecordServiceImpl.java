@@ -132,8 +132,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
 
     @Override
     public List<AlarmRecord> findAllRecords() {
-        List<AlarmRecord> list = alarmRecordDao.findAll();
-        return list;
+        return alarmRecordDao.findAll();
     }
 
     @Override
@@ -167,7 +166,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
     public GridPage<AlarmRecord> findRecordsForPage(AlarmRecord record, Page page) {
         long records = countRecord(record);
         List<AlarmRecord> list = findByPage(record, page);
-        return new GridPage<AlarmRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 
     @Override
@@ -332,6 +331,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
 
     /**
      * 是否无效报警
+     *
      * @param alarm 报警信息
      * @return
      */
@@ -347,7 +347,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                 // 车台已换新，报警无效
                 return true;
             }
-        } else if (deviceType == 2){
+        } else if (deviceType == 2) {
             int lockId = ((Long) alarm.get("lock_id")).intValue();
             if (lockId == 0) {
                 // 该位置已无锁，报警无效

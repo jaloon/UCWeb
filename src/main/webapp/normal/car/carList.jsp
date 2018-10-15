@@ -179,7 +179,7 @@
     <script src="../../resources/plugins/jqTable/js/jquery.mousewheel.min.js"></script>
     <!-- 表格插件 -->
     <script src="../../resources/plugins/jqTable/js/zipJs/jqTable.all.min.js"></script>
-
+    <script src="../../resources/plugins/verify.js"></script>
     <script type="text/javascript">
 
         <pop:Permission ename="editCar">

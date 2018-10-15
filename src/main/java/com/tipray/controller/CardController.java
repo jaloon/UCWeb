@@ -33,7 +33,6 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/manage/card")
-/* @Scope("prototype") */
 public class CardController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(CardController.class);
 
@@ -45,7 +44,9 @@ public class CardController extends BaseAction {
     @PermissionAnno("cardModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch card edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch card edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         Map<String, Object> map = new HashMap<String, Object>();
         if (id != null && id > 0) {
@@ -61,7 +62,9 @@ public class CardController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addCard(@ModelAttribute Card card) {
-        logger.info("add card, card={}", card);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add card, card={}", card);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_CARD
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -84,7 +87,9 @@ public class CardController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateCard(@ModelAttribute Card card) {
-        logger.info("update card, card={}", card);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update card, card={}", card);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_CARD
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -107,7 +112,9 @@ public class CardController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteCard(Long id) {
-        logger.info("delete card, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete card, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_CARD
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -129,7 +136,9 @@ public class CardController extends BaseAction {
     @RequestMapping(value = "isExist.do")
     @ResponseBody
     public Boolean isCardExist(Long cardId) {
-        logger.info("card exist, cardId={}", cardId);
+        if (logger.isDebugEnabled()) {
+            logger.debug("card exist, cardId={}", cardId);
+        }
         return cardService.isCardExist(cardId) != null;
     }
 
@@ -137,15 +146,18 @@ public class CardController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<Card> ajaxFindCardsForPage(@ModelAttribute Card card, @ModelAttribute Page page) {
-        logger.info("card list page, card={}, page={}", card, page);
-        GridPage<Card> gridPage = cardService.findCardsForPage(card, page);
-        return gridPage;
+        if (logger.isDebugEnabled()) {
+            logger.debug("card list page, card={}, page={}", card, page);
+        }
+        return cardService.findCardsForPage(card, page);
     }
 
     @RequestMapping(value = "findUnusedCard.do")
     @ResponseBody
     public List<Long> findUnusedCard(Integer cardType) {
-        logger.info("find unused card, cardType={}", cardType);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find unused card, cardType={}", cardType);
+        }
         return cardService.findUnusedCard(cardType);
     }
 }

@@ -96,8 +96,7 @@ public class UsageRecordServiceImpl implements UsageRecordService {
 
     @Override
     public List<UsageRecord> findAllRecords() {
-        List<UsageRecord> list = usageRecordDao.findAll();
-        return list;
+        return usageRecordDao.findAll();
     }
 
     @Override
@@ -142,6 +141,6 @@ public class UsageRecordServiceImpl implements UsageRecordService {
     public GridPage<UsageRecord> findRecordsForPage(UsageRecord record, Page page) {
         long records = countRecord(record);
         List<UsageRecord> list = findByPage(record, page);
-        return new GridPage<UsageRecord>(list, records, page.getPageId(), page.getRows(), list.size(), record);
+        return new GridPage<>(list, records, page, record);
     }
 }

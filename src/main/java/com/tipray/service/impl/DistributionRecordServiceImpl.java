@@ -83,7 +83,7 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 
     @Transactional
 	@Override
-	public ByteBuffer addDistributionRecord(Map<String, Object> distributionMap) {
+	public Long addDistributionRecord(Map<String, Object> distributionMap) {
 		// 车辆ID
 		Long carId = (Long) distributionMap.get("carId");
 		// 仓号
@@ -91,9 +91,13 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
 		distributionRecordDao.checkDistribute(carId, storeId);
 		distributionRecordDao.addByDistributionMap(distributionMap);
 		// 配送ID
-        Long transportId = (Long) distributionMap.get("id");
+        return (Long) distributionMap.get("id");
+	}
+
+	@Override
+	public ByteBuffer buildNewDistDataBuffer(String stationOfficialId, int transportId, byte storeId) {
         // 获取加油站相关信息
-        Map<String, Object> stationMap = gasStationDao.getStationForChangeByOfficialId((String) distributionMap.get("deptId"));
+        Map<String, Object> stationMap = gasStationDao.getStationForChangeByOfficialId(stationOfficialId);
         if (EmptyObjectUtil.isEmptyMap(stationMap)) {
             throw new IllegalArgumentException("加油站不存在！");
         }
@@ -116,7 +120,7 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
         // 获取加油站普通卡信息
         List<Long> cardIds = gasStationDao.findOrdinaryCardById(stationId);
 
-        byte[] tranportIdDword = BytesConverterByLittleEndian.getBytes(transportId.intValue());
+        byte[] tranportIdDword = BytesConverterByLittleEndian.getBytes(transportId);
         byte[] stationNameBuf = stationName.getBytes(StandardCharsets.UTF_8);
         int stationNameBufLen = stationNameBuf.length;
         byte[] userNameBuf = "物流配送接口".getBytes(StandardCharsets.UTF_8);
@@ -141,7 +145,7 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
         // 添加换站类型，1个字节
         dataBuffer.put((byte) 2);
         // 添加仓号，1个字节
-        dataBuffer.put(storeId.byteValue());
+        dataBuffer.put(storeId);
         // 添加原配送ID，4个字节
         dataBuffer.put(tranportIdDword);
         // 添加新配送ID，4个字节
@@ -183,7 +187,7 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
         // 添加操作员姓名，UTF-8编码
         dataBuffer.put(userNameBuf);
         return dataBuffer;
-	}
+    }
 
 	@Override
 	public List<Map<String, Object>> findDistributionsByGasStationId(Long gasStationId) {

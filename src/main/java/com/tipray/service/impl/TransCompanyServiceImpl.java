@@ -106,6 +106,6 @@ public class TransCompanyServiceImpl implements TransCompanyService {
 	public GridPage<TransCompany> findTransCompanysForPage(TransCompany transCompany, Page page) {
 		long records = countTransCompany(transCompany);
 		List<TransCompany> list = findByPage(transCompany, page);
-		return new GridPage<TransCompany>(list, records, page.getPageId(), page.getRows(), list.size(), transCompany);
+		return new GridPage<>(list, records, page, transCompany);
 	}
 }

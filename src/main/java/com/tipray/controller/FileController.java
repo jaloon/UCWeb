@@ -47,7 +47,7 @@ import java.util.List;
 public class FileController extends BaseAction {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FileController.class);
     private static final int UPLOAD_DEPOT = 1;
-    private static final int UPLOAD_STATON = 2;
+    private static final int UPLOAD_STATION = 2;
     private static final int UPLOAD_VEHICLE = 3;
     @Resource
     private OilDepotService oilDepotService;
@@ -103,7 +103,7 @@ public class FileController extends BaseAction {
                     List<OilDepot> oilDepots = ExcelUtils.getInstance().readExcel2Objects(inputStream, OilDepot.class);
                     oilDepotService.addOilDepots(oilDepots);
                     break;
-                case UPLOAD_STATON:
+                case UPLOAD_STATION:
                     type |= LogTypeConst.ENTITY_GAS_STATION;
                     description.append("加油站。");
                     List<GasStation> gasStations = ExcelUtils.getInstance().readExcel2Objects(inputStream, GasStation.class);
@@ -163,7 +163,9 @@ public class FileController extends BaseAction {
     @RequestMapping(value = "download/{filename:.+}", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public ResponseEntity<byte[]> download(@PathVariable(value = "filename") String filename) {
-        logger.info("downloadUpgradeFile file, filename={}", filename);
+        if (logger.isDebugEnabled()) {
+            logger.debug("downloadUpgradeFile file, filename={}", filename);
+        }
         try {
             if (StringUtil.isEmpty(filename)) {
                 logger.warn("file name is null!");

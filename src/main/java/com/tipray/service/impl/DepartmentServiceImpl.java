@@ -110,7 +110,7 @@ public class DepartmentServiceImpl extends BaseAction implements DepartmentServi
 	public GridPage<Department> findDepartmentsForPage(Department dept, Page page) {
 		Long total = departmentDao.countByVo(dept);
 		List<Department> list = departmentDao.findByVo(dept, page);
-		return new GridPage<Department>(list, total, page.getPageId(), page.getRows(), list.size(), dept);
+		return new GridPage<>(list, total, page, dept);
 	}
 
 	@Override

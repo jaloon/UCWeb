@@ -41,8 +41,8 @@ public enum UdpReplyWorkErrorEnum {
     OPERATE_FAIL_154_AUTHENTICATION_ID_ERROR(154, "操作失败，认证编号错误"),
     /** 操作失败，站点错误 */
     OPERATE_FAIL_155_STATION_ERROR(155, "操作失败，站点错误"),
-    /** 操作失败，设备存在越界报警 */
-    OPERATE_FAIL_156_DEVICE_OUT_OF_BOUNDS_ALARM(156, "操作失败，设备存在越界报警"),
+    /** 操作失败，车辆不在指定区域内 */
+    OPERATE_FAIL_156_VEHICLE_IS_NOT_IN_DESIGNATED_AREA(156, "操作失败，车辆不在指定区域内"),
     /** 操作失败，操作重复 */
     OPERATE_FAIL_157_DUPLICATION_OF_OPERATION(157, "操作失败，操作重复"),
     /** 操作失败，其它原因 */

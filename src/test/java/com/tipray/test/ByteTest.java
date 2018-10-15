@@ -23,6 +23,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 @SuppressWarnings({ "unused" })
 public class ByteTest {
+
+	@Test
+	public void testByteBinary() {
+	    byte b = -113;
+        System.out.println(BytesUtil.byteToBinaryString(b));
+        byte[] bytes = {64,64,-113,64,64};
+        System.out.println(BytesUtil.bytesToBinaryString(bytes, ' '));
+    }
+
 	@Test
 	public void appsync() throws IOException {
         String json = OkHttpUtil.get("https://www.pltone.com:3003/api/appSync.do?id=1");

@@ -6,8 +6,8 @@
 
 	<display-name>TRWeb</display-name>
 
-	<!-- session-timeout原来设置为1，代表1分钟，实在是太短了，比较容易出现session超时，然后出现各种与服务器通信时发生错误 -->
-	<!-- <session-config> <session-timeout>20</session-timeout> </session-config> -->
+	 <!--session-timeout原来设置为1，代表1分钟，实在是太短了，比较容易出现session超时，然后出现各种与服务器通信时发生错误 -->
+	 <session-config> <session-timeout>120</session-timeout> </session-config>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>

@@ -39,7 +39,6 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/manage/oildepot")
-/* @Scope("prototype") */
 public class OildepotController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(OildepotController.class);
 
@@ -52,10 +51,12 @@ public class OildepotController extends BaseAction {
     @Resource
     private InfoManageLogService infoManageLogService;
 
-    @PermissionAnno("oilDepotModule")
+    @PermissionAnno("oildepotModule")
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch oilDepot edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch oilDepot edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         OilDepot oilDepot = new OilDepot();
         List<InOutReader> readers = new ArrayList<InOutReader>();
@@ -79,7 +80,9 @@ public class OildepotController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addOilDepot(@ModelAttribute OilDepot oilDepot) {
-        logger.info("add oilDepot, oilDepot={}", oilDepot);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add oilDepot, oilDepot={}", oilDepot);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_OIL_DEPOT
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -102,7 +105,9 @@ public class OildepotController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateOilDepot(@ModelAttribute OilDepot oilDepot, String readersJson, String cardIds) {
-        logger.info("update oilDepot, oilDepot={}", oilDepot);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update oilDepot, oilDepot={}", oilDepot);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_OIL_DEPOT
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -125,7 +130,9 @@ public class OildepotController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteOilDepot(Long id) {
-        logger.info("delete card, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete card, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_OIL_DEPOT
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -153,14 +160,18 @@ public class OildepotController extends BaseAction {
     @RequestMapping(value = "isExist.do")
     @ResponseBody
     public Boolean isOilDepotExist(OilDepot oilDepot) {
-        logger.info("oildepot exist, oilDepot={}", oilDepot);
+        if (logger.isDebugEnabled()) {
+            logger.debug("oildepot exist, oilDepot={}", oilDepot);
+        }
         return oilDepotService.isOilDepotExist(oilDepot);
     }
 
     @RequestMapping(value = "getExistInfo.do")
     @ResponseBody
     public ResponseMsg getExistInfo(String officialId, String name, String abbr, String mode) {
-        logger.info("get oildepot exist info, officialId={}, name={}, abbr={}, mode={}", officialId, name, abbr, mode);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get oildepot exist info, officialId={}, name={}, abbr={}, mode={}", officialId, name, abbr, mode);
+        }
         return oilDepotService.getExistInfo(officialId, name, abbr, mode);
     }
 
@@ -168,7 +179,9 @@ public class OildepotController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<OilDepot> ajaxFindOilDepotsForPage(@ModelAttribute OilDepot oilDepot, @ModelAttribute Page page) {
-        logger.info("oilDepot list page, oilDepot={}, page={}", oilDepot, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("oilDepot list page, oilDepot={}, page={}", oilDepot, page);
+        }
         return oilDepotService.findOilDepotsForPage(oilDepot, page);
     }
 
@@ -181,7 +194,9 @@ public class OildepotController extends BaseAction {
     @RequestMapping(value = "getIdAndNameOfAllOilDepotsAndGasStations.do")
     @ResponseBody
     public Map<String, Object> getIdAndNameOfAllOilDepotsAndGasStations(Long depotVer, Long stationVer) {
-        logger.info("get id and name of all depots and stations, depotVer={}, stationVer={}", depotVer, stationVer);
+        if (logger.isDebugEnabled()) {
+            logger.debug("get id and name of all depots and stations, depotVer={}, stationVer={}", depotVer, stationVer);
+        }
         return oilDepotService.getIdAndNameOfAllOilDepotsAndGasStations(depotVer, stationVer);
     }
 

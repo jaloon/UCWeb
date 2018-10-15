@@ -36,7 +36,6 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/manage/user")
-/* @Scope("prototype") */
 public class UserController extends BaseAction {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -47,7 +46,9 @@ public class UserController extends BaseAction {
 
     @RequestMapping(value = "dispatch.do")
     public String dispatch(String mode, Long id, ModelMap modelMap) {
-        logger.info("dispatch user edit page, mode={}, id={}", mode, id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("dispatch user edit page, mode={}, id={}", mode, id);
+        }
         modelMap.put("mode", mode);
         User user = new User();
         if (id != null && id > 0) {
@@ -62,7 +63,9 @@ public class UserController extends BaseAction {
     @RequestMapping(value = "add.do")
     @ResponseBody
     public Message addUser(@ModelAttribute User user) {
-        logger.info("add user, user={}", user);
+        if (logger.isDebugEnabled()) {
+            logger.debug("add user, user={}", user);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_INSERT | LogTypeConst.RESULT_DONE;
@@ -84,7 +87,9 @@ public class UserController extends BaseAction {
     @RequestMapping(value = "update.do")
     @ResponseBody
     public Message updateUser(User user) {
-        logger.info("update user, user={}", user);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update user, user={}", user);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_UPDATE | LogTypeConst.RESULT_DONE;
@@ -107,7 +112,9 @@ public class UserController extends BaseAction {
     @RequestMapping(value = "delete.do")
     @ResponseBody
     public Message deleteUser(Long id) {
-        logger.info("delete user, id={}", id);
+        if (logger.isDebugEnabled()) {
+            logger.debug("delete user, id={}", id);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_DELETE | LogTypeConst.RESULT_DONE;
@@ -131,7 +138,9 @@ public class UserController extends BaseAction {
     @RequestMapping(value = "reset.do")
     @ResponseBody
     public Message resetPassword(User user) {
-        logger.info("reset password, user={}", user);
+        if (logger.isDebugEnabled()) {
+            logger.debug("reset password, user={}", user);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_PASSWORD_RESET | LogTypeConst.RESULT_DONE;
@@ -154,7 +163,9 @@ public class UserController extends BaseAction {
     @RequestMapping(value = "updatePwd.do")
     @ResponseBody
     public Message updatePassword(User user, String oldPwd) {
-        logger.info("update password, user={}", user);
+        if (logger.isDebugEnabled()) {
+            logger.debug("update password, user={}", user);
+        }
         InfoManageLog infoManageLog = new InfoManageLog(ThreadVariable.getUser());
         Integer type = LogTypeConst.CLASS_BASEINFO_MANAGE | LogTypeConst.ENTITY_USER
                 | LogTypeConst.TYPE_PASSWORD_ALTER | LogTypeConst.RESULT_DONE;
@@ -183,7 +194,9 @@ public class UserController extends BaseAction {
     @RequestMapping("isExist.do")
     @ResponseBody
     public Boolean isUserExist(@ModelAttribute User user) {
-        logger.info("user exist, user={}", user);
+        if (logger.isDebugEnabled()) {
+            logger.debug("user exist, user={}", user);
+        }
         User bean = userService.getUserByAccount(user.getAccount());
         return bean != null && user.getId() != bean.getId();
     }
@@ -192,17 +205,20 @@ public class UserController extends BaseAction {
     @RequestMapping(value = "ajaxFindForPage.do")
     @ResponseBody
     public GridPage<User> ajaxFindUsersForPage(@ModelAttribute User user, @ModelAttribute Page page) {
-        logger.info("user list page, user={}, page={}", user, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("user list page, user={}, page={}", user, page);
+        }
         user.setRole(ThreadVariable.getRole());
-        GridPage<User> gridPage = userService.findUsersForPage(user, page);
-        return gridPage;
+        return userService.findUsersForPage(user, page);
     }
 
     @PermissionAnno("viewUser")
     @RequestMapping(value = "findForPage.do")
     @ResponseBody
     public String findUsersForPage(User user, Page page, ModelMap modelMap) {
-        logger.info("find users for page, user={}, page={}", user, page);
+        if (logger.isDebugEnabled()) {
+            logger.debug("find users for page, user={}, page={}", user, page);
+        }
         modelMap.put("user", user);
         modelMap.put("gridPage", userService.findUsersForPage(user, page));
         return "normal/user/userList.jsp";

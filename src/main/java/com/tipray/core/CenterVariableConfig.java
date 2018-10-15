@@ -1,6 +1,7 @@
 package com.tipray.core;
 
 import com.tipray.cache.RC4KeyCache;
+import com.tipray.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,41 +71,15 @@ public class CenterVariableConfig {
             Properties properties = new Properties();
             properties.load(new FileInputStream(file));
 
-            String rc4NetStr = properties.getProperty("rc4.net");
-            if (rc4NetStr == null || rc4NetStr.trim().isEmpty()) {
-                rc4Net = false;
-            } else {
-                rc4Net = rc4NetStr.equals("1");
-            }
+            rc4Net = FileUtil.getBoolProp(properties, "rc4.net", false);
             rc4Key = properties.getProperty("rc4.key");
             RC4KeyCache.loadLocalRc4();
 
-            String validateLocalStr = properties.getProperty("validate.local");
-            String validateAppdevStr = properties.getProperty("validate.appdev");
-            String validateAppverStr = properties.getProperty("validate.appver");
+            validateLocal = FileUtil.getBoolProp(properties, "validate.local", false);
+            validateAppdev = FileUtil.getBoolProp(properties, "validate.appdev", false);
+            validateAppver = FileUtil.getBoolProp(properties, "validate.appver", false);
 
-            if (validateLocalStr == null || validateLocalStr.trim().isEmpty()) {
-                validateLocal = false;
-            } else {
-                validateLocal = validateLocalStr.equals("1");
-            }
-            if (validateAppdevStr == null || validateAppdevStr.trim().isEmpty()) {
-                validateAppdev = false;
-            } else {
-                validateAppdev = validateAppdevStr.equals("1");
-            }
-            if (validateAppverStr == null || validateAppverStr.trim().isEmpty()) {
-                validateAppver = false;
-            } else {
-                validateAppver = validateAppverStr.equals("1");
-            }
-
-            String emailSqliteStr = properties.getProperty("email.sqlite");
-            if (emailSqliteStr == null) {
-                emailSqlite = false;
-            } else {
-                emailSqlite = emailSqliteStr.equals("1");
-            }
+            emailSqlite = FileUtil.getBoolProp(properties, "email.sqlite", false);
             String emailSqliteReceiverStr = properties.getProperty("email.sqlite.receiver");
             if (emailSqliteReceiverStr == null || emailSqliteReceiverStr.trim().isEmpty()) {
                 emailSqliteReceivers = null;

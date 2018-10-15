@@ -137,4 +137,7 @@ public interface LockDao extends BaseDao<Lock> {
      * @return 锁记录ID
      */
     List<Lock> findIdsByDevIds(@Param("carId") Long carId, @Param("devIds") String devIds);
+
+    Map<String, Object> getLockByCarIdAndLockIndex(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
+
 }

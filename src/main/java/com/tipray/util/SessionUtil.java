@@ -27,7 +27,7 @@ public class SessionUtil {
 	public static final String LOGIN_SESSION_ID = "sid";
 	public static final String OLD_LOGIN_SESSION_ID = "oldSid";
 	public static final long SESSION_TIMEOUT_MILLISECOND = 30 * 60 * 1000L;
-	public static final long WEBAPP_TIMEOUT_MILLISECOND = 6 * 60 * 1000L;
+	public static final long WEBAPP_TIMEOUT_MILLISECOND = 2 * 60 * 60 * 1000L;
 
 	private static final Map<String, Session> SESSION_CACHE_MAP = new ConcurrentHashMap<>();
 	private static final SessionService SESSION_SERVICE = SpringBeanUtil.getSessionService();

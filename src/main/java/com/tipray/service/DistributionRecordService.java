@@ -18,10 +18,19 @@ public interface DistributionRecordService extends RecordService<DistributionRec
      * 根据物流配送接口信息添加配送记录
      *
      * @param distributionMap 物流配送接口信息
-     * @return 配送单新增业务数据体
+     * @return 配送ID
      * @throws ServiceException
      */
-    ByteBuffer addDistributionRecord(Map<String, Object> distributionMap) throws ServiceException;
+    Long addDistributionRecord(Map<String, Object> distributionMap) throws ServiceException;
+
+    /**
+     * 构建新增配送单数据体
+     * @param stationOfficialId 加油站官方编号
+     * @param transportId 配送ID
+     * @param storeId 仓号
+     * @return 配送单新增业务数据体
+     */
+    ByteBuffer buildNewDistDataBuffer(String stationOfficialId, int transportId, byte storeId);
 
     /**
      * 根据配送单号统计配送记录数量

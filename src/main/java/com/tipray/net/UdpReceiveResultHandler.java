@@ -65,14 +65,19 @@ class UdpReceiveResultHandler {
                     //     }
                     //     break;
                     case UdpBizId.REMOTE_CHANGE_STATION_RESPONSE:
-                        if (params != null) {
+                        Integer type = (Integer) params.get("type");
+                        Long transportId = (Long) params.get("transportId");
+                        if (type == 1) {
                             Long changeId = (Long) params.get("changeId");
-                            Long transportId = (Long) params.get("transportId");
                             Long changedTransportId = (Long) params.get("changedTransportId");
                             if (isOk) {
                                 CHANGE_SERVICE.updateChangeAndTransportStatusForDone(changeId, transportId, changedTransportId);
                             } else {
                                 CHANGE_SERVICE.updateChangeStatus(changeId, RemoteControlConst.REMOTE_PROGRESS_FAIL);
+                            }
+                        } else if (type == 2) {
+                            if (isOk) {
+                                CHANGE_SERVICE.updateDistStatus(transportId, 1);
                             }
                         }
                         break;
@@ -146,7 +151,7 @@ class UdpReceiveResultHandler {
     /**
      * 根据UDP应答结果构建日志显示结果
      *
-     * @param msg   {@link ResponseMsg} UDP应答结果
+     * @param msg {@link ResponseMsg} UDP应答结果
      * @return {@link String} 日志显示结果
      */
     private static String buildLogResultByResponseMsg(ResponseMsg msg) {

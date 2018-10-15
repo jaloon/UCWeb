@@ -5,6 +5,7 @@ import com.tipray.bean.baseinfo.AppSync;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.cache.RC4KeyCache;
 import com.tipray.constant.CenterConst;
+import com.tipray.constant.SystemPropertyConst;
 import com.tipray.core.CenterVariableConfig;
 import com.tipray.net.NioUdpServer;
 import com.tipray.net.SendPacketBuilder;
@@ -12,6 +13,7 @@ import com.tipray.service.AlarmRecordService;
 import com.tipray.service.AppService;
 import com.tipray.service.SqliteSyncService;
 import com.tipray.service.VehicleService;
+import com.tipray.util.FileUtil;
 import com.tipray.util.JSONUtil;
 import com.tipray.util.OkHttpUtil;
 import com.tipray.websocket.handler.AlarmWebSocketHandler;
@@ -21,8 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 定时任务
@@ -50,8 +54,13 @@ public class ScheduledJob {
     /**
      * APP配置信息同步路径
      */
-    private static final String APP_SYNC_URL = new StringBuffer().append(CenterConst.PLTONE_URL)
+    private static final String APP_SYNC_URL = new StringBuilder().append(CenterConst.PLTONE_URL)
             .append("/api/appSync.do?id=").append(CenterConst.CENTER_ID).toString();
+    /**
+     * 日志文件夹路径
+     */
+    private static final String LOG_FOLDER_PATH = new StringBuilder().append(SystemPropertyConst.CATALINA_HOME)
+            .append(File.separatorChar).append("logs").toString();
 
     /**
      * 定时更新RC4秘钥信息任务
@@ -119,4 +128,18 @@ public class ScheduledJob {
     public void executeSqliteSync() {
         sqliteSyncService.syncSqliteFile();
     }
+
+    /**
+     * 删除过期日志（超过60天的）任务
+     */
+    public void executeDeleteOverdueLog() {
+        final StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("删除超过60天的日志：");
+        File[] files = FileUtil.deleteFilesBeforeDateInFolder(LOG_FOLDER_PATH, 60, TimeUnit.DAYS);
+        for (File file : files) {
+            logBuilder.append('\n').append(file.getName());
+        }
+        logger.info(logBuilder.toString());
+    }
+
 }
