@@ -106,7 +106,7 @@
 	<insert id="addByChangeInfo" useGeneratedKeys="true" keyProperty="changedTransportId" parameterType="com.tipray.bean.ChangeInfo">
 		insert into
 		tbl_transport(distribute_id,vehicle_id,device_id,store_id,oildepot_id,gasstation_id,status,trigger_type,trigger_id)
-		values(#{invoice},#{carId},IFNULL(#{terminalId}, 0),#{storeId},#{oildepotId},#{changedGasstationId},0,6,0)
+		values(#{invoice},#{carId},IFNULL(#{terminalId}, 0),#{storeId},#{oildepotId},#{changedGasstationId},5,6,0)
 	</insert>
 	
 	<insert id="addByDistributionMap" useGeneratedKeys="true" keyProperty="id" parameterType="java.util.Map">
@@ -127,7 +127,7 @@
 	</select>
 
 	<select id="countWaitInvoice" parameterType="java.lang.String" resultType="java.lang.Integer">
-		select count(*) from tbl_transport where distribute_id = #{invoice} and `status` = 1
+		select count(*) from tbl_transport where distribute_id = #{invoice} and <![CDATA[ `status` < 2 ]]>
 	</select>
 
 	<select id="countSameWaitDistInfo" parameterType="java.util.Map" resultType="java.lang.Integer">
@@ -140,7 +140,7 @@
             AND vehicle_id = #{carId}
             AND store_id = #{binNum}
             AND gasstation_id = (select g.id from tbl_gasstation g where g.official_id=#{deptId})
-            AND `status` = 1
+            AND <![CDATA[ `status` < 2 ]]>
     </select>
 
 	<update id="checkDistribute">

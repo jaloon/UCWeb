@@ -4,7 +4,9 @@ import com.tipray.bean.alarm.AlarmDevice;
 import com.tipray.bean.alarm.AlarmInfo;
 import com.tipray.constant.AlarmBitMarkConst;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,11 +25,11 @@ public class VehicleAlarmUtil {
     // ------------------------------------------------------------------------------
 
     // 锁报警信息位说明：以下位序从低位开始
-    // --------------------------------------------------------------------------------------
-    // |8 			|7			|6		|5		|4			|3 			|2 		|1			|
-    // --------------------------------------------------------------------------------------
-    // |开关状态		|是否可用	|保留	|保留	|进入应急	|异常开锁	|低电压	|通讯异常	|
-    // --------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------
+    // |8 			|7			|6		|5		    |4			|3 			|2 		|1			|
+    // ------------------------------------------------------------------------------------------
+    // |开关状态		|是否可用	|保留	|异常移动报警	|进入应急	|异常开锁	|低电压	|通讯异常	|
+    // ------------------------------------------------------------------------------------------
 
 
     /**
@@ -159,12 +161,16 @@ public class VehicleAlarmUtil {
      * @return
      */
     public static String getLockAlarmByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
+        if (lockStatusInfo == null || lockIndex > lockStatusInfo.length) {
+            return "-";
+        }
         byte lock = lockStatusInfo[lockIndex - 1];
         return getLockAlarm(lock);
     }
 
     /**
      * 获取锁报警信息
+     *
      * @param lock
      * @return
      */
@@ -192,6 +198,31 @@ public class VehicleAlarmUtil {
             alarm.deleteCharAt(0);
         }
         return alarm.toString();
+    }
+
+    /**
+     * 获取锁报警状态值集合
+     * @param lockInfo
+     * @return
+     */
+    public static List<Integer> getLockAlarmValues(byte lockInfo) {
+        List<Integer> list = new ArrayList<>();
+        if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_1_COMM_ANOMALY) > 0) {
+            list.add(1);
+        }
+        if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_2_LOW_BATTERY) > 0) {
+            list.add(2);
+        }
+        if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_3_UNUSUAL_UNLOCK) > 0) {
+            list.add(3);
+        }
+        if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_4_ENTER_URGENT) > 0) {
+            list.add(4);
+        }
+        if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_5_UNUSUAL_MOVE) > 0) {
+            list.add(5);
+        }
+        return list;
     }
 
     /**
@@ -240,7 +271,7 @@ public class VehicleAlarmUtil {
             StringBuffer locks = new StringBuffer();
             for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
                 locks.append((i + 1) + "号锁：");
-                byte status = (byte) (lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+                int status = lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
                 if (status == 1) {
                     locks.append("开；");
                 } else {
@@ -263,7 +294,7 @@ public class VehicleAlarmUtil {
         if (lockStatusInfo != null && lockStatusInfo.length > 0) {
             Map<Integer, String> lockMap = new HashMap<>();
             for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
-                byte status = (byte) (lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+                int status = lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
                 lockMap.put(i + 1, status == 0 ? "关" : "开");
             }
             return lockMap;
@@ -278,36 +309,45 @@ public class VehicleAlarmUtil {
      * @param index
      * @return
      */
-    public static String getLockStatusByLockIndex(byte[] lockStatusInfo, Integer lockIndex) {
-        byte status = (byte) (lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+    public static String getLockStatusByLockIndex(byte[] lockStatusInfo, int lockIndex) {
+        if (lockStatusInfo == null || lockIndex > lockStatusInfo.length) {
+            return "-";
+        }
+        int status = lockStatusInfo[lockIndex - 1] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
         return status == 0 ? "关" : "开";
     }
 
     /**
      * 获取锁开关状态
+     *
      * @param lockStatusInfo
      * @return
      */
     public static String getLockStatus(byte lockStatusInfo) {
-        byte status = (byte) (lockStatusInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF);
+        int status = lockStatusInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
         return status == 0 ? "关" : "开";
+    }
+
+    public static int getLockStatusValue(byte lockStatusInfo) {
+        int status = lockStatusInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
+        return status == 0 ? 1 : 2;
     }
 
     /**
      * 构建报警标识
      *
-     * @param veehicleId 车辆ID
+     * @param vehicleId  车辆ID
      * @param deviceType 设备类型
-     * @param devcieId   设备Id
+     * @param deviceId   设备Id
      * @param alarmType  报警类型
      * @param lockId     锁记录ID
      * @return 14字节16进制字符串
      */
-    public static String buildAlarmTag(int veehicleId, byte deviceType, int devcieId, byte alarmType, int lockId) {
+    public static String buildAlarmTag(int vehicleId, byte deviceType, int deviceId, byte alarmType, int lockId) {
         return new StringBuilder()
-                .append(NumberHexUtil.intToHex(veehicleId))
+                .append(NumberHexUtil.intToHex(vehicleId))
                 .append(NumberHexUtil.byteToHex(deviceType))
-                .append(NumberHexUtil.intToHex(devcieId))
+                .append(NumberHexUtil.intToHex(deviceId))
                 .append(NumberHexUtil.byteToHex(alarmType))
                 .append(NumberHexUtil.intToHex(lockId))
                 .toString();

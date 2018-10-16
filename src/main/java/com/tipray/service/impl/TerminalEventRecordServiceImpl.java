@@ -5,6 +5,7 @@ import com.tipray.bean.Page;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.record.TerminalEventRecord;
 import com.tipray.bean.track.TrackInfo;
+import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.dao.LockDao;
 import com.tipray.dao.TerminalEventRecordDao;
 import com.tipray.dao.TrackDao;
@@ -47,48 +48,45 @@ public class TerminalEventRecordServiceImpl implements TerminalEventRecordServic
         TrackInfo trackInfo = trackDao.getTrackByTrackId(record.getTrackId().toString());
         if (trackInfo == null) {
             logger.warn("轨迹数据异常！");
-        } else {
-            setTrackForRecord(record, trackInfo);
-            byte terminalAlarmStatus = trackInfo.getTerminalAlarm().byteValue();
-            byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
-            boolean isAlarm = VehicleAlarmUtil.isAlarm(terminalAlarmStatus, lockStatusInfo);
-            record.setAlarm(isAlarm ? "是" : "否");
+            return record;
+        }
+        setTrackForRecord(record, trackInfo);
+        byte terminalAlarmStatus = trackInfo.getTerminalAlarm().byteValue();
+        byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
+        boolean isAlarm = VehicleAlarmUtil.isAlarm(terminalAlarmStatus, lockStatusInfo);
+        record.setAlarm(isAlarm ? "是" : "否");
 
-            StringBuffer alarmType = new StringBuffer();
-            alarmType.append(VehicleAlarmUtil.getTerminalAlarmInfo(terminalAlarmStatus)).append("<br>");
+        StringBuffer alarmType = new StringBuffer();
+        alarmType.append(VehicleAlarmUtil.getTerminalAlarmInfo(terminalAlarmStatus)).append("<br>");
 
-            StringBuffer lockStatusBuf = new StringBuffer();
-            Long carId = record.getCarId();
-            List<Lock> locks = lockDao.findLocksByCarId(carId);
-            Integer maxLockIndex = lockDao.getMaxLockIndexByCarId(carId);
+        StringBuffer lockStatusBuf = new StringBuffer();
+        Long carId = record.getCarId();
 
-            if (EmptyObjectUtil.isEmptyList(locks)) {
-                alarmType.append("锁绑定状态异常！");
-                lockStatusBuf.append("锁绑定状态异常！");
-            } else {
-                if (lockStatusInfo.length < locks.size() || lockStatusInfo.length != maxLockIndex) {
-                    alarmType.append("锁绑定状态异常！");
-                    lockStatusBuf.append("锁绑定状态异常！");
-                } else {
-                    StringBuffer alarmBuf = new StringBuffer();
-                    locks.forEach(lock -> {
-                        StringBuffer lockBuf = new StringBuffer();
-                        int lockIndex = lock.getIndex();
+        if (lockStatusInfo != null) {
+            StringBuffer lockBuf;
+            StringBuffer alarmBuf = new StringBuffer();
+            for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+                byte lockInfo = lockStatusInfo[i];
+                if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) > 0) {
+                    Lock lock = lockDao.getLockByCarIdAndLockIndex(carId, i + 1);
+                    if (lock != null) {
+                        lockBuf = new StringBuffer();
                         lockBuf.append('仓').append(lock.getStoreId()).append('-')
-                                .append(lock.getSeatName()).append('-').append(lock.getSeatIndex());
+                                .append(lock.getSeatName()).append('-')
+                                .append(lock.getSeatIndex());
                         alarmBuf.append(lockBuf).append('-')
-                                .append(VehicleAlarmUtil.getLockAlarmByLockIndex(lockStatusInfo, lockIndex))
+                                .append(VehicleAlarmUtil.getLockAlarm(lockInfo))
                                 .append("<br>");
                         lockStatusBuf.append(lockBuf).append('-')
-                                .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lockIndex))
+                                .append(VehicleAlarmUtil.getLockStatus(lockInfo))
                                 .append("<br>");
-                    });
-                    alarmType.append(alarmBuf);
+                    }
                 }
             }
-            record.setAlarmType(alarmType.toString());
-            record.setLockStatus(lockStatusBuf.toString());
+            alarmType.append(alarmBuf);
         }
+        record.setAlarmType(alarmType.toString());
+        record.setLockStatus(lockStatusBuf.toString());
         return record;
     }
 
@@ -108,7 +106,7 @@ public class TerminalEventRecordServiceImpl implements TerminalEventRecordServic
 
     @Override
     public long countRecord(TerminalEventRecord record) {
-        return record == null ? 0 : terminalEventRecordDao.count(record) ;
+        return record == null ? 0 : terminalEventRecordDao.count(record);
     }
 
     @Override

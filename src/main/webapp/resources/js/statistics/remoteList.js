@@ -110,7 +110,7 @@ $(function () {
                     jsonData.push({
                         id: remote.id,
                         carNo: remote.carNumber,
-                        time: remote.station,
+                        time: remote.createDate,
                         coordFlag: coordFlag,
                         gps: gps,
                         coordinate: coordinate,

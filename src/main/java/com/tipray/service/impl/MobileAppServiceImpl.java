@@ -67,21 +67,21 @@ public class MobileAppServiceImpl implements MobileAppService {
     }
 
     private Map<String, Object> parseLockForSwitchAndAlarm(Map<String, Object> map, Long carId, byte[] lockStatusInfo) {
+        List<Map<String, Object>> locks = new ArrayList<>();
         if (lockStatusInfo != null) {
-            List<Map<String, Object>> locks = new ArrayList<>();
             for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
                 byte lock = lockStatusInfo[i];
                 if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) > 0) {
-                    Map<String, Object> lockMap = lockDao.getLockByCarIdAndLockIndex(carId, i + 1);
+                    Map<String, Object> lockMap = lockDao.getLockByCarIdAndLockIndexForApp(carId, i + 1);
                     if (lockMap != null) {
-                        lockMap.put("switch_status", VehicleAlarmUtil.getLockStatus(lock));
-                        lockMap.put("alarm", VehicleAlarmUtil.getLockAlarm(lock));
+                        lockMap.put("switch_status", VehicleAlarmUtil.getLockStatusValue(lock));
+                        lockMap.put("alarm", VehicleAlarmUtil.getLockAlarmValues(lock));
                         locks.add(lockMap);
                     }
                 }
             }
-            map.put("locks", locks);
         }
+        map.put("locks", locks);
         return map;
     }
 

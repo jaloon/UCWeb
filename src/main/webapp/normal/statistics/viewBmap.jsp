@@ -201,7 +201,7 @@
         }
         return "无效";
     }
-
+    <c:if test="${mode=='reset'}">
     /**
      * 开锁重置状态
      * @param {number} status 状态值
@@ -221,7 +221,8 @@
                 return "未知状态[" + status + "]";
         }
     }
-
+    </c:if>
+    <c:if test="${mode=='event'}">
     /**
      * 车台事件
      * @param {number} type 事件类型值
@@ -233,7 +234,8 @@
         }
         return "未知类型[" + type + "]";
     }
-
+    </c:if>
+    <c:if test="${mode=='seal'}">
     /**
      * 施解封类型
      * @param type
@@ -265,6 +267,7 @@
                 return "施解封类型[" + type + "]";
         }
     }
+    </c:if>
 </script>
 </body>
 

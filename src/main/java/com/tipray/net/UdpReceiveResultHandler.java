@@ -67,17 +67,22 @@ class UdpReceiveResultHandler {
                     case UdpBizId.REMOTE_CHANGE_STATION_RESPONSE:
                         Integer type = (Integer) params.get("type");
                         Long transportId = (Long) params.get("transportId");
-                        if (type == 1) {
+                        if (type == null || type == 1) {
                             Long changeId = (Long) params.get("changeId");
                             Long changedTransportId = (Long) params.get("changedTransportId");
                             if (isOk) {
+                                logger.info("换站记录[{}]，应答成功！", changeId);
                                 CHANGE_SERVICE.updateChangeAndTransportStatusForDone(changeId, transportId, changedTransportId);
                             } else {
+                                logger.warn("换站记录[{}]，应答失败！", changeId);
                                 CHANGE_SERVICE.updateChangeStatus(changeId, RemoteControlConst.REMOTE_PROGRESS_FAIL);
                             }
                         } else if (type == 2) {
                             if (isOk) {
+                                logger.info("新增配送记录[{}]，应答成功！", transportId);
                                 CHANGE_SERVICE.updateDistStatus(transportId, 1);
+                            } else {
+                                logger.warn("新增配送记录[{}]，应答失败！", transportId);
                             }
                         }
                         break;

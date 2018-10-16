@@ -50,11 +50,11 @@ public interface LockDao extends BaseDao<Lock> {
     /**
      * 根据车辆ID和锁设备ID获取锁信息
      *
-     * @param carId  车辆ID
-     * @param lockId 锁设备ID
+     * @param carId        车辆ID
+     * @param lockDeviceId 锁记录ID
      * @return
      */
-    Lock getByLockId(@Param("carId") Long carId, @Param("lockId") Integer lockId);
+    Lock getByLockDeviceId(@Param("carId") Long carId, @Param("lockId") Integer lockDeviceId);
 
     /**
      * 锁绑定
@@ -105,13 +105,15 @@ public interface LockDao extends BaseDao<Lock> {
 
     /**
      * 获取锁开关状态
+     *
      * @param map 锁信息
      * @return
      */
-    Integer getLockStatus(Map<String , Object> map);
+    Integer getLockStatus(Map<String, Object> map);
 
     /**
      * 根据锁自增id获取锁信息
+     *
      * @param id 锁自增id
      * @return 锁信息
      */
@@ -119,12 +121,14 @@ public interface LockDao extends BaseDao<Lock> {
 
     /**
      * 批量更新锁备注
+     *
      * @param locks
      */
     void updateLockRemarks(List<Lock> locks);
 
     /**
      * 根据锁记录ID获取锁设备ID
+     *
      * @param id 锁记录ID
      * @return 锁设备ID
      */
@@ -132,12 +136,46 @@ public interface LockDao extends BaseDao<Lock> {
 
     /**
      * 根据锁设备ID和车辆ID获取锁记录ID
-     * @param carId 车辆ID
+     *
+     * @param carId  车辆ID
      * @param devIds 锁设备ID，逗号分隔
      * @return 锁记录ID
      */
     List<Lock> findIdsByDevIds(@Param("carId") Long carId, @Param("devIds") String devIds);
 
-    Map<String, Object> getLockByCarIdAndLockIndex(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
+    /**
+     * 根据车辆ID和锁索引查询锁信息（APP接口）
+     *
+     * @param carId     车辆ID
+     * @param lockIndex 锁索引
+     * @return 锁信息（id, store_id, seat, seat_index, lock_index）
+     */
+    Map<String, Object> getLockByCarIdAndLockIndexForApp(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
 
+    /**
+     * 根据车辆ID和锁记录ID查询锁信息（APP接口）
+     *
+     * @param carId  车辆ID
+     * @param lockId 锁记录ID
+     * @return 锁信息（id, store_id, seat, seat_index, lock_index）
+     */
+    Map<String, Object> getLockByCarIdAndLockIdForApp(@Param("carId") Long carId, @Param("lockId") Long lockId);
+
+    /**
+     * 根据车辆ID和锁索引查询锁信息
+     *
+     * @param carId     车辆ID
+     * @param lockIndex 锁索引
+     * @return 锁信息（id, store_id, seat, seat_name, seat_index, lock_index）
+     */
+    Lock getLockByCarIdAndLockIndex(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
+
+    /**
+     * 根据车辆ID和锁记录ID查询锁信息
+     *
+     * @param carId  车辆ID
+     * @param lockId 锁记录ID
+     * @return 锁信息（id, store_id, seat, seat_name, seat_index, lock_index）
+     */
+    Lock getLockByCarIdAndLockId(@Param("carId") Long carId, @Param("lockId") Long lockId);
 }

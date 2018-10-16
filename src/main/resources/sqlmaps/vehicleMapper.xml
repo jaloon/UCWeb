@@ -367,7 +367,7 @@
 		WHERE
 			c.id = t.vehicle_id 
 			AND c.is_invalid = 0 
-			AND t.status = 1 
+			AND <![CDATA[ t.`status` < 2 ]]>
 			AND c.vehicle_number = #{carNumber}
 	</select>
 	

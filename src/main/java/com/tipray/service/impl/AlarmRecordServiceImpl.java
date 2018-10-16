@@ -47,56 +47,56 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
 
     @Override
     public AlarmRecord getRecordById(Long id) {
-        if (id != null) {
-            AlarmRecord alarmRecord = alarmRecordDao.getById(id);
-            if (alarmRecord == null) {
-                return null;
-            }
-            alarmRecord.setRecordTime(alarmRecord.getAlarmTime());
-            TrackInfo trackInfo = trackDao.getTrackByTrackId(alarmRecord.getTrackId().toString());
-            if (trackInfo == null) {
-                logger.warn("轨迹数据异常！");
-            } else {
-                StringBuffer lockStatusBuf = new StringBuffer();
-                if (alarmRecord.getDeviceType() == 1) {
-                    Long carId = alarmRecord.getVehicleId();
-                    List<Lock> locks = lockDao.findLocksByCarId(carId);
-                    Integer maxLockIndex = lockDao.getMaxLockIndexByCarId(carId);
-                    if (EmptyObjectUtil.isEmptyList(locks)) {
-                        lockStatusBuf.append("锁绑定状态异常！");
-                    } else {
-                        byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
-                        if (lockStatusInfo.length < locks.size() || lockStatusInfo.length != maxLockIndex) {
-                            lockStatusBuf.append("锁绑定状态异常！");
-                        } else {
-                            locks.forEach(lock -> lockStatusBuf.append('仓').append(lock.getStoreId()).append('-')
-                                    .append(lock.getSeatName()).append('-').append(lock.getSeatIndex()).append('-')
-                                    .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()))
-                                    .append("<br>"));
-                        }
-                    }
-                } else {
-                    Lock lock = lockDao.getByLockId(alarmRecord.getVehicleId(), alarmRecord.getDeviceId());
-                    if (lock == null) {
-                        lockStatusBuf.append("锁绑定状态异常！");
-                    } else {
-                        byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
-                        int lockIndex = lock.getIndex();
-                        if (lockStatusInfo.length < lockIndex) {
-                            lockStatusBuf.append("锁绑定状态异常！");
-                        } else {
+        if (id == null) {
+            return null;
+        }
+        AlarmRecord alarmRecord = alarmRecordDao.getById(id);
+        if (alarmRecord == null) {
+            return null;
+        }
+        alarmRecord.setRecordTime(alarmRecord.getAlarmTime());
+        TrackInfo trackInfo = trackDao.getTrackByTrackId(alarmRecord.getTrackId().toString());
+        if (trackInfo == null) {
+            logger.warn("轨迹数据异常！");
+            return alarmRecord;
+        }
+        alarmRecord = setTrackForRecord(alarmRecord, trackInfo);
+
+        // 车辆ID
+        Long carId = alarmRecord.getVehicleId();
+        // 锁状态信息流
+        byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
+
+        StringBuffer lockStatusBuf = new StringBuffer();
+        if (alarmRecord.getDeviceType() == 1) {
+            // 车台报警，显示所有锁
+            if (lockStatusInfo != null) {
+                for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+                    byte lockInfo = lockStatusInfo[i];
+                    if ((lockInfo & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) > 0) {
+                        Lock lock = lockDao.getLockByCarIdAndLockIndex(carId, i + 1);
+                        if (lock != null) {
                             lockStatusBuf.append('仓').append(lock.getStoreId()).append('-')
-                                    .append(lock.getSeatName()).append('-').append(lock.getSeatIndex()).append('-')
-                                    .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()));
+                                    .append(lock.getSeatName()).append('-')
+                                    .append(lock.getSeatIndex()).append('-')
+                                    .append(VehicleAlarmUtil.getLockStatus(lockInfo))
+                                    .append("<br>");
                         }
                     }
                 }
-                alarmRecord.setLockStatus(lockStatusBuf.toString());
-                setTrackForRecord(alarmRecord, trackInfo);
             }
-            return alarmRecord;
+        } else {
+            // 锁报警，显示单个锁
+            Lock lock = lockDao.getLockByCarIdAndLockId(carId, alarmRecord.getLockId());
+            if (lock != null) {
+                lockStatusBuf.append('仓').append(lock.getStoreId()).append('-')
+                        .append(lock.getSeatName()).append('-')
+                        .append(lock.getSeatIndex()).append('-')
+                        .append(VehicleAlarmUtil.getLockStatusByLockIndex(lockStatusInfo, lock.getIndex()));
+            }
         }
-        return null;
+        alarmRecord.setLockStatus(lockStatusBuf.toString());
+        return alarmRecord;
     }
 
     /**
@@ -152,7 +152,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
                 list.forEach(alarmRecord -> {
                     TrackInfo trackInfo = trackInfoMap.get(alarmRecord.getTrackId());
                     if (trackInfo != null) {
-                        setTrackForRecord(alarmRecord, trackInfo);
+                        alarmRecord = setTrackForRecord(alarmRecord, trackInfo);
                     }
                 });
             } catch (Exception e) {
@@ -333,7 +333,7 @@ public class AlarmRecordServiceImpl implements AlarmRecordService {
      * 是否无效报警
      *
      * @param alarm 报警信息
-     * @return
+     * @return 是否
      */
     private boolean isInvalidAlarm(Map<String, Object> alarm) {
         Integer deviceType = (Integer) alarm.get("device_type");

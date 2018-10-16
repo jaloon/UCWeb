@@ -1286,7 +1286,7 @@ public class VehicleManageController {
                 return ResponseMsgUtil.error(RemoteChangeErrorEnum.CHANGED_STATION_INVALID);
             }
             int transportStatus = changeInfo.getTransportStatus();
-            if (transportStatus != 1) {
+            if (transportStatus > 1) {
                 result = "失败，当前配送状态不可换站！";
                 logger.error("远程换站失败：当前配送状态[{}]不可换站！", transportStatus);
                 return ResponseMsgUtil.error(ErrorTagConst.CHANGE_STATION_ERROR_TAG,
@@ -1318,6 +1318,9 @@ public class VehicleManageController {
 
             vehicleManageLog.setRemoteId((int) changeId);
 
+            logger.info("远程换站（换站ID：{}），数据录入成功！开始下发...", changeId);
+
+            params.put("type", 1);
             params.put("changeId", changeId);
             params.put("transportId", transportId);
             params.put("changedTransportId", changedTransportId);

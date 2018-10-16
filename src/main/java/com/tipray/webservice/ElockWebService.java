@@ -170,7 +170,7 @@ public class ElockWebService {
                     addDist(distributionMap, terminalId, invoice, taskKey);
                     continue;
                 }
-                // 配送单号代表的处于配送中状态的配送记录数目
+                // 配送单号代表的处于配送中状态[0,1]的配送记录数目
                 invoiceCount = distributionRecordService.countWaitInvoice(invoice);
                 if (invoiceCount == null || invoiceCount == 0) {
                     logger.info("配送单号[{}]代表的配送记录存在，但无配送中的记录，配送新增！", invoice);
@@ -178,7 +178,7 @@ public class ElockWebService {
                     continue;
                 }
 
-                // 相同配送信息的未完成配送记录数目
+                // 相同配送信息的未完成配送[0,1]记录数目
                 invoiceCount = distributionRecordService.countSameWaitDistInfo(distributionMap);
                 if (invoiceCount != null && invoiceCount > 0) {
                     logger.info("已存在与配送单号[{}]相同配送信息的未完成配送记录，不处理！", invoice);
@@ -187,9 +187,7 @@ public class ElockWebService {
 
                 // 物流配送接口更改配送信息换站
                 Map<String, Object> map = changeRecordService.distributionChange(distributionMap);
-                logger.info("配送单【{}】换站，数据录入成功！", invoice);
                 ThreadPool.CACHED_THREAD_POOL.execute(() -> {
-                    logger.info("配送单【{}】换站下发开始...", invoice);
                     // 换站ID
                     long changeId = (long) map.get("changeId");
                     // 原配送ID
@@ -198,6 +196,14 @@ public class ElockWebService {
                     long changedTransportId = (long) map.get("changedTransportId");
                     // UDP协议数据体
                     ByteBuffer dataBuffer = (ByteBuffer) map.get("dataBuffer");
+
+                    logger.info(new StringBuffer()
+                            .append("配送单【")
+                            .append(invoice)
+                            .append("】换站（换站ID：")
+                            .append(changeId)
+                            .append("），数据录入成功！开始下发...")
+                            .toString());
 
                     Map<String, Object> params = new HashMap<>();
                     params.put("type", 1);
@@ -240,9 +246,14 @@ public class ElockWebService {
     private void addDist(Map<String, Object> distributionMap, int terminalId, String invoice, long taskKey)
             throws ServiceException {
         Long transportId = distributionRecordService.addDistributionRecord(distributionMap);
-        logger.info("配送单【{}】新增，数据录入成功！", invoice);
         ThreadPool.CACHED_THREAD_POOL.execute(() -> {
-            logger.info("配送单【{}】新增下发开始...", invoice);
+            logger.info(new StringBuffer()
+                    .append("配送单【")
+                    .append(invoice)
+                    .append("】新增（配送ID：")
+                    .append(transportId)
+                    .append("），数据录入成功！开始下发...")
+                    .toString());
             ByteBuffer dataBuffer = distributionRecordService.buildNewDistDataBuffer(
                     (String) distributionMap.get(DistXmlNodeNameConst.NODE_4_06_DEPT_ID),
                     transportId.intValue(),

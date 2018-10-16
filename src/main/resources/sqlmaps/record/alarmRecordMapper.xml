@@ -9,6 +9,7 @@
         <result column="terminal_id" property="terminalId" />
         <result column="device_type" property="deviceType" />
 		<result column="device_id" property="deviceId" />
+		<result column="lock_id" property="lockId" />
 		<result column="type" property="type" />
 		<result column="type_name" property="typeName" />
 		<result column="alarm_status" property="status" />
@@ -24,10 +25,11 @@
 		c.vehicle_device_id								        terminal_id,
 		a.device_type									        device_type,
 		a.device_id										        device_id,
+		a.lock_id												lock_id,
 		a.type											        type,
 		fn_get_alarm_type ( a.device_type, a.type )		        type_name,
 		fn_type2name ( 'alarmStatus', a.`status` )		        alarm_status,
-		fn_get_alarm_station ( a.station_type, a.station_id )	        station,
+		fn_get_alarm_station ( a.station_type, a.station_id )	station,
 		a.vehicle_track_id								        track_id,
         DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' )        alarm_time,
         DATE_FORMAT( a.alarm_report_time, '%Y-%m-%d %H:%i:%s' ) alarm_report_time
@@ -194,7 +196,7 @@
 			vehicle_id	vehicleId,
 			device_type	deviceType,
 			device_id	deviceId,
-			lock_id		lockId,
+			lock_id		lockDeviceId,
 			type		alarmType
 		FROM
 			tbl_alarm
@@ -219,7 +221,7 @@
         <result column="station" property="station" />
         <result column="alarm_time" property="alarmTime" />
         <result column="vehicle_track_id" property="trackId" />
-        <result column="lock_id" property="alarmLock.lockId" />
+        <result column="lock_id" property="alarmLock.lockDeviceId" />
         <result column="lock_device_id" property="alarmLock.deviceId" />
         <result column="store_id" property="alarmLock.storeId" />
         <result column="seat" property="alarmLock.seat" />
@@ -254,7 +256,7 @@
 			AND a.vehicle_id = #{vehicleId}
 			AND a.device_type = #{deviceType}
 			AND a.device_id = #{deviceId}
-			AND a.lock_id = #{lockId}
+			AND a.lock_id = #{lockDeviceId}
 			AND a.type = #{alarmType}
 			AND a.`status` = 0
 		ORDER BY

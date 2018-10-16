@@ -47,7 +47,7 @@
             AND l.bind_status = 2
 	</select>
 	
-	<select id="getByLockId" resultMap="fullResultMap">
+	<select id="getByLockDeviceId" resultMap="fullResultMap">
         SELECT
             <include refid="select_columns"></include>
         FROM
@@ -255,7 +255,7 @@
 		and lock_device_id in (${devIds})
 	</select>
 
-    <select id="getLockByCarIdAndLockIndex" resultType="java.util.LinkedHashMap">
+    <select id="getLockByCarIdAndLockIndexForApp" resultType="java.util.LinkedHashMap">
         SELECT
             id,
             store_id,
@@ -267,6 +267,50 @@
         WHERE
             vehicle_id = #{carId}
             AND lock_index = #{lockIndex}
+    </select>
+
+    <select id="getLockByCarIdAndLockIdForApp" resultType="java.util.LinkedHashMap">
+        SELECT
+            id,
+            store_id,
+            seat,
+            seat_index,
+            lock_index
+        FROM
+            tbl_lock
+        WHERE
+            vehicle_id = #{carId}
+            AND id = #{lockId}
+    </select>
+
+    <select id="getLockByCarIdAndLockIndex" resultMap="fullResultMap">
+        SELECT
+            id,
+            store_id,
+            seat,
+            fn_type2name('lockSeat', seat) seat_name,
+            seat_index,
+            lock_index
+        FROM
+            tbl_lock
+        WHERE
+            vehicle_id = #{carId}
+            AND lock_index = #{lockIndex}
+    </select>
+
+    <select id="getLockByCarIdAndLockId" resultMap="fullResultMap">
+        SELECT
+            id,
+            store_id,
+            seat,
+            fn_type2name('lockSeat', seat) seat_name,
+            seat_index,
+            lock_index
+        FROM
+            tbl_lock
+        WHERE
+            vehicle_id = #{carId}
+            AND id = #{lockId}
     </select>
 
 </mapper>

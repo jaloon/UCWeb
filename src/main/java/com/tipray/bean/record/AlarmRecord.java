@@ -27,6 +27,10 @@ public class AlarmRecord extends Record {
      */
     private Integer deviceId;
     /**
+     * 锁记录ID
+     */
+    private Long lockId;
+    /**
      * 报警类型
      */
     private Integer type;
@@ -85,6 +89,14 @@ public class AlarmRecord extends Record {
 
     public void setDeviceId(Integer deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public Long getLockId() {
+        return lockId;
+    }
+
+    public void setLockId(Long lockId) {
+        this.lockId = lockId;
     }
 
     public Integer getType() {
@@ -163,6 +175,9 @@ public class AlarmRecord extends Record {
         }
         if (deviceId != null) {
             sb.append(", deviceId=").append(deviceId);
+        }
+        if (lockId != null) {
+            sb.append(", lockId=").append(lockId);
         }
         if (type != null) {
             sb.append(", type=").append(type);

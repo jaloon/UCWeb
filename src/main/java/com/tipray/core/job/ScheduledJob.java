@@ -136,8 +136,13 @@ public class ScheduledJob {
         final StringBuilder logBuilder = new StringBuilder();
         logBuilder.append("删除超过60天的日志：");
         File[] files = FileUtil.deleteFilesBeforeDateInFolder(LOG_FOLDER_PATH, 60, TimeUnit.DAYS);
-        for (File file : files) {
-            logBuilder.append('\n').append(file.getName());
+        if (files == null || files.length == 0) {
+            logBuilder.append("无过期日志。");
+        } else {
+            logBuilder.append('（').append(files.length).append("个日志文件）");
+            for (File file : files) {
+                logBuilder.append('\n').append(file.getName());
+            }
         }
         logger.info(logBuilder.toString());
     }
