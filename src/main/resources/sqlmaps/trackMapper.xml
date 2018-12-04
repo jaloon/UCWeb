@@ -181,11 +181,10 @@
             vehicle_id = #{vehicle_id};
     </select>
 
-    <select id="getLastTrackForApp" resultType="java.util.Map">
+    <select id="getLastTrackForApp" resultType="com.tipray.bean.track.LastTrackApp">
         SELECT
             vehicle_id,
-            #{carNumber} vehicle_number,
-            id track_id,
+            track_id,
             is_lnglat_valid,
             longitude,
             latitude,
@@ -193,8 +192,15 @@
             vehicle_alarm_status,
             angle,
             speed,
-            HEX( lock_status_info ) lock_status_info,
-            track_time
+            lock_status_info,
+            track_time,
+            last_valid_track_id,
+            last_is_lnglat_valid,
+            last_valid_longitude,
+            last_valid_latitude,
+            last_valid_angle,
+            last_valid_speed,
+            last_valid_track_time
         FROM
             tbl_vehicle_newest_track
         WHERE

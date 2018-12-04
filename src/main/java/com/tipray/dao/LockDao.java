@@ -1,6 +1,7 @@
 package com.tipray.dao;
 
 import com.tipray.bean.baseinfo.Lock;
+import com.tipray.bean.track.LockStatus;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.core.base.BaseDao;
 import org.apache.ibatis.annotations.Param;
@@ -150,7 +151,14 @@ public interface LockDao extends BaseDao<Lock> {
      * @param lockIndex 锁索引
      * @return 锁信息（id, store_id, seat, seat_index, lock_index）
      */
-    Map<String, Object> getLockByCarIdAndLockIndexForApp(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
+    LockStatus getLockByCarIdAndLockIndexForApp(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
+
+    /**
+     * 查询锁开关状态
+     * @param lockStatus {@link LockStatus}
+     * @return {@link LockStatus}
+     */
+    LockStatus getLockSwitchStatus(LockStatus lockStatus);
 
     /**
      * 根据车辆ID和锁记录ID查询锁信息（APP接口）

@@ -1,6 +1,7 @@
 package com.tipray.dao;
 
 import com.tipray.bean.track.LastTrack;
+import com.tipray.bean.track.LastTrackApp;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.core.annotation.MyBatisAnno;
 import com.tipray.websocket.handler.UpdateTrack;
@@ -117,11 +118,10 @@ public interface TrackDao {
     /**
      * 查询车辆的最新轨迹
      *
-     * @param carNumber {@link String} 车牌号
      * @param carId     {@link Long} 车辆ID
      * @return 最新轨迹
      */
-    Map<String, Object> getLastTrackForApp(@Param("carNumber") String carNumber, @Param("carId") Long carId);
+    LastTrackApp getLastTrackForApp(Long carId);
 
     void updateTracks(List<UpdateTrack> list);
 }

@@ -16,6 +16,8 @@ import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.track.LastCarStatus;
 import com.tipray.bean.track.LastTrack;
+import com.tipray.bean.track.LastTrackApp;
+import com.tipray.bean.track.LockStatus;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.bean.upgrade.TerminalUpgradeInfo;
@@ -24,6 +26,7 @@ import com.tipray.bean.upgrade.UpgradeCancelVehicle;
 import com.tipray.bean.upgrade.VehicleTree;
 import com.tipray.cache.AsynUdpCommCache;
 import com.tipray.cache.SerialNumberCache;
+import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.dao.DeviceDao;
 import com.tipray.dao.DriverDao;
 import com.tipray.dao.LockDao;
@@ -135,6 +138,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     /**
      * 处理配送卡
+     *
      * @param transportCard 配送卡
      */
     private void dealTransCard(TransportCard transportCard) {
@@ -670,38 +674,69 @@ public class VehicleServiceImpl implements VehicleService {
         Integer isOnline = vehicleDao.getOnline(carId);
         isOnline = isOnline == null ? 0 : isOnline;
         map.put("is_online", isOnline);
-        List<Map<String, Object>> tracks = new ArrayList<>();
-        if (beginMillis == null) {
-            Map<String, Object> trackMap = trackDao.getLastTrackForApp(carNumber, carId);
-            if (!EmptyObjectUtil.isEmptyMap(trackMap)) {
-                tracks.add(trackMap);
-            }
 
-        } else {
-            Date lastTtrackTime = trackDao.getLastTrackTime(carId);
-            beginMillis = Long.max(beginMillis, lastTtrackTime.getTime() - DateUtil.MINUTE_DIFF * 10);
-            String beginTime = DateUtil.formatDate(new Date(beginMillis), DateUtil.FORMAT_DATETIME);
-            List<TrackInfo> trackInfoList = trackDao.findTracksByCarIdsAndBeginTime(carId.toString(), beginTime);
-            trackInfoList.removeIf(EmptyObjectUtil::isEmptyBean);
-            trackInfoList.parallelStream().forEach(trackInfo -> {
-                Map<String, Object> trackMap = new HashMap<>();
-                trackMap.put("vehicle_id", carId);
-                trackMap.put("vehicle_number", carNumber);
-                trackMap.put("track_id", trackInfo.getId());
-                trackMap.put("is_lnglat_valid", trackInfo.getCoorValid() ? 1 : 0);
-                trackMap.put("longitude", trackInfo.getLongitude());
-                trackMap.put("latitude", trackInfo.getLatitude());
-                trackMap.put("vehicle_status", trackInfo.getCarStatus());
-                trackMap.put("vehicle_alarm_status", trackInfo.getTerminalAlarm());
-                trackMap.put("angle", trackInfo.getAngle());
-                trackMap.put("speed", trackInfo.getSpeed());
-                trackMap.put("lock_status_info", BytesUtil.bytesToHex(trackInfo.getLockStatusInfo(), false));
-                trackMap.put("track_time", trackInfo.getTrackTime());
-                tracks.add(trackMap);
-            });
+        if (beginMillis == null) {
+            LastTrackApp lastTrackApp = trackDao.getLastTrackForApp(carId);
+            if (lastTrackApp != null) {
+                byte[] lockStatusInfo = lastTrackApp.getLock_status_info();
+                lastTrackApp.setLocks(parseTrackLocks(carId, lockStatusInfo, true, lastTrackApp.getTrack_time().getTime()));
+                map.put("tracks", new LastTrackApp[]{lastTrackApp});
+            } else {
+                map.put("tracks", new LastTrackApp[0]);
+            }
+            return map;
         }
+        List<Map<String, Object>> tracks = new ArrayList<>();
+        Date lastTtrackTime = trackDao.getLastTrackTime(carId);
+        if (lastTtrackTime != null) {
+            beginMillis = Long.max(beginMillis, lastTtrackTime.getTime() - DateUtil.MINUTE_DIFF * 10);
+        }
+        String beginTime = DateUtil.formatDate(new Date(beginMillis), DateUtil.FORMAT_DATETIME);
+        List<TrackInfo> trackInfoList = trackDao.findTracksByCarIdsAndBeginTime(carId.toString(), beginTime);
+        trackInfoList.removeIf(EmptyObjectUtil::isEmptyBean);
+        trackInfoList.parallelStream().forEach(trackInfo -> {
+            Map<String, Object> trackMap = new HashMap<>();
+            trackMap.put("vehicle_id", carId);
+            trackMap.put("vehicle_number", carNumber);
+            trackMap.put("track_id", trackInfo.getId());
+            trackMap.put("is_lnglat_valid", trackInfo.getCoorValid() ? 1 : 0);
+            trackMap.put("longitude", trackInfo.getLongitude());
+            trackMap.put("latitude", trackInfo.getLatitude());
+            trackMap.put("vehicle_status", trackInfo.getCarStatus());
+            trackMap.put("vehicle_alarm_status", trackInfo.getTerminalAlarm());
+            trackMap.put("angle", trackInfo.getAngle());
+            trackMap.put("speed", trackInfo.getSpeed());
+            trackMap.put("locks", parseTrackLocks(carId, trackInfo.getLockStatusInfo(), false, 0));
+            trackMap.put("track_time", trackInfo.getTrackTime());
+            tracks.add(trackMap);
+        });
         map.put("tracks", tracks);
         return map;
+    }
+
+    private List<LockStatus> parseTrackLocks(Long carId, byte[] lockStatusInfo, boolean last, long trackMillis) {
+        List<LockStatus> locks = new ArrayList<>();
+        if (lockStatusInfo != null) {
+            for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
+                byte lock = lockStatusInfo[i];
+                if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) > 0) {
+                    LockStatus lockInfo = lockDao.getLockByCarIdAndLockIndexForApp(carId, i + 1);
+                    if (lockInfo != null) {
+                        int status = VehicleAlarmUtil.getLockStatusValue(lock);
+                        if (last) {
+                            LockStatus switchStatus = lockDao.getLockSwitchStatus(lockInfo);
+                            if (switchStatus != null && trackMillis < switchStatus.getSwitch_time() * 1000L) {
+                                status = switchStatus.getSwitch_status();
+                            }
+                        }
+                        lockInfo.setSwitch_status(status);
+                        lockInfo.setAlarm(VehicleAlarmUtil.getLockAlarmValues(lock));
+                        locks.add(lockInfo);
+                    }
+                }
+            }
+        }
+        return locks;
     }
 
     @Override
@@ -829,8 +864,7 @@ public class VehicleServiceImpl implements VehicleService {
             byte[] lockStatusInfo = trackInfo.getLockStatusInfo();
             if (lockStatusInfo == null
                     || lockStatusInfo.length < locks.size()
-                    || lockStatusInfo.length != maxLockIndex)
-            {
+                    || lockStatusInfo.length != maxLockIndex) {
                 lockStatusBuf.append("锁绑定状态异常！");
             } else {
                 locks.forEach(lock -> {

@@ -1,5 +1,6 @@
 package com.tipray.service.impl;
 
+import com.tipray.bean.track.LockStatus;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.dao.LockDao;
@@ -67,16 +68,16 @@ public class MobileAppServiceImpl implements MobileAppService {
     }
 
     private Map<String, Object> parseLockForSwitchAndAlarm(Map<String, Object> map, Long carId, byte[] lockStatusInfo) {
-        List<Map<String, Object>> locks = new ArrayList<>();
+        List<LockStatus> locks = new ArrayList<>();
         if (lockStatusInfo != null) {
             for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
                 byte lock = lockStatusInfo[i];
                 if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) > 0) {
-                    Map<String, Object> lockMap = lockDao.getLockByCarIdAndLockIndexForApp(carId, i + 1);
-                    if (lockMap != null) {
-                        lockMap.put("switch_status", VehicleAlarmUtil.getLockStatusValue(lock));
-                        lockMap.put("alarm", VehicleAlarmUtil.getLockAlarmValues(lock));
-                        locks.add(lockMap);
+                    LockStatus lockInfo = lockDao.getLockByCarIdAndLockIndexForApp(carId, i + 1);
+                    if (lockInfo != null) {
+                        lockInfo.setSwitch_status(VehicleAlarmUtil.getLockStatusValue(lock));
+                        lockInfo.setAlarm(VehicleAlarmUtil.getLockAlarmValues(lock));
+                        locks.add(lockInfo);
                     }
                 }
             }
