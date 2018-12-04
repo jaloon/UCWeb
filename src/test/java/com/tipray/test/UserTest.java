@@ -153,7 +153,7 @@ public class UserTest {
 		Session session = new Session();
 		session.setUuid("BBD7B5BADBECF4AAA044014CDFD43819");
 		session.setIp("127.0.0.1");
-		session = sessionService.login(user, session,0);
+		session = sessionService.login(user.getAccount(), user.getPassword(), session,0);
 		System.out.println(session);
 		session = ThreadVariable.getSession();
 		System.out.println(session);

@@ -57,7 +57,7 @@
 		where param_name=#{param}
 	</select>
 	
-	<select id="getVersionsOfOilDepotAndGasStation" resultType="java.util.Map">
+	<select id="getVersionsOfOilDepotAndGasStation" resultType="java.util.Map" flushCache="true">
 		SELECT
 			t1.version depot_ver,
 			t2.version station_ver 
@@ -65,7 +65,7 @@
 			tbl_vehicle_common_param_version t1,
 			tbl_vehicle_common_param_version t2 
 		WHERE
-			t1.id = 5 
-			AND t2.id = 6;
+			t1.param_name = 'oildepot_info'
+			AND t2.param_name = 'gasstation_info';
 	</select>
 </mapper>

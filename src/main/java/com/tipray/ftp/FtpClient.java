@@ -99,13 +99,11 @@ public class FtpClient {
         }
     }
 
-    /***
+    /**
      * 上传Ftp文件
      *
-     * @param localFile
-     *            本地文件
-     * @param remoteUpLoadePath
-     *            上传服务器路径
+     * @param localFile         本地文件
+     * @param remoteUpLoadePath 上传服务器路径
      */
     public boolean uploadFile(File localFile, String remoteUpLoadePath) {
         BufferedInputStream inStream = null;
@@ -139,15 +137,12 @@ public class FtpClient {
         return success;
     }
 
-    /***
+    /**
      * 下载文件
      *
-     * @param remoteFileName
-     *            待下载文件名称
-     * @param localPath
-     *            下载到本地哪个路径下 - 应该以/结束
-     * @param remoteDownLoadPath
-     *            待下载文件所在的路径
+     * @param remoteFileName     待下载文件名称
+     * @param localPath          下载到本地哪个路径下 - 应该以/结束
+     * @param remoteDownLoadPath 待下载文件所在的路径
      */
 
     public boolean downloadFile(String remoteFileName, String localPath, String remoteDownLoadPath) {

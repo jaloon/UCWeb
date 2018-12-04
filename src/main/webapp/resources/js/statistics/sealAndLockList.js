@@ -6,19 +6,19 @@
 function parseCarStatus(status) {
     switch (status) {
         case 1:
-            return "在油库";
+            return "在油库 - 解封";
         case 2:
-            return "在途";
+            return "在途中 - 施封";
         case 3:
-            return "在加油站";
+            return "在加油站 - 解封";
         case 4:
-            return "返程";
+            return "返程中 - 施封";
         case 5:
-            return "应急";
+            return "应急 - 解封";
         case 6:
-            return "油区外";
+            return "油区外[待进道闸] - 施封";
         case 7:
-            return "在油区";
+            return "在油区[已进道闸] - 解封";
         default:
             return "未知(" + status + ")";
     }
@@ -32,25 +32,25 @@ function parseCarStatus(status) {
 function parseSealType(type) {
     switch (type) {
         case 1:
-            return "进油库";
+            return "进油库 -> 解封";
         case 2:
-            return "出油库";
+            return "出油库 -> 施封";
         case 3:
-            return "进加油站";
+            return "进加油站 -> 解封";
         case 4:
-            return "出加油站";
+            return "出加油站 -> 施封";
         case 5:
-            return "进入应急";
+            return "进入应急 -> 解封";
         case 6:
-            return "取消应急";
+            return "取消应急 -> 施封";
         case 7:
             return "状态强制变更";
         case 8:
-            return "待进油区";
+            return "油区外[待进道闸] -> 施封";
         case 9:
-            return "进油区";
+            return "进油区[进道闸] -> 解封";
         case 10:
-            return "出油区";
+            return "出油区[出道闸] -> 施封";
         default:
             return "未知(" + type + ")";
     }
@@ -70,9 +70,9 @@ function parseAuthType(authtype) {
         case 2:
             return "出入库卡";
         case 3:
-            return "手持机";
+            return "加油站"; //手持机
         case 4:
-            return "普通卡";
+            return "加油站"; //普通卡
         case 5:
             return "应急卡";
         case 6:
@@ -219,6 +219,7 @@ $(function () {
                         station: seal.station,
                         authtype: parseAuthType(seal.authtype),
                         authid: seal.authid,
+                        operator: seal.operator,
                         alarm: seal.alarm == undefined ? "-" : seal.alarm
                     });
                 }

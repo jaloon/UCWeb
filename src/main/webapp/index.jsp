@@ -115,28 +115,28 @@
                 <dl class="statisticsManage">
                     <dt>查询统计</dt>
                     <pop:Permission ename="alarmRecordModule">
-                        <dd class="first_dd"><a name="normal/statistics/alarmList.html">报警记录查询</a></dd>
+                        <dd class="first_dd"><a name="normal/statistics/alarmList.html">报警记录</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="remoteRecordModule">
-                        <dd><a name="normal/statistics/remoteList.html">远程操作查询</a></dd>
+                        <dd><a name="normal/statistics/remoteList.html">远程操作记录</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="sealRecordModule,lockStatusModule">
-                        <dd><a name="normal/statistics/sealAndLockList.html">施解封和锁动作查询</a></dd>
+                        <dd><a name="normal/statistics/sealAndLockList.html">施解封和锁动作记录</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="transRecordModule">
-                        <dd><a name="normal/statistics/transportList.html">配送信息查询</a></dd>
+                        <dd><a name="normal/statistics/transportList.html">配送信息</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="changeRecordModule">
-                        <dd><a name="normal/statistics/changeList.html">远程换站记录查询</a></dd>
+                        <dd><a name="normal/statistics/changeList.html">远程换站记录</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="usageRecordModule">
-                        <dd><a name="normal/statistics/usageList.html">卡及设备使用记录查询</a></dd>
+                        <dd><a name="normal/statistics/usageList.html">卡及设备使用记录</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="resetRecordModule">
-                        <dd><a name="normal/statistics/resetList.html">开锁重置记录查询</a></dd>
+                        <dd><a name="normal/statistics/resetList.html">开锁重置记录</a></dd>
                     </pop:Permission>
                     <pop:Permission ename="eventRecordModule">
-                        <dd><a name="normal/statistics/eventList.html">车载终端事件记录查询</a></dd>
+                        <dd><a name="normal/statistics/eventList.html">车载终端事件记录</a></dd>
                     </pop:Permission>
                 </dl>
             </pop:Permission>

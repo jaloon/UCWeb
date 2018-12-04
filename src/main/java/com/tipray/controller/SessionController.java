@@ -4,7 +4,6 @@ import com.tipray.bean.Message;
 import com.tipray.bean.ResponseMsg;
 import com.tipray.bean.Session;
 import com.tipray.bean.baseinfo.Role;
-import com.tipray.bean.baseinfo.User;
 import com.tipray.cache.TrustAppUuidCache;
 import com.tipray.constant.reply.LoginErrorEnum;
 import com.tipray.constant.reply.PermissionErrorEnum;
@@ -15,14 +14,17 @@ import com.tipray.core.exception.PermissionException;
 import com.tipray.service.AppService;
 import com.tipray.service.PermissionService;
 import com.tipray.service.SessionService;
-import com.tipray.util.*;
+import com.tipray.util.HttpServletUtil;
+import com.tipray.util.ResponseMsgUtil;
+import com.tipray.util.SessionUtil;
+import com.tipray.util.StringUtil;
+import com.tipray.util.VersionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -54,18 +56,21 @@ public class SessionController extends BaseAction {
 
     @RequestMapping(value = "login.do")
     @ResponseBody
-    public ResponseMsg login(@ModelAttribute User user,
+    public ResponseMsg login(@RequestParam(value = "account") String account,
+                             @RequestParam(value = "password") String password,
                              @RequestParam(value = "is_app", required = false, defaultValue = "0") Integer isApp,
                              @RequestParam(value = "uuid", required = false) String uuid,
                              @RequestParam(value = "app_id", required = false) String appid,
                              @RequestParam(value = "system", required = false) String system,
                              @RequestParam(value = "app_ver", required = false) String appVer,
-                             ModelMap modelMap, HttpServletRequest request,
-                             HttpServletResponse response) {
+                             ModelMap modelMap,
+                             HttpServletRequest request,
+                             HttpServletResponse response)
+    {
         String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
         if (isApp > 0) {
             logger.info("操作员{}请求APP登录，password：{}，uuid：{}，app_id：{}，system：{}，app_ver：{}，user-agent：{}",
-                    user.getAccount(), user.getPassword(), uuid, appid, system, appVer, userAgent);
+                    account, password, uuid, appid, system, appVer, userAgent);
             if (CenterVariableConfig.isValidateAppdev()) {
                 // APP设备认证
                 if (StringUtil.isEmpty(uuid)) {
@@ -124,20 +129,24 @@ public class SessionController extends BaseAction {
                 logger.error("录入APP设备信息异常：{}", e.getMessage());
             }
         } else {
-            logger.info("操作员{}请求网页登录，password：{}, user-agent：{}", user.getAccount(), user.getPassword(), userAgent);
+            logger.info("操作员{}请求网页登录，password：{}, user-agent：{}", account, password, userAgent);
         }
         try {
             // HttpSession httpSession = request.getSession();
             // String sessionId = httpSession.getId();
             String sessionId = SessionUtil.getLoginSessionId(request);
-            if (isLogin(sessionId, user)) {
+            if (isLogin(sessionId, account)) {
                 if (isApp == 0) {
-                    logger.info("操作员{}登录成功！", user.getAccount());
+                    logger.info("操作员{}登录成功！", account);
+                    // 更新session时间
+                    SessionUtil.updateSession(request);
                     return ResponseMsgUtil.success("已登录！");
                 }
                 request.getSession().setAttribute("appdev-uuid", uuid);
-                Role appRole = sessionService.userCheck(user, isApp).getAppRole();
-                logger.info("操作员{}登录成功！", user.getAccount());
+                // 更新session时间
+                SessionUtil.updateSession(request);
+                Role appRole = sessionService.userCheck(account, password, isApp).getAppRole();
+                logger.info("操作员{}登录成功！", account);
                 return ResponseMsgUtil.success(getAppPermissions(appRole));
             }
             Session session = new Session();
@@ -146,7 +155,7 @@ public class SessionController extends BaseAction {
             session.setOperateDate(new Date());
             session.setUuid(sessionId);
             session.setIp(HttpServletUtil.getHost(request));
-            session = sessionService.login(user, session, isApp);
+            session = sessionService.login(account, password, session, isApp);
 
             // 添加session缓存
             SessionUtil.cacheSession(request, response, session);
@@ -160,20 +169,20 @@ public class SessionController extends BaseAction {
                 Role appRole = session.getUser().getAppRole();
                 msg = ResponseMsgUtil.success(getAppPermissions(appRole));
             }
-            logger.info("操作员{}登录成功！", user.getAccount());
+            logger.info("操作员{}登录成功！", account);
             return msg;
         } catch (LoginException e) {
-            logger.error("操作员{}登录异常：{}", user.getAccount(), e.getMessage());
+            logger.error("操作员{}登录异常：{}", account, e.getMessage());
             return ResponseMsgUtil.exception(e);
         } catch (PermissionException e) {
-            logger.error("操作员{}登录异常：账户未配置APP角色！", user.getAccount());
+            logger.error("操作员{}登录异常：账户未配置APP角色！", account);
             return ResponseMsgUtil.error(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
         }
     }
 
     @RequestMapping(value = "logout.do")
     @ResponseBody
-    public Message logout(ModelMap modelMap, HttpServletRequest request, HttpServletResponse response) {
+    public Message logout(HttpServletRequest request) {
         try {
             sessionService.logout(request);
             return Message.success();
@@ -192,16 +201,15 @@ public class SessionController extends BaseAction {
     /**
      * 是否已登录
      *
-     * @param sessionId {@link String}
-     * @param user      {@link User}
+     * @param sessionId       {@link String}
+     * @param loginingAccount {@link String} 待登录账号
      * @return 是否已登录
      */
-    private boolean isLogin(String sessionId, User user) {
+    private boolean isLogin(String sessionId, String loginingAccount) {
         Session session = sessionService.getSessionByUUID(sessionId);
         // 当前浏览器已有用户登录
         if (session != null && !SessionUtil.isLoginTimeout(session)) {
             String loginedAccount = session.getUser().getAccount();
-            String loginingAccount = user.getAccount();
             // 是否同一用户
             boolean isSameUser = loginedAccount.equalsIgnoreCase(loginingAccount);
             if (isSameUser) {

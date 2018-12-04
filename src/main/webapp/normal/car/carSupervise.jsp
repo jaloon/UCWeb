@@ -70,6 +70,38 @@
                 <pop:Permission ename="remoteModule">
                     <li>远程控制
                         <ul>
+                                <%--<li>
+                                    远程进出
+                                    <ul>
+                                        <pop:Permission ename="intoOildepot">
+                                            <li id="into_oildepot">进油库 -> 解封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="quitOildepot">
+                                            <li id="quit_oildepot">出油库 -> 施封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="intoGasstation">
+                                            <li id="into_gasstation">进加油站 -> 解封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="quitGasstation">
+                                            <li id="quit_gasstation">出加油站 -> 施封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="intoUrgent">
+                                            <li id="into_urgent">进入应急 -> 解封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="quitUrgent">
+                                            <li id="quit_urgent">取消应急 -> 施封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="waitOildom">
+                                            <li id="wait_oildom">油区外[待进道闸] -> 施封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="intoOildom">
+                                            <li id="into_oildom">进油区[进道闸] -> 解封</li>
+                                        </pop:Permission>
+                                        <pop:Permission ename="quitOildom">
+                                            <li id="quit_oildom">出油区[出道闸] -> 施封</li>
+                                        </pop:Permission>
+                                    </ul>
+                                </li>--%>
                             <pop:Permission ename="intoOildepot">
                                 <li id="into_oildepot">进油库</li>
                             </pop:Permission>
@@ -148,8 +180,17 @@
                                     <div class="cell">车牌号码</div>
                                 </th>
                                 <th class="">
-                                    <div class="cell">所属公司</div>
+                                    <div class="cell">车辆状态</div>
                                 </th>
+                                <th class="">
+                                    <div class="cell">报警</div>
+                                </th>
+                                <th class="">
+                                    <div class="cell">在线状态</div>
+                                </th>
+                                <%--<th class="">--%>
+                                    <%--<div class="cell">所属公司</div>--%>
+                                <%--</th>--%>
                                 <th class="">
                                     <div class="cell">GPS有效性</div>
                                 </th>
@@ -170,15 +211,6 @@
                                 </th>
                                 <th class="">
                                     <div class="cell">最后有效方向</div>
-                                </th>
-                                <th class="">
-                                    <div class="cell">车辆状态</div>
-                                </th>
-                                <th class="">
-                                    <div class="cell">报警</div>
-                                </th>
-                                <th class="">
-                                    <div class="cell">在线状态</div>
                                 </th>
                             </tr>
                             </thead>
@@ -247,7 +279,10 @@
     <table cellspacing="0" cellpadding="0" border="0" class="" role="c-table" data-height="336">
         <colgroup>
             <col name="" width="92">
-            <col name="" width="120">
+            <col name="" width="180">
+            <col name="" width="60">
+            <col name="" width="82">
+            <%--<col name="" width="120">--%>
             <col name="" width="96">
             <col name="" width="">
             <col name="" width="60">
@@ -255,9 +290,6 @@
             <col name="" width="">
             <col name="" width="120">
             <col name="" width="120">
-            <col name="" width="82">
-            <col name="" width="60">
-            <col name="" width="82">
         </colgroup>
         <thead>
         <tr>
@@ -265,8 +297,17 @@
                 <div class="cell">车牌号码</div>
             </th>
             <th class="">
-                <div class="cell">所属公司</div>
+                <div class="cell">车辆状态</div>
             </th>
+            <th class="">
+                <div class="cell">报警</div>
+            </th>
+            <th class="">
+                <div class="cell">在线状态</div>
+            </th>
+            <%--<th class="">
+                <div class="cell">所属公司</div>
+            </th>--%>
             <th class="">
                 <div class="cell">GPS有效性</div>
             </th>
@@ -288,15 +329,6 @@
             <th class="">
                 <div class="cell">最后有效方向</div>
             </th>
-            <th class="">
-                <div class="cell">车辆状态</div>
-            </th>
-            <th class="">
-                <div class="cell">报警</div>
-            </th>
-            <th class="">
-                <div class="cell">在线状态</div>
-            </th>
         </tr>
         </thead>
         <tbody>
@@ -306,8 +338,17 @@
                 <div class="cell">{{$value.carNo}}</div>
             </td>
             <td class="">
-                <div class="cell">{{$value.carCom}}</div>
+                <div class="cell">{{$value.carStatus}}</div>
             </td>
+            <td class="">
+                <div class="cell">{{$value.alarm}}</div>
+            </td>
+            <td class="">
+                <div class="cell">在线</div>
+            </td>
+            <%--<td class="">
+                <div class="cell">{{$value.carCom}}</div>
+            </td>--%>
             <td class="">
                 <div class="cell">{{$value.gps}}</div>
             </td>
@@ -332,15 +373,6 @@
             </td>
             <td class="">
                 <div class="cell">{{$value.lastaspect}}</div>
-            </td>
-            <td class="">
-                <div class="cell">{{$value.carStatus}}</div>
-            </td>
-            <td class="">
-                <div class="cell">{{$value.alarm}}</div>
-            </td>
-            <td class="">
-                <div class="cell">在线</div>
             </td>
         </tr>
         {{/each}}

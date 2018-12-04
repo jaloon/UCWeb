@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tipray.dao.RecordAuthDao">
+
+    <select id="getHandsetDirectorByDeviceId" parameterType="integer" resultType="java.lang.String">
+        SELECT director FROM tbl_handset WHERE handset_device_id = #{deviceId}
+    </select>
+
+    <select id="getCardDirectorByCardId" parameterType="long" resultType="java.lang.String">
+        SELECT director FROM tbl_card WHERE card_id = #{cardId}
+    </select>
+
+    <select id="isBarrier" parameterType="long" resultType="java.lang.Boolean">
+        SELECT is_barrier_gate FROM tbl_remote_control WHERE id = #{remoteId}
+    </select>
+
+    <select id="getOperatorByRemoteId" parameterType="long" resultType="java.lang.String">
+        SELECT u.`name` FROM tbl_remote_control r, tbl_user u WHERE r.user_id = u.id AND r.id = #{remoteId}
+    </select>
+
+    <select id="getUserNameByUserId" parameterType="long" resultType="java.lang.String">
+        SELECT `name` FROM tbl_user WHERE id = #{userId}
+    </select>
+</mapper>

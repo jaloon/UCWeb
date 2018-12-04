@@ -48,7 +48,7 @@ $(function () {
         type: 'datetime',
         // value: '2017-10-01 00:00:00',
         // value: new Date(new Date().setDate(new Date().getDate() - 3)), //3天前
-        value: new Date(new Date().setHours(0, 0, 0, 0)), //当天零点
+        value: new Date(new Date(new Date().setDate(new Date().getDate()-1)).setHours(0,0,0,0)), //前一天零点
         min: -90,
         max: new Date().getTime()
     });

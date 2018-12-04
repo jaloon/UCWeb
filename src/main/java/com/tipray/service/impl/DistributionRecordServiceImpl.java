@@ -123,7 +123,7 @@ public class DistributionRecordServiceImpl implements DistributionRecordService 
         byte[] tranportIdDword = BytesConverterByLittleEndian.getBytes(transportId);
         byte[] stationNameBuf = stationName.getBytes(StandardCharsets.UTF_8);
         int stationNameBufLen = stationNameBuf.length;
-        byte[] userNameBuf = "物流配送接口".getBytes(StandardCharsets.UTF_8);
+        byte[] userNameBuf = "物流平台".getBytes(StandardCharsets.UTF_8);
         int userNameBufLen = userNameBuf.length;
         int coverCoodrNum = 0, handsetNum = 0, cardNum = 0;
         // 缓冲区容量

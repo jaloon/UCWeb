@@ -21,12 +21,13 @@
 		r.id,
 		r.happen_time,
 		r.is_app,
-		r.is_barrier_gate,
+		<!--r.is_barrier_gate,-->
 		v.vehicle_number vehicle_number,
 		r.type,
 		fn_type2name ( 'remoteType', r.type ) type_name,
+		fn_get_alarm_station(r.station_type, r.station_id) station,
 		r.`status` remote_status,
-		fn_type2name ( 'remoteStatus', r.`status` ) status_name,
+		fn_get_remote_control_status(r.is_barrier_gate, r.`status`) status_name,
 		IFNULL(u.account, IF(r.is_barrier_gate = 1,'道闸','未知')) user_account,
 		IFNULL(u.`name`, IF(r.is_barrier_gate = 1,'道闸','未知')) user_name,
 		s.vehicle_track_id track_id

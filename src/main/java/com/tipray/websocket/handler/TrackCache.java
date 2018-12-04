@@ -172,26 +172,23 @@ public enum TrackCache {
      */
     private String parseCarStatus(int carStatus) {
         switch (carStatus) {
-            case 0:
-                return "未知";
             case 1:
-                return "在油库";
+                return "在油库 - 解封";
             case 2:
-                return "在途中";
+                return "在途中 - 施封";
             case 3:
-                return "在加油站";
+                return "在加油站 - 解封";
             case 4:
-                return "返程中";
+                return "返程中 - 施封";
             case 5:
-                return "应急";
+                return "应急 - 解封";
             case 6:
-                return "待入油区";
+                return "油区外[待进道闸] - 施封";
             case 7:
-                return "在油区";
+                return "在油区[已进道闸] - 解封";
             default:
-                break;
+                return "未知(" + carStatus + ")";
         }
-        return "未知";
     }
 
     /**

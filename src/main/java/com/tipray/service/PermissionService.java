@@ -1,10 +1,10 @@
 package com.tipray.service;
 
-import java.util.List;
-import java.util.Map;
-
 import com.tipray.bean.baseinfo.Permission;
 import com.tipray.core.exception.ServiceException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * PermissionService
@@ -39,6 +39,7 @@ public interface PermissionService {
 
 	/**
 	 * 获取所有的权限
+	 * **
 	 * 
 	 * @param id
 	 * @return
@@ -55,7 +56,7 @@ public interface PermissionService {
 
 	/**
 	 * 根据ID集合获取权限
-	 * 
+	 * **
 	 * @param ids
 	 * @return
 	 */
@@ -63,14 +64,14 @@ public interface PermissionService {
 
 	/**
 	 * 获取系统操作权限
-	 * 
+	 * **
 	 * @return
 	 */
     List<Permission> findOperatePermissions();
 
 	/**
 	 * 根据id集合获取权限
-	 * 
+	 * **
 	 * @param ids
 	 * @return
 	 */

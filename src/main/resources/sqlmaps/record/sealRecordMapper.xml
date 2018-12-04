@@ -57,7 +57,7 @@
 			and s.trigger_time between #{begin} and #{end}
 		</if> 
 		<if test="type != null and type != -2">
-			and s.trigger_type = #{type}
+			and s.status_incident = #{type}
 		</if>
 		<if test="carNumber != null and carNumber != ''">
 			and v.vehicle_number like CONCAT('%',#{carNumber},'%')
@@ -76,7 +76,7 @@
             AND s.trigger_time BETWEEN #{entity.begin} AND #{entity.end}
 		</if>
 		<if test="entity.type != null and entity.type != -2">
-            AND s.trigger_type = #{entity.type}
+            AND s.status_incident = #{entity.type}
 		</if>
 		<if test="entity.carNumber != null and entity.carNumber != ''">
             AND v.vehicle_number LIKE CONCAT('%',#{entity.carNumber},'%')

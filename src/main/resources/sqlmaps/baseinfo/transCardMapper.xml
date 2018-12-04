@@ -66,7 +66,7 @@
 	<select id="count" parameterType="com.tipray.bean.baseinfo.TransportCard" resultType="java.lang.Long">
 		select count(*) from tbl_transport_card where is_invalid=0 
 		<if test="transportCardId != null and transportCardId != -2">
-			and transport_card_id = #{transportCardId}
+			and transport_card_id like CONCAT('%',#{transportCardId},'%')
 		</if>
 	</select>
 	
@@ -76,7 +76,7 @@
 		on t.transport_card_id=c.transport_card_id
 		where t.is_invalid=0
 		<if test="entity.transportCardId != null and entity.transportCardId != -2">
-			and t.transport_card_id = #{entity.transportCardId}
+			and t.transport_card_id like CONCAT('%',#{entity.transportCardId},'%')
 		</if>
 		order by t.id asc  
 		limit #{page.startRow}, #{page.rows}

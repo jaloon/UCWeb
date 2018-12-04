@@ -26,6 +26,8 @@ public class CenterVariableConfig {
     private static boolean validateAppdev;
     private static boolean validateAppver;
 
+    private static long passcheckTimeout;
+
     private static boolean emailSqlite;
     private static String[] emailSqliteReceivers;
 
@@ -49,11 +51,15 @@ public class CenterVariableConfig {
         return validateAppver;
     }
 
-    public static boolean isEmailSqlite() {
+    public static synchronized long getPasscheckTimeout() {
+        return passcheckTimeout;
+    }
+
+    public static synchronized boolean isEmailSqlite() {
         return emailSqlite;
     }
 
-    public static String[] getEmailSqliteReceivers() {
+    public static synchronized String[] getEmailSqliteReceivers() {
         return emailSqliteReceivers;
     }
 
@@ -78,6 +84,8 @@ public class CenterVariableConfig {
             validateLocal = FileUtil.getBoolProp(properties, "validate.local", false);
             validateAppdev = FileUtil.getBoolProp(properties, "validate.appdev", false);
             validateAppver = FileUtil.getBoolProp(properties, "validate.appver", false);
+
+            passcheckTimeout = FileUtil.getLongProp(properties,"passcheck.timeout", 0L);
 
             emailSqlite = FileUtil.getBoolProp(properties, "email.sqlite", false);
             String emailSqliteReceiverStr = properties.getProperty("email.sqlite.receiver");

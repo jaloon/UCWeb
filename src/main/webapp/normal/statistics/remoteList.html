@@ -36,16 +36,16 @@
         <label for="text_type" class="search-type" id="type_type">操作类型</label>
         <select class="search-text" id="text_type">
             <option value="">所有操作</option>
-            <option value=1>进油库</option>
-            <option value=2>出油库</option>
-            <option value=3>进加油站</option>
-            <option value=4>出加油站</option>
-            <option value=5>进入应急</option>
-            <option value=6>取消应急</option>
+            <option value=1>进油库 -> 解封</option>
+            <option value=2>出油库 -> 施封</option>
+            <option value=3>进加油站 -> 解封</option>
+            <option value=4>出加油站 -> 施封</option>
+            <option value=5>进入应急 -> 解封</option>
+            <option value=6>取消应急 -> 施封</option>
             <option value=7>状态强制变更</option>
-            <option value=8>待进油区</option>
-            <option value=9>进油区</option>
-            <option value=10>出油区</option>
+            <option value=8>油区外[待进道闸] -> 施封</option>
+            <option value=9>进油区[进道闸] -> 解封</option>
+            <option value=10>出油区[出道闸] -> 施封</option>
         </select>
         <label for="text_begin" class="search-type" id="type_begin">开始时间</label>
         <input type="text" class="search-text" id="text_begin">
@@ -59,6 +59,7 @@
             <div class="table-box c-table c-table--border">
                 <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
                     <colgroup>
+                        <col name="" width="">
                         <col name="" width="">
                         <col name="" width="">
                         <col name="" width="">
@@ -106,6 +107,7 @@
             <col name="" width="">
             <col name="" width="">
             <col name="" width="">
+            <col name="" width="">
             <col name="" width="110">
         </colgroup>
         <thead>
@@ -127,6 +129,9 @@
             </th>
             <th class="">
                 <div class="cell">操作类型</div>
+            </th>
+            <th class="">
+                <div class="cell">站点</div>
             </th>
             <th class="">
                 <div class="cell">操作员</div>
@@ -171,6 +176,9 @@
             </td>
             <td class="">
                 <div class="cell">{{$value.type}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.station}}</div>
             </td>
             <td class="">
                 <div class="cell">{{$value.user}}</div>

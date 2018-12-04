@@ -7,11 +7,13 @@ import com.tipray.bean.record.SealRecord;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.dao.LockDao;
+import com.tipray.dao.RecordAuthDao;
 import com.tipray.dao.SealRecordDao;
 import com.tipray.dao.TrackDao;
 import com.tipray.service.SealRecordService;
 import com.tipray.util.DateUtil;
 import com.tipray.util.EmptyObjectUtil;
+import com.tipray.util.StringUtil;
 import com.tipray.util.VehicleAlarmUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,8 @@ public class SealRecordServiceImpl implements SealRecordService {
     private TrackDao trackDao;
     @Resource
     private LockDao lockDao;
+    @Resource
+    private RecordAuthDao recordAuthDao;
 
     @Override
     public SealRecord getRecordById(Long id) {
@@ -107,7 +111,31 @@ public class SealRecordServiceImpl implements SealRecordService {
         List<SealRecord> list = sealRecordDao.findByPage(record, page);
         if (!EmptyObjectUtil.isEmptyList(list)) {
             StringBuffer trackIds = new StringBuffer();
-            list.forEach(sealRecord -> trackIds.append(',').append(sealRecord.getTrackId()));
+            list.forEach(sealRecord -> {
+                // 0：未知 | 1：出入库读卡器 | 2：出入库卡 | 3：手持机 | 4：普通卡 | 5：应急卡 | 6：远程操作 | 7：操作员
+                Integer authtype = sealRecord.getAuthtype();
+                Long authid = sealRecord.getAuthid();
+                String operator = null;
+                if (authtype == 3) { // 手持机
+                    operator = recordAuthDao.getHandsetDirectorByDeviceId(authid.intValue());
+                } else if (authtype == 2 || authtype == 4 || authtype == 5) { // 卡
+                    operator = recordAuthDao.getCardDirectorByCardId(authid);
+                } else if (authtype == 6) { // 远程操作
+                    Boolean barrier = recordAuthDao.isBarrier(authid);
+                    if (barrier != null && barrier) {
+                        operator = "道闸";
+                    } else {
+                        operator = recordAuthDao.getOperatorByRemoteId(authid);
+                    }
+                } else if (authtype == 7) { // 操作员
+                    operator = recordAuthDao.getUserNameByUserId(authid);
+                }
+                if (StringUtil.isEmpty(operator)) {
+                    operator = "-";
+                }
+                sealRecord.setOperator(operator);
+                trackIds.append(',').append(sealRecord.getTrackId());
+            });
             trackIds.deleteCharAt(0);
             try {
                 Map<Long, TrackInfo> trackInfoMap = trackDao.findTrackMapByTrackIds(trackIds.toString());

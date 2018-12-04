@@ -534,7 +534,7 @@ public class VehicleController extends BaseAction {
     /**
      * 查询某辆车某个时间点以后的轨迹信息
      *
-     * @param carNumber 车牌号，英文逗号“,”分隔
+     * @param carNumber 车牌号
      * @param beginTime 轨迹开始时间
      * @return 轨迹信息
      */

@@ -72,7 +72,7 @@ public class DistUdpTask {
      * @param taskKey 任务key
      * @param cacheId 缓存ID
      * @param src     UDP通信数据
-     * @param params  换站参数
+     * @param params  新增参数
      */
     public static DistUdpTask buildNewDistTask(String invoice, long taskKey, int cacheId, ByteBuffer src,
                                                Map<String, Object> params) {
@@ -116,7 +116,8 @@ public class DistUdpTask {
                         int errorId = reply.getCode();
                         // int commonError = errorId >>> 16;
                         int workError = errorId & 0xFFFF;
-                        if (workError == UdpReplyWorkErrorEnum.OPERATE_FAIL_105_OPERATION_NOT_SUPPORTED.code() && type == 2) {
+                        if (workError == UdpReplyWorkErrorEnum.OPERATE_FAIL_105_OPERATION_NOT_SUPPORTED.code()
+                                && type == 2) {
                             logger.info("配送单【{}】新增下发无效：车台主动获取配送单，停止重发！", invoice);
                             stop();
                             return;
@@ -129,19 +130,13 @@ public class DistUdpTask {
                     }
                     if (isIssueTimeout()) {
                         stop();
+                        return;
                     }
                     // 重新添加换站参数缓存
                     AsynUdpCommCache.putParamCache(cacheId, params);
                 }
 
-                if (interrupt) {
-                    logger.warn("配送单【{}】{}下发超时：新的配送信息覆盖，停止重发！", invoice, type == 1 ? "换站" : "新增");
-                    AsynUdpCommCache.removeParamCache(cacheId);
-                    stop();
-                    return;
-                }
-                if (System.currentTimeMillis() - distTime > DateUtil.DAY_DIFF) {
-                    logger.warn("配送单【{}】{}下发超时：超过24小时，停止重发！", invoice, type == 1 ? "换站" : "新增");
+                if (isIssueTimeout()) {
                     AsynUdpCommCache.removeParamCache(cacheId);
                     stop();
                     return;
@@ -155,19 +150,16 @@ public class DistUdpTask {
         return this;
     }
 
+    /**
+     * 下发超时
+     */
     private boolean isIssueTimeout() {
         if (interrupt) {
             logger.warn("配送单【{}】{}下发超时：新的配送信息覆盖，停止重发！", invoice, type == 1 ? "换站" : "新增");
-            if (type == 1) {
-                AsynUdpCommCache.removeParamCache(cacheId);
-            }
             return true;
         }
         if (System.currentTimeMillis() - distTime > DateUtil.DAY_DIFF) {
             logger.warn("配送单【{}】{}下发超时：超过24小时，停止重发！", invoice, type == 1 ? "换站" : "新增");
-            if (type == 1) {
-                AsynUdpCommCache.removeParamCache(cacheId);
-            }
             return true;
         }
         return false;

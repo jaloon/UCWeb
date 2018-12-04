@@ -260,6 +260,7 @@
                 cover_lonlatlist_region cover
             FROM
                 tbl_gasstation
+          	WHERE is_invalid = 0
 		]]>
 	</select>
 

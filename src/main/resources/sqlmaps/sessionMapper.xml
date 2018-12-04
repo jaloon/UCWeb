@@ -48,6 +48,7 @@
         from tbl_session s,tbl_user u,tbl_role r 
 		where s.user_id=u.id and u.role_id=r.id and s.session_id = #{uuid}
     </select>
+
     <select id="getByOldUUID" resultMap="BaseResultMap" parameterType="java.lang.String" >
         select <include refid="select_columns"></include>
         from tbl_session s,tbl_user u,tbl_role r 

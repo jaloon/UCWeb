@@ -104,8 +104,8 @@ public class PermissionUtil {
 	 * @return
 	 */
 	public static boolean containPermission(List<Permission> permissions, String ename) {
-		String[] enames = ename.split(",");
 		if (permissions != null) {
+			String[] enames = ename.split(",");
 			for (Permission permission : permissions) {
                 for (String pName : enames) {
                     if (permission.getEname().equals(pName)) {

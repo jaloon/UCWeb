@@ -3,6 +3,7 @@ package com.tipray.core.filter;
 import com.tipray.bean.Session;
 import com.tipray.constant.HttpStatusConst;
 import com.tipray.core.GridProperties;
+import com.tipray.core.ThreadVariable;
 import com.tipray.util.HttpRequestUtil;
 import com.tipray.util.NetUtil;
 import com.tipray.util.SessionUtil;
@@ -31,19 +32,20 @@ public class LoginValidateFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
             throws ServletException {
+
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+        // Enumeration<String> enumeration = request.getHeaderNames();
+        // while (enumeration.hasMoreElements()) {
+        //     String name = enumeration.nextElement();
+        //     String header = request.getHeader(name);
+        //     log.info("{} ==> {}", name, header);
+        // }
+
+        String url = request.getRequestURI();
         try {
-            HttpServletRequest request = (HttpServletRequest) servletRequest;
-            HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-            // Enumeration<String> enumeration = request.getHeaderNames();
-            // while (enumeration.hasMoreElements()) {
-            //     String name = enumeration.nextElement();
-            //     String header = request.getHeader(name);
-            //     log.info("{} ==> {}", name, header);
-            // }
-
             // 路径白名单检查
-            String url = request.getRequestURI();
             if (isResourceRequest(url) || isNotLoginValidate(url, request)) {
                 chain.doFilter(servletRequest, servletResponse);
                 return;
@@ -77,7 +79,7 @@ public class LoginValidateFilter implements Filter {
                 }
 
                 String path = request.getContextPath();
-                String requestUrl =  HttpRequestUtil.getRequestUrl(request);
+                String requestUrl = HttpRequestUtil.getRequestUrl(request);
                 encodeUrl(requestUrl);
 
                 String location = new StringBuffer(path).append("/login.jsp?requestUrl=").append(requestUrl)
@@ -89,7 +91,7 @@ public class LoginValidateFilter implements Filter {
                 response.sendRedirect(location);
             }
         } catch (Exception e) {
-            log.error("登录过滤器异常！", e);
+            log.error("[{}]请求路径[{}]应答异常：\n{}", ThreadVariable.getUser().getAccount(), url, e.toString());
             throw new ServletException(e);
         }
     }
@@ -110,8 +112,13 @@ public class LoginValidateFilter implements Filter {
             if (oldSession != null) {
                 // LoginError = LoginErrorEnum.OFFSITE_LOGIN;
                 loginStatus = HttpStatusConst.HTTP_603_OFFSITE_LOGIN;
-                errorMessage = encodeUrl(new StringBuffer("<div style=\"font-size:15px;line-height:20px;\">您的账号在异地登录(")
-                        .append(oldSession.getIp()).append(")<br>如非授权，建议修改密码</div>").toString());
+                errorMessage = encodeUrl(
+                        new StringBuffer()
+                                .append("<div style='font-size:15px;line-height:20px;'>您的账号在异地登录(")
+                                .append(oldSession.getIp())
+                                .append(")<br>如非授权，建议修改密码</div>")
+                                .toString()
+                );
             } else {
                 // LoginError = LoginErrorEnum.LOGIN_INVALID;
                 loginStatus = HttpStatusConst.HTTP_601_LOGIN_INVALID;

@@ -35,6 +35,10 @@ public class SealRecord extends Record {
      */
     private Long authid;
     /**
+     * 认证操作者
+     */
+    private String operator;
+    /**
      * 是否报警
      */
     private String alarm;
@@ -95,6 +99,14 @@ public class SealRecord extends Record {
         this.authid = authid;
     }
 
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
     public String getAlarm() {
         return alarm;
     }
@@ -145,6 +157,9 @@ public class SealRecord extends Record {
         }
         if (authid != null) {
             sb.append(", authid=").append(authid);
+        }
+        if (operator != null) {
+            sb.append(", operator='").append(operator).append('\'');
         }
         if (alarm != null) {
             sb.append(", alarm='").append(alarm).append('\'');

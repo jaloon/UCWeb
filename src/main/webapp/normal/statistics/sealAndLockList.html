@@ -78,16 +78,16 @@
             <label for="text_type_seal" class="search-type" id="type_type_seal">施解封类型</label>
             <select class="search-text" id="text_type_seal">
                 <option value="">所有类型</option>
-                <option value=1>进油库</option>
-                <option value=2>出油库</option>
-                <option value=3>进加油站</option>
-                <option value=4>出加油站</option>
-                <option value=5>进入应急</option>
-                <option value=6>取消应急</option>
+                <option value=1>进油库 -> 解封</option>
+                <option value=2>出油库 -> 施封</option>
+                <option value=3>进加油站 -> 解封</option>
+                <option value=4>出加油站 -> 施封</option>
+                <option value=5>进入应急 -> 解封</option>
+                <option value=6>取消应急 -> 施封</option>
                 <option value=7>状态强制变更</option>
-                <option value=8>待进油区</option>
-                <option value=9>进油区</option>
-                <option value=10>出油区</option>
+                <option value=8>油区外[待进道闸] -> 施封</option>
+                <option value=9>进油区[进道闸] -> 解封</option>
+                <option value=10>出油区[出道闸] -> 施封</option>
             </select>
             <input type="button" class="search-btn button" id="search_btn_seal" value="查询">
         </div>
@@ -96,6 +96,7 @@
                 <div class="table-box c-table c-table--border">
                     <table cellspacing="0" cellpadding="0" border="0" role="c-table" data-height="200">
                         <colgroup>
+                            <col name="" width="">
                             <col name="" width="">
                             <col name="" width="">
                             <col name="" width="">
@@ -206,6 +207,7 @@
             <col name="" width="130">
             <col name="" width="110">
             <col name="" width="110">
+            <col name="" width="110">
             <col name="" width="126">
         </colgroup>
         <thead>
@@ -248,6 +250,9 @@
             </th>
             <th class="">
                 <div class="cell">认证编号</div>
+            </th>
+            <th class="">
+                <div class="cell">操作员</div>
             </th>
             <th class="">
                 <div class="cell">是否报警</div>
@@ -307,6 +312,9 @@
             </td>
             <td class="">
                 <div class="cell">{{$value.authid}}</div>
+            </td>
+            <td class="">
+                <div class="cell">{{$value.operator}}</div>
             </td>
             <td class="">
                 <div class="cell">{{$value.alarm}}</div>

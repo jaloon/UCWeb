@@ -41,6 +41,7 @@
         <div class="search-zone">
             <label for="search_text" class="search-type" id="search_type">卡类型</label>
             <select class="search-text" id="search_text">
+                <option value="">所有类型</option>
                 <option value=1>应急卡</option>
                 <option value=2>入库卡</option>
                 <option value=3>出库卡</option>

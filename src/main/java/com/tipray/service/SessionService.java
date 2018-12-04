@@ -86,18 +86,18 @@ public interface SessionService {
      * @throws LoginException
      * @throws PermissionException
      */
-    Session login(User user, Session session, Integer isApp) throws LoginException, PermissionException;
+    Session login(String account, String password, Session session, Integer isApp) throws LoginException, PermissionException;
 
     /**
      * 用户校验
-     *
-     * @param user
+     * @param account
+     * @param password
      * @param isApp
      * @return
      * @throws LoginException
      * @throws PermissionException
      */
-    User userCheck(User user, Integer isApp) throws LoginException, PermissionException;
+    User userCheck(String account, String password, Integer isApp) throws LoginException, PermissionException;
 
     /**
      * 退出当前登录账号

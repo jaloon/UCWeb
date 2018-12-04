@@ -49,7 +49,6 @@ public class Point implements Serializable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(longitude, latitude);
     }
 }

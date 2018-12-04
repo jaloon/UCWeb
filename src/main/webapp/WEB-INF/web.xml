@@ -86,6 +86,15 @@
 		<filter-name>loginValidateFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+	<!--<filter>-->
+		<!--<filter-name>remoteOperatorFilter</filter-name>-->
+		<!--<filter-class>com.tipray.core.filter.RemoteOperatorFilter</filter-class>-->
+		<!--<async-supported>true</async-supported>-->
+	<!--</filter>-->
+	<!--<filter-mapping>-->
+		<!--<filter-name>remoteOperatorFilter</filter-name>-->
+		<!--<url-pattern>/manage/remote/*</url-pattern>-->
+	<!--</filter-mapping>-->
 	<filter>
 		<filter-name>noCacheFilter</filter-name>
 		<filter-class>com.tipray.core.filter.NoCacheFilter</filter-class>
@@ -128,9 +137,9 @@
 	<!--<listener>-->
 		<!--<listener-class>com.tipray.core.listener.FtpServerListener</listener-class>-->
 	<!--</listener>-->
-	<listener>
-		<listener-class>com.tipray.core.listener.WebServiceListener</listener-class>
-	</listener>
+	<!--<listener>-->
+		<!--<listener-class>com.tipray.core.listener.WebServiceListener</listener-class>-->
+	<!--</listener>-->
 	<listener>
 		<listener-class>com.tipray.core.listener.UdpServerListener</listener-class>
 	</listener>

@@ -676,6 +676,7 @@ public class VehicleServiceImpl implements VehicleService {
             if (!EmptyObjectUtil.isEmptyMap(trackMap)) {
                 tracks.add(trackMap);
             }
+
         } else {
             Date lastTtrackTime = trackDao.getLastTrackTime(carId);
             beginMillis = Long.max(beginMillis, lastTtrackTime.getTime() - DateUtil.MINUTE_DIFF * 10);

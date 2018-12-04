@@ -125,18 +125,22 @@ public class SessionServiceImpl implements SessionService {
 
     @Transactional
     @Override
-    public Session login(User user, Session session, Integer isApp) throws LoginException, PermissionException {
-        User userDb = userCheck(user, isApp);
+    public Session login(String account, String password, Session session, Integer isApp)
+            throws LoginException, PermissionException {
+        User userDb = userCheck(account, password, isApp);
         session.setUser(userDb);
         addSession(session);
         return session;
     }
 
     @Override
-    public User userCheck(User user, Integer isApp) throws LoginException, PermissionException {
-        String account = user.getAccount();
+    public User userCheck(String account, String password, Integer isApp)
+            throws LoginException, PermissionException {
         if (StringUtil.isEmpty(account)) {
             throw new LoginException("账号错误");
+        }
+        if (StringUtil.isEmpty(password)) {
+            throw new LoginException("密码错误");
         }
         if (account.equals("admin") && isApp > 0) {
             throw new PermissionException(PermissionErrorEnum.APP_NOT_ACCEPTABLE);
@@ -145,15 +149,14 @@ public class SessionServiceImpl implements SessionService {
         if (userDb == null) {
             throw new LoginException("账号错误");
         }
-        String newPassword = user.getPassword();
         if (isApp == 0) {
             try {
-                newPassword = MD5Util.md5Encode(newPassword);
+                password = MD5Util.md5Encode(password);
             } catch (NoSuchAlgorithmException e) {
                 throw new LoginException("密码加密异常", e);
             }
         }
-        if (!newPassword.equals(userDb.getPassword())) {
+        if (!password.equals(userDb.getPassword())) {
             throw new LoginException("密码错误");
         }
         if (isApp > 0 && (userDb.getAppRole() == null || userDb.getAppRole().getId() == 0)) {

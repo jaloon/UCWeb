@@ -963,6 +963,26 @@ public class FileUtil {
         }
     }
 
+	/**
+	 * 获取长整形属性值
+	 *
+	 * @param properties   {@link Properties}
+	 * @param key          属性名称
+	 * @param defaultValue 默认值
+	 * @return 属性值
+	 */
+	public static long getLongProp(Properties properties, String key, long defaultValue) {
+		String value = properties.getProperty(key);
+		if (value == null || value.trim().isEmpty()) {
+			return defaultValue;
+		}
+		try {
+			return Long.parseLong(value, 10);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+
     /**
      * 获取布尔型属性值
      *

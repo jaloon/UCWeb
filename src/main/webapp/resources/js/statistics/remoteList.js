@@ -115,6 +115,7 @@ $(function () {
                         gps: gps,
                         coordinate: coordinate,
                         type: remote.typeName,
+                        station: remote.station,
                         user: remote.user.name + "(" + remote.user.account + ")",
                         result: remote.statusName,
                         app: remote.isApp > 0 ? "是" : "否"

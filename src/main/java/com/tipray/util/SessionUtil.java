@@ -147,7 +147,7 @@ public class SessionUtil {
 			synchronized (SESSION_CACHE_MAP) {
 				SESSION_CACHE_MAP.clear();
 				SESSION_CACHE_MAP.putAll(SESSION_SERVICE.findSessions());
-                Set<String> sessionIdSet = SESSION_CACHE_MAP.keySet();
+				Set<String> sessionIdSet = SESSION_CACHE_MAP.keySet();
 				while (sessionIdSet.contains(sessionId)) {
 					sessionId = UUIDUtil.getHexUUID();
 				}
@@ -192,7 +192,7 @@ public class SessionUtil {
 	public static void updateUser(User user) {
 		if (user != null) {
 			for (Session session : SESSION_CACHE_MAP.values()) {
-				if (session.getUser().getId() == user.getId()) {
+				if (session.getUser().getId().equals(user.getId())) {
 					session.setUser(user);
 				}
 			}
