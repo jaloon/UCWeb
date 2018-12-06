@@ -175,7 +175,7 @@
 		ON t1.lock_device_id = t2.lock_device_id
 	</select>
 
-	<select id="findlocksByCarNo" parameterType="java.lang.String" resultType="com.tipray.bean.lock.LockForApp">
+	<select id="findlocksByCarId" parameterType="java.lang.Long" resultType="com.tipray.bean.lock.LockForApp">
         SELECT
         	l.vehicle_id,
         	l.id lock_id,
@@ -195,8 +195,7 @@
 			tbl_vehicle v
         WHERE
         	l.lock_device_id = d.device_id
-            AND l.vehicle_id = v.id
-            AND v.vehicle_number = #{carNumber}
+            AND l.vehicle_id = #{carId}
     </select>
 
 	<select id="getLockStatus" parameterType="com.tipray.bean.lock.LockForApp" resultType="com.tipray.bean.lock.LockStatus" flushCache="true">

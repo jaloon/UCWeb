@@ -600,23 +600,37 @@ public class VehicleServiceImpl implements VehicleService {
             return null;
         }
         Long carId = vehicleDao.getIdByCarNo(carNumber);
+        List<LockForApp> locks = lockDao.findlocksByCarId(carId);
+        if (EmptyObjectUtil.isEmptyList(locks)) {
+            return new ArrayList<>();
+        }
         LastTrackApp lastTrackApp = trackDao.getLastTrackForApp(carId);
-        byte[] lockStatusInfo = lastTrackApp.getLock_status_info();
-        int lockSizeInTrack = lockStatusInfo.length;
-        long trackMillis = lastTrackApp.getTrack_time().getTime();
-        List<LockForApp> locks = lockDao.findlocksByCarNo(carNumber);
-        locks.forEach(lock -> {
-            int status = 0;
-            int lockIndex = lock.getLock_index();
-            if (lockSizeInTrack > lockIndex) {
-                status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lockIndex]);
-            }
-            LockStatus lockStatus = lockDao.getLockStatus(lock);
-            if (lockStatus != null && (status == 0 || trackMillis < lockStatus.getSwitch_time() * 1000L)) {
-                status = lockStatus.getSwitch_status();
-            }
-            lock.setSwitch_status(status);
-        });
+        if (lastTrackApp != null) {
+            byte[] lockStatusInfo = lastTrackApp.getLock_status_info();
+            int lockSizeInTrack = lockStatusInfo == null ? 0 : lockStatusInfo.length;
+            long trackMillis = lastTrackApp.getTrack_time().getTime();
+            locks.forEach(lock -> {
+                int status = 0;
+                int lockIndex = lock.getLock_index();
+                if (lockSizeInTrack > lockIndex) {
+                    status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lockIndex]);
+                }
+                LockStatus lockStatus = lockDao.getLockStatus(lock);
+                if (lockStatus != null && (status == 0 || trackMillis < lockStatus.getSwitch_time() * 1000L)) {
+                    status = lockStatus.getSwitch_status();
+                }
+                lock.setSwitch_status(status);
+            });
+        } else {
+            locks.forEach(lock -> {
+                int status = 0;
+                LockStatus lockStatus = lockDao.getLockStatus(lock);
+                if (lockStatus != null) {
+                    status = lockStatus.getSwitch_status();
+                }
+                lock.setSwitch_status(status);
+            });
+        }
         return locks;
     }
 

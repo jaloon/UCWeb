@@ -98,12 +98,12 @@ public interface LockDao extends BaseDao<Lock> {
     List<Lock> findVehicleIdByLocks(List<Lock> locks);
 
     /**
-     * 根据车牌号获取锁信息
+     * 根据车辆ID获取锁信息
      *
-     * @param carNumber 车牌号
+     * @param carId 车辆ID
      * @return 锁信息
      */
-    List<LockForApp> findlocksByCarNo(String carNumber);
+    List<LockForApp> findlocksByCarId(Long carId);
 
     /**
      * 获取锁开关状态
