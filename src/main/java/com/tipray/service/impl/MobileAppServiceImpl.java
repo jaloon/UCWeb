@@ -1,6 +1,6 @@
 package com.tipray.service.impl;
 
-import com.tipray.bean.track.LockStatus;
+import com.tipray.bean.lock.LockStatus;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.constant.AlarmBitMarkConst;
 import com.tipray.dao.LockDao;

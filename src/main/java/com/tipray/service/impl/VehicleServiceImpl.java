@@ -14,10 +14,11 @@ import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.lock.LockForApp;
 import com.tipray.bean.track.LastCarStatus;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.LastTrackApp;
-import com.tipray.bean.track.LockStatus;
+import com.tipray.bean.lock.LockStatus;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.bean.upgrade.TerminalUpgradeInfo;
@@ -564,7 +565,7 @@ public class VehicleServiceImpl implements VehicleService {
         }
         vehicle.put("status", getLastCarStatusByCarId((Long) vehicle.get("id")));
         List<Map<String, Object>> drivers = driverDao.findByCarNoForApp(carNumber);
-        List<Map<String, Object>> locks = findlocksByCarNo(carNumber);
+        List<LockForApp> locks = findlocksByCarNo(carNumber);
         Map<String, Object> map = new HashMap<>();
         map.put("vehicle", vehicle);
         map.put("drivers", drivers);
@@ -594,14 +595,22 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<Map<String, Object>> findlocksByCarNo(String carNumber) {
+    public List<LockForApp> findlocksByCarNo(String carNumber) {
         if (StringUtil.isEmpty(carNumber)) {
             return null;
         }
-        List<Map<String, Object>> locks = lockDao.findlocksByCarNo(carNumber);
+        Long carId = vehicleDao.getIdByCarNo(carNumber);
+        LastTrackApp lastTrackApp = trackDao.getLastTrackForApp(carId);
+        byte[] lockStatusInfo = lastTrackApp.getLock_status_info();
+        long trackMillis = lastTrackApp.getTrack_time().getTime();
+        List<LockForApp> locks = lockDao.findlocksByCarNo(carNumber);
         locks.forEach(lock -> {
-            Integer status = lockDao.getLockStatus(lock);
-            lock.put("switch_status", status == null ? 0 : status);
+            int status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lock.getLock_index()]);
+            LockStatus lockStatus = lockDao.getLockStatus(lock);
+            if (lockStatus != null && trackMillis < lockStatus.getSwitch_time() * 1000L) {
+                status = lockStatus.getSwitch_status();
+            }
+            lock.setSwitch_status(status);
         });
         return locks;
     }
@@ -678,6 +687,7 @@ public class VehicleServiceImpl implements VehicleService {
         if (beginMillis == null) {
             LastTrackApp lastTrackApp = trackDao.getLastTrackForApp(carId);
             if (lastTrackApp != null) {
+                lastTrackApp.setVehicle_number(carNumber);
                 byte[] lockStatusInfo = lastTrackApp.getLock_status_info();
                 lastTrackApp.setLocks(parseTrackLocks(carId, lockStatusInfo, true, lastTrackApp.getTrack_time().getTime()));
                 map.put("tracks", new LastTrackApp[]{lastTrackApp});

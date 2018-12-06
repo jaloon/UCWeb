@@ -11,6 +11,7 @@ import com.tipray.bean.baseinfo.Device;
 import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.lock.LockForApp;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.upgrade.TerminalUpgradeInfo;
@@ -385,9 +386,9 @@ public interface VehicleService {
      * 根据车牌号获取锁及其状态信息
      *
      * @param carNumber 车牌号
-     * @return
+     * @return 锁及其状态信息
      */
-    List<Map<String, Object>> findlocksByCarNo(String carNumber);
+    List<LockForApp> findlocksByCarNo(String carNumber);
 
     /**
      * 获取所有在线车辆信息（车牌号、仓数、设备ID、配送卡）

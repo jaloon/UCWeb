@@ -7,6 +7,7 @@ import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.lock.LockForApp;
 import com.tipray.bean.record.AlarmRecord;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.TrackInfo;
@@ -85,7 +86,7 @@ public class CarTest {
 
     @Test
     public void findlocksByCarNo() throws Exception{
-        List<Map<String, Object>> list =
+        List<LockForApp> list =
         carService.findlocksByCarNo("闽A77220");
         System.out.println(JSONUtil.stringify(list));
     }

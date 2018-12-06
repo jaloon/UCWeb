@@ -1,4 +1,4 @@
-package com.tipray.bean.track;
+package com.tipray.bean.lock;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

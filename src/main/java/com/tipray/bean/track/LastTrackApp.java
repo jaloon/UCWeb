@@ -1,6 +1,7 @@
 package com.tipray.bean.track;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tipray.bean.lock.LockStatus;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +17,7 @@ public class LastTrackApp implements Serializable {
     private static final long serialVersionUID = 1L;
     private long id;
     private long vehicle_id;
+    private String vehicle_number;
     private long track_id;
     private int is_lnglat_valid;
     private float longitude;
@@ -50,6 +52,14 @@ public class LastTrackApp implements Serializable {
 
     public void setVehicle_id(long vehicle_id) {
         this.vehicle_id = vehicle_id;
+    }
+
+    public String getVehicle_number() {
+        return vehicle_number;
+    }
+
+    public void setVehicle_number(String vehicle_number) {
+        this.vehicle_number = vehicle_number;
     }
 
     public long getTrack_id() {

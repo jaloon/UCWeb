@@ -175,7 +175,7 @@
 		ON t1.lock_device_id = t2.lock_device_id
 	</select>
 
-	<select id="findlocksByCarNo" parameterType="java.lang.String" resultType="java.util.Map">
+	<select id="findlocksByCarNo" parameterType="java.lang.String" resultType="com.tipray.bean.lock.LockForApp">
         SELECT
         	l.vehicle_id,
         	l.id lock_id,
@@ -199,9 +199,10 @@
             AND v.vehicle_number = #{carNumber}
     </select>
 
-	<select id="getLockStatus" parameterType="java.util.Map" resultType="java.lang.Integer">
+	<select id="getLockStatus" parameterType="com.tipray.bean.lock.LockForApp" resultType="com.tipray.bean.lock.LockStatus" flushCache="true">
         SELECT
-            `status`
+            `status` switch_status,
+            UNIX_TIMESTAMP(change_report_time) switch_time
         FROM
             tbl_lock_status
         WHERE
@@ -255,7 +256,7 @@
 		and lock_device_id in (${devIds})
 	</select>
 
-    <select id="getLockByCarIdAndLockIndexForApp" resultType="com.tipray.bean.track.LockStatus">
+    <select id="getLockByCarIdAndLockIndexForApp" resultType="com.tipray.bean.lock.LockStatus">
         SELECT
             id,
             vehicle_id,
@@ -268,9 +269,12 @@
         WHERE
             vehicle_id = #{carId}
             AND lock_index = #{lockIndex}
+            AND lock_device_id > 0
+            AND is_allowed_open = 2
+            AND bind_status  = 2
     </select>
 
-    <select id="getLockSwitchStatus" parameterType="com.tipray.bean.track.LockStatus" resultType="com.tipray.bean.track.LockStatus">
+    <select id="getLockSwitchStatus" parameterType="com.tipray.bean.lock.LockStatus" resultType="com.tipray.bean.lock.LockStatus" flushCache="true">
         SELECT
             `status` switch_status,
             UNIX_TIMESTAMP(change_report_time) switch_time

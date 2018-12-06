@@ -13,6 +13,7 @@ import com.tipray.bean.baseinfo.Lock;
 import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.User;
 import com.tipray.bean.baseinfo.Vehicle;
+import com.tipray.bean.lock.LockForApp;
 import com.tipray.bean.log.InfoManageLog;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.upgrade.UpgradeCancelVehicle;
@@ -417,11 +418,11 @@ public class VehicleController extends BaseAction {
      * 根据车牌号获取锁及其状态信息
      *
      * @param carNumber 车牌号
-     * @return
+     * @return 锁及其状态信息
      */
     @RequestMapping(value = "findlocksByCarNo.do")
     @ResponseBody
-    public List<Map<String, Object>> findlocksByCarNo(String carNumber) {
+    public List<LockForApp> findlocksByCarNo(String carNumber) {
         if (logger.isDebugEnabled()) {
             logger.debug("findlocksByCarNo: 根据车牌号获取车、锁相关信息, carNumber={}", carNumber);
         }
@@ -433,8 +434,6 @@ public class VehicleController extends BaseAction {
 
     /**
      * 获取在线车辆信息
-     *
-     * @return
      */
     @RequestMapping(value = "findOnlineCars.do")
     @ResponseBody

@@ -181,7 +181,7 @@
             vehicle_id = #{vehicle_id};
     </select>
 
-    <select id="getLastTrackForApp" resultType="com.tipray.bean.track.LastTrackApp">
+    <select id="getLastTrackForApp" resultType="com.tipray.bean.track.LastTrackApp" flushCache="true">
         SELECT
             vehicle_id,
             track_id,
