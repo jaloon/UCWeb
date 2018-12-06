@@ -602,12 +602,17 @@ public class VehicleServiceImpl implements VehicleService {
         Long carId = vehicleDao.getIdByCarNo(carNumber);
         LastTrackApp lastTrackApp = trackDao.getLastTrackForApp(carId);
         byte[] lockStatusInfo = lastTrackApp.getLock_status_info();
+        int lockSizeInTrack = lockStatusInfo.length;
         long trackMillis = lastTrackApp.getTrack_time().getTime();
         List<LockForApp> locks = lockDao.findlocksByCarNo(carNumber);
         locks.forEach(lock -> {
-            int status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lock.getLock_index()]);
+            int status = 0;
+            int lockIndex = lock.getLock_index();
+            if (lockSizeInTrack > lockIndex) {
+                status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lockIndex]);
+            }
             LockStatus lockStatus = lockDao.getLockStatus(lock);
-            if (lockStatus != null && trackMillis < lockStatus.getSwitch_time() * 1000L) {
+            if (lockStatus != null && (status == 0 || trackMillis < lockStatus.getSwitch_time() * 1000L)) {
                 status = lockStatus.getSwitch_status();
             }
             lock.setSwitch_status(status);
