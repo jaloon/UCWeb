@@ -449,7 +449,16 @@ public class VehicleController extends BaseAction {
     @RequestMapping(value = "findAllCars.do")
     @ResponseBody
     public List<Map<String, Object>> findAllCarsForApp() {
-        return vehicleService.findAllCarsForApp();
+        logger.info("APP开始获取所有车辆信息：");
+        List<Map<String, Object>> list = vehicleService.findAllCarsForApp();
+        // try {
+        //     String json = JSONUtil.stringify(list);
+        //     logger.info("APP获取所有车辆信息结束：\n{}", json);
+        // } catch (JsonProcessingException e) {
+        //     e.printStackTrace();
+        // }
+        logger.info("APP获取所有车辆信息结束");
+        return list;
     }
 
     /**

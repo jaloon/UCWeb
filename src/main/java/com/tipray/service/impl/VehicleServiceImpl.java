@@ -612,12 +612,16 @@ public class VehicleServiceImpl implements VehicleService {
             locks.forEach(lock -> {
                 int status = 0;
                 int lockIndex = lock.getLock_index();
-                if (lockSizeInTrack > lockIndex) {
-                    status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lockIndex]);
+                if (lockSizeInTrack >= lockIndex) {
+                    status = VehicleAlarmUtil.getLockStatusValue(lockStatusInfo[lockIndex - 1]);
                 }
                 LockStatus lockStatus = lockDao.getLockStatus(lock);
                 if (lockStatus != null && (status == 0 || trackMillis < lockStatus.getSwitch_time() * 1000L)) {
-                    status = lockStatus.getSwitch_status();
+                    if (lock.getLock_device_id().equals(lockStatus.getLock_device_id())) {
+                        status = lockStatus.getSwitch_status();
+                    } else {
+                        status = 0;
+                    }
                 }
                 lock.setSwitch_status(status);
             });
@@ -625,7 +629,7 @@ public class VehicleServiceImpl implements VehicleService {
             locks.forEach(lock -> {
                 int status = 0;
                 LockStatus lockStatus = lockDao.getLockStatus(lock);
-                if (lockStatus != null) {
+                if (lockStatus != null && lock.getLock_device_id().equals(lockStatus.getLock_device_id())) {
                     status = lockStatus.getSwitch_status();
                 }
                 lock.setSwitch_status(status);
@@ -755,7 +759,11 @@ public class VehicleServiceImpl implements VehicleService {
                         if (last) {
                             LockStatus switchStatus = lockDao.getLockSwitchStatus(lockInfo);
                             if (switchStatus != null && trackMillis < switchStatus.getSwitch_time() * 1000L) {
-                                status = switchStatus.getSwitch_status();
+                                if (lockInfo.getLock_device_id() == switchStatus.getLock_device_id()) {
+                                    status = switchStatus.getSwitch_status();
+                                } else {
+                                    status = 0;
+                                }
                             }
                         }
                         lockInfo.setSwitch_status(status);

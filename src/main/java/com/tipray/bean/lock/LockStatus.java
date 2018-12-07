@@ -19,6 +19,8 @@ public class LockStatus implements Serializable {
     private int store_id;
     private int seat;
     private int seat_index;
+    @JsonIgnore
+    private int lock_device_id;
     private int lock_index;
     private int switch_status;
     private List<Integer> alarm;
@@ -63,6 +65,14 @@ public class LockStatus implements Serializable {
 
     public void setSeat_index(int seat_index) {
         this.seat_index = seat_index;
+    }
+
+    public int getLock_device_id() {
+        return lock_device_id;
+    }
+
+    public void setLock_device_id(int lock_device_id) {
+        this.lock_device_id = lock_device_id;
     }
 
     public int getLock_index() {

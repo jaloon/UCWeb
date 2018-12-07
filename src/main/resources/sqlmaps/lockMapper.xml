@@ -200,6 +200,7 @@
 	<select id="getLockStatus" parameterType="com.tipray.bean.lock.LockForApp" resultType="com.tipray.bean.lock.LockStatus" flushCache="true">
         SELECT
             `status` switch_status,
+            lock_device_id,
             UNIX_TIMESTAMP(change_report_time) switch_time
         FROM
             tbl_lock_status
@@ -208,7 +209,6 @@
             AND store_id = #{store_id}
             AND seat = #{seat}
             AND seat_index = #{seat_index}
-            AND lock_device_id = #{lock_device_id}
         ORDER BY
         	change_time DESC,
             id DESC
@@ -261,6 +261,7 @@
             store_id,
             seat,
             seat_index,
+            lock_device_id,
             lock_index
         FROM
             tbl_lock
@@ -275,6 +276,7 @@
     <select id="getLockSwitchStatus" parameterType="com.tipray.bean.lock.LockStatus" resultType="com.tipray.bean.lock.LockStatus" flushCache="true">
         SELECT
             `status` switch_status,
+            lock_device_id,
             UNIX_TIMESTAMP(change_report_time) switch_time
         FROM
             `tbl_lock_status`
