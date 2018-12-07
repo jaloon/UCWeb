@@ -191,8 +191,7 @@
             l.remark
         FROM
             tbl_lock l,
-            tbl_device d,
-			tbl_vehicle v
+            tbl_device d
         WHERE
         	l.lock_device_id = d.device_id
             AND l.vehicle_id = #{carId}
