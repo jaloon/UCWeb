@@ -175,7 +175,7 @@
 		ON t1.lock_device_id = t2.lock_device_id
 	</select>
 
-	<select id="findlocksByCarId" parameterType="java.lang.Long" resultType="com.tipray.bean.lock.LockForApp">
+	<select id="findLockForAppsByCarId" parameterType="java.lang.Long" resultType="com.tipray.bean.lock.LockForApp">
         SELECT
         	l.vehicle_id,
         	l.id lock_id,

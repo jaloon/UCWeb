@@ -600,7 +600,7 @@ public class VehicleServiceImpl implements VehicleService {
             return null;
         }
         Long carId = vehicleDao.getIdByCarNo(carNumber);
-        List<LockForApp> locks = lockDao.findlocksByCarId(carId);
+        List<LockForApp> locks = lockDao.findLockForAppsByCarId(carId);
         if (EmptyObjectUtil.isEmptyList(locks)) {
             return new ArrayList<>();
         }

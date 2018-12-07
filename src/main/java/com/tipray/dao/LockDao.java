@@ -103,7 +103,7 @@ public interface LockDao extends BaseDao<Lock> {
      * @param carId 车辆ID
      * @return 锁信息
      */
-    List<LockForApp> findlocksByCarId(Long carId);
+    List<LockForApp> findLockForAppsByCarId(Long carId);
 
     /**
      * 获取锁开关状态
