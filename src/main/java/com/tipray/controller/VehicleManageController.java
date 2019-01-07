@@ -1743,17 +1743,19 @@ public class VehicleManageController {
             if (controlType > 8) { // 进出油区
                 Integer barrierType = controlType == RemoteControlConst.REMOTE_TYPE_9_INTO_OILDOM ? 1 : 2;
                 List<Integer> readerIds = inOutReaderService.findBarrierReaderIdByDepotId(stationId, barrierType);
-                if (EmptyObjectUtil.isEmptyList(readerIds)) {
-                    result = "失败，油库未指定道闸转发读卡器！";
-                    logger.error("远程车辆进出失败：油库【{}】未指定道闸转发读卡器！", stationId);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_NULL);
+                // if (EmptyObjectUtil.isEmptyList(readerIds)) {
+                //     result = "失败，油库未指定道闸转发读卡器！";
+                //     logger.error("远程车辆进出失败：油库【{}】未指定道闸转发读卡器！", stationId);
+                //     return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_NULL);
+                // }
+                // if (readerIds.size() > 1) {
+                //     result = "失败，油库道闸转发读卡器太多！";
+                //     logger.error("远程车辆进出失败：油库【{}】道闸转发读卡器太多！", stationId);
+                //     return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_TOO_MUCH);
+                // }
+                if (readerIds != null && readerIds.size() == 1) {
+                    readerId = readerIds.get(0);
                 }
-                if (readerIds.size() > 1) {
-                    result = "失败，油库道闸转发读卡器太多！";
-                    logger.error("远程车辆进出失败：油库【{}】道闸转发读卡器太多！", stationId);
-                    return ResponseMsgUtil.error(RemoteControlErrorEnum.DEPOT_BARRIER_READER_TOO_MUCH);
-                }
-                readerId = readerIds.get(0);
             }
             // 添加远程操作记录
             Integer remoteControlId = vehicleService.addRemoteControlRecord(map);

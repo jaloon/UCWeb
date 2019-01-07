@@ -299,7 +299,7 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
                     jdbcUtilOildepot.setBytes(6, oildepotInfo.getCover());
                     jdbcUtilOildepot.executeUpdate();
                 }
-                updateParamVer(jdbcUtilOildepot, SqliteFileConst.URGENT_CARD);
+                updateParamVer(jdbcUtilOildepot, SqliteFileConst.OIL_DEPOT);
                 logger.info("车台基础配置同步：油库更新成功！");
             } catch (SQLException e) {
                 jdbcUtilOildepot.rollback();
@@ -431,7 +431,7 @@ public class SqliteSyncServiceImpl implements SqliteSyncService {
     /**
      * 版本校验
      *
-     * @param sqliteDbName
+     * @param sqliteDbName sqlite数据库名称
      * @param jdbcUtil     JDBCUtil
      * @return 0 不更新，1 更新，2 进一步验证
      */

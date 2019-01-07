@@ -150,9 +150,12 @@ public interface LockDao extends BaseDao<Lock> {
      *
      * @param carId     车辆ID
      * @param lockIndex 锁索引
+     * @param validLock 有效锁
      * @return 锁信息（id, store_id, seat, seat_index, lock_index）
      */
-    LockStatus getLockByCarIdAndLockIndexForApp(@Param("carId") Long carId, @Param("lockIndex") Integer lockIndex);
+    LockStatus getLockByCarIdAndLockIndexForApp(@Param("carId") Long carId,
+                                                @Param("lockIndex") Integer lockIndex,
+                                                @Param("validLock") boolean validLock);
 
     /**
      * 查询锁开关状态

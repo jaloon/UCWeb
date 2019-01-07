@@ -2,6 +2,7 @@ package com.tipray.util;
 
 import com.tipray.bean.ResponseMsg;
 import com.tipray.constant.reply.*;
+import com.tipray.core.exception.ArgsCheckException;
 import com.tipray.net.constant.UdpProtocolParseResultEnum;
 
 /**
@@ -71,6 +72,16 @@ public class ResponseMsgUtil {
      */
     public static ResponseMsg error(LoginErrorEnum loginError) {
         return error(ErrorTagConst.LOGIN_ERROR_TAG, loginError.code(), loginError.msg());
+    }
+
+    /**
+     * 错误回复（参数校验）
+     *
+     * @param e {@link ArgsCheckException} 参数校验异常
+     * @return {@link ResponseMsg}
+     */
+    public static ResponseMsg error(ArgsCheckException e) {
+        return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, e.getCode(), e.getMessage());
     }
 
     /**

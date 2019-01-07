@@ -15,10 +15,10 @@ import com.tipray.bean.baseinfo.TransCompany;
 import com.tipray.bean.baseinfo.TransportCard;
 import com.tipray.bean.baseinfo.Vehicle;
 import com.tipray.bean.lock.LockForApp;
+import com.tipray.bean.lock.LockStatus;
 import com.tipray.bean.track.LastCarStatus;
 import com.tipray.bean.track.LastTrack;
 import com.tipray.bean.track.LastTrackApp;
-import com.tipray.bean.lock.LockStatus;
 import com.tipray.bean.track.ReTrack;
 import com.tipray.bean.track.TrackInfo;
 import com.tipray.bean.upgrade.TerminalUpgradeInfo;
@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,8 +159,7 @@ public class VehicleServiceImpl implements VehicleService {
     /**
      * 添加超时任务
      *
-     * @param src     {@link ByteBuffer} 待发送数据包
-     * @param cacheId {@link Integer} 缓存ID
+     * @param src {@link ByteBuffer} 待发送数据包
      */
     private void addTimeoutTask(ByteBuffer src) {
         short serialNo = SerialNumberCache.getSerialNumber(UdpBizId.TRANSPORT_CARD_UPDATE_REQUEST);
@@ -645,7 +645,32 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public List<Map<String, Object>> findAllCarsForApp() {
-        return vehicleDao.findAllCarsForApp();
+        List<Map<String, Object>> carList = vehicleDao.findAllCarsForApp();
+
+        if (!EmptyObjectUtil.isEmptyList(carList)) {
+            List<Map<String, Object>> lockList = vehicleDao.findValidLocksForApp();
+            if (!EmptyObjectUtil.isEmptyList(lockList)) {
+                Iterator<Map<String, Object>> lockIterator = lockList.iterator();
+                List<Map<String, Object>> locks;
+                for (Map<String, Object> car : carList) {
+                    locks = new ArrayList<>();
+                    while (lockIterator.hasNext()) {
+                        Map<String, Object> lock = lockIterator.next();
+                        if (lock.get("vehicle_id").equals(car.get("id"))) {
+                            lock.remove("vehicle_id");
+                            locks.add(lock);
+                            lockIterator.remove();
+                        }
+                    }
+                    car.put("locks", locks);
+                    if (!lockList.isEmpty()) {
+                        lockIterator = lockList.iterator();
+                    }
+                }
+            }
+            // carList.forEach(car -> car.put("locks", vehicleDao.findValidLocksByCarIdForApp((Long) car.get("id"))));
+        }
+        return carList;
     }
 
     @Transactional
@@ -753,7 +778,7 @@ public class VehicleServiceImpl implements VehicleService {
             for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
                 byte lock = lockStatusInfo[i];
                 if ((lock & AlarmBitMarkConst.LOCK_ALARM_BIT_7_ENABLE) > 0) {
-                    LockStatus lockInfo = lockDao.getLockByCarIdAndLockIndexForApp(carId, i + 1);
+                    LockStatus lockInfo = lockDao.getLockByCarIdAndLockIndexForApp(carId, i + 1, true);
                     if (lockInfo != null) {
                         int status = VehicleAlarmUtil.getLockStatusValue(lock);
                         if (last) {
@@ -890,7 +915,7 @@ public class VehicleServiceImpl implements VehicleService {
         if (trackInfo == null) {
             return null;
         }
-        trackInfo.getTerminalAlarm();
+        // trackInfo.getTerminalAlarm();
         long carId = trackInfo.getCarId();
         List<Lock> locks = lockDao.findLocksByCarId(carId);
         Integer maxLockIndex = lockDao.getMaxLockIndexByCarId(carId);

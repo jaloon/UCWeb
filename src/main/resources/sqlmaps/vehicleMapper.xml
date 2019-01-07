@@ -793,6 +793,44 @@
             v.is_invalid = 0
     </select>
 
+	<select id="findValidLocksForApp" resultType="java.util.Map">
+		SELECT
+			id,
+			vehicle_id,
+			store_id,
+			seat,
+			seat_index,
+			lock_device_id,
+			lock_index,
+			remark
+		FROM
+			tbl_lock
+		WHERE
+			is_has_bind = 1
+			AND is_allowed_open = 2
+			AND bind_status = 2
+			AND <![CDATA[lock_device_id > 0]]>
+	</select>
+
+	<select id="findValidLocksByCarIdForApp" parameterType="long" resultType="java.util.Map">
+		SELECT
+			id,
+			store_id,
+			seat,
+			seat_index,
+			lock_device_id,
+			lock_index,
+			remark
+		FROM
+			tbl_lock
+		WHERE
+			is_has_bind = 1
+			AND is_allowed_open = 2
+			AND bind_status = 2
+			AND <![CDATA[lock_device_id > 0]]>
+			AND vehicle_id = #{carId}
+	</select>
+
     <resultMap id="carOnlineMap" type="java.util.Map" >
         <result column="vehicle_id" property="carId" javaType="java.lang.Long" />
         <result column="vehicle_number" property="carNumber" javaType="java.lang.String" />

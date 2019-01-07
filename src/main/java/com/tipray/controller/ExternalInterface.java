@@ -5,6 +5,7 @@ import com.tipray.bean.baseinfo.AppVer;
 import com.tipray.bean.baseinfo.CenterDev;
 import com.tipray.core.base.BaseAction;
 import com.tipray.service.AppService;
+import com.tipray.service.SqliteSyncService;
 import com.tipray.util.JSONUtil;
 import com.tipray.util.ResponseMsgUtil;
 import com.tipray.util.StringUtil;
@@ -36,6 +37,14 @@ public class ExternalInterface extends BaseAction {
     private AlarmWebSocketHandler alarmWebSocketHandler;
     @Autowired
     private MonitorWebSocketHandler monitorWebSocketHandler;
+    @Resource
+    private SqliteSyncService sqliteSyncService;
+
+    @RequestMapping("/sqlite")
+    public String sqlite() {
+        sqliteSyncService.syncSqliteFile();
+        return "ok";
+    }
 
     /**
      * 报警
@@ -212,6 +221,5 @@ public class ExternalInterface extends BaseAction {
             return ResponseMsgUtil.exception(e);
         }
     }
-
 
 }

@@ -221,7 +221,7 @@
         <result column="station" property="station" />
         <result column="alarm_time" property="alarmTime" />
         <result column="vehicle_track_id" property="trackId" />
-        <result column="lock_id" property="alarmLock.lockDeviceId" />
+        <result column="lock_id" property="alarmLock.deviceId" />
         <result column="lock_device_id" property="alarmLock.deviceId" />
         <result column="store_id" property="alarmLock.storeId" />
         <result column="seat" property="alarmLock.seat" />
@@ -256,7 +256,7 @@
 			AND a.vehicle_id = #{vehicleId}
 			AND a.device_type = #{deviceType}
 			AND a.device_id = #{deviceId}
-			AND a.lock_id = #{lockDeviceId}
+			AND a.lock_id = #{deviceId}
 			AND a.type = #{alarmType}
 			AND a.`status` = 0
 		ORDER BY
@@ -277,30 +277,130 @@
 			AND a.id = #{alarmId}
     </select>
 
-	<select id="findNotElimitedForApp" resultType="java.util.Map">
+	<select id="findNotElimitedForApp" resultType="java.util.LinkedHashMap">
 		SELECT
-			a.id alarm_id,
+			a.id,
 			a.record_id,
 			a.vehicle_id,
 			c.vehicle_number,
 			a.device_type,
 			a.device_id,
 			a.lock_id,
-			a.type alarm_type,
-			fn_get_alarm_type ( a.device_type, a.type ) alarm_type_name,
+			a.`type`,
 			a.station_type,
 			a.station_id,
 			fn_get_alarm_station ( a.station_type, a.station_id ) station_name,
 			DATE_FORMAT( a.alarm_time, '%Y-%m-%d %H:%i:%s' ) alarm_time,
 			DATE_FORMAT( a.alarm_report_time, '%Y-%m-%d %H:%i:%s' ) alarm_report_time,
-			a.vehicle_track_id
+			a.vehicle_track_id,
+			a.track_is_lnglat_valid,
+			a.track_lng,
+			a.track_lat,
+			l.id `lock.id`,
+			l.store_id `lock.store_id`,
+			l.seat `lock.seat`,
+			l.seat_index `lock.seat_index`,
+			l.lock_index `lock.lock_index`
 		FROM
-			tbl_alarm a,
+			tbl_alarm a
+			LEFT JOIN tbl_lock l ON a.lock_id = l.id
+			AND a.lock_id > 0
+			AND a.device_type = 2,
 			tbl_vehicle c
 		WHERE
 			a.vehicle_id = c.id
 			AND a.`status` = 0
 		ORDER BY a.alarm_report_time ASC, a.alarm_time ASC, a.id ASC
 	</select>
-	
+
+	<select id="findAlarmRecords" resultType="java.util.LinkedHashMap">
+		SELECT
+			ta.id,
+			ta.vehicle_id,
+			ta.record_id,
+			ta.device_type,
+			ta.device_id,
+			ta.lock_id,
+			ta.`type`,
+			ta.station_type,
+			ta.station_id,
+			fn_get_alarm_station ( ta.station_type, ta.station_id ) station_name,
+			ta.vehicle_track_id,
+			ta.track_is_lnglat_valid,
+			ta.track_lng,
+			ta.track_lat,
+			ta.alarm_time,
+			ta.alarm_report_time,
+			ta.eliminate_trigger_type,
+			ta.eliminate_trigger_id,
+			ta.eliminate_station_type,
+			ta.eliminate_station_id,
+			ta.eliminate_vehicle_track_id,
+			ta.eliminate_time,
+			ta.eliminate_report_time,
+			ta.`status`,
+			ae.is_app,
+			ae.is_lnglat_valid,
+			ae.longitude,
+			ae.latitude,
+			u.`name` `user`,
+			l.id `lock.id`,
+			l.store_id `lock.store_id`,
+			l.seat `lock.seat`,
+			l.seat_index `lock.seat_index`,
+			l.lock_index `lock.lock_index`
+		FROM
+			tbl_alarm ta
+			LEFT JOIN tbl_remote_alarm_eliminate ae ON ta.eliminate_trigger_id = ae.id
+			AND ta.eliminate_trigger_type = 6
+			AND ta.`status` != 2
+			LEFT JOIN tbl_user u ON ae.user_id = u.id
+			AND u.is_invalid = 0
+			LEFT JOIN tbl_lock l ON ta.lock_id = l.id
+			AND ta.lock_id > 0
+			AND ta.device_type = 2
+		WHERE
+			ta.vehicle_id = #{carId}
+			AND ta.alarm_report_time BETWEEN #{beginTime} AND #{endTime}
+			AND  <![CDATA[ta.`status` < 3]]>
+	</select>
+
+	<update id="updateAlarmStateForInvalidDevice">
+		UPDATE tbl_alarm
+		SET `status` = 4
+		WHERE
+			`status` = 0
+			AND id NOT IN
+			(
+				SELECT
+					t.id
+				FROM
+					(
+						SELECT
+							a.id
+						FROM
+							tbl_alarm a,
+							tbl_vehicle v
+						WHERE
+							a.`status` = 0
+							AND a.device_type = 1
+							AND a.vehicle_id = v.id
+							AND a.device_id = v.vehicle_device_id
+							AND v.is_invalid = 0 UNION
+						SELECT
+							a.id
+						FROM
+							tbl_alarm a,
+							tbl_lock l
+						WHERE
+							a.`status` = 0
+							AND a.device_type = 2
+							AND a.lock_id = l.id
+							AND a.device_id = l.lock_device_id
+							AND l.bind_status = 2
+							AND l.is_allowed_open = 2
+							AND l.is_has_bind = 1
+					) t
+			)
+	</update>
 </mapper>

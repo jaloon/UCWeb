@@ -20,7 +20,6 @@ import com.tipray.websocket.handler.AlarmWebSocketHandler;
 import com.tipray.websocket.handler.MonitorWebSocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -34,7 +33,6 @@ import java.util.concurrent.TimeUnit;
  * @author chenlong
  * @version 1.0 2018-04-18
  */
-@Component
 public class ScheduledJob {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledJob.class);
     @Resource
@@ -147,4 +145,19 @@ public class ScheduledJob {
         logger.info(logBuilder.toString());
     }
 
+    /**
+     * 报警状态：4 设备已无效
+     */
+    public void executeUpdateAlarmState() {
+        final StringBuilder logBuilder = new StringBuilder();
+        logBuilder.append("更新设备已无效的未消除报警：");
+        try {
+            Long count = alarmRecordService.updateAlarmStateForInvalidDevice();
+            logBuilder.append("成功更新").append(count).append("条记录");
+            logger.info(logBuilder.toString());
+        } catch (Exception e) {
+            logBuilder.append("更新失败！");
+            logger.error(logBuilder.toString(), e);
+        }
+    }
 }

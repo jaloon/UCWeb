@@ -18,10 +18,20 @@ public interface MobileAppService {
     /**
      * 按车辆查询最新n条施解封记录
      */
-    List<Map<String, Object>> findSealRecords(Long carId, String carNumber, String beginTime);
+    List<Map<String, Object>> findSealRecords(Long carId, String carNumber, String beginTime, String endTime);
 
     /**
      * 按车辆查询最新n条开关锁纪录
      */
-    List<Map<String, Object>> findLockRecords(Long carId, String carNumber, String beginTime);
+    List<Map<String, Object>> findLockRecords(Long carId, String carNumber, String beginTime, String endTime);
+
+    /**
+     * 按车辆查询历史配送记录
+     */
+    List<Map<String, Object>> findDistRecords(long carId, String carNumber, String beginTime, String endTime);
+
+    /**
+     * 按车辆查询报警记录（包括已消除）
+     */
+    List<Map<String, Object>> findAlarmRecords(long carId, String carNumber, String beginTime, String endTime);
 }

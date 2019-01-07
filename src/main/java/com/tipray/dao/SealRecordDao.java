@@ -18,11 +18,22 @@ import java.util.Map;
 public interface SealRecordDao extends BaseDao<SealRecord> {
 
     /**
+     * 按车辆查询最新施解封记录
+     *
+     * @param carId 车辆ID
+     * @return 施解封记录
+     */
+    Map<String, Object> getLastSealRecord(Long carId);
+
+    /**
      * 按车辆查询最新n条施解封记录
      *
      * @param carId     车辆ID
      * @param beginTime 开始时间
+     * @param endTime   结束时间
      * @return 施解封记录
      */
-    List<Map<String, Object>> findSealRecords(@Param("carId") Long carId, @Param("beginTime") String beginTime);
+    List<Map<String, Object>> findSealRecords(@Param("carId") Long carId,
+                                              @Param("beginTime") String beginTime,
+                                              @Param("endTime") String endTime);
 }

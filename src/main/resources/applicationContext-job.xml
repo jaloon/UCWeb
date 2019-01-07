@@ -14,6 +14,8 @@
     <!-- 配置定时任务的线程池（多任务时需要进行配置，若不配置多任务下会有问题。） -->
     <task:scheduler id="scheduler" pool-size="10"/>
 
+    <bean id="scheduledJob" class="com.tipray.core.job.ScheduledJob"/>
+
     <task:scheduled-tasks scheduler="scheduler">
         <!--<task:scheduled ref="exampleJob" method="execute" cron="*/7 * * * * ?"/>-->
         <!--定时更新RC4秘钥信息任务，每隔5分钟执行一次-->
@@ -33,5 +35,7 @@
         <task:scheduled ref="scheduledJob" method="executeSqliteSync" cron="0 30 22 * * ?"/>
         <!--删除过期日志（超过60天的）任务，每天0点执行一次-->
         <task:scheduled ref="scheduledJob" method="executeDeleteOverdueLog" cron="0 0 0 * * ?"/>
+        <!--更新报警状态：4 设备已无效任务，每天1点执行一次-->
+        <task:scheduled ref="scheduledJob" method="executeUpdateAlarmState" cron="0 0 1 * * ?"/>
     </task:scheduled-tasks>
 </beans>

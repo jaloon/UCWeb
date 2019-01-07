@@ -268,15 +268,11 @@ public class VehicleAlarmUtil {
      */
     public static String getLockStatus(byte[] lockStatusInfo) {
         if (lockStatusInfo != null && lockStatusInfo.length > 0) {
-            StringBuffer locks = new StringBuffer();
+            StringBuilder locks = new StringBuilder();
             for (int i = 0, len = lockStatusInfo.length; i < len; i++) {
-                locks.append((i + 1) + "号锁：");
+                locks.append(i + 1).append("号锁：");
                 int status = lockStatusInfo[i] & AlarmBitMarkConst.LOCK_ALARM_BIT_8_ON_OFF;
-                if (status == 1) {
-                    locks.append("开；");
-                } else {
-                    locks.append("关；");
-                }
+                locks.append(status == 0 ? '关' : '开').append('；');
             }
             locks.setCharAt(locks.length() - 1, '。');
             return locks.toString();
@@ -306,7 +302,7 @@ public class VehicleAlarmUtil {
      * 根据锁序号获取锁状态
      *
      * @param lockStatusInfo
-     * @param index
+     * @param lockIndex
      * @return
      */
     public static String getLockStatusByLockIndex(byte[] lockStatusInfo, int lockIndex) {

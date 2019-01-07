@@ -85,31 +85,85 @@
 		limit #{page.startRow}, #{page.rows}
 	</select>
 
+    <select id="getLastSealRecord" resultType="java.util.LinkedHashMap">
+        <![CDATA[
+            SELECT
+                ss.id,
+                ss.vehicle_id,
+                ss.device_id,
+                ss.record_id,
+                ss.pre_status,
+                ss.`status`,
+                ss.status_incident,
+                ss.trigger_type,
+                ss.trigger_id,
+                ss.station_type,
+                ss.station_id,
+                fn_get_alarm_station ( ss.station_type, ss.station_id ) station,
+                ss.store_id_list,
+                HEX( ss.lock_device_id_list ) lock_device_id_list,
+                ss.vehicle_track_id,
+                ss.track_is_lnglat_valid,
+                ss.track_lng,
+			    ss.track_lat,
+                ss.trigger_time,
+                rc.is_barrier_gate,
+                rc.is_app,
+                rc.is_lnglat_valid,
+                rc.longitude,
+                rc.latitude,
+                u.`name` `user`
+            FROM
+                tbl_vehicle_seal_status ss
+                LEFT JOIN tbl_remote_control rc ON ss.trigger_id = rc.id
+                AND ss.trigger_type = 6
+                LEFT JOIN tbl_user u ON rc.user_id = u.id
+                AND u.is_invalid = 0
+            WHERE
+                ss.vehicle_id = #{carId}
+            ORDER BY
+                ss.trigger_time DESC,
+                ss.id DESC
+                LIMIT 1
+        ]]>
+    </select>
     <select id="findSealRecords" resultType="java.util.LinkedHashMap">
         <![CDATA[
-        SELECT
-            id,
-            vehicle_id,
-            device_id,
-            record_id,
-            vehicle_device_id,
-            pre_status,
-            `status`,
-            status_incident,
-            trigger_type,
-            trigger_id,
-            station_type,
-            station_id,
-            fn_get_alarm_station(station_type, station_id) station,
-            store_id_list,
-            HEX(lock_device_id_list) lock_device_id_list,
-            vehicle_track_id,
-            trigger_time
-        FROM
-            tbl_vehicle_seal_status
-        WHERE
-            vehicle_id = #{carId}
-            AND trigger_time > #{beginTime}
+            SELECT
+                ss.id,
+                ss.vehicle_id,
+                ss.device_id,
+                ss.record_id,
+                ss.pre_status,
+                ss.`status`,
+                ss.status_incident,
+                ss.trigger_type,
+                ss.trigger_id,
+                ss.station_type,
+                ss.station_id,
+                fn_get_alarm_station ( ss.station_type, ss.station_id ) station_name,
+                ss.store_id_list,
+                HEX( ss.lock_device_id_list ) lock_device_id_list,
+                ss.vehicle_track_id,
+                ss.track_is_lnglat_valid,
+                ss.track_lng,
+			    ss.track_lat,
+                ss.trigger_time,
+                rc.is_barrier_gate,
+                rc.is_app,
+                rc.is_lnglat_valid,
+                rc.longitude,
+                rc.latitude,
+                u.`name` `user`
+            FROM
+                tbl_vehicle_seal_status ss
+                LEFT JOIN tbl_remote_control rc ON ss.trigger_id = rc.id
+                AND ss.trigger_type = 6
+                LEFT JOIN tbl_user u ON rc.user_id = u.id
+                AND u.is_invalid = 0
+            WHERE
+                ss.vehicle_id = #{carId}
+                AND ss.trigger_time BETWEEN #{beginTime} AND #{endTime}
         ]]>
     </select>
 </mapper>

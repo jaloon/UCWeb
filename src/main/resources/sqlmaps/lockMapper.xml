@@ -268,9 +268,11 @@
         WHERE
             vehicle_id = #{carId}
             AND lock_index = #{lockIndex}
+            <if test="validLock == true">
             AND lock_device_id > 0
             AND is_allowed_open = 2
             AND bind_status  = 2
+            </if>
     </select>
 
     <select id="getLockSwitchStatus" parameterType="com.tipray.bean.lock.LockStatus" resultType="com.tipray.bean.lock.LockStatus" flushCache="true">

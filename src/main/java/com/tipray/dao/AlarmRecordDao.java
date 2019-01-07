@@ -20,8 +20,9 @@ import java.util.Map;
 public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
     /**
      * 为消除报警获取报警记录
+     *
      * @param id 报警ID
-     * @return
+     * @return 报警记录
      */
     AlarmRecord getAlarmForEliById(Long id);
 
@@ -30,7 +31,7 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
      *
      * @param ids       {@link String} 报警ID集合，英文“,”分隔
      * @param vehicleId {@link Long} 车辆ID
-     * @return
+     * @return 报警记录
      */
     List<AlarmRecord> getAlarmRecordsByIdsAndCar(@Param("ids") String ids, @Param("vehicleId") Long vehicleId);
 
@@ -38,12 +39,13 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
      * 根据报警ID集合获取报警设备个数
      *
      * @param ids {@link String} 报警ID集合，英文“,”分隔
-     * @return
+     * @return 报警设备个数
      */
     Integer countAlarmDeviceByIds(String ids);
 
     /**
      * 根据报警ID查询同位置设备同类型报警的报警ID
+     *
      * @param id {@link Long} 报警ID
      * @return 同位置设备同类型报警的报警ID
      */
@@ -74,6 +76,7 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
 
     /**
      * 更新远程消除报警完成
+     *
      * @param eliminateId {@link Integer} 报警消除ID
      * @param alarmIds    {@link String} 报警ID集合
      */
@@ -81,8 +84,9 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
 
     /**
      * 更新先前同位置设备同类型报警的报警状态为远程消除
+     *
      * @param eliminateId {@link Integer} 报警消除ID
-     * @param alarmIdList  {@link Long} 报警ID集合
+     * @param alarmIdList {@link Long} 报警ID集合
      */
     void updateAlarmEliminated(@Param("eliminateId") Integer eliminateId, @Param("alarmIdList") List<Long> alarmIdList);
 
@@ -95,21 +99,24 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
 
     /**
      * 获取未消除的报警设备
-     * @return
+     *
+     * @return 报警设备
      */
     List<AlarmDevice> findNotElimitedAlarmDevice();
 
     /**
      * 根据报警设备获取报警信息
-     * @param alarmDevice
-     * @return
+     *
+     * @param alarmDevice 报警设备
+     * @return 报警信息
      */
     AlarmInfo getAlarmInfoByAlarmDevcie(AlarmDevice alarmDevice);
 
     /**
      * 根据报警设备获取报警信息
+     *
      * @param alarmId 报警ID
-     * @return
+     * @return 报警信息
      */
     AlarmInfo getAlarmInfoByAlarmId(Long alarmId);
 
@@ -119,4 +126,21 @@ public interface AlarmRecordDao extends BaseDao<AlarmRecord> {
      * @return 未消除的报警信息
      */
     List<Map<String, Object>> findNotElimitedForApp();
+
+    /**
+     * 按车辆查询报警记录（包括已消除）
+     *
+     * @param carId     车辆ID
+     * @param beginTime 开始时间
+     * @param endTime   结束时间
+     * @return 报警记录
+     */
+    List<Map<String, Object>> findAlarmRecords(@Param("carId") Long carId,
+                                               @Param("beginTime") String beginTime,
+                                               @Param("endTime") String endTime);
+
+    /**
+     * 更新报警状态：4 设备已无效
+     */
+    Long updateAlarmStateForInvalidDevice();
 }

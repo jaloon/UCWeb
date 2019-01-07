@@ -26,6 +26,7 @@ import java.util.Map;
 public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 统计车牌号
+     *
      * @param carNumber
      * @return
      */
@@ -33,12 +34,14 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 根据车牌号更新车辆
+     *
      * @param vehicle
      */
     void updateByCarNumber(Vehicle vehicle);
 
     /**
      * 根据车牌号删除车辆
+     *
      * @param carNumber
      */
     void deleteByCarNumber(String carNumber);
@@ -132,6 +135,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 根据车牌号获取仓数
+     *
      * @param carNo 车牌号
      * @return 仓数
      */
@@ -179,7 +183,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     /**
      * 车辆解绑车载终端
      *
-     * @param carNumber {@link String} 车牌号
+     * @param carNumber  {@link String} 车牌号
      * @param terminalId {@link Integer} 车载终端设备ID
      */
     void terminalUnbind(@Param("carNumber") String carNumber, @Param("terminalId") Integer terminalId);
@@ -255,6 +259,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 根据车台设备ID获取GPS配置信息
+     *
      * @param terminalId 车台设备ID
      * @return GPS配置信息
      */
@@ -262,6 +267,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 根据车辆ID获取GPS配置信息
+     *
      * @param carId 车辆ID
      * @return GPS配置信息
      */
@@ -269,6 +275,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 根据车牌号获取GPS配置信息
+     *
      * @param carNumber 车牌号
      * @return GPS配置信息
      */
@@ -286,12 +293,14 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 更新车台功能启用配置
+     *
      * @param functionEnable {@link Integer} 启用功能
      */
     void updateTerminalEnable(Integer functionEnable);
 
     /**
      * 添加车台功能启用配置
+     *
      * @param functionEnable {@link Integer} 启用功能
      */
     void addTerminalEnable(Integer functionEnable);
@@ -400,6 +409,19 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     List<Map<String, Object>> findAllCarsForApp();
 
     /**
+     * 询有效锁信息
+     */
+    List<Map<String, Object>> findValidLocksForApp();
+
+    /**
+     * 根据车辆ID查询有效锁信息
+     *
+     * @param carId 车辆ID
+     * @return 有效锁信息
+     */
+    List<Map<String, Object>> findValidLocksByCarIdForApp(Long carId);
+
+    /**
      * 获取在线车辆ID集合
      *
      * @return {@link Map} 在线车辆集合（carId：车辆ID，carNumber：车牌号）
@@ -409,6 +431,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 获取车辆最新状态
+     *
      * @param carId 车辆ID
      * @return 车辆最新状态
      */
@@ -430,6 +453,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 根据车辆ID查询车辆是否在线
+     *
      * @param carId {@link Long} 车辆ID
      * @return {@link Integer} 1 在线，0 离线
      */
@@ -437,6 +461,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 查询车辆最新状态
+     *
      * @param carId 车辆id
      * @return 状态，时间
      */
@@ -444,6 +469,7 @@ public interface VehicleDao extends BaseDao<Vehicle> {
 
     /**
      * 查询某段时间之后所有车辆的状态
+     *
      * @param begin 查询时间
      * @return 车辆id，状态，时间
      */

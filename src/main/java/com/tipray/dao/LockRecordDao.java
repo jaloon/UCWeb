@@ -21,7 +21,10 @@ public interface LockRecordDao extends BaseDao<LockRecord> {
      *
      * @param carId     车辆ID
      * @param beginTime 开始时间
+     * @param endTime   结束时间
      * @return 施解封记录
      */
-    List<Map<String, Object>> findLockRecords(@Param("carId") Long carId, @Param("beginTime") String beginTime);
+    List<Map<String, Object>> findLockRecords(@Param("carId") Long carId,
+                                              @Param("beginTime") String beginTime,
+                                              @Param("endTime") String endTime);
 }

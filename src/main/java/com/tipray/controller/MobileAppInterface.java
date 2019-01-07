@@ -2,6 +2,7 @@ package com.tipray.controller;
 
 import com.tipray.bean.ResponseMsg;
 import com.tipray.constant.reply.ErrorTagConst;
+import com.tipray.core.exception.ArgsCheckException;
 import com.tipray.service.MobileAppService;
 import com.tipray.service.VehicleService;
 import com.tipray.util.DateUtil;
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,18 +79,19 @@ public class MobileAppInterface {
         if (logger.isDebugEnabled()) {
             logger.debug("find seal records: carNumber={}, beginTime={}", carNumber, beginTime);
         }
-        ResponseMsg responseMsg = checkRecordParams(carNumber, beginTime);
-        if (responseMsg.getCode() > 0) {
-            return responseMsg;
-        }
+        long carId;
         try {
-            Long carId = vehicleService.getIdByCarNo(carNumber);
-            if (carId == null) {
-                String logMsg = "车辆不存在！";
-                logger.warn(logMsg);
-                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 5, logMsg);
+            carId = checkCarNumber(carNumber);
+            if (StringUtil.isNotEmpty(beginTime)) {
+                compareTime(parseTime(beginTime), Long.MAX_VALUE);
             }
-            return ResponseMsgUtil.success(mobileAppService.findSealRecords(carId, carNumber, beginTime));
+        } catch (ArgsCheckException e) {
+            logger.warn(e.getMessage());
+            return ResponseMsgUtil.error(e);
+        }
+
+        try {
+            return ResponseMsgUtil.success(mobileAppService.findSealRecords(carId, carNumber, beginTime, now()));
         } catch (Exception e) {
             logger.error("按车辆查询最新n条施解封记录异常！", e);
             return ResponseMsgUtil.exception(e);
@@ -101,18 +106,16 @@ public class MobileAppInterface {
         if (logger.isDebugEnabled()) {
             logger.debug("find lock records: carNumber={}, beginTime={}", carNumber, beginTime);
         }
-        ResponseMsg responseMsg = checkRecordParams(carNumber, beginTime);
-        if (responseMsg.getCode() > 0) {
-            return responseMsg;
+        long carId;
+        try {
+            carId = checkCarNumber(carNumber);
+            checkTime(beginTime, null, false);
+        } catch (ArgsCheckException e) {
+            logger.warn(e.getMessage());
+            return ResponseMsgUtil.error(e);
         }
         try {
-            Long carId = vehicleService.getIdByCarNo(carNumber);
-            if (carId == null) {
-                String logMsg = "车辆不存在！";
-                logger.warn(logMsg);
-                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 5, logMsg);
-            }
-            return ResponseMsgUtil.success(mobileAppService.findLockRecords(carId, carNumber, beginTime));
+            return ResponseMsgUtil.success(mobileAppService.findLockRecords(carId, carNumber, beginTime, now()));
         } catch (Exception e) {
             logger.error("按车辆查询最新n条开关锁纪录异常！", e);
             return ResponseMsgUtil.exception(e);
@@ -120,35 +123,151 @@ public class MobileAppInterface {
     }
 
     /**
-     * 校验记录参数
-     *
-     * @param carNumber 车牌号
-     * @param beginTime 开始时间
-     * @return {@link ResponseMsg}
+     * 按车辆查询n条施解封和开关锁记录，结果中返回两个数组，分别为施解封记录和开关锁记录
      */
-    private ResponseMsg checkRecordParams(String carNumber, String beginTime) {
-        if (StringUtil.isEmpty(carNumber)) {
-            String logMsg = "车牌号为空！";
-            logger.warn(logMsg);
-            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 1, logMsg);
-        }
-        if (StringUtil.isEmpty(beginTime)) {
-            String logMsg = "开始时间为空！";
-            logger.warn(logMsg);
-            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 2, logMsg);
+    @RequestMapping("find_seal_lock_records")
+    public ResponseMsg findSealAndLockRecords(String carNumber, String beginTime, String endTime) {
+        long carId;
+        try {
+            carId = checkCarNumber(carNumber);
+            checkTime(beginTime, endTime, true);
+        } catch (ArgsCheckException e) {
+            logger.warn(e.getMessage());
+            return ResponseMsgUtil.error(e);
         }
         try {
-            Date beginDate = new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(beginTime);
-            if (beginDate.getTime() >= System.currentTimeMillis()) {
-                String logMsg = "开始时间比当前时间晚！";
-                logger.warn(logMsg);
-                return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 3, logMsg);
-            }
-        } catch (ParseException e) {
-            String logMsg = "时间格式不正确！";
-            logger.warn(logMsg);
-            return ResponseMsgUtil.error(ErrorTagConst.PARAM_CHECK_ERROR_TAG, 4, logMsg);
+            Map<String, Object> map = new HashMap<>(2);
+            map.put("seal_records", mobileAppService.findSealRecords(carId, carNumber, beginTime, endTime));
+            map.put("lock_records", mobileAppService.findLockRecords(carId, carNumber, beginTime, endTime));
+            return ResponseMsgUtil.success(map);
+        } catch (Exception e) {
+            logger.error("按车辆查询最新n条施解封和开关锁记录异常！", e);
+            return ResponseMsgUtil.exception(e);
         }
-        return ResponseMsgUtil.success();
+    }
+
+    /**
+     * 按车辆查询历史配送记录
+     */
+    @RequestMapping("find_transport_records")
+    public ResponseMsg findDistRecords(String carNumber, String beginTime, String endTime) {
+        long carId;
+        try {
+            carId = checkCarNumber(carNumber);
+            checkTime(beginTime, endTime, true);
+        } catch (ArgsCheckException e) {
+            logger.warn(e.getMessage());
+            return ResponseMsgUtil.error(e);
+        }
+        try {
+            return ResponseMsgUtil.success(mobileAppService.findDistRecords(carId, carNumber, beginTime, endTime));
+        } catch (Exception e) {
+            logger.error("按车辆查询最新n条开关锁纪录异常！", e);
+            return ResponseMsgUtil.exception(e);
+        }
+    }
+
+    /**
+     * 按车辆查询报警记录（包括已消除）
+     */
+    @RequestMapping("find_alarm_records")
+    public ResponseMsg findAlarmRecords(String carNumber, String beginTime, String endTime) {
+        long carId;
+        try {
+            carId = checkCarNumber(carNumber);
+            checkTime(beginTime, endTime, true);
+        } catch (ArgsCheckException e) {
+            logger.warn(e.getMessage());
+            return ResponseMsgUtil.error(e);
+        }
+        try {
+            return ResponseMsgUtil.success(mobileAppService.findAlarmRecords(carId, carNumber, beginTime, endTime));
+        } catch (Exception e) {
+            logger.error("按车辆查询最新n条开关锁纪录异常！", e);
+            return ResponseMsgUtil.exception(e);
+        }
+    }
+
+    /**
+     * 校验车牌号
+     *
+     * @param carNumber 车牌号
+     * @return 车辆ID
+     * @throws ArgsCheckException if carNumber is null or car Non-exist
+     */
+    private long checkCarNumber(String carNumber) {
+        if (StringUtil.isEmpty(carNumber)) {
+            throw new ArgsCheckException("车牌号为空！", 1);
+        }
+        Long carId = vehicleService.getIdByCarNo(carNumber);
+        if (carId == null) {
+            throw new ArgsCheckException("车辆不存在！", 2);
+        }
+        return carId;
+    }
+
+    /**
+     * 校验时间
+     *
+     * @param beginTime 开始时间
+     * @param endTime   结束时间
+     * @param checkEnd  是否校验结束时间
+     * @throws ArgsCheckException if time is null or time format invalid
+     */
+    private void checkTime(String beginTime, String endTime, boolean checkEnd) {
+        if (StringUtil.isEmpty(beginTime)) {
+            throw new ArgsCheckException("开始时间为空！", 3);
+        }
+        if (checkEnd && StringUtil.isEmpty(endTime)) {
+            throw new ArgsCheckException("结束时间为空！", 4);
+        }
+
+        compareTime(parseTime(beginTime), checkEnd ? parseTime(endTime) : Long.MAX_VALUE);
+    }
+
+    /**
+     * 转换时间字符串为毫秒值
+     *
+     * @param time 时间字符串
+     * @return 毫秒值
+     * @throws ArgsCheckException if time format invalid
+     */
+    private long parseTime(String time) {
+        try {
+            return new SimpleDateFormat(DateUtil.FORMAT_DATETIME).parse(time).getTime();
+        } catch (ParseException e) {
+            throw new ArgsCheckException("时间格式不正确！", 5);
+        }
+    }
+
+    /**
+     * 比较时间
+     *
+     * @param begin 开始时间毫秒数
+     * @param end   结束时间毫秒数
+     * @throws ArgsCheckException if begin >= end
+     */
+    private void compareTime(long begin, long end) {
+        if (begin >= System.currentTimeMillis()) {
+            throw new ArgsCheckException("开始时间比当前时间晚！", 6);
+        }
+        if (begin >= end) {
+            throw new ArgsCheckException("开始时间比结束时间晚！", 7);
+        }
+    }
+
+    /**
+     * 获取当前时间字符串
+     */
+    private String now() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    @RequestMapping("find_vehicles")
+    public List<Map<String, Object>> findAllCarsForApp() {
+        logger.info("find_vehicles start:");
+        List<Map<String, Object>> list = vehicleService.findAllCarsForApp();
+        logger.info("find_vehicles end.");
+        return list;
     }
 }

@@ -207,5 +207,87 @@
 			AND t.store_id = #{storeId}
 		</if>
 	</select>
+
+	<select id="findDistRecords" resultType="java.util.LinkedHashMap">
+		SELECT
+			tt1.*,
+			tt2.change_gasstation_id,
+			tt2.change_gasstation_name,
+			tt2.is_app,
+			tt2.is_lnglat_valid,
+			tt2.longitude,
+			tt2.latitude,
+			tt2.`user`,
+			tt2.change_finish_time
+		FROM
+			(
+				SELECT
+					t.id,
+					t.distribute_id,
+					t.vehicle_id,
+					t.device_id,
+					t.store_id,
+					t.oildepot_id,
+					o.short_name oildepot_name,
+					t.gasstation_id,
+					g.short_name gasstation_name,
+					t.trigger_type,
+					t.trigger_id,
+					t.issue_time,
+					t.end_time,
+					t.`status`,
+					t.center_issue_time
+				FROM
+					tbl_transport t
+					LEFT JOIN tbl_oildepot o ON t.oildepot_id = o.id AND o.is_invalid = 0
+					LEFT JOIN tbl_gasstation g ON t.gasstation_id = g.id AND g.is_invalid = 0
+				WHERE
+					t.vehicle_id = #{carId}
+					AND t.issue_time BETWEEN #{beginTime} AND #{endTime}
+					AND t.`status` != 5
+			) tt1
+			LEFT JOIN
+			(
+				SELECT
+					tc.*,
+					g.short_name change_gasstation_name
+				FROM
+					(
+						SELECT
+							cg.id,
+							t2.gasstation_id change_gasstation_id,
+							u.`user`,
+							cg.is_app,
+							cg.is_lnglat_valid,
+							cg.longitude,
+							cg.latitude,
+							cg.finish_time change_finish_time
+						FROM
+							tbl_remote_change_gasstation cg
+							LEFT JOIN
+							(
+								SELECT
+								id,
+								`name` `user`
+								FROM
+								tbl_user
+								WHERE
+								is_invalid = 0 UNION
+								SELECT
+								2147483647 id,
+								'销售平台' `user`
+							) u ON cg.user_id = u.id,
+							tbl_transport t1,
+							tbl_transport t2
+						WHERE
+							t1.vehicle_id = #{carId}
+							AND t1.issue_time BETWEEN #{beginTime} AND #{endTime}
+							AND t1.`status` = 3
+							AND t1.trigger_id = cg.id
+							AND cg.changed_transport_id = t2.id
+					) tc
+					LEFT JOIN tbl_gasstation g ON tc.change_gasstation_id = g.id AND g.is_invalid = 0
+			) tt2 ON tt1.trigger_id = tt2.id
+	</select>
 	
 </mapper>
