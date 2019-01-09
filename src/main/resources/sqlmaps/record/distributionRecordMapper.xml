@@ -69,7 +69,7 @@
 	
 	<select id="getRecentTransportIdByInvoice" parameterType="java.lang.String" resultType="java.lang.Long">
 		<!-- 方法一：按时间倒序，取第一条数据 -->
-		select id from tbl_transport where distribute_id=#{invoice} and `status` = 1
+		select id from tbl_transport where distribute_id=#{invoice} and <![CDATA[ `status` < 2 ]]>
 		ORDER BY issue_time DESC LIMIT 1
 		<!-- 方法二：先查询出最近的时间，再按时间查询 -->
 		<!-- select id from tbl_transport where distribute_id=#{invoice}

@@ -137,9 +137,9 @@
 	<!--<listener>-->
 		<!--<listener-class>com.tipray.core.listener.FtpServerListener</listener-class>-->
 	<!--</listener>-->
-	<!--<listener>-->
-		<!--<listener-class>com.tipray.core.listener.WebServiceListener</listener-class>-->
-	<!--</listener>-->
+	<listener>
+		<listener-class>com.tipray.core.listener.WebServiceListener</listener-class>
+	</listener>
 	<listener>
 		<listener-class>com.tipray.core.listener.UdpServerListener</listener-class>
 	</listener>
