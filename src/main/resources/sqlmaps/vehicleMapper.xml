@@ -863,6 +863,25 @@
 			LIMIT 1;
 	</select>
 
+	<select id="getLastSeal" parameterType="java.lang.Long" resultType="java.util.Map">
+		SELECT
+			seal_store_info,
+			pre_status,
+			status_incident,
+			trigger_type,
+			trigger_id,
+			station_type,
+			station_id
+		FROM
+			`tbl_vehicle_seal_status`
+		WHERE
+			vehicle_id = #{carId}
+		ORDER BY
+			trigger_time DESC,
+			id DESC
+			LIMIT 1
+	</select>
+
     <update id="updateTimeoutOfflineCars">
         <![CDATA[
             UPDATE tbl_vehicle_realtime_status

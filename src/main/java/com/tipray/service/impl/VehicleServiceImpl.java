@@ -563,13 +563,16 @@ public class VehicleServiceImpl implements VehicleService {
         if (vehicle == null) {
             return null;
         }
-        vehicle.put("status", getLastCarStatusByCarId((Long) vehicle.get("id")));
-        List<Map<String, Object>> drivers = driverDao.findByCarNoForApp(carNumber);
-        List<LockForApp> locks = findlocksByCarNo(carNumber);
+        Long carId = (Long) vehicle.get("id");
+        vehicle.put("status", getLastCarStatusByCarId(carId));
+        Map<String, Object> seal = vehicleDao.getLastSeal(carId);
+        if (seal != null) {
+            vehicle.putAll(seal);
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("vehicle", vehicle);
-        map.put("drivers", drivers);
-        map.put("locks", locks);
+        map.put("drivers", driverDao.findByCarNoForApp(carNumber));
+        map.put("locks", findlocksByCarNo(carNumber));
         return map;
     }
 

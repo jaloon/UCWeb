@@ -438,6 +438,14 @@ public interface VehicleDao extends BaseDao<Vehicle> {
     Integer getLastCarStatus(Long carId);
 
     /**
+     * 获取车辆最新施解封信息
+     *
+     * @param carId 车辆ID
+     * @return 车辆施解封状态下的【施解封仓号信息】【前状态】【状态事件】【触发方式】【触发ID】【站点类型】和【站点ID】
+     */
+    Map<String, Object> getLastSeal(Long carId);
+
+    /**
      * 更新最后在线时间距现在超过6分钟的车辆在线状态为离线（超时用400秒）
      */
     void updateTimeoutOfflineCars();
