@@ -40,6 +40,7 @@ import com.tipray.net.SendPacketBuilder;
 import com.tipray.net.TimeOutTask;
 import com.tipray.net.constant.UdpBizId;
 import com.tipray.service.VehicleService;
+import com.tipray.util.BytesConverterByLittleEndian;
 import com.tipray.util.BytesUtil;
 import com.tipray.util.DateUtil;
 import com.tipray.util.EmptyObjectUtil;
@@ -53,15 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 车辆管理业务层
@@ -564,16 +557,41 @@ public class VehicleServiceImpl implements VehicleService {
             return null;
         }
         Long carId = (Long) vehicle.get("id");
-        vehicle.put("status", getLastCarStatusByCarId(carId));
-        Map<String, Object> seal = vehicleDao.getLastSeal(carId);
-        if (seal != null) {
-            vehicle.putAll(seal);
+        Integer status = getLastCarStatusByCarId(carId);
+        if (status != null && status > 0) {
+            Map<String, Object> seal = vehicleDao.getLastSeal(carId);
+            if (seal != null) {
+                Integer sealStatus = (Integer) seal.get("status");
+                if (status.equals(sealStatus)) {
+                    seal.put("lock_id_list", bytesToList((byte[]) seal.get("lock_id_list")));
+                    seal.put("lock_device_id_list", bytesToList((byte[]) seal.get("lock_device_id_list")));
+                    vehicle.putAll(seal);
+                } else {
+                    vehicle.put("status", status);
+                }
+            } else {
+                vehicle.put("status", status);
+            }
+        } else {
+            vehicle.put("status", status);
         }
+
         Map<String, Object> map = new HashMap<>();
         map.put("vehicle", vehicle);
         map.put("drivers", driverDao.findByCarNoForApp(carNumber));
         map.put("locks", findlocksByCarNo(carNumber));
         return map;
+    }
+
+    private List<Integer> bytesToList(byte[] bytes) {
+        List<Integer> list = new ArrayList<>();
+        if (EmptyObjectUtil.isEmptyArray(bytes)) {
+            return list;
+        }
+        for (int i = 0, len = bytes.length; i < len; i += 4) {
+            list.add(BytesConverterByLittleEndian.getInt(Arrays.copyOfRange(bytes, i, i + 4)));
+        }
+        return list;
     }
 
     @Override

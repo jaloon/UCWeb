@@ -196,7 +196,7 @@
 			vehicle_id	vehicleId,
 			device_type	deviceType,
 			device_id	deviceId,
-			lock_id		lockDeviceId,
+			lock_id		lockId,
 			type		alarmType
 		FROM
 			tbl_alarm
@@ -221,7 +221,7 @@
         <result column="station" property="station" />
         <result column="alarm_time" property="alarmTime" />
         <result column="vehicle_track_id" property="trackId" />
-        <result column="lock_id" property="alarmLock.deviceId" />
+        <result column="lock_id" property="alarmLock.lockId" />
         <result column="lock_device_id" property="alarmLock.deviceId" />
         <result column="store_id" property="alarmLock.storeId" />
         <result column="seat" property="alarmLock.seat" />
@@ -256,7 +256,7 @@
 			AND a.vehicle_id = #{vehicleId}
 			AND a.device_type = #{deviceType}
 			AND a.device_id = #{deviceId}
-			AND a.lock_id = #{deviceId}
+			AND a.lock_id = #{lockId}
 			AND a.type = #{alarmType}
 			AND a.`status` = 0
 		ORDER BY
